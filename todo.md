@@ -85,17 +85,17 @@ Progress tracker for prompt_plan.md execution.
 
 ### Prompt 1.4 — Layout Persistence Logic
 
-- [ ] Write tests for createLayout()
-- [ ] Write tests for serializeLayout()
-- [ ] Write tests for deserializeLayout()
-- [ ] Write tests for validateLayoutStructure()
-- [ ] Write round-trip test (serialize → deserialize)
-- [ ] Implement createLayout()
-- [ ] Implement serializeLayout()
-- [ ] Implement deserializeLayout()
-- [ ] Implement validateLayoutStructure() type guard
-- [ ] All tests pass
-- [ ] **Commit:** `feat(serialization): add layout JSON persistence and validation`
+- [x] Write tests for createLayout()
+- [x] Write tests for serializeLayout()
+- [x] Write tests for deserializeLayout()
+- [x] Write tests for validateLayoutStructure()
+- [x] Write round-trip test (serialize → deserialize)
+- [x] Implement createLayout()
+- [x] Implement serializeLayout()
+- [x] Implement deserializeLayout()
+- [x] Implement validateLayoutStructure() type guard
+- [x] All tests pass
+- [x] **Commit:** `feat(serialization): add layout JSON persistence and validation`
 
 ---
 
@@ -103,50 +103,50 @@ Progress tracker for prompt_plan.md execution.
 
 ### Prompt 2.1 — Layout Store (Svelte 5 Runes)
 
-- [ ] Create layout.svelte.ts with $state for layout and isDirty
-- [ ] Create $derived for racks, deviceLibrary, rackCount, canAddRack
-- [ ] Implement createNewLayout()
-- [ ] Implement loadLayout() and resetLayout()
-- [ ] Implement rack actions (add, update, delete, reorder)
-- [ ] Implement device library actions (add, update, delete)
-- [ ] Implement placement actions (place, move, moveToRack, remove)
-- [ ] Implement dirty tracking (markDirty, markClean)
-- [ ] Write tests for all store actions
-- [ ] All tests pass
-- [ ] **Commit:** `feat(store): add layout store with Svelte 5 runes`
+- [x] Create layout.svelte.ts with $state for layout and isDirty
+- [x] Create $derived for racks, deviceLibrary, rackCount, canAddRack
+- [x] Implement createNewLayout()
+- [x] Implement loadLayout() and resetLayout()
+- [x] Implement rack actions (add, update, delete, reorder)
+- [x] Implement device library actions (add, update, delete)
+- [x] Implement placement actions (place, move, moveToRack, remove)
+- [x] Implement dirty tracking (markDirty, markClean)
+- [x] Write tests for all store actions
+- [x] All tests pass
+- [x] **Commit:** `feat(store): add layout store with Svelte 5 runes`
 
 ### Prompt 2.2 — Selection Store
 
-- [ ] Create selection.svelte.ts with $state
-- [ ] Create $derived for hasSelection, isRackSelected, isDeviceSelected
-- [ ] Implement selectRack()
-- [ ] Implement selectDevice()
-- [ ] Implement clearSelection()
-- [ ] Write tests for selection state changes
-- [ ] All tests pass
-- [ ] **Commit:** `feat(store): add selection store`
+- [x] Create selection.svelte.ts with $state
+- [x] Create $derived for hasSelection, isRackSelected, isDeviceSelected
+- [x] Implement selectRack()
+- [x] Implement selectDevice()
+- [x] Implement clearSelection()
+- [x] Write tests for selection state changes
+- [x] All tests pass
+- [x] **Commit:** `feat(store): add selection store`
 
 ### Prompt 2.3 — UI Store (Theme, Zoom, Drawers)
 
-- [ ] Create ui.svelte.ts with theme state and actions
-- [ ] Create theme utilities (load, save, apply to document)
-- [ ] Create zoom state with min/max/step constraints
-- [ ] Create drawer state (left, right) with toggle actions
-- [ ] Add $effect for theme persistence and document update
-- [ ] Write tests for theme, zoom, and drawer state
-- [ ] All tests pass
-- [ ] **Commit:** `feat(store): add UI store for theme, zoom, and drawers`
+- [x] Create ui.svelte.ts with theme state and actions
+- [x] Create theme utilities (load, save, apply to document)
+- [x] Create zoom state with min/max/step constraints
+- [x] Create drawer state (left, right) with toggle actions
+- [x] Add $effect for theme persistence and document update
+- [x] Write tests for theme, zoom, and drawer state
+- [x] All tests pass
+- [x] **Commit:** `feat(store): add UI store for theme, zoom, and drawers`
 
 ### Prompt 2.4 — Session Persistence
 
-- [ ] Create session.ts utilities (save, load, clear, hasSession)
-- [ ] Create debounce utility
-- [ ] Update layout store with session auto-save ($effect, debounced)
-- [ ] Add restoreFromSession() action
-- [ ] Write tests for session storage operations
-- [ ] Write tests for debounce utility
-- [ ] All tests pass
-- [ ] **Commit:** `feat(persistence): add sessionStorage auto-save`
+- [x] Create session.ts utilities (save, load, clear, hasSession)
+- [x] Create debounce utility
+- [x] Update layout store with session auto-save ($effect, debounced)
+- [x] Add restoreFromSession() action
+- [x] Write tests for session storage operations
+- [x] Write tests for debounce utility
+- [x] All tests pass
+- [x] **Commit:** `feat(persistence): add sessionStorage auto-save`
 
 ---
 
@@ -154,60 +154,60 @@ Progress tracker for prompt_plan.md execution.
 
 ### Prompt 3.1 — Rack SVG Component
 
-- [ ] Create Rack.svelte with props (rack, deviceLibrary, selected, zoom)
-- [ ] Render SVG with correct dimensions
-- [ ] Render background rectangle
-- [ ] Render left rail with U numbers (U1 at bottom)
-- [ ] Render grid lines and rack nut points
-- [ ] Render rack name below
-- [ ] Render selection outline when selected
-- [ ] Apply zoom transform
-- [ ] Handle click and keyboard events
-- [ ] Add accessibility attributes
-- [ ] Write component tests
-- [ ] All tests pass
-- [ ] **Commit:** `feat(components): add Rack SVG visualization component`
+- [x] Create Rack.svelte with props (rack, deviceLibrary, selected, zoom)
+- [x] Render SVG with correct dimensions
+- [x] Render background rectangle
+- [x] Render left rail with U numbers (U1 at bottom)
+- [x] Render grid lines and rack nut points
+- [x] Render rack name below
+- [x] Render selection outline when selected
+- [x] Apply zoom transform
+- [x] Handle click and keyboard events
+- [x] Add accessibility attributes
+- [x] Write component tests
+- [x] All tests pass
+- [x] **Commit:** `feat(components): add Rack SVG visualization component`
 
 ### Prompt 3.2 — Device SVG Component
 
-- [ ] Create RackDevice.svelte with props
-- [ ] Calculate correct Y position (U1 at bottom)
-- [ ] Render rectangle with device colour
-- [ ] Render device name (centered, truncated)
-- [ ] Render selection outline when selected
-- [ ] Handle click events (stop propagation)
-- [ ] Add accessibility attributes
-- [ ] Create CategoryIcon.svelte (simple geometric icons)
-- [ ] Update Rack.svelte to render RackDevice components
-- [ ] Write component tests
-- [ ] All tests pass
-- [ ] **Commit:** `feat(components): add RackDevice SVG component`
+- [x] Create RackDevice.svelte with props
+- [x] Calculate correct Y position (U1 at bottom)
+- [x] Render rectangle with device colour
+- [x] Render device name (centered, truncated)
+- [x] Render selection outline when selected
+- [x] Handle click events (stop propagation)
+- [x] Add accessibility attributes
+- [x] Create CategoryIcon.svelte (simple geometric icons)
+- [x] Update Rack.svelte to render RackDevice components
+- [x] Write component tests
+- [x] All tests pass
+- [x] **Commit:** `feat(components): add RackDevice SVG component`
 
 ### Prompt 3.3 — Canvas Component
 
-- [ ] Create Canvas.svelte (reads from stores)
-- [ ] Render racks in horizontal row, sorted by position
-- [ ] Bottom-align racks (flex-end)
-- [ ] Enable horizontal scroll
-- [ ] Handle click on empty space (clear selection)
-- [ ] Create EmptyState.svelte
-- [ ] Show EmptyState when no racks
-- [ ] Write component tests
-- [ ] All tests pass
-- [ ] **Commit:** `feat(components): add Canvas with multi-rack layout`
+- [x] Create Canvas.svelte (reads from stores)
+- [x] Render racks in horizontal row, sorted by position
+- [x] Bottom-align racks (flex-end)
+- [x] Enable horizontal scroll
+- [x] Handle click on empty space (clear selection)
+- [x] Create EmptyState.svelte
+- [x] Show EmptyState when no racks
+- [x] Write component tests
+- [x] All tests pass
+- [x] **Commit:** `feat(components): add Canvas with multi-rack layout`
 
 ### Prompt 3.4 — Device Palette (Left Drawer)
 
-- [ ] Create DevicePalette.svelte with search state
-- [ ] Implement search filtering (case-insensitive)
-- [ ] Implement category grouping
-- [ ] Create DevicePaletteItem.svelte
-- [ ] Display device name, height badge, colour swatch
-- [ ] Add "Add Device" button
-- [ ] Create deviceFilters.ts utilities
-- [ ] Write component tests
-- [ ] All tests pass
-- [ ] **Commit:** `feat(components): add Device Palette with search and grouping`
+- [x] Create DevicePalette.svelte with search state
+- [x] Implement search filtering (case-insensitive)
+- [x] Implement category grouping
+- [x] Create DevicePaletteItem.svelte
+- [x] Display device name, height badge, colour swatch
+- [x] Add "Add Device" button
+- [x] Create deviceFilters.ts utilities
+- [x] Write component tests
+- [x] All tests pass
+- [x] **Commit:** `feat(components): add Device Palette with search and grouping`
 
 ---
 
@@ -215,29 +215,29 @@ Progress tracker for prompt_plan.md execution.
 
 ### Prompt 4.1 — DnD: Palette to Rack
 
-- [ ] Install svelte-dnd-action
-- [ ] Create dragdrop.ts utilities (calculateDropPosition, getDropFeedback)
-- [ ] Make DevicePaletteItem draggable
-- [ ] Update Rack.svelte to accept drops
-- [ ] Show drop preview at target position
-- [ ] Highlight valid/invalid drop zones
-- [ ] Call placeDevice on valid drop
-- [ ] Write integration tests
-- [ ] All tests pass
-- [ ] **Commit:** `feat(dnd): add drag-and-drop from palette to rack`
+- [x] Install svelte-dnd-action
+- [x] Create dragdrop.ts utilities (calculateDropPosition, getDropFeedback)
+- [x] Make DevicePaletteItem draggable
+- [x] Update Rack.svelte to accept drops
+- [x] Show drop preview at target position
+- [x] Highlight valid/invalid drop zones
+- [x] Call placeDevice on valid drop
+- [x] Write integration tests
+- [x] All tests pass
+- [x] **Commit:** `feat(dnd): add drag-and-drop from palette to rack`
 
 ### Prompt 4.2 — DnD: Move Within Rack
 
-- [ ] Make RackDevice draggable
-- [ ] Show placeholder during drag
-- [ ] Handle internal rack moves (exclude source from collision)
-- [ ] Show drop preview at new position
-- [ ] Call moveDevice on valid drop
-- [ ] Add keyboard movement (ArrowUp/ArrowDown)
-- [ ] Block movement at boundaries and collisions
-- [ ] Write integration tests
-- [ ] All tests pass
-- [ ] **Commit:** `feat(dnd): add device movement within rack`
+- [x] Make RackDevice draggable
+- [x] Show placeholder during drag
+- [x] Handle internal rack moves (exclude source from collision)
+- [x] Show drop preview at new position
+- [x] Call moveDevice on valid drop
+- [x] Add keyboard movement (ArrowUp/ArrowDown)
+- [x] Block movement at boundaries and collisions
+- [x] Write integration tests
+- [x] All tests pass
+- [x] **Commit:** `feat(dnd): add device movement within rack`
 
 ### Prompt 4.3 — DnD: Move Between Racks
 

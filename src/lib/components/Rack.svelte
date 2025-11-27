@@ -27,6 +27,14 @@
 		ondevicemove?: (
 			event: CustomEvent<{ rackId: string; deviceIndex: number; newPosition: number }>
 		) => void;
+		ondevicemoverack?: (
+			event: CustomEvent<{
+				sourceRackId: string;
+				sourceIndex: number;
+				targetRackId: string;
+				targetPosition: number;
+			}>
+		) => void;
 	}
 
 	let {
@@ -38,7 +46,8 @@
 		onselect,
 		ondeviceselect,
 		ondevicedrop,
-		ondevicemove
+		ondevicemove,
+		ondevicemoverack
 	}: Props = $props();
 
 	// Track which device is being dragged (for internal moves)
@@ -180,6 +189,12 @@
 			dragData.sourceRackId === rack.id &&
 			dragData.sourceIndex !== undefined;
 
+		// Determine if this is a cross-rack move (from different rack)
+		const isCrossRackMove =
+			dragData.type === 'rack-device' &&
+			dragData.sourceRackId !== rack.id &&
+			dragData.sourceIndex !== undefined;
+
 		// Calculate target position
 		const svg = event.currentTarget as SVGElement;
 		const rect = svg.getBoundingClientRect();
@@ -188,6 +203,7 @@
 		const targetU = calculateDropPosition(mouseY, rack.height, U_HEIGHT, RACK_PADDING);
 
 		// For internal moves, exclude the source device from collision checks
+		// Cross-rack and palette drops don't need exclusion
 		const excludeIndex = isInternalMove ? dragData.sourceIndex : undefined;
 		const feedback = getDropFeedback(
 			rack,
@@ -209,8 +225,20 @@
 						}
 					})
 				);
+			} else if (isCrossRackMove && dragData.sourceIndex !== undefined && dragData.sourceRackId) {
+				// Cross-rack move from a different rack
+				ondevicemoverack?.(
+					new CustomEvent('devicemoverack', {
+						detail: {
+							sourceRackId: dragData.sourceRackId,
+							sourceIndex: dragData.sourceIndex,
+							targetRackId: rack.id,
+							targetPosition: targetU
+						}
+					})
+				);
 			} else {
-				// External drop from palette or different rack
+				// External drop from palette (library-device type)
 				ondevicedrop?.(
 					new CustomEvent('devicedrop', {
 						detail: {

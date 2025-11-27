@@ -341,7 +341,7 @@ Commit: "feat(collision): add collision detection system"
 
 ### Prompt 1.4 — Layout Persistence Logic
 
-**Status:** ⬜ Not started  
+**Status:** ✅ Complete
 **Dependencies:** 1.3
 
 ```text
@@ -396,7 +396,7 @@ Commit: "feat(serialization): add layout JSON persistence and validation"
 
 ### Prompt 2.1 — Layout Store (Svelte 5 Runes)
 
-**Status:** ⬜ Not started  
+**Status:** ✅ Complete
 **Dependencies:** 1.4
 
 ```text
@@ -467,7 +467,7 @@ Commit: "feat(store): add layout store with Svelte 5 runes"
 
 ### Prompt 2.2 — Selection Store
 
-**Status:** ⬜ Not started  
+**Status:** ✅ Complete
 **Dependencies:** 2.1
 
 ```text
@@ -512,7 +512,7 @@ Commit: "feat(store): add selection store"
 
 ### Prompt 2.3 — UI Store (Theme, Zoom, Drawers)
 
-**Status:** ⬜ Not started  
+**Status:** ✅ Complete
 **Dependencies:** 0.1
 
 ```text
@@ -584,7 +584,7 @@ Commit: "feat(store): add UI store for theme, zoom, and drawers"
 
 ### Prompt 2.4 — Session Persistence
 
-**Status:** ⬜ Not started  
+**Status:** ✅ Complete
 **Dependencies:** 2.1
 
 ```text
@@ -637,7 +637,7 @@ Commit: "feat(persistence): add sessionStorage auto-save"
 
 ### Prompt 3.1 — Rack SVG Component
 
-**Status:** ⬜ Not started  
+**Status:** ✅ Complete
 **Dependencies:** 2.1, 2.3
 
 ```text
@@ -690,7 +690,7 @@ Commit: "feat(components): add Rack SVG visualization component"
 
 ### Prompt 3.2 — Device SVG Component
 
-**Status:** ⬜ Not started  
+**Status:** ✅ Complete
 **Dependencies:** 3.1
 
 ```text
@@ -753,7 +753,7 @@ Commit: "feat(components): add RackDevice SVG component"
 
 ### Prompt 3.3 — Canvas Component
 
-**Status:** ⬜ Not started  
+**Status:** ✅ Complete
 **Dependencies:** 3.2
 
 ```text
@@ -805,7 +805,7 @@ Commit: "feat(components): add Canvas with multi-rack layout"
 
 ### Prompt 3.4 — Device Palette (Left Drawer)
 
-**Status:** ⬜ Not started  
+**Status:** ✅ Complete
 **Dependencies:** 3.2, 1.1
 
 ```text
@@ -870,7 +870,7 @@ Commit: "feat(components): add Device Palette with search and grouping"
 
 ### Prompt 4.1 — DnD: Palette to Rack
 
-**Status:** ⬜ Not started  
+**Status:** ✅ Complete
 **Dependencies:** 3.4, 1.3
 
 ```text
@@ -927,7 +927,7 @@ Commit: "feat(dnd): add drag-and-drop from palette to rack"
 
 ### Prompt 4.2 — DnD: Move Within Rack
 
-**Status:** ⬜ Not started  
+**Status:** ✅ Complete
 **Dependencies:** 4.1
 
 ```text
@@ -2327,8 +2327,8 @@ Commit: "chore: v0.1.0 release"
 | Phase                 | Prompts            | Status |
 | --------------------- | ------------------ | ------ |
 | 0. Bootstrap          | 0.1, 0.2           | ✅     |
-| 1. Business Logic     | 1.1, 1.2, 1.3, 1.4 | ⬜     |
-| 2. State Management   | 2.1, 2.2, 2.3, 2.4 | ⬜     |
+| 1. Business Logic     | 1.1, 1.2, 1.3, 1.4 | ✅     |
+| 2. State Management   | 2.1, 2.2, 2.3, 2.4 | ✅     |
 | 3. Core Components    | 3.1, 3.2, 3.3, 3.4 | ⬜     |
 | 4. Drag-and-Drop      | 4.1, 4.2, 4.3      | ⬜     |
 | 5. App Shell          | 5.1, 5.2, 5.3, 5.4 | ⬜     |

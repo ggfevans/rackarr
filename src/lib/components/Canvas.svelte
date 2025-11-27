@@ -20,9 +20,24 @@
 		ondevicemove?: (
 			event: CustomEvent<{ rackId: string; deviceIndex: number; newPosition: number }>
 		) => void;
+		ondevicemoverack?: (
+			event: CustomEvent<{
+				sourceRackId: string;
+				sourceIndex: number;
+				targetRackId: string;
+				targetPosition: number;
+			}>
+		) => void;
 	}
 
-	let { onnewrack, onrackselect, ondeviceselect, ondevicedrop, ondevicemove }: Props = $props();
+	let {
+		onnewrack,
+		onrackselect,
+		ondeviceselect,
+		ondevicedrop,
+		ondevicemove,
+		ondevicemoverack
+	}: Props = $props();
 
 	const layoutStore = getLayoutStore();
 	const selectionStore = getSelectionStore();
@@ -79,6 +94,19 @@
 		const { rackId, deviceIndex, newPosition } = event.detail;
 		layoutStore.moveDevice(rackId, deviceIndex, newPosition);
 		ondevicemove?.(event);
+	}
+
+	function handleDeviceMoveRack(
+		event: CustomEvent<{
+			sourceRackId: string;
+			sourceIndex: number;
+			targetRackId: string;
+			targetPosition: number;
+		}>
+	) {
+		const { sourceRackId, sourceIndex, targetRackId, targetPosition } = event.detail;
+		layoutStore.moveDeviceToRack(sourceRackId, sourceIndex, targetRackId, targetPosition);
+		ondevicemoverack?.(event);
 	}
 
 	function handleKeyDown(event: KeyboardEvent) {
@@ -141,6 +169,7 @@
 					ondeviceselect={(e) => handleDeviceSelect(e, rack.id)}
 					ondevicedrop={(e) => handleDeviceDrop(e)}
 					ondevicemove={(e) => handleDeviceMove(e)}
+					ondevicemoverack={(e) => handleDeviceMoveRack(e)}
 				/>
 			{/each}
 		</div>

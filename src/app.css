@@ -1,0 +1,139 @@
+/* Rackarr - Global Styles and CSS Custom Properties */
+
+/* CSS Custom Properties from spec Section 18.3 */
+:root {
+	/* Layout dimensions */
+	--u-height: 22px;
+	--rack-width: 220px;
+	--toolbar-height: 52px;
+	--drawer-width: 300px;
+
+	/* Typography */
+	--font-size-device: 13px;
+	--font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+
+	/* Transitions */
+	--transition-fast: 150ms ease;
+	--transition-normal: 200ms ease;
+}
+
+/* Dark theme (default) */
+:root,
+[data-theme='dark'] {
+	--colour-bg: #1a1a1a;
+	--colour-text: #ffffff;
+	--colour-text-secondary: #a0a0a0;
+	--colour-rack-interior: #2d2d2d;
+	--colour-rack-rail: #404040;
+	--colour-rack-border: #505050;
+	--colour-selection: #0066ff;
+	--colour-invalid: #ff4444;
+	--colour-valid: #44ff44;
+	--colour-surface: #252525;
+	--colour-surface-hover: #333333;
+	--colour-border: #404040;
+	--colour-toolbar-bg: #1f1f1f;
+	--colour-drawer-bg: #222222;
+}
+
+/* Light theme */
+[data-theme='light'] {
+	--colour-bg: #f5f5f5;
+	--colour-text: #1a1a1a;
+	--colour-text-secondary: #666666;
+	--colour-rack-interior: #e0e0e0;
+	--colour-rack-rail: #c0c0c0;
+	--colour-rack-border: #b0b0b0;
+	--colour-selection: #0066ff;
+	--colour-invalid: #cc0000;
+	--colour-valid: #008800;
+	--colour-surface: #ffffff;
+	--colour-surface-hover: #f0f0f0;
+	--colour-border: #d0d0d0;
+	--colour-toolbar-bg: #ffffff;
+	--colour-drawer-bg: #fafafa;
+}
+
+/* Reset and base styles */
+*,
+*::before,
+*::after {
+	box-sizing: border-box;
+	margin: 0;
+	padding: 0;
+}
+
+html,
+body {
+	height: 100%;
+	font-family: var(--font-family);
+	background: var(--colour-bg);
+	color: var(--colour-text);
+	line-height: 1.5;
+	-webkit-font-smoothing: antialiased;
+	-moz-osx-font-smoothing: grayscale;
+}
+
+#app {
+	height: 100%;
+}
+
+/* Focus styles for accessibility */
+:focus-visible {
+	outline: 2px solid var(--colour-selection);
+	outline-offset: 2px;
+}
+
+/* Button reset */
+button {
+	font: inherit;
+	color: inherit;
+	background: none;
+	border: none;
+	cursor: pointer;
+}
+
+button:disabled {
+	cursor: not-allowed;
+	opacity: 0.5;
+}
+
+/* Input reset */
+input,
+select,
+textarea {
+	font: inherit;
+	color: inherit;
+}
+
+/* Scrollbar styling */
+::-webkit-scrollbar {
+	width: 8px;
+	height: 8px;
+}
+
+::-webkit-scrollbar-track {
+	background: var(--colour-surface);
+}
+
+::-webkit-scrollbar-thumb {
+	background: var(--colour-border);
+	border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+	background: var(--colour-text-secondary);
+}
+
+/* Utility classes */
+.sr-only {
+	position: absolute;
+	width: 1px;
+	height: 1px;
+	padding: 0;
+	margin: -1px;
+	overflow: hidden;
+	clip: rect(0, 0, 0, 0);
+	white-space: nowrap;
+	border: 0;
+}

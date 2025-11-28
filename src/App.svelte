@@ -10,6 +10,7 @@
 	import DevicePalette from '$lib/components/DevicePalette.svelte';
 	import EditPanel from '$lib/components/EditPanel.svelte';
 	import NewRackForm from '$lib/components/NewRackForm.svelte';
+	import AddDeviceForm from '$lib/components/AddDeviceForm.svelte';
 	import { getLayoutStore } from '$lib/stores/layout.svelte';
 	import { getSelectionStore } from '$lib/stores/selection.svelte';
 	import { getUIStore } from '$lib/stores/ui.svelte';
@@ -20,6 +21,7 @@
 
 	// Dialog state
 	let newRackFormOpen = $state(false);
+	let addDeviceFormOpen = $state(false);
 
 	// Toolbar event handlers
 	function handleNewRack() {
@@ -91,8 +93,28 @@
 	}
 
 	function handleAddDevice() {
-		// TODO: Implement in Phase 6 (Add Device Form)
-		console.log('Add device clicked');
+		addDeviceFormOpen = true;
+	}
+
+	function handleAddDeviceCreate(data: {
+		name: string;
+		height: number;
+		category: import('$lib/types').DeviceCategory;
+		colour: string;
+		notes: string;
+	}) {
+		layoutStore.addDeviceToLibrary({
+			name: data.name,
+			height: data.height,
+			category: data.category,
+			colour: data.colour,
+			notes: data.notes || undefined
+		});
+		addDeviceFormOpen = false;
+	}
+
+	function handleAddDeviceCancel() {
+		addDeviceFormOpen = false;
 	}
 
 	// Beforeunload handler for unsaved changes
@@ -150,6 +172,12 @@
 		open={newRackFormOpen}
 		oncreate={handleNewRackCreate}
 		oncancel={handleNewRackCancel}
+	/>
+
+	<AddDeviceForm
+		open={addDeviceFormOpen}
+		onadd={handleAddDeviceCreate}
+		oncancel={handleAddDeviceCancel}
 	/>
 </div>
 

@@ -35,6 +35,7 @@
 				targetPosition: number;
 			}>
 		) => void;
+		onrackdragstart?: (event: CustomEvent<{ rackId: string }>) => void;
 	}
 
 	let {
@@ -47,7 +48,8 @@
 		ondeviceselect,
 		ondevicedrop,
 		ondevicemove,
-		ondevicemoverack
+		ondevicemoverack,
+		onrackdragstart
 	}: Props = $props();
 
 	// Track which device is being dragged (for internal moves)
@@ -251,9 +253,38 @@
 			}
 		}
 	}
+
+	// Rack drag handle for reordering
+	function handleRackDragStart(event: DragEvent) {
+		event.stopPropagation();
+		if (!event.dataTransfer) return;
+
+		event.dataTransfer.setData(
+			'application/json',
+			JSON.stringify({ type: 'rack-reorder', rackId: rack.id })
+		);
+		event.dataTransfer.effectAllowed = 'move';
+
+		onrackdragstart?.(
+			new CustomEvent('rackdragstart', {
+				detail: { rackId: rack.id }
+			})
+		);
+	}
 </script>
 
 <div class="rack-container" style="transform: scale({zoomScale}); transform-origin: top left;">
+	<!-- Drag handle for rack reordering -->
+	<div
+		class="rack-drag-handle"
+		draggable="true"
+		ondragstart={handleRackDragStart}
+		role="button"
+		aria-label="Drag to reorder {rack.name}"
+		tabindex="-1"
+	>
+		<span class="drag-handle-icon">&#x2630;</span>
+	</div>
 	<!-- svelte-ignore a11y_no_noninteractive_tabindex a11y_no_noninteractive_element_interactions -->
 	<svg
 		width={RACK_WIDTH}
@@ -380,6 +411,41 @@
 <style>
 	.rack-container {
 		display: inline-block;
+		position: relative;
+	}
+
+	.rack-drag-handle {
+		position: absolute;
+		top: -24px;
+		left: 50%;
+		transform: translateX(-50%);
+		width: 32px;
+		height: 20px;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		background: var(--colour-panel, #2d2d2d);
+		border: 1px solid var(--colour-border, #404040);
+		border-radius: 4px;
+		cursor: grab;
+		opacity: 0.6;
+		transition: opacity 0.15s ease;
+		z-index: 10;
+	}
+
+	.rack-drag-handle:hover {
+		opacity: 1;
+		background: var(--colour-hover, #3d3d3d);
+	}
+
+	.rack-drag-handle:active {
+		cursor: grabbing;
+	}
+
+	.drag-handle-icon {
+		color: var(--colour-text-muted, #808080);
+		font-size: 12px;
+		line-height: 1;
 	}
 
 	svg {

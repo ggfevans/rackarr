@@ -41,6 +41,9 @@
 	// Rail width (matches Rack.svelte)
 	const RAIL_WIDTH = 24;
 
+	// Type for draggable attribute spread
+	type DraggableAttr = Record<string, unknown>;
+
 	// Position calculation (SVG y-coordinate, origin at top)
 	// y = (rackHeight - position - device.height + 1) * uHeight
 	const yPosition = $derived((rackHeight - position - device.height + 1) * uHeight);
@@ -88,7 +91,7 @@
 	aria-label={ariaLabel}
 	aria-pressed={selected}
 	tabindex="0"
-	{...{ draggable: 'true' } as unknown as Record}
+	{...{ draggable: 'true' } as DraggableAttr}
 	onclick={handleClick}
 	onkeydown={handleKeyDown}
 	ondragstart={handleDragStart}

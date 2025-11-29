@@ -2336,9 +2336,9 @@ Commit: "chore: v0.1.0 release"
 | 7. Save/Load          | 7.1, 7.2           | ✅     |
 | 8. Feedback & Polish  | 8.1, 8.2, 8.3      | ✅     |
 | 9. Export             | 9.1, 9.2           | ✅     |
-| 10. Help & A11y       | 10.1, 10.2, 10.3   | ⬜     |
-| 11. E2E & Integration | 11.1, 11.2, 11.3   | ⬜     |
-| 12. Deployment        | 12.1, 12.2, 12.3   | ⬜     |
+| 10. Help & A11y       | 10.1, 10.2, 10.3   | ✅     |
+| 11. E2E & Integration | 11.1, 11.2, 11.3   | ✅     |
+| 12. Deployment        | 12.1, 12.2, 12.3   | ✅     |
 
 **Total Prompts:** 29  
 **Estimated Time:** 5-7 hours with Claude Code

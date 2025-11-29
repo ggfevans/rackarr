@@ -162,6 +162,114 @@ describe('svgToScreen', () => {
 	});
 });
 
+describe('equivalence with legacy calculation', () => {
+	/**
+	 * Test that screenToSVG produces the same results as the legacy calculation:
+	 *   const rect = svg.getBoundingClientRect();
+	 *   const mouseY = (event.clientY - rect.top) / zoomScale;
+	 *
+	 * The legacy method manually compensates for zoom but doesn't handle pan.
+	 * screenToSVG using getScreenCTM() handles both automatically.
+	 */
+
+	it('matches legacy calculation at 100% zoom (no transform)', () => {
+		// At 100% zoom, CTM is identity matrix
+		// Legacy: (clientY - rect.top) / 1.0 = clientY - rect.top
+		// New: screenToSVG with identity CTM = clientY (assuming rect.top = 0)
+
+		const mockSvg = createMockSVG({ a: 1, b: 0, c: 0, d: 1, e: 0, f: 0 });
+		const clientY = 150;
+
+		// New method
+		const newResult = screenToSVG(mockSvg, 0, clientY);
+
+		// Legacy method (simulated with rect.top = 0, zoomScale = 1)
+		const rectTop = 0;
+		const zoomScale = 1;
+		const legacyResult = (clientY - rectTop) / zoomScale;
+
+		expect(newResult.y).toBeCloseTo(legacyResult);
+	});
+
+	it('matches legacy calculation at 50% zoom', () => {
+		// At 50% zoom, CTM has scale 0.5
+		// Legacy: (clientY - rect.top) / 0.5 = (clientY - rect.top) * 2
+		// New: screenToSVG with 0.5 scale CTM
+
+		const mockSvg = createMockSVG({ a: 0.5, b: 0, c: 0, d: 0.5, e: 0, f: 0 });
+		const clientY = 100;
+
+		// New method
+		const newResult = screenToSVG(mockSvg, 0, clientY);
+
+		// Legacy method
+		const rectTop = 0;
+		const zoomScale = 0.5;
+		const legacyResult = (clientY - rectTop) / zoomScale;
+
+		expect(newResult.y).toBeCloseTo(legacyResult);
+	});
+
+	it('matches legacy calculation at 200% zoom', () => {
+		// At 200% zoom, CTM has scale 2
+		// Legacy: (clientY - rect.top) / 2 = (clientY - rect.top) / 2
+		// New: screenToSVG with 2x scale CTM
+
+		const mockSvg = createMockSVG({ a: 2, b: 0, c: 0, d: 2, e: 0, f: 0 });
+		const clientY = 200;
+
+		// New method
+		const newResult = screenToSVG(mockSvg, 0, clientY);
+
+		// Legacy method
+		const rectTop = 0;
+		const zoomScale = 2;
+		const legacyResult = (clientY - rectTop) / zoomScale;
+
+		expect(newResult.y).toBeCloseTo(legacyResult);
+	});
+
+	it('handles non-zero rect.top (SVG offset from page top)', () => {
+		// When SVG is offset from page top, the CTM includes translation
+		// Legacy: (clientY - rect.top) / zoomScale
+		// New: screenToSVG accounts for translation in CTM
+
+		// SVG at y=100 on page, 1x zoom
+		// CTM translation e/f represents the SVG position
+		const svgTop = 100;
+		const mockSvg = createMockSVG({ a: 1, b: 0, c: 0, d: 1, e: 0, f: svgTop });
+		const clientY = 250;
+
+		// New method
+		const newResult = screenToSVG(mockSvg, 0, clientY);
+
+		// Legacy method
+		const rectTop = svgTop;
+		const zoomScale = 1;
+		const legacyResult = (clientY - rectTop) / zoomScale;
+
+		expect(newResult.y).toBeCloseTo(legacyResult);
+	});
+
+	it('handles zoom + offset combined', () => {
+		// SVG at y=50 on page, 1.5x zoom
+		const svgTop = 50;
+		const zoom = 1.5;
+		const mockSvg = createMockSVG({ a: zoom, b: 0, c: 0, d: zoom, e: 0, f: svgTop });
+		const clientY = 200;
+
+		// New method
+		const newResult = screenToSVG(mockSvg, 0, clientY);
+
+		// Legacy method
+		const rectTop = svgTop;
+		const zoomScale = zoom;
+		const legacyResult = (clientY - rectTop) / zoomScale;
+
+		expect(newResult.y).toBeCloseTo(legacyResult);
+	});
+});
+
 describe('round-trip conversion', () => {
 	it('screenToSVG then svgToScreen returns original coordinates', () => {
 		const mockSvg = createMockSVG({ a: 1.5, b: 0, c: 0, d: 1.5, e: 75, f: 50 });

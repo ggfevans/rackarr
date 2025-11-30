@@ -17,6 +17,16 @@ A browser-based visual tool for planning and documenting server rack layouts. De
 - **Session Persistence**: Auto-saves work to browser storage
 - **Offline Ready**: Runs entirely in the browser, no server required
 
+## AI Transparency
+
+This project is developed using AI-assisted workflows (primarily [Claude Code](https://claude.com/claude-code) via [Happy](https://happy.engineering)). We believe in transparent collaboration between human developers and AI tools.
+
+- Substantial AI contributions are marked with `Co-authored-by` tags in commits
+- All AI-generated code undergoes human review and comprehensive testing
+- The AI assists development but humans maintain architectural decisions and project vision
+
+Both traditional and AI-assisted contributions are welcome. See [CONTRIBUTING.md](CONTRIBUTING.md) for details.
+
 ## Quick Start
 
 ### Development

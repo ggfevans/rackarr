@@ -1,0 +1,52 @@
+# Security Policy
+
+## Supported Versions
+
+Rackarr is currently in active development (v0.1.x). Security updates are applied to the latest version.
+
+| Version | Supported          |
+| ------- | ------------------ |
+| 0.1.x   | :white_check_mark: |
+
+## Reporting a Vulnerability
+
+If you discover a security vulnerability in Rackarr, please report it by:
+
+1. **Email**: Create an issue at https://github.com/ggfevans/rackarr/issues (or the primary repository)
+2. **Response Time**: We aim to acknowledge reports within 48 hours
+3. **Disclosure**: Please allow us time to address the issue before public disclosure
+
+## AI-Generated Code
+
+Code generated with AI assistance undergoes the same security review process as human-written code.
+
+### Our Approach
+
+- All contributions (AI-assisted or traditional) are tested against our comprehensive test suite (791 tests as of v0.1)
+- AI-generated code receives human review before merging
+- Security-sensitive code receives additional scrutiny regardless of authorship
+- Dependencies are regularly audited using `npm audit`
+
+### Security Considerations
+
+- **Client-Side Only**: Rackarr runs entirely in the browser with no backend server, reducing attack surface
+- **No External Data**: No user data is transmitted to external servers
+- **Local Storage**: Session data is stored in browser localStorage (user-controlled)
+- **No Authentication**: No user accounts or authentication system to compromise
+
+## Best Practices for Users
+
+When using Rackarr:
+
+- Review exported files before sharing, as they may contain infrastructure details
+- Be cautious about loading `.rackarr.json` files from untrusted sources
+- Keep your browser updated to ensure latest security patches
+
+## Dependency Security
+
+We maintain security through:
+
+- Regular dependency updates
+- Automated security scanning via `npm audit`
+- Minimal dependency footprint
+- Pre-commit hooks for code quality and linting

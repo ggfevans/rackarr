@@ -4,6 +4,8 @@
  */
 
 import type panzoom from 'panzoom';
+import type { Rack } from '$lib/types';
+import { calculateFitAll, racksToPositions } from '$lib/utils/canvas';
 
 // Panzoom constants
 export const ZOOM_MIN = 0.5; // 50%
@@ -15,6 +17,7 @@ type PanzoomInstance = ReturnType<typeof panzoom>;
 // Module-level state
 let panzoomInstance = $state<PanzoomInstance | null>(null);
 let currentZoom = $state(1); // 1 = 100%
+let canvasElement = $state<HTMLElement | null>(null);
 
 // Derived values
 const canZoomIn = $derived(currentZoom < ZOOM_MAX);
@@ -30,6 +33,7 @@ export function resetCanvasStore(): void {
 	}
 	panzoomInstance = null;
 	currentZoom = 1;
+	canvasElement = null;
 }
 
 /**
@@ -57,6 +61,7 @@ export function getCanvasStore() {
 
 		// Actions
 		setPanzoomInstance,
+		setCanvasElement,
 		disposePanzoom,
 		zoomIn,
 		zoomOut,
@@ -64,7 +69,8 @@ export function getCanvasStore() {
 		resetZoom,
 		getTransform,
 		moveTo,
-		smoothMoveTo
+		smoothMoveTo,
+		fitAll
 	};
 }
 
@@ -177,4 +183,29 @@ function smoothMoveTo(x: number, y: number, scale: number): void {
 		// Use panzoom's smooth zoom
 		panzoomInstance.smoothZoomAbs(x, y, scale);
 	}
+}
+
+/**
+ * Set the canvas container element (for viewport measurements)
+ */
+function setCanvasElement(element: HTMLElement): void {
+	canvasElement = element;
+}
+
+/**
+ * Fit all racks in the viewport
+ */
+function fitAll(racks: Rack[]): void {
+	if (!panzoomInstance || !canvasElement || racks.length === 0) return;
+
+	// Get viewport dimensions
+	const viewportWidth = canvasElement.clientWidth;
+	const viewportHeight = canvasElement.clientHeight;
+
+	// Convert racks to positions and calculate fit
+	const rackPositions = racksToPositions(racks);
+	const { zoom, panX, panY } = calculateFitAll(rackPositions, viewportWidth, viewportHeight);
+
+	// Apply the transform with animation
+	smoothMoveTo(panX, panY, zoom);
 }

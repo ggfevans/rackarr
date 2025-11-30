@@ -108,6 +108,21 @@ describe('Toolbar Component', () => {
 		});
 	});
 
+	describe('Fit All button', () => {
+		it('renders fit all button', () => {
+			render(Toolbar);
+			expect(screen.getByRole('button', { name: /fit all/i })).toBeInTheDocument();
+		});
+
+		it('calls onfitall on click', async () => {
+			const onFitAll = vi.fn();
+			render(Toolbar, { props: { onfitall: onFitAll } });
+
+			await fireEvent.click(screen.getByRole('button', { name: /fit all/i }));
+			expect(onFitAll).toHaveBeenCalledTimes(1);
+		});
+	});
+
 	describe('Zoom controls', () => {
 		it('zoom in disabled at ZOOM_MAX', () => {
 			const store = getCanvasStore();

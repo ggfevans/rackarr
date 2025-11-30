@@ -194,6 +194,10 @@
 		canvasStore.zoomOut();
 	}
 
+	function handleFitAll() {
+		canvasStore.fitAll(layoutStore.racks);
+	}
+
 	function handleToggleTheme() {
 		uiStore.toggleTheme();
 	}
@@ -266,6 +270,7 @@
 		ondelete={handleDelete}
 		onzoomin={handleZoomIn}
 		onzoomout={handleZoomOut}
+		onfitall={handleFitAll}
 		ontoggletheme={handleToggleTheme}
 		onhelp={handleHelp}
 	/>
@@ -326,6 +331,7 @@
 		onload={handleLoad}
 		onexport={handleExport}
 		ondelete={handleDelete}
+		onfitall={handleFitAll}
 		onhelp={handleHelp}
 	/>
 </div>

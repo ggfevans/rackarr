@@ -13,10 +13,11 @@
 		onload?: () => void;
 		onexport?: () => void;
 		ondelete?: () => void;
+		onfitall?: () => void;
 		onhelp?: () => void;
 	}
 
-	let { onsave, onload, onexport, ondelete, onhelp }: Props = $props();
+	let { onsave, onload, onexport, ondelete, onfitall, onhelp }: Props = $props();
 
 	const layoutStore = getLayoutStore();
 	const selectionStore = getSelectionStore();
@@ -69,6 +70,12 @@
 			{
 				key: 'd',
 				action: () => uiStore.toggleLeftDrawer()
+			},
+
+			// F - fit all
+			{
+				key: 'f',
+				action: () => onfitall?.()
 			},
 
 			// Ctrl/Cmd+S - save

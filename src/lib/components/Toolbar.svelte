@@ -13,6 +13,7 @@
 		IconTrash,
 		IconZoomIn,
 		IconZoomOut,
+		IconFitAll,
 		IconSun,
 		IconMoon,
 		IconHelp
@@ -31,6 +32,7 @@
 		ondelete?: () => void;
 		onzoomin?: () => void;
 		onzoomout?: () => void;
+		onfitall?: () => void;
 		ontoggletheme?: () => void;
 		onhelp?: () => void;
 	}
@@ -47,6 +49,7 @@
 		ondelete,
 		onzoomin,
 		onzoomout,
+		onfitall,
 		ontoggletheme,
 		onhelp
 	}: Props = $props();
@@ -113,6 +116,10 @@
 
 		<ToolbarButton label="Zoom In" disabled={!canvasStore.canZoomIn} onclick={onzoomin}>
 			<IconZoomIn />
+		</ToolbarButton>
+
+		<ToolbarButton label="Fit All" onclick={onfitall}>
+			<IconFitAll />
 		</ToolbarButton>
 
 		<div class="separator" aria-hidden="true"></div>

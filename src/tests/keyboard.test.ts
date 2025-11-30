@@ -246,6 +246,16 @@ describe('KeyboardHandler Component', () => {
 
 			expect(uiStore.leftDrawerOpen).toBe(!initialState);
 		});
+
+		it('F key triggers fit all', async () => {
+			const onFitAll = vi.fn();
+
+			render(KeyboardHandler, { props: { onfitall: onFitAll } });
+
+			await fireEvent.keyDown(window, { key: 'f' });
+
+			expect(onFitAll).toHaveBeenCalledTimes(1);
+		});
 	});
 
 	describe('Modifier Key Shortcuts', () => {

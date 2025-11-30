@@ -54,9 +54,15 @@
 
 	// Panzoom container reference
 	let panzoomContainer: HTMLDivElement | null = $state(null);
+	let canvasContainer: HTMLDivElement | null = $state(null);
 
 	// Initialize panzoom on mount
 	onMount(() => {
+		// Set canvas element for viewport measurements
+		if (canvasContainer) {
+			canvasStore.setCanvasElement(canvasContainer);
+		}
+
 		if (panzoomContainer) {
 			const instance = panzoom(panzoomContainer, {
 				minZoom: ZOOM_MIN,
@@ -191,7 +197,7 @@
 <svelte:window onkeydown={handleKeyDown} />
 
 <!-- svelte-ignore a11y_click_events_have_key_events -->
-<div class="canvas" role="application" onclick={handleCanvasClick}>
+<div class="canvas" role="application" bind:this={canvasContainer} onclick={handleCanvasClick}>
 	{#if hasRacks}
 		<div class="panzoom-container" bind:this={panzoomContainer}>
 			<div class="rack-row">

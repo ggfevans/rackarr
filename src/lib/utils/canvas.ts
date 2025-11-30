@@ -3,6 +3,14 @@
  * Calculations for fit-all zoom and rack bounding boxes
  */
 
+import type { Rack } from '$lib/types';
+
+// Rack rendering constants (must match Rack.svelte)
+const U_HEIGHT = 22;
+const RACK_WIDTH = 220;
+const NAME_HEIGHT = 28;
+const RACK_GAP = 24;
+
 /**
  * Bounding box interface
  */
@@ -116,4 +124,34 @@ export function calculateFitAll(
 	const panY = (viewportHeight - bounds.height * zoom) / 2 - bounds.y * zoom;
 
 	return { zoom, panX, panY };
+}
+
+/**
+ * Convert racks to RackPosition array for bounding box calculation.
+ * Sorts racks by position and calculates x coordinates based on layout.
+ *
+ * @param racks - Array of racks from the layout store
+ * @returns Array of RackPosition objects with calculated coordinates
+ */
+export function racksToPositions(racks: Rack[]): RackPosition[] {
+	if (racks.length === 0) return [];
+
+	// Sort by position
+	const sorted = [...racks].sort((a, b) => a.position - b.position);
+
+	// Find max height for vertical alignment (racks align at bottom)
+	const maxHeight = Math.max(...sorted.map((r) => r.height * U_HEIGHT + NAME_HEIGHT));
+
+	let currentX = 0;
+	return sorted.map((rack) => {
+		const height = rack.height * U_HEIGHT + NAME_HEIGHT;
+		const position: RackPosition = {
+			x: currentX,
+			y: maxHeight - height, // Align to bottom
+			width: RACK_WIDTH,
+			height
+		};
+		currentX += RACK_WIDTH + RACK_GAP;
+		return position;
+	});
 }

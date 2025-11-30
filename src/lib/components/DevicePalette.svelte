@@ -167,7 +167,7 @@
 	}
 
 	.search-container {
-		padding: 12px;
+		padding: 16px 8px 12px;
 		border-bottom: 1px solid var(--colour-border, #333333);
 	}
 

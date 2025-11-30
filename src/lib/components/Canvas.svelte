@@ -9,7 +9,7 @@
 	import { getLayoutStore } from '$lib/stores/layout.svelte';
 	import { getSelectionStore } from '$lib/stores/selection.svelte';
 	import { getCanvasStore, ZOOM_MIN, ZOOM_MAX } from '$lib/stores/canvas.svelte';
-	import { getDropFeedback } from '$lib/utils/dragdrop';
+	import { debug } from '$lib/utils/debug';
 	import Rack from './Rack.svelte';
 	import WelcomeScreen from './WelcomeScreen.svelte';
 
@@ -56,13 +56,15 @@
 	let panzoomContainer: HTMLDivElement | null = $state(null);
 	let canvasContainer: HTMLDivElement | null = $state(null);
 
-	// Initialize panzoom on mount
+	// Set canvas element for viewport measurements
 	onMount(() => {
-		// Set canvas element for viewport measurements
 		if (canvasContainer) {
 			canvasStore.setCanvasElement(canvasContainer);
 		}
+	});
 
+	// Initialize panzoom reactively when container becomes available
+	$effect(() => {
 		if (panzoomContainer) {
 			const instance = panzoom(panzoomContainer, {
 				minZoom: ZOOM_MIN,
@@ -74,21 +76,49 @@
 				beforeMouseDown: (e: MouseEvent) => {
 					// Allow drag-and-drop to work - don't initiate pan on draggable elements
 					const target = e.target as HTMLElement;
-					if (target.draggable || target.closest('[draggable="true"]')) {
-						return false;
+
+					// Check if target or any parent is draggable
+					// For SVGElements, we need to check the draggable attribute differently
+					const isDraggableElement =
+						(target as HTMLElement).draggable === true ||
+						target.getAttribute?.('draggable') === 'true' ||
+						target.closest?.('[draggable="true"]') !== null;
+
+					debug.log('beforeMouseDown:', {
+						target: target.tagName,
+						className: target.className,
+						draggable: (target as HTMLElement).draggable,
+						draggableAttr: target.getAttribute?.('draggable'),
+						closestDraggable: target.closest?.('[draggable="true"]'),
+						isDraggableElement,
+						willPan: !isDraggableElement
+					});
+
+					// Don't pan if on a draggable element
+					if (isDraggableElement) {
+						return true; // Block panning, let drag-drop work
 					}
-					return true;
+
+					// Allow panning on empty space and non-interactive elements
+					return false;
 				},
 				// Filter out drag events from panzoom handling
 				filterKey: () => true
 			});
 
+			debug.log('Panzoom initialized on container:', panzoomContainer);
 			canvasStore.setPanzoomInstance(instance);
-		}
 
-		return () => {
-			canvasStore.disposePanzoom();
-		};
+			// Center content on initial load
+			requestAnimationFrame(() => {
+				canvasStore.fitAll(layoutStore.racks);
+			});
+
+			return () => {
+				debug.log('Disposing panzoom');
+				canvasStore.disposePanzoom();
+			};
+		}
 	});
 
 	function handleCanvasClick(event: MouseEvent) {
@@ -158,54 +188,125 @@
 		layoutStore.updateRackView(rackId, view);
 	}
 
-	function handleKeyDown(event: KeyboardEvent) {
-		// Only handle arrow keys when a device is selected
-		if (selectionStore.selectedType !== 'device') return;
-		if (event.key !== 'ArrowUp' && event.key !== 'ArrowDown') return;
+	// Rack reordering state (prefixed with _ as they're for future visual feedback)
+	let _rackDragOverId = $state<string | null>(null);
+	let _rackDragSourceId = $state<string | null>(null);
 
-		// Don't handle if we're in an input field
-		const target = event.target as HTMLElement;
-		if (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA') return;
+	function handleRackRowDragOver(event: DragEvent) {
+		if (!event.dataTransfer) return;
 
-		event.preventDefault();
+		const data = event.dataTransfer.getData('application/json');
+		if (!data) {
+			// Data might not be available during dragover in some browsers
+			// Check if we have effectAllowed set to 'move' (set by rack drag)
+			if (event.dataTransfer.effectAllowed === 'move') {
+				event.preventDefault();
+				event.dataTransfer.dropEffect = 'move';
+			}
+			return;
+		}
 
-		const rackId = selectionStore.selectedRackId;
-		const deviceIndex = selectionStore.selectedDeviceIndex;
-		if (!rackId || deviceIndex === null) return;
+		try {
+			const parsed = JSON.parse(data);
+			if (parsed.type === 'rack-reorder') {
+				event.preventDefault();
+				event.dataTransfer.dropEffect = 'move';
+				_rackDragSourceId = parsed.rackId;
 
-		const rack = layoutStore.racks.find((r) => r.id === rackId);
-		if (!rack || !rack.devices[deviceIndex]) return;
+				// Find which rack we're over based on mouse position
+				const rackRow = event.currentTarget as HTMLElement;
+				const rackElements = rackRow.querySelectorAll('.rack-container');
+				let targetRackId: string | null = null;
 
-		const placedDevice = rack.devices[deviceIndex];
-		const device = layoutStore.deviceLibrary.find((d) => d.id === placedDevice.libraryId);
-		if (!device) return;
+				for (const el of rackElements) {
+					const rect = el.getBoundingClientRect();
+					if (event.clientX >= rect.left && event.clientX <= rect.right) {
+						const rackId = sortedRacks.find((r) => {
+							// Match by position in the DOM
+							const rackIndex = Array.from(rackElements).indexOf(el);
+							return rackIndex !== -1 && sortedRacks[rackIndex]?.id === r.id;
+						})?.id;
+						if (rackId) {
+							targetRackId = rackId;
+							break;
+						}
+					}
+				}
 
-		const currentPosition = placedDevice.position;
-		const direction = event.key === 'ArrowUp' ? 1 : -1;
-		const newPosition = currentPosition + direction;
-
-		// Check if move is valid
-		const feedback = getDropFeedback(
-			rack,
-			layoutStore.deviceLibrary,
-			device.height,
-			newPosition,
-			deviceIndex
-		);
-
-		if (feedback === 'valid') {
-			layoutStore.moveDevice(rackId, deviceIndex, newPosition);
+				_rackDragOverId = targetRackId;
+			}
+		} catch {
+			// Invalid JSON, ignore
 		}
 	}
-</script>
 
-<svelte:window onkeydown={handleKeyDown} />
+	function handleRackRowDragLeave() {
+		_rackDragOverId = null;
+	}
+
+	function handleRackRowDrop(event: DragEvent) {
+		event.preventDefault();
+		_rackDragOverId = null;
+
+		if (!event.dataTransfer) return;
+
+		const data = event.dataTransfer.getData('application/json');
+		if (!data) return;
+
+		try {
+			const parsed = JSON.parse(data);
+			if (parsed.type === 'rack-reorder' && parsed.rackId) {
+				const sourceRackId = parsed.rackId;
+
+				// Find target rack based on drop position
+				const rackRow = event.currentTarget as HTMLElement;
+				const rackElements = rackRow.querySelectorAll('.rack-container');
+				let targetIndex = -1;
+
+				for (let i = 0; i < rackElements.length; i++) {
+					const rect = rackElements[i].getBoundingClientRect();
+					const midX = rect.left + rect.width / 2;
+
+					if (event.clientX < midX) {
+						targetIndex = i;
+						break;
+					}
+				}
+
+				// If we didn't find a position, drop at the end
+				if (targetIndex === -1) {
+					targetIndex = sortedRacks.length - 1;
+				}
+
+				// Find source rack index
+				const sourceIndex = sortedRacks.findIndex((r) => r.id === sourceRackId);
+				if (sourceIndex !== -1 && sourceIndex !== targetIndex) {
+					// Adjust target index if dragging from before the target
+					const adjustedTarget = sourceIndex < targetIndex ? targetIndex - 1 : targetIndex;
+					if (sourceIndex !== adjustedTarget) {
+						layoutStore.reorderRacks(sourceIndex, adjustedTarget);
+					}
+				}
+			}
+		} catch {
+			// Invalid JSON, ignore
+		}
+
+		_rackDragSourceId = null;
+	}
+</script>
 
 <!-- svelte-ignore a11y_click_events_have_key_events -->
 <div class="canvas" role="application" bind:this={canvasContainer} onclick={handleCanvasClick}>
 	{#if hasRacks}
 		<div class="panzoom-container" bind:this={panzoomContainer}>
-			<div class="rack-row">
+			<div
+				class="rack-row"
+				ondragover={handleRackRowDragOver}
+				ondragleave={handleRackRowDragLeave}
+				ondrop={handleRackRowDrop}
+				role="list"
+			>
 				{#each sortedRacks as rack (rack.id)}
 					<Rack
 						{rack}
@@ -233,9 +334,6 @@
 <style>
 	.canvas {
 		flex: 1;
-		display: flex;
-		align-items: center;
-		justify-content: center;
 		overflow: hidden;
 		background-color: var(--colour-bg, #1a1a1a);
 		min-height: 0;
@@ -243,12 +341,17 @@
 	}
 
 	.panzoom-container {
-		display: flex;
-		align-items: center;
-		justify-content: center;
+		/* No flexbox centering - panzoom controls all positioning */
+		/* fitAll() centers content on load and when toolbar button clicked */
 		min-width: 100%;
 		min-height: 100%;
-		transform-origin: center center;
+		transform-origin: 0 0;
+		touch-action: none;
+		cursor: grab;
+	}
+
+	.panzoom-container:active {
+		cursor: grabbing;
 	}
 
 	.rack-row {

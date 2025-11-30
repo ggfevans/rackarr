@@ -41,9 +41,6 @@
 	// Rail width (matches Rack.svelte)
 	const RAIL_WIDTH = 17;
 
-	// Type for draggable attribute spread
-	type DraggableAttr = Record<string, unknown>;
-
 	// Position calculation (SVG y-coordinate, origin at top)
 	// y = (rackHeight - position - device.height + 1) * uHeight
 	const yPosition = $derived((rackHeight - position - device.height + 1) * uHeight);
@@ -88,18 +85,24 @@
 <g
 	data-device-id={device.id}
 	transform="translate({RAIL_WIDTH}, {yPosition})"
-	role="button"
-	aria-label={ariaLabel}
-	aria-pressed={selected}
-	tabindex="0"
-	{...{ draggable: 'true' } as DraggableAttr}
-	onclick={handleClick}
-	onkeydown={handleKeyDown}
-	ondragstart={handleDragStart}
-	ondragend={handleDragEnd}
 	class="rack-device"
 	class:dragging={isDragging}
 >
+	<!-- Invisible HTML overlay for drag-and-drop (SVG elements don't support draggable natively) -->
+	<foreignObject x="0" y="0" width={deviceWidth} height={deviceHeight} class="drag-overlay">
+		<div
+			class="drag-handle"
+			role="button"
+			aria-label={ariaLabel}
+			aria-pressed={selected}
+			tabindex="0"
+			draggable="true"
+			onclick={handleClick}
+			onkeydown={handleKeyDown}
+			ondragstart={handleDragStart}
+			ondragend={handleDragEnd}
+		></div>
+	</foreignObject>
 	<!-- Device rectangle -->
 	<rect
 		class="device-rect"
@@ -147,23 +150,33 @@
 </g>
 
 <style>
-	.rack-device {
-		cursor: grab;
-	}
-
-	.rack-device:active {
-		cursor: grabbing;
-	}
-
 	.rack-device.dragging {
 		opacity: 0.5;
 	}
 
-	.rack-device:focus {
+	.drag-overlay {
+		overflow: visible;
+	}
+
+	.drag-handle {
+		width: 100%;
+		height: 100%;
+		cursor: grab;
+		background: transparent;
+		border: none;
+		padding: 0;
+		margin: 0;
+	}
+
+	.drag-handle:active {
+		cursor: grabbing;
+	}
+
+	.drag-handle:focus {
 		outline: none;
 	}
 
-	.rack-device:focus .device-rect {
+	.rack-device:focus-within .device-rect {
 		stroke: var(--colour-selection, #0066ff);
 		stroke-width: 2;
 	}
@@ -171,12 +184,14 @@
 	.device-rect {
 		stroke: rgba(0, 0, 0, 0.2);
 		stroke-width: 1;
+		pointer-events: none;
 	}
 
 	.device-selection {
 		fill: none;
 		stroke: var(--colour-selection, #0066ff);
 		stroke-width: 2;
+		pointer-events: none;
 	}
 
 	.device-name {

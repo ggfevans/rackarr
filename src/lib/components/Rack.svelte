@@ -14,6 +14,9 @@
 		type DropFeedback
 	} from '$lib/utils/dragdrop';
 	import { screenToSVG } from '$lib/utils/coordinates';
+	import { getCanvasStore } from '$lib/stores/canvas.svelte';
+
+	const canvasStore = getCanvasStore();
 
 	interface Props {
 		rack: RackType;
@@ -56,6 +59,8 @@
 
 	// Track which device is being dragged (for internal moves)
 	let draggingDeviceIndex = $state<number | null>(null);
+	// Track if we just finished dragging a device (to prevent rack selection on release)
+	let justFinishedDrag = $state(false);
 
 	// Look up device by libraryId
 	function getDeviceById(libraryId: string): Device | undefined {
@@ -66,7 +71,7 @@
 	const U_HEIGHT = 22;
 	const RACK_WIDTH = 220;
 	const RAIL_WIDTH = 17;
-	const RACK_PADDING = 4;
+	const RACK_PADDING = 18; // Space at top for rack name (13px font + margin)
 
 	// Calculated dimensions
 	const totalHeight = $derived(rack.height * U_HEIGHT);
@@ -105,7 +110,15 @@
 		})
 	);
 
-	function handleClick() {
+	function handleClick(_event: MouseEvent) {
+		// Don't select rack if we just finished panning
+		if (canvasStore.isPanning) return;
+		// Don't select rack if we just finished dragging a device
+		if (justFinishedDrag) {
+			justFinishedDrag = false;
+			return;
+		}
+
 		onselect?.(new CustomEvent('select', { detail: { rackId: rack.id } }));
 	}
 
@@ -189,6 +202,12 @@
 
 	function handleDeviceDragEnd() {
 		draggingDeviceIndex = null;
+		// Set flag to prevent rack selection on the click that follows drag end
+		justFinishedDrag = true;
+		// Reset the flag after a short delay (in case no click event follows)
+		setTimeout(() => {
+			justFinishedDrag = false;
+		}, 100);
 	}
 
 	function handleDrop(event: DragEvent) {
@@ -295,14 +314,9 @@
 	tabindex="0"
 	aria-selected={selected}
 	role="option"
-	onclick={handleClick}
 	onkeydown={handleKeyDown}
+	onclick={handleClick}
 >
-	<!-- Rack view toggle -->
-	<div class="rack-view-toggle-container">
-		<RackViewToggle view={rack.view} onchange={handleViewChange} />
-	</div>
-
 	<!-- Drag handle for rack reordering - only shown when selected -->
 	{#if selected}
 		<div
@@ -376,17 +390,6 @@
 			</text>
 		{/each}
 
-		<!-- Selection outline -->
-		{#if selected}
-			<rect
-				x="1"
-				y={RACK_PADDING + 1}
-				width={RACK_WIDTH - 2}
-				height={totalHeight - 2}
-				class="rack-selection"
-			/>
-		{/if}
-
 		<!-- Devices -->
 		<g transform="translate(0, {RACK_PADDING})">
 			{#each visibleDevices as placedDevice, deviceIndex (placedDevice.libraryId + '-' + placedDevice.position)}
@@ -425,10 +428,29 @@
 			/>
 		{/if}
 
-		<!-- Rack name above -->
-		<text x={RACK_WIDTH / 2} y="2" class="rack-name" text-anchor="middle">
+		<!-- Rack name at top -->
+		<text
+			x={RACK_WIDTH / 2}
+			y="0"
+			class="rack-name"
+			text-anchor="middle"
+			dominant-baseline="text-before-edge"
+		>
 			{rack.name}
 		</text>
+
+		<!-- View toggle in lower right corner -->
+		<foreignObject
+			x={RACK_WIDTH - 60}
+			y={totalHeight + RACK_PADDING - 26}
+			width="56"
+			height="22"
+			class="view-toggle-overlay"
+		>
+			<div class="view-toggle-wrapper">
+				<RackViewToggle view={rack.view} onchange={handleViewChange} />
+			</div>
+		</foreignObject>
 	</svg>
 </div>
 
@@ -436,7 +458,8 @@
 	.rack-container {
 		display: inline-block;
 		position: relative;
-		cursor: pointer;
+		cursor: inherit; /* Inherit cursor from panzoom-container (grab/grabbing) */
+		touch-action: inherit; /* Allow panzoom to handle touches */
 	}
 
 	.rack-container:focus {
@@ -444,15 +467,28 @@
 		outline-offset: 2px;
 	}
 
-	.rack-view-toggle-container {
-		display: flex;
-		justify-content: center;
-		margin-bottom: 8px;
+	.rack-container[aria-selected='true'] {
+		outline: 2px solid var(--colour-selection, #0066ff);
+		outline-offset: 2px;
+	}
+
+	.view-toggle-overlay {
+		pointer-events: none;
+	}
+
+	.view-toggle-wrapper {
+		pointer-events: all;
+		opacity: 0.9;
+		transition: opacity 0.15s ease;
+	}
+
+	.view-toggle-wrapper:hover {
+		opacity: 1;
 	}
 
 	.rack-drag-handle {
 		position: absolute;
-		top: -24px;
+		bottom: -24px;
 		left: 50%;
 		transform: translateX(-50%);
 		width: 32px;
@@ -486,6 +522,7 @@
 
 	svg {
 		pointer-events: auto;
+		touch-action: inherit; /* Allow panzoom to handle touches */
 	}
 
 	.rack-interior {
@@ -502,7 +539,7 @@
 	}
 
 	.u-label {
-		fill: var(--colour-text-secondary, #a0a0a0);
+		fill: var(--colour-text-muted, #b0b0b0);
 		font-size: 10px;
 		text-anchor: middle;
 		font-family: var(--font-family, system-ui, sans-serif);
@@ -513,15 +550,10 @@
 		fill: var(--colour-rack-border, #505050);
 	}
 
-	.rack-selection {
-		fill: none;
-		stroke: var(--colour-selection, #0066ff);
-		stroke-width: 2;
-	}
-
 	.rack-name {
 		fill: var(--colour-text, #ffffff);
-		font-size: var(--font-size-device, 13px);
+		font-size: 15px;
+		font-weight: 500;
 		text-anchor: middle;
 		font-family: var(--font-family, system-ui, sans-serif);
 	}

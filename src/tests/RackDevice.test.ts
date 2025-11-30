@@ -124,8 +124,8 @@ describe('RackDevice SVG Component', () => {
 		it('displays category icon for devices', () => {
 			const { container } = render(RackDevice, { props: defaultProps });
 
-			// Category icon is rendered via foreignObject
-			const foreignObject = container.querySelector('foreignObject');
+			// Category icon is rendered via foreignObject with class category-icon-wrapper
+			const foreignObject = container.querySelector('foreignObject.category-icon-wrapper');
 			expect(foreignObject).toBeInTheDocument();
 
 			// Icon container should have the icon
@@ -153,7 +153,8 @@ describe('RackDevice SVG Component', () => {
 				props: { ...defaultProps, device: device2U }
 			});
 
-			const foreignObject = container.querySelector('foreignObject');
+			// Get the category icon wrapper (not the drag handle overlay)
+			const foreignObject = container.querySelector('foreignObject.category-icon-wrapper');
 			expect(foreignObject).toBeInTheDocument();
 
 			// Foreign object should span full device height (2U * 22px = 44px)
@@ -197,10 +198,11 @@ describe('RackDevice SVG Component', () => {
 				props: { ...defaultProps, onselect: handleSelect }
 			});
 
-			const group = container.querySelector('g');
-			expect(group).toBeInTheDocument();
+			// Click the drag-handle (the interactive element inside foreignObject)
+			const dragHandle = container.querySelector('.drag-handle');
+			expect(dragHandle).toBeInTheDocument();
 
-			await fireEvent.click(group!);
+			await fireEvent.click(dragHandle!);
 
 			expect(handleSelect).toHaveBeenCalledTimes(1);
 			expect(handleSelect).toHaveBeenCalledWith(
@@ -218,11 +220,11 @@ describe('RackDevice SVG Component', () => {
 				props: { ...defaultProps, onselect: handleSelect }
 			});
 
-			// Wrap in a parent div to test propagation
-			const group = container.querySelector('g');
+			// Click the drag-handle
+			const dragHandle = container.querySelector('.drag-handle');
 			container.addEventListener('click', handleParentClick);
 
-			await fireEvent.click(group!);
+			await fireEvent.click(dragHandle!);
 
 			// Parent should not receive click due to stopPropagation
 			expect(handleSelect).toHaveBeenCalledTimes(1);
@@ -233,22 +235,23 @@ describe('RackDevice SVG Component', () => {
 		it('has role="button"', () => {
 			const { container } = render(RackDevice, { props: defaultProps });
 
-			const group = container.querySelector('g');
-			expect(group).toHaveAttribute('role', 'button');
+			// Accessibility attributes are on the drag-handle inside foreignObject
+			const dragHandle = container.querySelector('.drag-handle');
+			expect(dragHandle).toHaveAttribute('role', 'button');
 		});
 
 		it('has correct aria-label', () => {
 			const { container } = render(RackDevice, { props: defaultProps });
 
-			const group = container.querySelector('g');
-			expect(group).toHaveAttribute('aria-label', 'Test Server, 1U server at U1');
+			const dragHandle = container.querySelector('.drag-handle');
+			expect(dragHandle).toHaveAttribute('aria-label', 'Test Server, 1U server at U1');
 		});
 
 		it('has tabindex for keyboard focus', () => {
 			const { container } = render(RackDevice, { props: defaultProps });
 
-			const group = container.querySelector('g');
-			expect(group).toHaveAttribute('tabindex', '0');
+			const dragHandle = container.querySelector('.drag-handle');
+			expect(dragHandle).toHaveAttribute('tabindex', '0');
 		});
 	});
 

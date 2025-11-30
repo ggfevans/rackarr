@@ -123,7 +123,7 @@
 	}
 
 	/**
-	 * Move the selected device up or down
+	 * Move the selected device up or down, leapfrogging over blocking devices
 	 * @param direction - 1 for up (higher U), -1 for down (lower U)
 	 */
 	function moveSelectedDevice(direction: number) {
@@ -140,18 +140,41 @@
 		const device = layoutStore.deviceLibrary.find((d) => d.id === placedDevice.libraryId);
 		if (!device) return;
 
-		const newPosition = placedDevice.position + direction;
+		// Try to find a valid position in the direction of movement
+		let newPosition = placedDevice.position + direction;
 
-		// Check bounds
-		if (newPosition < 1) return;
-		if (newPosition + device.height - 1 > rack.height) return;
+		// Keep looking for a valid position, leapfrogging over blocking devices
+		while (newPosition >= 1 && newPosition + device.height - 1 <= rack.height) {
+			// Check if this position is valid (no collisions)
+			const hasCollision = rack.devices.some((d, idx) => {
+				if (idx === selectionStore.selectedDeviceIndex) return false; // Ignore self
+				const otherDevice = layoutStore.deviceLibrary.find((dev) => dev.id === d.libraryId);
+				if (!otherDevice) return false;
 
-		// Move the device
-		layoutStore.moveDevice(
-			selectionStore.selectedRackId,
-			selectionStore.selectedDeviceIndex,
-			newPosition
-		);
+				const otherTop = d.position + otherDevice.height - 1;
+				const otherBottom = d.position;
+				const newTop = newPosition + device.height - 1;
+				const newBottom = newPosition;
+
+				// Check overlap
+				return !(newTop < otherBottom || newBottom > otherTop);
+			});
+
+			if (!hasCollision) {
+				// Found a valid position, move there
+				layoutStore.moveDevice(
+					selectionStore.selectedRackId!,
+					selectionStore.selectedDeviceIndex!,
+					newPosition
+				);
+				return;
+			}
+
+			// Position blocked, try next position in direction
+			newPosition += direction;
+		}
+
+		// No valid position found in that direction
 	}
 
 	/**

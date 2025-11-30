@@ -5,11 +5,12 @@
 
 import type { Rack } from '$lib/types';
 
-// Rack rendering constants (must match Rack.svelte)
+// Rack rendering constants (must match Rack.svelte and Canvas.svelte)
 const U_HEIGHT = 22;
 const RACK_WIDTH = 220;
-const NAME_HEIGHT = 28;
-const RACK_GAP = 24;
+const RACK_PADDING = 18; // Space at top for rack name (must match Rack.svelte)
+const RACK_GAP = 24; // Gap between racks in rack-row
+const RACK_ROW_PADDING = 16; // Padding around rack-row
 
 /**
  * Bounding box interface
@@ -82,14 +83,19 @@ export function calculateRacksBoundingBox(racks: RackPosition[]): Bounds {
 }
 
 /**
+ * Minimum zoom level (must match ZOOM_MIN in canvas store)
+ */
+const FIT_ALL_MIN_ZOOM = 0.25;
+
+/**
  * Calculate zoom and pan values to fit all racks in the viewport.
  *
  * The calculation:
  * 1. Find bounding box of all racks
  * 2. Add padding around the content
  * 3. Calculate zoom to fit content in viewport
- * 4. Cap zoom at maximum (200%)
- * 5. Calculate pan to center content
+ * 4. Clamp zoom between min (50%) and max (200%)
+ * 5. Calculate pan to center content (using clamped zoom)
  *
  * @param racks - Array of rack positions
  * @param viewportWidth - Width of the viewport in pixels
@@ -107,21 +113,38 @@ export function calculateFitAll(
 
 	const bounds = calculateRacksBoundingBox(racks);
 
-	// Add padding to content dimensions
-	const contentWidth = bounds.width + FIT_ALL_PADDING * 2;
-	const contentHeight = bounds.height + FIT_ALL_PADDING * 2;
+	// The actual visual content includes the rack-row's CSS padding
+	const visualContentWidth = bounds.width + RACK_ROW_PADDING * 2;
+	const visualContentHeight = bounds.height + RACK_ROW_PADDING * 2;
 
-	// Calculate zoom to fit content in viewport
-	const zoomX = viewportWidth / contentWidth;
-	const zoomY = viewportHeight / contentHeight;
+	// For zoom calculation, add extra visual margin (FIT_ALL_PADDING) around the content
+	const contentWithMarginWidth = visualContentWidth + FIT_ALL_PADDING * 2;
+	const contentWithMarginHeight = visualContentHeight + FIT_ALL_PADDING * 2;
 
-	// Use smaller zoom to ensure content fits, cap at max zoom
-	const zoom = Math.min(zoomX, zoomY, FIT_ALL_MAX_ZOOM);
+	// Calculate zoom to fit content with margin in viewport
+	const zoomX = viewportWidth / contentWithMarginWidth;
+	const zoomY = viewportHeight / contentWithMarginHeight;
 
-	// Calculate pan to center content in viewport
-	// Pan formula: (viewport - content*zoom) / 2 - bounds.origin*zoom
-	const panX = (viewportWidth - bounds.width * zoom) / 2 - bounds.x * zoom;
-	const panY = (viewportHeight - bounds.height * zoom) / 2 - bounds.y * zoom;
+	// Use smaller zoom to ensure content fits, clamp between min and max
+	const zoom = Math.max(FIT_ALL_MIN_ZOOM, Math.min(zoomX, zoomY, FIT_ALL_MAX_ZOOM));
+
+	// Calculate pan to center the visual content (rack-row) in viewport
+	const scaledContentWidth = visualContentWidth * zoom;
+	const scaledContentHeight = visualContentHeight * zoom;
+
+	// Pan formula: center the scaled content in the viewport
+	let panX = (viewportWidth - scaledContentWidth) / 2;
+	let panY = (viewportHeight - scaledContentHeight) / 2;
+
+	if (scaledContentWidth > viewportWidth) {
+		// Content wider than viewport - align to left edge with small padding
+		panX = FIT_ALL_PADDING;
+	}
+
+	if (scaledContentHeight > viewportHeight) {
+		// Content taller than viewport - align to top edge with small padding
+		panY = FIT_ALL_PADDING;
+	}
 
 	return { zoom, panX, panY };
 }
@@ -129,6 +152,7 @@ export function calculateFitAll(
 /**
  * Convert racks to RackPosition array for bounding box calculation.
  * Sorts racks by position and calculates x coordinates based on layout.
+ * Accounts for rack-row padding and actual rendered heights.
  *
  * @param racks - Array of racks from the layout store
  * @returns Array of RackPosition objects with calculated coordinates
@@ -139,15 +163,23 @@ export function racksToPositions(racks: Rack[]): RackPosition[] {
 	// Sort by position
 	const sorted = [...racks].sort((a, b) => a.position - b.position);
 
-	// Find max height for vertical alignment (racks align at bottom)
-	const maxHeight = Math.max(...sorted.map((r) => r.height * U_HEIGHT + NAME_HEIGHT));
+	// Calculate total rendered height
+	// SVG viewBoxHeight = rack.height * U_HEIGHT + RACK_PADDING
+	// View toggle is now inside the SVG, so no additional height needed
+	const getRackHeight = (rack: Rack) => rack.height * U_HEIGHT + RACK_PADDING;
 
-	let currentX = 0;
+	// Find max height for vertical alignment (racks align at bottom via CSS)
+	const maxHeight = Math.max(...sorted.map(getRackHeight));
+
+	// Account for rack-row padding
+	let currentX = RACK_ROW_PADDING;
+	const startY = RACK_ROW_PADDING;
+
 	return sorted.map((rack) => {
-		const height = rack.height * U_HEIGHT + NAME_HEIGHT;
+		const height = getRackHeight(rack);
 		const position: RackPosition = {
 			x: currentX,
-			y: maxHeight - height, // Align to bottom
+			y: startY + (maxHeight - height), // Align to bottom within padded area
 			width: RACK_WIDTH,
 			height
 		};

@@ -280,7 +280,7 @@ describe('Canvas Store', () => {
 	});
 
 	describe('smoothMoveTo', () => {
-		it('uses smooth zoom when reduced motion not preferred', () => {
+		it('zooms at origin then moves when reduced motion not preferred', () => {
 			const store = getCanvasStore();
 			const mockPanzoom = createMockPanzoom(1);
 
@@ -293,12 +293,14 @@ describe('Canvas Store', () => {
 			store.setPanzoomInstance(mockPanzoom as ReturnType<typeof import('panzoom').default>);
 			store.smoothMoveTo(100, 200, 1.5);
 
-			expect(mockPanzoom.smoothZoomAbs).toHaveBeenCalledWith(100, 200, 1.5);
+			// Should zoom at origin (0, 0) to avoid coordinate confusion
+			expect(mockPanzoom.smoothZoomAbs).toHaveBeenCalledWith(0, 0, 1.5);
+			// Note: moveTo is called async via setTimeout, so we can't test it here easily
 
 			vi.unstubAllGlobals();
 		});
 
-		it('uses instant zoom when reduced motion preferred', () => {
+		it('zooms at origin then moves when reduced motion preferred', () => {
 			const store = getCanvasStore();
 			const mockPanzoom = createMockPanzoom(1);
 
@@ -311,7 +313,8 @@ describe('Canvas Store', () => {
 			store.setPanzoomInstance(mockPanzoom as ReturnType<typeof import('panzoom').default>);
 			store.smoothMoveTo(100, 200, 1.5);
 
-			expect(mockPanzoom.zoomAbs).toHaveBeenCalledWith(100, 200, 1.5);
+			// Should zoom at origin (0, 0) then apply pan offset
+			expect(mockPanzoom.zoomAbs).toHaveBeenCalledWith(0, 0, 1.5);
 			expect(mockPanzoom.moveTo).toHaveBeenCalledWith(100, 200);
 
 			vi.unstubAllGlobals();

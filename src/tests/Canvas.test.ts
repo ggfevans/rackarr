@@ -142,9 +142,9 @@ describe('Canvas Component', () => {
 
 			const { container } = render(Canvas);
 
-			// The selected rack should have selection outline
-			const selectionOutline = container.querySelector('.rack-selection');
-			expect(selectionOutline).toBeInTheDocument();
+			// The selected rack should have aria-selected=true (CSS applies outline)
+			const selectedRack = container.querySelector('.rack-container[aria-selected="true"]');
+			expect(selectedRack).toBeInTheDocument();
 		});
 	});
 

@@ -126,8 +126,9 @@ describe('Rack SVG Component', () => {
 				}
 			});
 
-			const selectionOutline = container.querySelector('.rack-selection');
-			expect(selectionOutline).toBeInTheDocument();
+			// Selection is now indicated via aria-selected on the container (CSS outline applied)
+			const rackContainer = container.querySelector('.rack-container');
+			expect(rackContainer).toHaveAttribute('aria-selected', 'true');
 		});
 
 		it('hides selection outline when selected=false', () => {
@@ -139,8 +140,9 @@ describe('Rack SVG Component', () => {
 				}
 			});
 
-			const selectionOutline = container.querySelector('.rack-selection');
-			expect(selectionOutline).not.toBeInTheDocument();
+			// Selection is now indicated via aria-selected on the container
+			const rackContainer = container.querySelector('.rack-container');
+			expect(rackContainer).toHaveAttribute('aria-selected', 'false');
 		});
 	});
 

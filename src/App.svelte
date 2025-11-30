@@ -282,6 +282,7 @@
 			open={uiStore.leftDrawerOpen}
 			title="Device Library"
 			showClose={false}
+			showHeader={false}
 			onclose={handleClosePalette}
 		>
 			<DevicePalette onadddevice={handleAddDevice} />

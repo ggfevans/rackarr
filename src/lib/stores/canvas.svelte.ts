@@ -6,9 +6,10 @@
 import type panzoom from 'panzoom';
 import type { Rack } from '$lib/types';
 import { calculateFitAll, racksToPositions } from '$lib/utils/canvas';
+import { debug } from '$lib/utils/debug';
 
 // Panzoom constants
-export const ZOOM_MIN = 0.5; // 50%
+export const ZOOM_MIN = 0.25; // 25% - allows fitting 6+ large racks
 export const ZOOM_MAX = 2; // 200%
 export const ZOOM_STEP = 0.25; // 25%
 
@@ -18,6 +19,7 @@ type PanzoomInstance = ReturnType<typeof panzoom>;
 let panzoomInstance = $state<PanzoomInstance | null>(null);
 let currentZoom = $state(1); // 1 = 100%
 let canvasElement = $state<HTMLElement | null>(null);
+let isPanning = $state(false);
 
 // Derived values
 const canZoomIn = $derived(currentZoom < ZOOM_MAX);
@@ -34,6 +36,7 @@ export function resetCanvasStore(): void {
 	panzoomInstance = null;
 	currentZoom = 1;
 	canvasElement = null;
+	isPanning = false;
 }
 
 /**
@@ -57,6 +60,9 @@ export function getCanvasStore() {
 		},
 		get hasPanzoom() {
 			return panzoomInstance !== null;
+		},
+		get isPanning() {
+			return isPanning;
 		},
 
 		// Actions
@@ -84,6 +90,17 @@ function setPanzoomInstance(instance: PanzoomInstance): void {
 	instance.on('zoom', () => {
 		const transform = instance.getTransform();
 		currentZoom = transform.scale;
+	});
+
+	// Track panning state to prevent accidental selection after pan
+	instance.on('panstart', () => {
+		isPanning = true;
+	});
+	instance.on('panend', () => {
+		// Small delay to let click event fire first, then reset
+		setTimeout(() => {
+			isPanning = false;
+		}, 50);
 	});
 
 	// Initialize currentZoom from panzoom
@@ -176,12 +193,22 @@ function smoothMoveTo(x: number, y: number, scale: number): void {
 	// Check for reduced motion preference
 	const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
+	// First apply zoom, then apply pan offset
+	// Note: zoomAbs takes screen coords for zoom center, not pan offset
+	// So we zoom at origin (0,0) then apply the pan
 	if (prefersReducedMotion) {
-		panzoomInstance.zoomAbs(x, y, scale);
+		panzoomInstance.zoomAbs(0, 0, scale);
 		panzoomInstance.moveTo(x, y);
 	} else {
-		// Use panzoom's smooth zoom
-		panzoomInstance.smoothZoomAbs(x, y, scale);
+		// For smooth animation, we need to zoom then pan
+		// Use smooth zoom at origin
+		panzoomInstance.smoothZoomAbs(0, 0, scale);
+		// Wait a tick for zoom to start, then move
+		setTimeout(() => {
+			if (panzoomInstance) {
+				panzoomInstance.moveTo(x, y);
+			}
+		}, 0);
 	}
 }
 
@@ -206,6 +233,27 @@ function fitAll(racks: Rack[]): void {
 	const rackPositions = racksToPositions(racks);
 	const { zoom, panX, panY } = calculateFitAll(rackPositions, viewportWidth, viewportHeight);
 
-	// Apply the transform with animation
-	smoothMoveTo(panX, panY, zoom);
+	debug.group('Fit All Calculation');
+	debug.log('Viewport:', { width: viewportWidth, height: viewportHeight });
+	debug.log('Rack positions:', rackPositions);
+	debug.log('Calculated:', { zoom, panX, panY });
+	debug.log('Current transform before:', panzoomInstance.getTransform());
+	debug.groupEnd();
+
+	// Check for reduced motion preference
+	const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+	// Apply zoom first, then pan
+	// This ensures the pan offset is correct for the zoom level
+	if (prefersReducedMotion) {
+		// Instant: zoom at origin (doesn't matter where we zoom since we're moving after)
+		panzoomInstance.zoomAbs(0, 0, zoom);
+		panzoomInstance.moveTo(panX, panY);
+	} else {
+		// Smooth: zoom at origin then smoothly pan
+		panzoomInstance.zoomAbs(0, 0, zoom);
+		panzoomInstance.moveTo(panX, panY);
+	}
+
+	debug.log('Transform after fitAll:', panzoomInstance.getTransform());
 }

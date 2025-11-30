@@ -76,13 +76,12 @@ describe('calculateFitAll', () => {
 		expect(result.zoom).toBe(2);
 	});
 
-	it('does not go below minimum zoom for large content', () => {
-		// Very large rack that would require less than min zoom
+	it('clamps zoom to minimum (25%) for large content', () => {
+		// Very large rack that would require less than min zoom (0.25)
 		const racks = [{ x: 0, y: 0, width: 4000, height: 3000 }];
 		const result = calculateFitAll(racks, 800, 600);
-		expect(result.zoom).toBeGreaterThan(0);
-		// Should be small but still calculated correctly
-		expect(result.zoom).toBeLessThan(1);
+		// Should be clamped to minimum zoom
+		expect(result.zoom).toBe(0.25);
 	});
 
 	it('centers content in viewport horizontally', () => {

@@ -296,9 +296,15 @@ function deleteDeviceFromLibrary(id: string): void {
  * @param rackId - Target rack ID
  * @param libraryId - Device library ID
  * @param position - U position (bottom of device)
+ * @param face - Optional face assignment (defaults to DEFAULT_DEVICE_FACE)
  * @returns true if placed successfully, false otherwise
  */
-function placeDevice(rackId: string, libraryId: string, position: number): boolean {
+function placeDevice(
+	rackId: string,
+	libraryId: string,
+	position: number,
+	face: 'front' | 'rear' | 'both' = DEFAULT_DEVICE_FACE
+): boolean {
 	const rackIndex = layout.racks.findIndex((r) => r.id === rackId);
 	if (rackIndex === -1) return false;
 
@@ -314,7 +320,7 @@ function placeDevice(rackId: string, libraryId: string, position: number): boole
 	// Add device to rack
 	const updatedRack = {
 		...rack,
-		devices: [...rack.devices, { libraryId, position, face: DEFAULT_DEVICE_FACE }]
+		devices: [...rack.devices, { libraryId, position, face }]
 	};
 
 	layout.racks = layout.racks.map((r) => (r.id === rackId ? updatedRack : r));

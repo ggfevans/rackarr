@@ -423,6 +423,18 @@ describe('Layout Store', () => {
 			expect(store.racks[0]!.devices[0]!.face).toBe('front');
 		});
 
+		it('places device with specified rear face', () => {
+			const result = store.placeDevice(rackId, device.id, 5, 'rear');
+			expect(result).toBe(true);
+			expect(store.racks[0]!.devices[0]!.face).toBe('rear');
+		});
+
+		it('places device with specified both face', () => {
+			const result = store.placeDevice(rackId, device.id, 5, 'both');
+			expect(result).toBe(true);
+			expect(store.racks[0]!.devices[0]!.face).toBe('both');
+		});
+
 		it('returns false for invalid position (collision)', () => {
 			store.placeDevice(rackId, device.id, 5);
 

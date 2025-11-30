@@ -6,7 +6,7 @@
 import type { Layout, Rack, Device, DeviceCategory } from '$lib/types';
 import { DEFAULT_DEVICE_FACE } from '$lib/types/constants';
 import { createLayout } from '$lib/utils/serialization';
-import { createRack } from '$lib/utils/rack';
+import { createRack, duplicateRack as duplicateRackUtil } from '$lib/utils/rack';
 import { generateId } from '$lib/utils/device';
 import { canPlaceDevice, findCollisions } from '$lib/utils/collision';
 
@@ -68,6 +68,7 @@ export function getLayoutStore() {
 		updateRackView,
 		deleteRack,
 		reorderRacks,
+		duplicateRack,
 
 		// Device library actions
 		addDeviceToLibrary,
@@ -201,6 +202,43 @@ function reorderRacks(fromIndex: number, toIndex: number): void {
 	});
 
 	isDirty = true;
+}
+
+/**
+ * Duplicate a rack with all its devices
+ * @param id - Rack ID to duplicate
+ * @returns Success object or error message
+ */
+function duplicateRack(id: string): { error?: string } {
+	// Check max racks limit
+	if (layout.racks.length >= MAX_RACKS) {
+		return { error: 'Maximum of 6 racks allowed' };
+	}
+
+	// Find the rack to duplicate
+	const originalRack = layout.racks.find((r) => r.id === id);
+	if (!originalRack) {
+		return { error: 'Rack not found' };
+	}
+
+	// Create duplicate using utility function
+	const duplicate = duplicateRackUtil(originalRack);
+
+	// Insert duplicate after original and update positions
+	const insertPosition = originalRack.position + 1;
+	const updatedRacks = layout.racks.map((rack) => {
+		// Shift positions of racks after the insertion point
+		if (rack.position >= insertPosition) {
+			return { ...rack, position: rack.position + 1 };
+		}
+		return rack;
+	});
+
+	// Add the duplicate at the insertion position
+	layout.racks = [...updatedRacks, { ...duplicate, position: insertPosition }];
+	isDirty = true;
+
+	return {};
 }
 
 /**

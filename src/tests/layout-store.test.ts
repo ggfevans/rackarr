@@ -566,6 +566,31 @@ describe('Layout Store', () => {
 		});
 	});
 
+	describe('duplicateRack', () => {
+		it('duplicates rack and adds to layout', () => {
+			const store = getLayoutStore();
+			const rack = store.addRack('Test Rack', 42);
+			expect(store.racks).toHaveLength(1);
+
+			store.duplicateRack(rack!.id);
+			expect(store.racks).toHaveLength(2);
+		});
+
+		it('returns error when 6 racks exist', () => {
+			const store = getLayoutStore();
+			// Create 6 racks (maximum allowed)
+			for (let i = 0; i < 6; i++) {
+				store.addRack(`Rack ${i}`, 42);
+			}
+			expect(store.racks).toHaveLength(6);
+
+			// Try to duplicate when at max
+			const result = store.duplicateRack(store.racks[0]!.id);
+			expect(result.error).toBe('Maximum of 6 racks allowed');
+			expect(store.racks).toHaveLength(6);
+		});
+	});
+
 	describe('resetLayout', () => {
 		it('resets to initial state', () => {
 			const store = getLayoutStore();

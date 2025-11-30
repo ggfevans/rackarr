@@ -7,7 +7,7 @@
 	import { getLayoutStore } from '$lib/stores/layout.svelte';
 	import { getSelectionStore } from '$lib/stores/selection.svelte';
 	import { getUIStore } from '$lib/stores/ui.svelte';
-	import { showToast } from '$lib/stores/toast.svelte';
+	import { getToastStore } from '$lib/stores/toast.svelte';
 
 	interface Props {
 		onsave?: () => void;
@@ -23,6 +23,7 @@
 	const layoutStore = getLayoutStore();
 	const selectionStore = getSelectionStore();
 	const uiStore = getUIStore();
+	const toastStore = getToastStore();
 
 	// Define all shortcuts
 	function getShortcuts(): ShortcutHandler[] {
@@ -214,7 +215,7 @@
 
 		const result = layoutStore.duplicateRack(selectionStore.selectedId);
 		if (result.error) {
-			showToast(result.error, 'error');
+			toastStore.showToast(result.error, 'error');
 		}
 	}
 

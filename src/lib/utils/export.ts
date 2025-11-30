@@ -9,7 +9,6 @@ const U_HEIGHT = 22;
 const RACK_WIDTH = 220;
 const RAIL_WIDTH = 17;
 const RACK_PADDING = 4;
-const NAME_HEIGHT = 28;
 const RACK_GAP = 40;
 const LEGEND_PADDING = 20;
 const LEGEND_ITEM_HEIGHT = 24;
@@ -51,14 +50,13 @@ export function generateExportSVG(
 	const totalRackWidth = racks.length * RACK_WIDTH + (racks.length - 1) * RACK_GAP;
 
 	const rackAreaHeight = maxRackHeight * U_HEIGHT + RACK_PADDING * 2;
-	const nameAreaHeight = includeNames ? NAME_HEIGHT : 0;
 	const legendWidth = includeLegend ? 180 : 0;
 	const legendHeight = includeLegend
 		? usedDevices.length * LEGEND_ITEM_HEIGHT + LEGEND_PADDING * 2
 		: 0;
 
 	const contentWidth = totalRackWidth + (includeLegend ? LEGEND_PADDING + legendWidth : 0);
-	const contentHeight = Math.max(rackAreaHeight + nameAreaHeight, legendHeight);
+	const contentHeight = Math.max(rackAreaHeight, legendHeight);
 
 	const svgWidth = contentWidth + EXPORT_PADDING * 2;
 	const svgHeight = contentHeight + EXPORT_PADDING * 2;
@@ -217,12 +215,12 @@ export function generateExportSVG(
 			rackGroup.appendChild(deviceName);
 		}
 
-		// Rack name
+		// Rack name (positioned above rack)
 		if (includeNames) {
 			const nameText = document.createElementNS('http://www.w3.org/2000/svg', 'text');
 			nameText.setAttribute('class', 'rack-name');
 			nameText.setAttribute('x', String(RACK_WIDTH / 2));
-			nameText.setAttribute('y', String(rackHeight + RACK_PADDING + NAME_HEIGHT / 2 + 4));
+			nameText.setAttribute('y', '2');
 			nameText.setAttribute('fill', textColor);
 			nameText.setAttribute('font-size', '13');
 			nameText.setAttribute('text-anchor', 'middle');

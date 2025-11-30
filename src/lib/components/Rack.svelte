@@ -67,11 +67,10 @@
 	const RACK_WIDTH = 220;
 	const RAIL_WIDTH = 17;
 	const RACK_PADDING = 4;
-	const NAME_HEIGHT = 28;
 
 	// Calculated dimensions
 	const totalHeight = $derived(rack.height * U_HEIGHT);
-	const viewBoxHeight = $derived(totalHeight + NAME_HEIGHT);
+	const viewBoxHeight = $derived(totalHeight + RACK_PADDING);
 	const interiorWidth = $derived(RACK_WIDTH - RAIL_WIDTH * 2);
 
 	// Drop preview state
@@ -426,8 +425,8 @@
 			/>
 		{/if}
 
-		<!-- Rack name below -->
-		<text x={RACK_WIDTH / 2} y={totalHeight + RACK_PADDING + NAME_HEIGHT / 2 + 4} class="rack-name">
+		<!-- Rack name above -->
+		<text x={RACK_WIDTH / 2} y="2" class="rack-name" text-anchor="middle">
 			{rack.name}
 		</text>
 	</svg>

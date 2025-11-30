@@ -74,7 +74,7 @@ describe('Rack SVG Component', () => {
 	});
 
 	describe('Rack Name', () => {
-		it('displays rack name below the rack', () => {
+		it('displays rack name', () => {
 			render(Rack, {
 				props: {
 					rack: mockRack,
@@ -84,6 +84,35 @@ describe('Rack SVG Component', () => {
 			});
 
 			expect(screen.getByText('Test Rack')).toBeInTheDocument();
+		});
+
+		it('positions title above rack body', () => {
+			const { container } = render(Rack, {
+				props: {
+					rack: mockRack,
+					deviceLibrary: mockDeviceLibrary,
+					selected: false
+				}
+			});
+
+			const title = container.querySelector('.rack-name');
+			const rackInterior = container.querySelector('.rack-interior');
+			const titleY = parseFloat(title?.getAttribute('y') ?? '0');
+			const interiorY = parseFloat(rackInterior?.getAttribute('y') ?? '0');
+			expect(titleY).toBeLessThan(interiorY);
+		});
+
+		it('centers title horizontally', () => {
+			const { container } = render(Rack, {
+				props: {
+					rack: mockRack,
+					deviceLibrary: mockDeviceLibrary,
+					selected: false
+				}
+			});
+
+			const title = container.querySelector('.rack-name');
+			expect(title?.getAttribute('text-anchor')).toBe('middle');
 		});
 	});
 

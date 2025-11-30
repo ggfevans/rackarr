@@ -112,25 +112,43 @@ export function generateExportSVG(
 		// Rack interior
 		const interior = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
 		interior.setAttribute('x', String(RAIL_WIDTH));
-		interior.setAttribute('y', String(RACK_PADDING));
+		interior.setAttribute('y', String(RACK_PADDING + RAIL_WIDTH));
 		interior.setAttribute('width', String(RACK_WIDTH - RAIL_WIDTH * 2));
 		interior.setAttribute('height', String(rackHeight));
 		interior.setAttribute('fill', rackInterior);
 		rackGroup.appendChild(interior);
 
-		// Left rail
+		// Top bar (horizontal)
+		const topBar = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+		topBar.setAttribute('x', '0');
+		topBar.setAttribute('y', String(RACK_PADDING));
+		topBar.setAttribute('width', String(RACK_WIDTH));
+		topBar.setAttribute('height', String(RAIL_WIDTH));
+		topBar.setAttribute('fill', rackRail);
+		rackGroup.appendChild(topBar);
+
+		// Bottom bar (horizontal)
+		const bottomBar = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+		bottomBar.setAttribute('x', '0');
+		bottomBar.setAttribute('y', String(RACK_PADDING + RAIL_WIDTH + rackHeight));
+		bottomBar.setAttribute('width', String(RACK_WIDTH));
+		bottomBar.setAttribute('height', String(RAIL_WIDTH));
+		bottomBar.setAttribute('fill', rackRail);
+		rackGroup.appendChild(bottomBar);
+
+		// Left rail (vertical)
 		const leftRail = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
 		leftRail.setAttribute('x', '0');
-		leftRail.setAttribute('y', String(RACK_PADDING));
+		leftRail.setAttribute('y', String(RACK_PADDING + RAIL_WIDTH));
 		leftRail.setAttribute('width', String(RAIL_WIDTH));
 		leftRail.setAttribute('height', String(rackHeight));
 		leftRail.setAttribute('fill', rackRail);
 		rackGroup.appendChild(leftRail);
 
-		// Right rail
+		// Right rail (vertical)
 		const rightRail = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
 		rightRail.setAttribute('x', String(RACK_WIDTH - RAIL_WIDTH));
-		rightRail.setAttribute('y', String(RACK_PADDING));
+		rightRail.setAttribute('y', String(RACK_PADDING + RAIL_WIDTH));
 		rightRail.setAttribute('width', String(RAIL_WIDTH));
 		rightRail.setAttribute('height', String(rackHeight));
 		rightRail.setAttribute('fill', rackRail);
@@ -139,7 +157,7 @@ export function generateExportSVG(
 		// Grid lines
 		for (let i = 0; i <= rack.height; i++) {
 			const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
-			const y = i * U_HEIGHT + RACK_PADDING;
+			const y = i * U_HEIGHT + RACK_PADDING + RAIL_WIDTH;
 			line.setAttribute('x1', String(RAIL_WIDTH));
 			line.setAttribute('y1', String(y));
 			line.setAttribute('x2', String(RACK_WIDTH - RAIL_WIDTH));

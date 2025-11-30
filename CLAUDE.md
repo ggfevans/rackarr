@@ -20,6 +20,24 @@ Full planning documentation is symlinked in `.claude/context/`:
 
 **Read `.claude/context/CLAUDE-planning.md` for complete instructions including scope guard.**
 
+## Autonomous Mode
+
+When given an overnight execution prompt:
+
+- You have explicit permission to work without pausing between prompts
+- Do NOT ask for review or confirmation mid-session
+- Do NOT pause to summarise progress until complete
+- Continue until: all prompts done, test failure after 2 attempts, or genuine ambiguity requiring human decision
+- I will review asynchronously via git commits and session-report.md
+
+**Stopping conditions (ONLY these):**
+
+1. All prompts in `prompt_plan.md` marked complete
+2. Test failure you cannot resolve after 2 attempts
+3. Ambiguity that genuinely requires human input (document in `blockers.md`)
+
+If none of those conditions are met, proceed immediately to the next prompt.
+
 ---
 
 ## Quick Reference

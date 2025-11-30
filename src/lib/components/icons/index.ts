@@ -11,3 +11,4 @@ export { default as IconSun } from './IconSun.svelte';
 export { default as IconMoon } from './IconMoon.svelte';
 export { default as IconHelp } from './IconHelp.svelte';
 export { default as IconFitAll } from './IconFitAll.svelte';
+export { default as IconGrip } from './IconGrip.svelte';

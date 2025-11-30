@@ -9,7 +9,7 @@
 	import { getSelectionStore } from '$lib/stores/selection.svelte';
 	import { getUIStore } from '$lib/stores/ui.svelte';
 	import { COMMON_RACK_HEIGHTS } from '$lib/types/constants';
-	import type { Rack, Device, PlacedDevice } from '$lib/types';
+	import type { Rack, Device, PlacedDevice, DeviceFace } from '$lib/types';
 
 	const layoutStore = getLayoutStore();
 	const selectionStore = getSelectionStore();
@@ -112,6 +112,17 @@
 				selectionStore.selectedDeviceIndex
 			);
 			selectionStore.clearSelection();
+		}
+	}
+
+	// Update device face
+	function handleFaceChange(face: DeviceFace) {
+		if (selectionStore.selectedRackId !== null && selectionStore.selectedDeviceIndex !== null) {
+			layoutStore.updateDeviceFace(
+				selectionStore.selectedRackId,
+				selectionStore.selectedDeviceIndex,
+				face
+			);
 		}
 	}
 
@@ -230,6 +241,43 @@
 					</span>
 				</div>
 			</div>
+
+			<!-- Face selector -->
+			<fieldset class="face-selector" aria-label="Mounted face">
+				<legend>Mounted Face</legend>
+				<div class="radio-group">
+					<label>
+						<input
+							type="radio"
+							name="device-face"
+							value="front"
+							checked={selectedDeviceInfo.placedDevice.face === 'front'}
+							onchange={() => handleFaceChange('front')}
+						/>
+						Front
+					</label>
+					<label>
+						<input
+							type="radio"
+							name="device-face"
+							value="rear"
+							checked={selectedDeviceInfo.placedDevice.face === 'rear'}
+							onchange={() => handleFaceChange('rear')}
+						/>
+						Rear
+					</label>
+					<label>
+						<input
+							type="radio"
+							name="device-face"
+							value="both"
+							checked={selectedDeviceInfo.placedDevice.face === 'both'}
+							onchange={() => handleFaceChange('both')}
+						/>
+						Both (full-depth)
+					</label>
+				</div>
+			</fieldset>
 
 			{#if selectedDeviceInfo.device.notes}
 				<div class="notes-section">
@@ -411,5 +459,42 @@
 
 	.btn-danger:hover {
 		background: var(--colour-danger-hover, #b91c1c);
+	}
+
+	.face-selector {
+		border: 1px solid var(--colour-border);
+		border-radius: 4px;
+		padding: 12px;
+		margin: 0;
+	}
+
+	.face-selector legend {
+		font-size: 12px;
+		font-weight: 600;
+		color: var(--colour-text-secondary);
+		text-transform: uppercase;
+		letter-spacing: 0.5px;
+		padding: 0 4px;
+	}
+
+	.radio-group {
+		display: flex;
+		flex-direction: column;
+		gap: 8px;
+	}
+
+	.radio-group label {
+		display: flex;
+		align-items: center;
+		gap: 8px;
+		font-size: 14px;
+		color: var(--colour-text);
+		cursor: pointer;
+	}
+
+	.radio-group input[type='radio'] {
+		width: 16px;
+		height: 16px;
+		cursor: pointer;
 	}
 </style>

@@ -79,6 +79,7 @@ export function getLayoutStore() {
 		moveDevice,
 		moveDeviceToRack,
 		removeDeviceFromRack,
+		updateDeviceFace,
 
 		// Dirty tracking
 		markDirty,
@@ -400,6 +401,29 @@ function removeDeviceFromRack(rackId: string, deviceIndex: number): void {
 	if (deviceIndex < 0 || deviceIndex >= rack.devices.length) return;
 
 	const updatedDevices = rack.devices.filter((_, idx) => idx !== deviceIndex);
+	layout.racks = layout.racks.map((r) => (r.id === rackId ? { ...r, devices: updatedDevices } : r));
+	isDirty = true;
+}
+
+/**
+ * Update a device's face property
+ * @param rackId - Rack ID
+ * @param deviceIndex - Index of device in rack's devices array
+ * @param face - New face value ('front' | 'rear' | 'both')
+ */
+function updateDeviceFace(
+	rackId: string,
+	deviceIndex: number,
+	face: 'front' | 'rear' | 'both'
+): void {
+	const rackIndex = layout.racks.findIndex((r) => r.id === rackId);
+	if (rackIndex === -1) return;
+
+	const rack = layout.racks[rackIndex]!;
+	if (deviceIndex < 0 || deviceIndex >= rack.devices.length) return;
+
+	const updatedDevices = rack.devices.map((d, idx) => (idx === deviceIndex ? { ...d, face } : d));
+
 	layout.racks = layout.racks.map((r) => (r.id === rackId ? { ...r, devices: updatedDevices } : r));
 	isDirty = true;
 }

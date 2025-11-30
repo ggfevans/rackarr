@@ -255,6 +255,57 @@ describe('EditPanel Component', () => {
 			expect(screen.getByRole('button', { name: /remove from rack/i })).toBeInTheDocument();
 		});
 	});
+
+	describe('Device face assignment', () => {
+		it('shows face selector when device selected', () => {
+			const layoutStore = getLayoutStore();
+			const selectionStore = getSelectionStore();
+
+			const rack = layoutStore.addRack('My Rack', 24);
+			const device = layoutStore.addDeviceToLibrary({
+				name: 'Test Server',
+				height: 2,
+				category: 'server',
+				colour: '#4A90D9'
+			});
+			layoutStore.placeDevice(rack!.id, device.id, 1);
+			selectionStore.selectDevice(rack!.id, 0, device.id);
+
+			const { getByRole } = render(EditPanel);
+			expect(getByRole('group', { name: /mounted face/i })).toBeTruthy();
+		});
+
+		it('has three radio options', () => {
+			const layoutStore = getLayoutStore();
+			const selectionStore = getSelectionStore();
+
+			const rack = layoutStore.addRack('My Rack', 24);
+			const device = layoutStore.addDeviceToLibrary({
+				name: 'Test Server',
+				height: 2,
+				category: 'server',
+				colour: '#4A90D9'
+			});
+			layoutStore.placeDevice(rack!.id, device.id, 1);
+			selectionStore.selectDevice(rack!.id, 0, device.id);
+
+			const { getByLabelText } = render(EditPanel);
+			expect(getByLabelText('Front')).toBeTruthy();
+			expect(getByLabelText('Rear')).toBeTruthy();
+			expect(getByLabelText('Both (full-depth)')).toBeTruthy();
+		});
+
+		it('does not show face selector for rack selection', () => {
+			const layoutStore = getLayoutStore();
+			const selectionStore = getSelectionStore();
+
+			const rack = layoutStore.addRack('My Rack', 24);
+			selectionStore.selectRack(rack!.id);
+
+			const { queryByRole } = render(EditPanel);
+			expect(queryByRole('group', { name: /mounted face/i })).toBeNull();
+		});
+	});
 });
 
 describe('ColourSwatch Component', () => {

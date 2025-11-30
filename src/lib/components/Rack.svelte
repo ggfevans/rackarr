@@ -460,11 +460,11 @@
 			{rack.name}
 		</text>
 
-		<!-- View toggle in top bar on the right -->
+		<!-- View toggle in top bar (centered) -->
 		<foreignObject
-			x={RACK_WIDTH - 58}
+			x="0"
 			y={RACK_PADDING}
-			width="56"
+			width={RACK_WIDTH}
 			height={RAIL_WIDTH}
 			class="view-toggle-overlay"
 		>
@@ -494,17 +494,20 @@
 	}
 
 	.view-toggle-overlay {
-		pointer-events: none;
+		overflow: visible;
 	}
 
 	.view-toggle-wrapper {
-		pointer-events: all;
-		opacity: 0.9;
-		transition: opacity 0.15s ease;
+		width: 100%;
+		height: 100%;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		pointer-events: none;
 	}
 
-	.view-toggle-wrapper:hover {
-		opacity: 1;
+	.view-toggle-wrapper > :global(*) {
+		pointer-events: all;
 	}
 
 	.rack-drag-handle {

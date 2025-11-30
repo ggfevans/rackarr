@@ -46,15 +46,16 @@
 	}
 
 	.toggle-button {
-		padding: 4px 12px;
+		padding: 1px 8px;
 		border: none;
 		background: transparent;
 		color: var(--colour-text);
-		font-size: 12px;
+		font-size: 11px;
 		font-weight: 500;
 		cursor: pointer;
 		transition: all 0.15s ease;
 		position: relative;
+		line-height: 1.2;
 	}
 
 	.toggle-button:not(:last-child) {

@@ -95,3 +95,18 @@ export function isUAvailable(rack: Rack, deviceLibrary: Device[], uPosition: num
 	const occupied = getOccupiedUs(rack, deviceLibrary);
 	return !occupied.has(uPosition);
 }
+
+/**
+ * Create a deep copy of a rack with a new ID
+ * @param rack - The rack to duplicate
+ * @returns A new rack with a new ID, copied name, and copied devices
+ */
+export function duplicateRack(rack: Rack): Rack {
+	return {
+		...rack,
+		id: generateId(),
+		name: `${rack.name} (Copy)`,
+		position: rack.position + 1,
+		devices: rack.devices.map((device) => ({ ...device }))
+	};
+}

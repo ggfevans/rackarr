@@ -1,5 +1,11 @@
 import { describe, it, expect } from 'vitest';
-import { createRack, validateRack, getOccupiedUs, isUAvailable } from '$lib/utils/rack';
+import {
+	createRack,
+	validateRack,
+	getOccupiedUs,
+	isUAvailable,
+	duplicateRack
+} from '$lib/utils/rack';
 import type { Device, Rack } from '$lib/types';
 
 // Helper to create test devices
@@ -10,6 +16,20 @@ function createTestDevice(id: string, height: number): Device {
 		height,
 		colour: '#4A90D9',
 		category: 'server'
+	};
+}
+
+// Helper to create mock racks for testing
+function createMockRack(overrides: Partial<Rack> = {}): Rack {
+	return {
+		id: 'rack-1',
+		name: 'Test Rack',
+		height: 42,
+		width: 19,
+		position: 0,
+		view: 'front',
+		devices: [],
+		...overrides
 	};
 }
 
@@ -266,6 +286,46 @@ describe('Rack Utilities', () => {
 			expect(isUAvailable(rack, [device], 1)).toBe(true);
 			expect(isUAvailable(rack, [device], 4)).toBe(true);
 			expect(isUAvailable(rack, [device], 7)).toBe(true);
+		});
+	});
+
+	describe('duplicateRack', () => {
+		it('creates new rack with different ID', () => {
+			const original = createMockRack({ id: 'rack-1' });
+			const copy = duplicateRack(original);
+			expect(copy.id).not.toBe(original.id);
+		});
+
+		it('appends (Copy) to name', () => {
+			const original = createMockRack({ name: 'Main Rack' });
+			const copy = duplicateRack(original);
+			expect(copy.name).toBe('Main Rack (Copy)');
+		});
+
+		it('preserves rack properties including view', () => {
+			const original = createMockRack({ height: 42, view: 'rear' });
+			const copy = duplicateRack(original);
+			expect(copy.height).toBe(42);
+			expect(copy.view).toBe('rear');
+		});
+
+		it('copies all devices preserving positions and faces', () => {
+			const original = createMockRack({
+				devices: [
+					{ libraryId: 'lib-1', position: 1, face: 'front' },
+					{ libraryId: 'lib-2', position: 10, face: 'both' }
+				]
+			});
+			const copy = duplicateRack(original);
+			expect(copy.devices).toHaveLength(2);
+			expect(copy.devices[0].position).toBe(1);
+			expect(copy.devices[1].face).toBe('both');
+		});
+
+		it('positions copy after original', () => {
+			const original = createMockRack({ position: 2 });
+			const copy = duplicateRack(original);
+			expect(copy.position).toBe(3);
 		});
 	});
 });

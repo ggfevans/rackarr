@@ -170,7 +170,7 @@ export function generateExportSVG(
 		// Mounting holes on right rail (3 per U)
 		const holeColor = isDark ? '#505050' : '#a0a0a0';
 		for (let i = 0; i < rack.height; i++) {
-			const baseY = i * U_HEIGHT + RACK_PADDING + 4;
+			const baseY = i * U_HEIGHT + RACK_PADDING + RAIL_WIDTH + 4;
 			const holeX = RACK_WIDTH - RAIL_WIDTH / 2;
 
 			for (const offsetY of [0, 7, 14]) {
@@ -186,7 +186,7 @@ export function generateExportSVG(
 		// U labels on left rail
 		for (let i = 0; i < rack.height; i++) {
 			const uNumber = rack.height - i;
-			const labelY = i * U_HEIGHT + U_HEIGHT / 2 + RACK_PADDING;
+			const labelY = i * U_HEIGHT + U_HEIGHT / 2 + RACK_PADDING + RAIL_WIDTH;
 
 			const label = document.createElementNS('http://www.w3.org/2000/svg', 'text');
 			label.setAttribute('x', String(RAIL_WIDTH / 2));

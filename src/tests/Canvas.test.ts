@@ -42,36 +42,29 @@ describe('Canvas Component', () => {
 		});
 	});
 
+	// Note: Multi-rack rendering tests updated for single-rack mode (v0.1.1)
 	describe('Rack Rendering', () => {
-		it('renders correct number of racks', () => {
+		it('renders single rack', () => {
 			const layoutStore = getLayoutStore();
-			layoutStore.addRack('Rack 1', 12);
-			layoutStore.addRack('Rack 2', 18);
-			layoutStore.addRack('Rack 3', 24);
+			layoutStore.addRack('Test Rack', 42);
 
 			const { container } = render(Canvas);
 
-			// Each rack should have an SVG element
+			// Should have exactly one rack container
 			const rackContainers = container.querySelectorAll('.rack-container');
-			expect(rackContainers.length).toBe(3);
+			expect(rackContainers.length).toBe(1);
 		});
 
-		it('renders racks in position order', () => {
+		it('renders rack with correct name', () => {
 			const layoutStore = getLayoutStore();
-			layoutStore.addRack('First Rack', 12);
-			layoutStore.addRack('Second Rack', 18);
-			layoutStore.addRack('Third Rack', 24);
+			layoutStore.addRack('My Server Rack', 42);
 
 			render(Canvas);
 
-			// Rack names should appear in order
-			const rackNames = screen.getAllByText(/Rack$/);
-			expect(rackNames[0]).toHaveTextContent('First Rack');
-			expect(rackNames[1]).toHaveTextContent('Second Rack');
-			expect(rackNames[2]).toHaveTextContent('Third Rack');
+			expect(screen.getByText('My Server Rack')).toBeInTheDocument();
 		});
 
-		it('hides WelcomeScreen when racks exist', () => {
+		it('hides WelcomeScreen when rack exists', () => {
 			const layoutStore = getLayoutStore();
 			layoutStore.addRack('Test Rack', 12);
 
@@ -82,32 +75,27 @@ describe('Canvas Component', () => {
 		});
 	});
 
+	// Note: Layout tests updated for single-rack mode (v0.1.1)
 	describe('Layout', () => {
-		it('bottom-aligns racks (uses flex-end)', () => {
+		it('renders canvas container', () => {
 			const layoutStore = getLayoutStore();
-			layoutStore.addRack('Short Rack', 12);
-			layoutStore.addRack('Tall Rack', 42);
+			layoutStore.addRack('Test Rack', 42);
 
 			const { container } = render(Canvas);
 
 			const canvas = container.querySelector('.canvas');
 			expect(canvas).toBeInTheDocument();
-
-			// Canvas should have the class that applies flex-end alignment
 			expect(canvas?.classList.contains('canvas')).toBe(true);
 		});
 
-		it('has horizontal scroll enabled', () => {
+		it('has canvas element when rack exists', () => {
 			const layoutStore = getLayoutStore();
-			layoutStore.addRack('Rack 1', 12);
+			layoutStore.addRack('Test Rack', 42);
 
 			const { container } = render(Canvas);
 
 			const canvas = container.querySelector('.canvas');
 			expect(canvas).toBeInTheDocument();
-
-			// overflow-x should be auto or scroll
-			// This will be verified through CSS
 		});
 	});
 

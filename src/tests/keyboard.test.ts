@@ -299,7 +299,9 @@ describe('KeyboardHandler Component', () => {
 			expect(onExport).toHaveBeenCalledTimes(1);
 		});
 
-		it('Ctrl+D duplicates selected rack', async () => {
+		// Note: Duplicate rack tests updated for single-rack mode (v0.1.1)
+		// In single-rack mode, duplicating is blocked - test verifies no duplicate created
+		it('Ctrl+D does not duplicate in single-rack mode', async () => {
 			const layoutStore = getLayoutStore();
 			const selectionStore = getSelectionStore();
 
@@ -312,12 +314,11 @@ describe('KeyboardHandler Component', () => {
 
 			await fireEvent.keyDown(window, { key: 'd', ctrlKey: true });
 
-			// Should now have 2 racks (original + duplicate)
-			expect(layoutStore.racks).toHaveLength(2);
-			expect(layoutStore.racks[1]!.name).toBe('Test Rack (Copy)');
+			// Single-rack mode: duplicate is blocked, still only 1 rack
+			expect(layoutStore.racks).toHaveLength(1);
 		});
 
-		it('Cmd+D duplicates selected rack (Mac)', async () => {
+		it('Cmd+D does not duplicate in single-rack mode (Mac)', async () => {
 			const layoutStore = getLayoutStore();
 			const selectionStore = getSelectionStore();
 
@@ -330,9 +331,8 @@ describe('KeyboardHandler Component', () => {
 
 			await fireEvent.keyDown(window, { key: 'd', metaKey: true });
 
-			// Should now have 2 racks (original + duplicate)
-			expect(layoutStore.racks).toHaveLength(2);
-			expect(layoutStore.racks[1]!.name).toBe('Test Rack (Copy)');
+			// Single-rack mode: duplicate is blocked, still only 1 rack
+			expect(layoutStore.racks).toHaveLength(1);
 		});
 	});
 

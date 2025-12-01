@@ -4,15 +4,12 @@
  */
 
 import type { Layout, Rack, Device, DeviceCategory } from '$lib/types';
-import { DEFAULT_DEVICE_FACE } from '$lib/types/constants';
+import { DEFAULT_DEVICE_FACE, MAX_RACKS } from '$lib/types/constants';
 import { createLayout } from '$lib/utils/serialization';
 import { createRack, duplicateRack as duplicateRackUtil } from '$lib/utils/rack';
 import { generateId } from '$lib/utils/device';
 import { canPlaceDevice, findCollisions } from '$lib/utils/collision';
 import { migrateLayout } from '$lib/utils/migration';
-
-// Maximum number of racks allowed
-const MAX_RACKS = 6;
 
 // Module-level state (using $state rune)
 let layout = $state<Layout>(createLayout('Untitled'));
@@ -214,7 +211,7 @@ function reorderRacks(fromIndex: number, toIndex: number): void {
 function duplicateRack(id: string): { error?: string } {
 	// Check max racks limit
 	if (layout.racks.length >= MAX_RACKS) {
-		return { error: 'Maximum of 6 racks allowed' };
+		return { error: `Maximum of ${MAX_RACKS} rack${MAX_RACKS === 1 ? '' : 's'} allowed` };
 	}
 
 	// Find the rack to duplicate

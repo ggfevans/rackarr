@@ -182,22 +182,16 @@ describe('Layout Store', () => {
 			expect(store.rackCount).toBe(1);
 		});
 
-		it('sets position to next available', () => {
-			const store = getLayoutStore();
-			store.addRack('First', 42);
-			const second = store.addRack('Second', 24);
-			expect(second!.position).toBe(1);
-		});
+		// Note: Position test removed - single-rack mode (v0.1.1) only allows 1 rack
+		// This test will be restored in v0.3 when multi-rack is re-enabled
 
-		it('returns null when 6 racks exist', () => {
+		it('returns null when 1 rack exists (single-rack mode)', () => {
 			const store = getLayoutStore();
-			for (let i = 0; i < 6; i++) {
-				store.addRack(`Rack ${i}`, 42);
-			}
+			store.addRack('First Rack', 42);
 			expect(store.canAddRack).toBe(false);
-			const result = store.addRack('Seventh', 42);
+			const result = store.addRack('Second', 42);
 			expect(result).toBeNull();
-			expect(store.rackCount).toBe(6);
+			expect(store.rackCount).toBe(1);
 		});
 
 		it('sets isDirty to true', () => {
@@ -243,15 +237,8 @@ describe('Layout Store', () => {
 			expect(store.rackCount).toBe(0);
 		});
 
-		it('updates positions of remaining racks', () => {
-			const store = getLayoutStore();
-			const first = store.addRack('First', 42);
-			store.addRack('Second', 24);
-			store.addRack('Third', 18);
-			store.deleteRack(first!.id);
-			expect(store.racks[0]!.position).toBe(0);
-			expect(store.racks[1]!.position).toBe(1);
-		});
+		// Note: Multi-rack position test removed - single-rack mode (v0.1.1) only allows 1 rack
+		// This test will be restored in v0.3 when multi-rack is re-enabled
 
 		it('sets isDirty to true', () => {
 			const store = getLayoutStore();
@@ -262,32 +249,16 @@ describe('Layout Store', () => {
 		});
 	});
 
+	// Note: reorderRacks tests removed - single-rack mode (v0.1.1) only allows 1 rack
+	// These tests will be restored in v0.3 when multi-rack is re-enabled
 	describe('reorderRacks', () => {
-		it('swaps rack positions correctly', () => {
+		it('is a no-op with single rack', () => {
 			const store = getLayoutStore();
-			const first = store.addRack('First', 42);
-			const second = store.addRack('Second', 24);
-			const third = store.addRack('Third', 18);
-
-			store.reorderRacks(0, 2);
-
-			// Find racks by original ID
-			const firstRack = store.racks.find((r) => r.id === first!.id);
-			const secondRack = store.racks.find((r) => r.id === second!.id);
-			const thirdRack = store.racks.find((r) => r.id === third!.id);
-
-			expect(firstRack!.position).toBe(2);
-			expect(secondRack!.position).toBe(1);
-			expect(thirdRack!.position).toBe(0);
-		});
-
-		it('sets isDirty to true', () => {
-			const store = getLayoutStore();
-			store.addRack('First', 42);
-			store.addRack('Second', 24);
+			store.addRack('Only Rack', 42);
 			store.markClean();
-			store.reorderRacks(0, 1);
-			expect(store.isDirty).toBe(true);
+			store.reorderRacks(0, 1); // No-op - only one rack
+			expect(store.racks).toHaveLength(1);
+			// isDirty unchanged since no actual reorder happened
 		});
 	});
 
@@ -504,77 +475,25 @@ describe('Layout Store', () => {
 		});
 	});
 
+	// Note: Cross-rack move tests removed - single-rack mode (v0.1.1) only allows 1 rack
+	// These tests will be restored in v0.3 when multi-rack is re-enabled
 	describe('moveDeviceToRack', () => {
-		let store: ReturnType<typeof getLayoutStore>;
-		let device: Device;
-		let sourceRackId: string;
-		let targetRackId: string;
-
-		beforeEach(() => {
-			store = getLayoutStore();
-			device = store.addDeviceToLibrary({
+		it('delegates to moveDevice for same-rack moves', () => {
+			const store = getLayoutStore();
+			const device = store.addDeviceToLibrary({
 				name: 'Test Server',
 				height: 2,
 				category: 'server',
 				colour: '#4A90D9'
 			});
-			const sourceRack = store.addRack('Source Rack', 42);
-			const targetRack = store.addRack('Target Rack', 42);
-			sourceRackId = sourceRack!.id;
-			targetRackId = targetRack!.id;
-			store.placeDevice(sourceRackId, device.id, 5);
+			const rack = store.addRack('Only Rack', 42);
+			store.placeDevice(rack!.id, device.id, 5);
 			store.markClean();
-		});
 
-		it('transfers device between racks', () => {
-			const result = store.moveDeviceToRack(sourceRackId, 0, targetRackId, 10);
+			// Same rack move should work (delegates to moveDevice)
+			const result = store.moveDeviceToRack(rack!.id, 0, rack!.id, 10);
 			expect(result).toBe(true);
-
-			// Source rack should be empty
-			const sourceRack = store.racks.find((r) => r.id === sourceRackId);
-			expect(sourceRack!.devices).toHaveLength(0);
-
-			// Target rack should have the device
-			const targetRack = store.racks.find((r) => r.id === targetRackId);
-			expect(targetRack!.devices).toHaveLength(1);
-			expect(targetRack!.devices[0]!.libraryId).toBe(device.id);
-			expect(targetRack!.devices[0]!.position).toBe(10);
-		});
-
-		it('preserves face property when moving between racks', () => {
-			// The device should have been placed with default front face
-			const sourceRack = store.racks.find((r) => r.id === sourceRackId);
-			expect(sourceRack!.devices[0]!.face).toBe('front');
-
-			const result = store.moveDeviceToRack(sourceRackId, 0, targetRackId, 10);
-			expect(result).toBe(true);
-
-			// Target rack should preserve the face
-			const targetRack = store.racks.find((r) => r.id === targetRackId);
-			expect(targetRack!.devices[0]!.face).toBe('front');
-		});
-
-		it('returns false for collision in target rack', () => {
-			const device2 = store.addDeviceToLibrary({
-				name: 'Blocking Device',
-				height: 2,
-				category: 'server',
-				colour: '#4A90D9'
-			});
-			store.placeDevice(targetRackId, device2.id, 10);
-
-			const result = store.moveDeviceToRack(sourceRackId, 0, targetRackId, 10);
-			expect(result).toBe(false);
-
-			// Device should still be in source rack
-			const sourceRack = store.racks.find((r) => r.id === sourceRackId);
-			expect(sourceRack!.devices).toHaveLength(1);
-		});
-
-		it('sets isDirty to true on success', () => {
-			expect(store.isDirty).toBe(false);
-			store.moveDeviceToRack(sourceRackId, 0, targetRackId, 10);
-			expect(store.isDirty).toBe(true);
+			expect(store.racks[0]!.devices[0]!.position).toBe(10);
 		});
 	});
 
@@ -629,28 +548,19 @@ describe('Layout Store', () => {
 		});
 	});
 
+	// Note: duplicateRack multi-rack test removed - single-rack mode (v0.1.1) only allows 1 rack
+	// These tests will be restored in v0.3 when multi-rack is re-enabled
 	describe('duplicateRack', () => {
-		it('duplicates rack and adds to layout', () => {
+		it('returns error when 1 rack exists (single-rack mode)', () => {
 			const store = getLayoutStore();
-			const rack = store.addRack('Test Rack', 42);
+			// Create 1 rack (maximum allowed in single-rack mode)
+			store.addRack('First Rack', 42);
 			expect(store.racks).toHaveLength(1);
 
-			store.duplicateRack(rack!.id);
-			expect(store.racks).toHaveLength(2);
-		});
-
-		it('returns error when 6 racks exist', () => {
-			const store = getLayoutStore();
-			// Create 6 racks (maximum allowed)
-			for (let i = 0; i < 6; i++) {
-				store.addRack(`Rack ${i}`, 42);
-			}
-			expect(store.racks).toHaveLength(6);
-
-			// Try to duplicate when at max
+			// Try to duplicate when at max - should fail
 			const result = store.duplicateRack(store.racks[0]!.id);
-			expect(result.error).toBe('Maximum of 6 racks allowed');
-			expect(store.racks).toHaveLength(6);
+			expect(result.error).toBe('Maximum of 1 rack allowed');
+			expect(store.racks).toHaveLength(1);
 		});
 	});
 

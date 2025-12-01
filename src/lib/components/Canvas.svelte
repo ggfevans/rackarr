@@ -195,7 +195,13 @@
 
 <!-- svelte-ignore a11y_click_events_have_key_events -->
 <!-- svelte-ignore a11y_no_noninteractive_element_interactions -->
-<div class="canvas" role="application" bind:this={canvasContainer} onclick={handleCanvasClick}>
+<div
+	class="canvas"
+	role="application"
+	aria-label="Rack layout canvas"
+	bind:this={canvasContainer}
+	onclick={handleCanvasClick}
+>
 	{#if hasRacks && rack}
 		<div class="panzoom-container" bind:this={panzoomContainer}>
 			<!-- Single-rack mode: direct rack reference (v0.1.1) -->

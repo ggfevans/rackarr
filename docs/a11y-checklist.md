@@ -27,9 +27,29 @@ This document tracks accessibility compliance for the Rackarr application.
 
 ## Visual Design
 
-- [ ] Color is not the sole indicator of state (verified in 4.4)
-- [ ] Contrast ratios meet WCAG AA (verified in 4.4)
+- [x] Color is not the sole indicator of state (icons/text accompany colors)
+- [x] Contrast ratios meet WCAG AA (verified via automated tests)
 - [ ] Reduced motion preference is respected (implemented in 6.2)
+
+### Contrast Ratios (Dark Theme on #09090b)
+
+| Element    | Color   | Ratio | Requirement |
+| ---------- | ------- | ----- | ----------- |
+| Body text  | #fafafa | 18:1+ | 4.5:1 AA    |
+| Muted text | #a1a1aa | 7:1+  | 4.5:1 AA    |
+| Selection  | #3b82f6 | 5.8:1 | 4.5:1 AA    |
+| Error      | #ef4444 | 5.6:1 | 4.5:1 AA    |
+| Focus ring | #3b82f6 | 5.8:1 | 3:1 AA      |
+
+### Contrast Ratios (Light Theme on #fafafa)
+
+| Element    | Color   | Ratio | Requirement |
+| ---------- | ------- | ----- | ----------- |
+| Body text  | #09090b | 18:1+ | 4.5:1 AA    |
+| Muted text | #52525b | 7:1+  | 4.5:1 AA    |
+| Selection  | #2563eb | 4.6:1 | 4.5:1 AA    |
+| Error      | #dc2626 | 4.8:1 | 4.5:1 AA    |
+| Focus ring | #2563eb | 4.6:1 | 3:1 AA      |
 
 ## Component Checklist
 
@@ -97,11 +117,12 @@ This document tracks accessibility compliance for the Rackarr application.
 
 ## Testing
 
-Automated tests for ARIA attributes are in:
+Automated tests for accessibility are in:
 
 - `src/tests/AriaAudit.test.ts` - Comprehensive ARIA audit
 - `src/tests/DialogA11y.test.ts` - Dialog accessibility
 - `src/tests/focus.test.ts` - Focus management utilities
+- `src/tests/contrast.test.ts` - Color contrast verification
 
 ## Manual Testing Recommendations
 

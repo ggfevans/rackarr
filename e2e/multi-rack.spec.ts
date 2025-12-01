@@ -83,7 +83,9 @@ async function dragDeviceToRack(page: Page, rackIndex = 0) {
 	await page.waitForTimeout(100);
 }
 
-test.describe('Multi-Rack Operations', () => {
+// SKIPPED: Multi-rack support deferred to v0.3
+// Tests preserved for future restoration
+test.describe.skip('Multi-Rack Operations (v0.3)', () => {
 	test.beforeEach(async ({ page }) => {
 		await page.goto('/');
 		await page.evaluate(() => sessionStorage.clear());

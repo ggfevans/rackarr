@@ -399,7 +399,13 @@
 
 		<!-- U labels on left rail (rendered after holes for better visibility) -->
 		{#each uLabels as { uNumber, yPosition } (uNumber)}
-			<text x={RAIL_WIDTH / 2} y={yPosition} class="u-label" dominant-baseline="middle">
+			<text
+				x={RAIL_WIDTH / 2}
+				y={yPosition}
+				class="u-label"
+				class:u-label-highlight={uNumber % 5 === 0}
+				dominant-baseline="middle"
+			>
 				{uNumber}
 			</text>
 		{/each}
@@ -554,8 +560,14 @@
 		fill: var(--colour-text-muted, #b0b0b0);
 		font-size: 10px;
 		text-anchor: middle;
-		font-family: var(--font-family, system-ui, sans-serif);
+		font-family: var(--font-mono, monospace);
+		font-variant-numeric: tabular-nums;
 		user-select: none;
+	}
+
+	.u-label-highlight {
+		font-weight: var(--font-weight-semibold, 600);
+		fill: var(--colour-text, #ffffff);
 	}
 
 	.rack-hole {

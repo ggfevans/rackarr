@@ -297,6 +297,7 @@
 
 <div
 	class="rack-container"
+	class:selected
 	tabindex="0"
 	aria-selected={selected}
 	role="option"
@@ -483,6 +484,11 @@
 	.rack-container[aria-selected='true'] {
 		outline: 2px solid var(--colour-selection, #0066ff);
 		outline-offset: 2px;
+	}
+
+	.rack-container.selected {
+		outline: 2px solid var(--colour-selection);
+		outline-offset: 4px;
 	}
 
 	.view-toggle-overlay {

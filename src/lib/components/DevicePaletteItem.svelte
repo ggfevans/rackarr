@@ -10,10 +10,11 @@
 
 	interface Props {
 		device: Device;
+		librarySelected?: boolean;
 		onselect?: (event: CustomEvent<{ device: Device }>) => void;
 	}
 
-	let { device, onselect }: Props = $props();
+	let { device, librarySelected = false, onselect }: Props = $props();
 
 	// Track dragging state for visual feedback
 	let isDragging = $state(false);
@@ -49,6 +50,7 @@
 <div
 	class="device-palette-item"
 	class:dragging={isDragging}
+	class:library-selected={librarySelected}
 	role="listitem"
 	tabindex="0"
 	draggable="true"
@@ -97,6 +99,11 @@
 	.device-palette-item:focus-visible {
 		outline: 2px solid var(--colour-focus-ring);
 		outline-offset: var(--space-1);
+	}
+
+	.device-palette-item.library-selected {
+		background-color: color-mix(in srgb, var(--colour-selection) 15%, transparent);
+		border: 1px solid var(--colour-selection);
 	}
 
 	.drag-handle {

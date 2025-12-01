@@ -87,6 +87,7 @@
 	data-device-id={device.id}
 	transform="translate({RAIL_WIDTH}, {yPosition})"
 	class="rack-device"
+	class:selected
 	class:dragging={isDragging}
 >
 	<!-- Invisible HTML overlay for drag-and-drop (SVG elements don't support draggable natively) -->

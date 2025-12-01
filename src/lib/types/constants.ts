@@ -57,8 +57,9 @@ export const MAX_DEVICE_HEIGHT = 42;
 
 /**
  * Maximum number of racks allowed
+ * v0.1.1: Single rack mode - multi-rack planned for v0.3
  */
-export const MAX_RACKS = 6;
+export const MAX_RACKS = 1;
 
 /**
  * Current layout schema version

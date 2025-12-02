@@ -60,6 +60,7 @@
 		]
 	},
 	"dependencies": {
-		"panzoom": "^9.4.3"
+		"panzoom": "^9.4.3",
+		"zod": "^4.1.13"
 	}
 }

@@ -12,16 +12,13 @@
 		ALLOWED_RACK_WIDTHS
 	} from '$lib/types/constants';
 
+	// Height options for 10" racks (smaller form factor)
+	const SMALL_RACK_HEIGHTS = [4, 6, 8, 12];
+
 	interface Props {
 		open: boolean;
 		rackCount?: number;
-		oncreate?: (data: {
-			name: string;
-			height: number;
-			width: number;
-			desc_units: boolean;
-			starting_unit: number;
-		}) => void;
+		oncreate?: (data: { name: string; height: number; width: number }) => void;
 		oncancel?: () => void;
 	}
 
@@ -33,23 +30,32 @@
 	let isCustomHeight = $state(false);
 	let customHeight = $state(42);
 	let selectedWidth = $state(STANDARD_RACK_WIDTH);
-	let descUnits = $state(false);
-	let startingUnit = $state(1);
 
 	// Validation errors
 	let nameError = $state('');
 	let heightError = $state('');
 
+	// Available heights based on rack width
+	const availableHeights = $derived(
+		selectedWidth === 10 ? SMALL_RACK_HEIGHTS : COMMON_RACK_HEIGHTS
+	);
+
+	// Reset height when width changes if current selection isn't available
+	$effect(() => {
+		if (!isCustomHeight && !availableHeights.includes(selectedHeight)) {
+			// Select the largest available height as default
+			selectedHeight = availableHeights[availableHeights.length - 1];
+		}
+	});
+
 	// Reset form when dialog opens
 	$effect(() => {
 		if (open) {
 			name = 'Racky McRackface';
+			selectedWidth = STANDARD_RACK_WIDTH;
 			selectedHeight = 42;
 			isCustomHeight = false;
 			customHeight = 42;
-			selectedWidth = STANDARD_RACK_WIDTH;
-			descUnits = false;
-			startingUnit = 1;
 			nameError = '';
 			heightError = '';
 		}
@@ -94,9 +100,7 @@
 			oncreate?.({
 				name: name.trim(),
 				height: getCurrentHeight(),
-				width: selectedWidth,
-				desc_units: descUnits,
-				starting_unit: startingUnit
+				width: selectedWidth
 			});
 		}
 	}
@@ -132,9 +136,27 @@
 		</div>
 
 		<div class="form-group">
+			<span class="form-label">Rack Width</span>
+			<div class="width-options" role="group" aria-label="Rack width">
+				{#each ALLOWED_RACK_WIDTHS as width (width)}
+					<label class="width-option">
+						<input
+							type="radio"
+							name="rack-width"
+							value={width}
+							checked={selectedWidth === width}
+							onchange={() => (selectedWidth = width)}
+						/>
+						<span class="width-label">{width}"</span>
+					</label>
+				{/each}
+			</div>
+		</div>
+
+		<div class="form-group">
 			<span class="form-label">Height</span>
 			<div class="height-buttons" role="group" aria-label="Rack height">
-				{#each COMMON_RACK_HEIGHTS as height (height)}
+				{#each availableHeights as height (height)}
 					<button
 						type="button"
 						class="height-btn"
@@ -172,42 +194,6 @@
 			{#if heightError}
 				<span class="error-message">{heightError}</span>
 			{/if}
-		</div>
-
-		<div class="form-group">
-			<span class="form-label">Rack Width</span>
-			<div class="width-options" role="group" aria-label="Rack width">
-				{#each ALLOWED_RACK_WIDTHS as width (width)}
-					<label class="width-option">
-						<input
-							type="radio"
-							name="rack-width"
-							value={width}
-							checked={selectedWidth === width}
-							onchange={() => (selectedWidth = width)}
-						/>
-						<span class="width-label">{width}"</span>
-					</label>
-				{/each}
-			</div>
-		</div>
-
-		<div class="form-group checkbox-group">
-			<label class="checkbox-label">
-				<input type="checkbox" bind:checked={descUnits} />
-				<span>Descending units (U1 at top)</span>
-			</label>
-		</div>
-
-		<div class="form-group">
-			<label for="starting-unit">Starting Unit</label>
-			<input
-				type="number"
-				id="starting-unit"
-				class="input-field"
-				bind:value={startingUnit}
-				min="1"
-			/>
 		</div>
 
 		<div class="form-actions">
@@ -344,26 +330,6 @@
 	.width-label {
 		font-size: 14px;
 		color: var(--colour-text);
-	}
-
-	.checkbox-group {
-		margin-top: 4px;
-	}
-
-	.checkbox-label {
-		display: flex;
-		align-items: center;
-		gap: 8px;
-		cursor: pointer;
-		font-size: 14px;
-		color: var(--colour-text);
-	}
-
-	.checkbox-label input[type='checkbox'] {
-		width: 18px;
-		height: 18px;
-		accent-color: var(--colour-selection);
-		cursor: pointer;
 	}
 
 	.form-actions {

@@ -69,21 +69,8 @@
 		}
 	}
 
-	function handleNewRackCreate(data: {
-		name: string;
-		height: number;
-		width: number;
-		desc_units: boolean;
-		starting_unit: number;
-	}) {
-		layoutStore.addRack(
-			data.name,
-			data.height,
-			data.width,
-			undefined, // form_factor (use default)
-			data.desc_units,
-			data.starting_unit
-		);
+	function handleNewRackCreate(data: { name: string; height: number; width: number }) {
+		layoutStore.addRack(data.name, data.height, data.width);
 		newRackFormOpen = false;
 	}
 

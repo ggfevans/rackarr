@@ -121,9 +121,7 @@ describe('NewRackForm Component', () => {
 			expect(onCreate).toHaveBeenCalledWith({
 				name: 'My New Rack',
 				height: 24,
-				width: 19,
-				desc_units: false,
-				starting_unit: 1
+				width: 19
 			});
 		});
 
@@ -145,9 +143,7 @@ describe('NewRackForm Component', () => {
 			expect(onCreate).toHaveBeenCalledWith({
 				name: 'Custom Rack',
 				height: 50,
-				width: 19,
-				desc_units: false,
-				starting_unit: 1
+				width: 19
 			});
 		});
 	});
@@ -183,9 +179,7 @@ describe('NewRackForm Component', () => {
 			expect(onCreate).toHaveBeenCalledWith({
 				name: 'Enter Test Rack',
 				height: 42,
-				width: 19,
-				desc_units: false,
-				starting_unit: 1
+				width: 19
 			});
 		});
 
@@ -260,104 +254,6 @@ describe('NewRackForm Component', () => {
 			await fireEvent.click(submitBtn);
 
 			expect(onCreate).toHaveBeenCalledWith(expect.objectContaining({ width: 19 }));
-		});
-	});
-
-	describe('Descending units', () => {
-		it('shows descending units checkbox', () => {
-			render(NewRackForm, { props: { open: true } });
-			expect(screen.getByLabelText(/descending units/i)).toBeInTheDocument();
-		});
-
-		it('checkbox is unchecked by default', () => {
-			render(NewRackForm, { props: { open: true } });
-			const checkbox = screen.getByLabelText(/descending units/i) as HTMLInputElement;
-			expect(checkbox.checked).toBe(false);
-		});
-
-		it('can check descending units', async () => {
-			render(NewRackForm, { props: { open: true } });
-			const checkbox = screen.getByLabelText(/descending units/i) as HTMLInputElement;
-			await fireEvent.click(checkbox);
-			expect(checkbox.checked).toBe(true);
-		});
-
-		it('includes desc_units in create event data', async () => {
-			const onCreate = vi.fn();
-			render(NewRackForm, { props: { open: true, oncreate: onCreate } });
-
-			// Check descending units
-			const checkbox = screen.getByLabelText(/descending units/i);
-			await fireEvent.click(checkbox);
-
-			// Submit form
-			const submitBtn = screen.getByRole('button', { name: /create/i });
-			await fireEvent.click(submitBtn);
-
-			expect(onCreate).toHaveBeenCalledWith(expect.objectContaining({ desc_units: true }));
-		});
-
-		it('defaults to false in create event data', async () => {
-			const onCreate = vi.fn();
-			render(NewRackForm, { props: { open: true, oncreate: onCreate } });
-
-			// Submit form without changing desc_units
-			const submitBtn = screen.getByRole('button', { name: /create/i });
-			await fireEvent.click(submitBtn);
-
-			expect(onCreate).toHaveBeenCalledWith(expect.objectContaining({ desc_units: false }));
-		});
-	});
-
-	describe('Starting unit', () => {
-		it('shows starting unit input', () => {
-			render(NewRackForm, { props: { open: true } });
-			expect(screen.getByLabelText(/starting unit/i)).toBeInTheDocument();
-		});
-
-		it('has default value of 1', () => {
-			render(NewRackForm, { props: { open: true } });
-			const input = screen.getByLabelText(/starting unit/i) as HTMLInputElement;
-			expect(input.value).toBe('1');
-		});
-
-		it('has minimum value of 1', () => {
-			render(NewRackForm, { props: { open: true } });
-			const input = screen.getByLabelText(/starting unit/i) as HTMLInputElement;
-			expect(input.min).toBe('1');
-		});
-
-		it('can change starting unit value', async () => {
-			render(NewRackForm, { props: { open: true } });
-			const input = screen.getByLabelText(/starting unit/i) as HTMLInputElement;
-			await fireEvent.input(input, { target: { value: '5' } });
-			expect(input.value).toBe('5');
-		});
-
-		it('includes starting_unit in create event data', async () => {
-			const onCreate = vi.fn();
-			render(NewRackForm, { props: { open: true, oncreate: onCreate } });
-
-			// Change starting unit
-			const input = screen.getByLabelText(/starting unit/i);
-			await fireEvent.input(input, { target: { value: '10' } });
-
-			// Submit form
-			const submitBtn = screen.getByRole('button', { name: /create/i });
-			await fireEvent.click(submitBtn);
-
-			expect(onCreate).toHaveBeenCalledWith(expect.objectContaining({ starting_unit: 10 }));
-		});
-
-		it('defaults to 1 in create event data', async () => {
-			const onCreate = vi.fn();
-			render(NewRackForm, { props: { open: true, oncreate: onCreate } });
-
-			// Submit form without changing starting_unit
-			const submitBtn = screen.getByRole('button', { name: /create/i });
-			await fireEvent.click(submitBtn);
-
-			expect(onCreate).toHaveBeenCalledWith(expect.objectContaining({ starting_unit: 1 }));
 		});
 	});
 });

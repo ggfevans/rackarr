@@ -52,6 +52,7 @@ export function getCategoryDisplayName(category: DeviceCategory): string {
 		kvm: 'KVM',
 		'av-media': 'AV/Media',
 		cooling: 'Cooling',
+		shelf: 'Shelves',
 		blank: 'Blanks',
 		other: 'Other'
 	};

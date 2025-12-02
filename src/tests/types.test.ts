@@ -6,7 +6,10 @@ import type {
 	Layout,
 	DeviceCategory,
 	RackView,
-	DeviceFace
+	DeviceFace,
+	Airflow,
+	WeightUnit,
+	DeviceImages
 } from '$lib/types';
 import {
 	CATEGORY_COLOURS,
@@ -45,6 +48,115 @@ describe('Types', () => {
 			};
 
 			expect(device.notes).toBe('Primary application server');
+		});
+
+		it('accepts device with all optional fields', () => {
+			const device: Device = {
+				id: '123e4567-e89b-12d3-a456-426614174000',
+				name: 'Dell R740',
+				height: 2,
+				colour: '#4A90D9',
+				category: 'server',
+				notes: 'Primary database server',
+				manufacturer: 'Dell',
+				model: 'PowerEdge R740',
+				part_number: 'R740-SKU-001',
+				airflow: 'front-to-rear',
+				weight: 25.5,
+				weight_unit: 'kg',
+				is_full_depth: true,
+				face: 'both',
+				images: {
+					front: 'images/dell-r740-front.png',
+					rear: 'images/dell-r740-rear.png'
+				}
+			};
+
+			expect(device.manufacturer).toBe('Dell');
+			expect(device.model).toBe('PowerEdge R740');
+			expect(device.part_number).toBe('R740-SKU-001');
+			expect(device.airflow).toBe('front-to-rear');
+			expect(device.weight).toBe(25.5);
+			expect(device.weight_unit).toBe('kg');
+			expect(device.is_full_depth).toBe(true);
+			expect(device.face).toBe('both');
+			expect(device.images?.front).toBe('images/dell-r740-front.png');
+			expect(device.images?.rear).toBe('images/dell-r740-rear.png');
+		});
+
+		it('works without optional fields (backwards compatible)', () => {
+			const device: Device = {
+				id: 'simple-device',
+				name: '1U Switch',
+				height: 1,
+				colour: '#7B68EE',
+				category: 'network'
+			};
+
+			expect(device.manufacturer).toBeUndefined();
+			expect(device.model).toBeUndefined();
+			expect(device.airflow).toBeUndefined();
+			expect(device.weight).toBeUndefined();
+			expect(device.images).toBeUndefined();
+		});
+	});
+
+	describe('Airflow type', () => {
+		it('accepts all valid airflow values', () => {
+			const airflowValues: Airflow[] = [
+				'front-to-rear',
+				'rear-to-front',
+				'left-to-right',
+				'right-to-left',
+				'side-to-rear',
+				'rear-to-side',
+				'bottom-to-top',
+				'top-to-bottom',
+				'passive',
+				'mixed'
+			];
+
+			expect(airflowValues).toHaveLength(10);
+			airflowValues.forEach((value) => {
+				expect(typeof value).toBe('string');
+			});
+		});
+	});
+
+	describe('WeightUnit type', () => {
+		it('accepts all valid weight unit values', () => {
+			const weightUnits: WeightUnit[] = ['kg', 'g', 'lb', 'oz'];
+
+			expect(weightUnits).toHaveLength(4);
+			expect(weightUnits).toContain('kg');
+			expect(weightUnits).toContain('g');
+			expect(weightUnits).toContain('lb');
+			expect(weightUnits).toContain('oz');
+		});
+	});
+
+	describe('DeviceImages interface', () => {
+		it('accepts front and rear image paths', () => {
+			const images: DeviceImages = {
+				front: 'images/device-front.png',
+				rear: 'images/device-rear.png'
+			};
+
+			expect(images.front).toBe('images/device-front.png');
+			expect(images.rear).toBe('images/device-rear.png');
+		});
+
+		it('allows optional front and rear', () => {
+			const frontOnly: DeviceImages = { front: 'front.png' };
+			const rearOnly: DeviceImages = { rear: 'rear.png' };
+			const empty: DeviceImages = {};
+
+			expect(frontOnly.front).toBe('front.png');
+			expect(frontOnly.rear).toBeUndefined();
+			expect(rearOnly.rear).toBe('rear.png');
+			expect(rearOnly.front).toBeUndefined();
+			expect(empty.front).toBeUndefined();
+			expect(empty.rear).toBeUndefined();
 		});
 	});
 

@@ -30,6 +30,36 @@ export type DeviceCategory =
 	| 'other';
 
 /**
+ * Airflow direction types for thermal metadata
+ */
+export type Airflow =
+	| 'front-to-rear'
+	| 'rear-to-front'
+	| 'left-to-right'
+	| 'right-to-left'
+	| 'side-to-rear'
+	| 'rear-to-side'
+	| 'bottom-to-top'
+	| 'top-to-bottom'
+	| 'passive'
+	| 'mixed';
+
+/**
+ * Weight unit types
+ */
+export type WeightUnit = 'kg' | 'g' | 'lb' | 'oz';
+
+/**
+ * Device images - front and rear image paths
+ */
+export interface DeviceImages {
+	/** Path to front image */
+	front?: string;
+	/** Path to rear image */
+	rear?: string;
+}
+
+/**
  * Device in the library (template)
  * Can be placed multiple times in racks
  */
@@ -38,7 +68,7 @@ export interface Device {
 	id: string;
 	/** Display name */
 	name: string;
-	/** Height in rack units (1-42U) */
+	/** Height in rack units (0.5-42U) */
 	height: number;
 	/** Hex colour for display (e.g., '#4A90D9') */
 	colour: string;
@@ -46,6 +76,24 @@ export interface Device {
 	category: DeviceCategory;
 	/** Optional notes/description */
 	notes?: string;
+	/** Manufacturer name (for NetBox imports) */
+	manufacturer?: string;
+	/** Model name (for NetBox imports) */
+	model?: string;
+	/** Part number / SKU */
+	part_number?: string;
+	/** Airflow direction */
+	airflow?: Airflow;
+	/** Device weight */
+	weight?: number;
+	/** Weight unit (required if weight is provided) */
+	weight_unit?: WeightUnit;
+	/** Whether device occupies full rack depth (default: true) */
+	is_full_depth?: boolean;
+	/** Default face for placement */
+	face?: DeviceFace;
+	/** Device images */
+	images?: DeviceImages;
 }
 
 /**

@@ -1,6 +1,8 @@
 services:
   rackarr:
-    build: .
+    image: ghcr.io/ggfevans/rackarr:latest
+    # To build locally instead, comment out 'image' and uncomment 'build':
+    # build: .
     ports:
       - "8080:80"
     restart: unless-stopped

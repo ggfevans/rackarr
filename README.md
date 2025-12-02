@@ -8,12 +8,13 @@ A browser-based visual tool for planning and documenting server rack layouts. De
 
 ## Features
 
-- **Visual Rack Editor**: Single rack editing with heights from 1U to 100U (multi-rack support planned for v0.3)
-- **Drag-and-Drop**: Intuitive device placement from palette to rack
-- **Device Library**: Starter library with common devices, plus custom device creation
+- **Visual Rack Editor**: Single rack editing with heights from 1U to 100U, supporting both 10" and 19" rack widths
+- **Drag-and-Drop**: Intuitive device placement from a fixed device library sidebar
+- **Device Library**: 12 device categories with starter devices, plus custom device creation
+- **Device Images**: Upload front/rear images for devices with label/image display toggle
 - **Smart Collision Detection**: Prevents device overlap with visual feedback
-- **Multi-Rack File Loading**: Opens multi-rack files (loads first rack only with warning)
-- **Export Options**: PNG, JPEG, SVG, and PDF export with customizable options
+- **Export Options**: PNG, JPEG, SVG, and PDF export with bundled metadata option
+- **Save/Load**: ZIP archive format (`.rackarr.zip`) with embedded device images
 - **Dark/Light Themes**: Full theme support with system preference detection
 - **Keyboard Shortcuts**: Full keyboard navigation for power users
 - **Session Persistence**: Auto-saves work to browser storage
@@ -50,31 +51,20 @@ npm run test:e2e
 npm run build
 ```
 
-### Docker
-
-```bash
-# Build and run with Docker Compose
-docker-compose up
-
-# Or build and run manually
-docker build -t rackarr .
-docker run -p 8080:80 rackarr
-```
-
-Access the app at `http://localhost:8080`
+Access the app at `http://localhost:5173`
 
 ## Keyboard Shortcuts
 
 | Key                    | Action                          |
 | ---------------------- | ------------------------------- |
-| `Delete` / `Backspace` | Delete selected item            |
-| `Arrow Up`             | Move device up 1U               |
-| `Arrow Down`           | Move device down 1U             |
-| `Escape`               | Clear selection / Close drawers |
-| `D`                    | Toggle device palette           |
 | `Ctrl/Cmd + S`         | Save layout                     |
 | `Ctrl/Cmd + O`         | Load layout                     |
 | `Ctrl/Cmd + E`         | Export dialog                   |
+| `Delete` / `Backspace` | Delete selected item            |
+| `Arrow Up/Down`        | Move device up/down 1U          |
+| `I`                    | Toggle label/image display      |
+| `F`                    | Fit rack to viewport            |
+| `Escape`               | Clear selection / Close dialogs |
 | `?`                    | Show help                       |
 
 ## Tech Stack
@@ -104,16 +94,17 @@ e2e/                    # Playwright E2E tests
 
 ## File Format
 
-Rackarr saves layouts as JSON files with the `.rackarr.json` extension:
+Rackarr saves layouts as ZIP archives with the `.rackarr.zip` extension, containing:
 
-```json
-{
-  "version": "1.0",
-  "name": "My Homelab",
-  "racks": [...],
-  "deviceLibrary": [...]
-}
 ```
+my-layout.rackarr.zip
+├── project.json      # Layout data (racks, devices, library)
+└── images/           # Device images (front/rear)
+    ├── device-abc-front.png
+    └── device-abc-rear.jpg
+```
+
+Legacy `.rackarr.json` files are also supported for backwards compatibility.
 
 ## Contributing
 
@@ -132,9 +123,4 @@ Self-hosted or local instances have no analytics. The GoatCounter script only ru
 
 ## License
 
-[MIT License](LICENSE) - Copyright (c) 2025 gvns
-
-## Repository
-
-- **Primary**: https://git.falcon-wahoe.ts.net/ggfevans/rackarr
-- **Mirror**: https://github.com/ggfevans/rackarr
+[MIT License](LICENSE) - Copyright (c) 2025 Gareth Evans (ggfevans)

@@ -2,11 +2,12 @@
 
 ## Supported Versions
 
-Rackarr is currently in active development (v0.1.x). Security updates are applied to the latest version.
+Rackarr is currently in active development. Security updates are applied to the latest version.
 
 | Version | Supported          |
 | ------- | ------------------ |
-| 0.1.x   | :white_check_mark: |
+| 0.3.x   | :white_check_mark: |
+| < 0.3   | :x:                |
 
 ## Reporting a Vulnerability
 
@@ -22,7 +23,7 @@ Code generated with AI assistance undergoes the same security review process as 
 
 ### Our Approach
 
-- All contributions (AI-assisted or traditional) are tested against our comprehensive test suite (791 tests as of v0.1)
+- All contributions (AI-assisted or traditional) are tested against our comprehensive test suite (1400+ tests)
 - AI-generated code receives human review before merging
 - Security-sensitive code receives additional scrutiny regardless of authorship
 - Dependencies are regularly audited using `npm audit`

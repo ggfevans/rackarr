@@ -143,7 +143,7 @@ describe('Device Utilities', () => {
 			});
 
 			expect(result.valid).toBe(false);
-			expect(result.errors).toContain('Height must be between 1 and 42');
+			expect(result.errors).toContain('Height must be between 0.5 and 42');
 		});
 
 		it('rejects height greater than 42', () => {
@@ -156,7 +156,7 @@ describe('Device Utilities', () => {
 			});
 
 			expect(result.valid).toBe(false);
-			expect(result.errors).toContain('Height must be between 1 and 42');
+			expect(result.errors).toContain('Height must be between 0.5 and 42');
 		});
 
 		it('rejects empty name', () => {
@@ -223,7 +223,7 @@ describe('Device Utilities', () => {
 			expect(result.valid).toBe(false);
 			expect(result.errors.length).toBeGreaterThanOrEqual(3);
 			expect(result.errors).toContain('Name is required');
-			expect(result.errors).toContain('Height must be between 1 and 42');
+			expect(result.errors).toContain('Height must be between 0.5 and 42');
 			expect(result.errors).toContain('Colour must be a valid hex colour (e.g., #4A90D9)');
 		});
 

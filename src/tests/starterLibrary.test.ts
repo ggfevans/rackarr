@@ -6,9 +6,9 @@ import { createLayout } from '$lib/utils/serialization';
 
 describe('Starter Device Library', () => {
 	describe('getStarterLibrary', () => {
-		it('returns 25 devices', () => {
+		it('returns 27 devices', () => {
 			const devices = getStarterLibrary();
-			expect(devices).toHaveLength(25);
+			expect(devices).toHaveLength(27);
 		});
 
 		it('most categories have at least one starter device', () => {
@@ -39,7 +39,7 @@ describe('Starter Device Library', () => {
 			devices.forEach((device) => {
 				expect(validateDevice(device).valid).toBe(true);
 				expect(device.name).toBeTruthy();
-				expect(device.height).toBeGreaterThanOrEqual(1);
+				expect(device.height).toBeGreaterThanOrEqual(0.5);
 				expect(device.height).toBeLessThanOrEqual(42);
 				expect(device.id).toBeTruthy();
 			});
@@ -114,9 +114,17 @@ describe('Starter Device Library', () => {
 			const devices = getStarterLibrary();
 			const blanks = devices.filter((d) => d.category === 'blank');
 
-			expect(blanks.length).toBeGreaterThanOrEqual(2);
+			expect(blanks.length).toBeGreaterThanOrEqual(3);
+			expect(blanks.some((d) => d.name === '0.5U Blank' && d.height === 0.5)).toBe(true);
 			expect(blanks.some((d) => d.name === '1U Blank')).toBe(true);
 			expect(blanks.some((d) => d.name === '2U Blank')).toBe(true);
+		});
+
+		it('includes half-U blanking fan', () => {
+			const devices = getStarterLibrary();
+			const cooling = devices.filter((d) => d.category === 'cooling');
+
+			expect(cooling.some((d) => d.name === '0.5U Blanking Fan' && d.height === 0.5)).toBe(true);
 		});
 
 		it('includes shelf devices', () => {
@@ -143,7 +151,7 @@ describe('Starter Device Library', () => {
 		it('new layout includes starter library', () => {
 			const layout = createLayout();
 
-			expect(layout.deviceLibrary.length).toBe(25);
+			expect(layout.deviceLibrary.length).toBe(27);
 			expect(layout.deviceLibrary[0]?.id).toMatch(/^starter-/);
 		});
 

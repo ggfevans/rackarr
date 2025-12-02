@@ -15,8 +15,8 @@ describe('Layout Store', () => {
 			expect(store.layout.name).toBe('Untitled');
 			expect(store.layout.version).toBe(CURRENT_VERSION);
 			expect(store.layout.racks).toEqual([]);
-			// Now includes starter library (25 devices)
-			expect(store.layout.deviceLibrary.length).toBe(25);
+			// Now includes starter library (27 devices)
+			expect(store.layout.deviceLibrary.length).toBe(27);
 		});
 
 		it('initializes isDirty as false', () => {
@@ -53,8 +53,8 @@ describe('Layout Store', () => {
 			const store = getLayoutStore();
 			store.addDeviceToLibrary({ name: 'Test', height: 1, category: 'server', colour: '#4A90D9' });
 			store.createNewLayout('New Layout');
-			// Starter library has 25 devices
-			expect(store.deviceLibrary.length).toBe(25);
+			// Starter library has 27 devices
+			expect(store.deviceLibrary.length).toBe(27);
 		});
 
 		it('sets isDirty to false', () => {
@@ -428,7 +428,7 @@ describe('Layout Store', () => {
 	describe('addDeviceToLibrary', () => {
 		it('generates ID and adds device', () => {
 			const store = getLayoutStore();
-			const initialCount = store.deviceLibrary.length; // 25 from starter library
+			const initialCount = store.deviceLibrary.length; // 27 from starter library
 			const device = store.addDeviceToLibrary({
 				name: 'Test Server',
 				height: 2,
@@ -499,7 +499,7 @@ describe('Layout Store', () => {
 	describe('deleteDeviceFromLibrary', () => {
 		it('removes device from library', () => {
 			const store = getLayoutStore();
-			const initialCount = store.deviceLibrary.length; // 25 from starter library
+			const initialCount = store.deviceLibrary.length; // 27 from starter library
 			const device = store.addDeviceToLibrary({
 				name: 'To Delete',
 				height: 1,
@@ -755,8 +755,8 @@ describe('Layout Store', () => {
 
 			expect(freshStore.layout.name).toBe('Untitled');
 			expect(freshStore.racks).toEqual([]);
-			// Starter library has 25 devices
-			expect(freshStore.deviceLibrary.length).toBe(25);
+			// Starter library has 27 devices
+			expect(freshStore.deviceLibrary.length).toBe(27);
 			expect(freshStore.isDirty).toBe(false);
 		});
 	});

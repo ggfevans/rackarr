@@ -83,7 +83,7 @@ describe('AddDeviceForm Component', () => {
 			const submitBtn = screen.getByRole('button', { name: /add/i });
 			await fireEvent.click(submitBtn);
 
-			expect(screen.getByText(/height must be between 1 and 42/i)).toBeInTheDocument();
+			expect(screen.getByText(/height must be between 0.5 and 42/i)).toBeInTheDocument();
 		});
 
 		it('rejects height > 42', async () => {
@@ -100,7 +100,7 @@ describe('AddDeviceForm Component', () => {
 			const submitBtn = screen.getByRole('button', { name: /add/i });
 			await fireEvent.click(submitBtn);
 
-			expect(screen.getByText(/height must be between 1 and 42/i)).toBeInTheDocument();
+			expect(screen.getByText(/height must be between 0.5 and 42/i)).toBeInTheDocument();
 		});
 	});
 

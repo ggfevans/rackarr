@@ -19,7 +19,8 @@ import {
 	ALL_CATEGORIES,
 	CURRENT_VERSION,
 	DEFAULT_RACK_VIEW,
-	DEFAULT_DEVICE_FACE
+	DEFAULT_DEVICE_FACE,
+	MIN_DEVICE_HEIGHT
 } from '$lib/types/constants';
 
 describe('Types', () => {
@@ -540,6 +541,12 @@ describe('Constants', () => {
 	describe('DEFAULT_DEVICE_FACE', () => {
 		it('is front', () => {
 			expect(DEFAULT_DEVICE_FACE).toBe('front');
+		});
+	});
+
+	describe('MIN_DEVICE_HEIGHT', () => {
+		it('supports half-U devices (0.5)', () => {
+			expect(MIN_DEVICE_HEIGHT).toBe(0.5);
 		});
 	});
 });

@@ -54,7 +54,7 @@ export const MAX_RACK_HEIGHT = 100;
 /**
  * Device height constraints
  */
-export const MIN_DEVICE_HEIGHT = 1;
+export const MIN_DEVICE_HEIGHT = 0.5;
 export const MAX_DEVICE_HEIGHT = 42;
 
 /**

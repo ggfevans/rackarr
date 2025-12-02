@@ -60,7 +60,7 @@ describe('Layout Serialization', () => {
 
 		it('initializes with starter device library', () => {
 			const layout = createLayout('My Layout');
-			expect(layout.deviceLibrary.length).toBe(25);
+			expect(layout.deviceLibrary.length).toBe(27);
 			expect(layout.deviceLibrary[0]?.id).toMatch(/^starter-/);
 		});
 

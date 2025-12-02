@@ -297,7 +297,7 @@ describe('File Utilities', () => {
 
 			expect(result.name).toBe('Full Layout');
 			expect(result.settings.theme).toBe('light');
-			expect(result.deviceLibrary.length).toBe(25); // Starter library
+			expect(result.deviceLibrary.length).toBe(27); // Starter library
 		});
 
 		it('returns Layout type', () => {

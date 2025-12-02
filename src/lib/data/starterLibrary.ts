@@ -45,9 +45,11 @@ const STARTER_DEVICES: StarterDeviceSpec[] = [
 	{ name: '2U Amplifier', height: 2, category: 'av-media' },
 
 	// Cooling devices
+	{ name: '0.5U Blanking Fan', height: 0.5, category: 'cooling' },
 	{ name: '1U Fan Panel', height: 1, category: 'cooling' },
 
 	// Blank panels
+	{ name: '0.5U Blank', height: 0.5, category: 'blank' },
 	{ name: '1U Blank', height: 1, category: 'blank' },
 	{ name: '2U Blank', height: 2, category: 'blank' },
 

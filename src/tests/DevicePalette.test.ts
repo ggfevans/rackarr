@@ -110,12 +110,12 @@ describe('DevicePalette Component', () => {
 
 	describe('Category Grouping', () => {
 		it('groups devices by category', () => {
-			// Starter library already has devices in all 10 categories
+			// Starter library already has devices in all 11 categories
 			const { container } = render(DevicePalette);
 
-			// Should show category headers for all 10 categories
+			// Should show category headers for all 11 categories
 			const categoryHeaders = container.querySelectorAll('.category-header');
-			expect(categoryHeaders.length).toBe(10);
+			expect(categoryHeaders.length).toBe(11);
 			// Servers and Network headers should exist
 			expect(screen.getByText('Servers')).toBeInTheDocument();
 			expect(screen.getByText('Network')).toBeInTheDocument();

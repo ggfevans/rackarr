@@ -6,9 +6,9 @@ import { createLayout } from '$lib/utils/serialization';
 
 describe('Starter Device Library', () => {
 	describe('getStarterLibrary', () => {
-		it('returns 22 devices', () => {
+		it('returns 25 devices', () => {
 			const devices = getStarterLibrary();
-			expect(devices).toHaveLength(22);
+			expect(devices).toHaveLength(25);
 		});
 
 		it('most categories have at least one starter device', () => {
@@ -118,13 +118,32 @@ describe('Starter Device Library', () => {
 			expect(blanks.some((d) => d.name === '1U Blank')).toBe(true);
 			expect(blanks.some((d) => d.name === '2U Blank')).toBe(true);
 		});
+
+		it('includes shelf devices', () => {
+			const devices = getStarterLibrary();
+			const shelves = devices.filter((d) => d.category === 'shelf');
+
+			expect(shelves.length).toBe(3);
+			expect(shelves.some((d) => d.name === '1U Shelf' && d.height === 1)).toBe(true);
+			expect(shelves.some((d) => d.name === '2U Shelf' && d.height === 2)).toBe(true);
+			expect(shelves.some((d) => d.name === '4U Shelf' && d.height === 4)).toBe(true);
+		});
+
+		it('shelf devices have correct colour', () => {
+			const devices = getStarterLibrary();
+			const shelves = devices.filter((d) => d.category === 'shelf');
+
+			shelves.forEach((shelf) => {
+				expect(shelf.colour).toBe('#8B4513');
+			});
+		});
 	});
 
 	describe('Layout integration', () => {
 		it('new layout includes starter library', () => {
 			const layout = createLayout();
 
-			expect(layout.deviceLibrary.length).toBe(22);
+			expect(layout.deviceLibrary.length).toBe(25);
 			expect(layout.deviceLibrary[0]?.id).toMatch(/^starter-/);
 		});
 

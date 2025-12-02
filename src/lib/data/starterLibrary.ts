@@ -51,6 +51,11 @@ const STARTER_DEVICES: StarterDeviceSpec[] = [
 	{ name: '1U Blank', height: 1, category: 'blank' },
 	{ name: '2U Blank', height: 2, category: 'blank' },
 
+	// Shelf devices
+	{ name: '1U Shelf', height: 1, category: 'shelf' },
+	{ name: '2U Shelf', height: 2, category: 'shelf' },
+	{ name: '4U Shelf', height: 4, category: 'shelf' },
+
 	// Other/Generic devices
 	{ name: '1U Generic', height: 1, category: 'other' },
 	{ name: '2U Generic', height: 2, category: 'other' }

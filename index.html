@@ -5,9 +5,33 @@
 		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
 		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
 		<title>Rackarr - Rack Layout Designer</title>
+		<!-- SPA redirect handler for GitHub Pages -->
+		<script>
+			(function () {
+				var redirect = sessionStorage.redirect;
+				delete sessionStorage.redirect;
+				if (redirect && redirect !== location.href) {
+					history.replaceState(null, null, redirect);
+				}
+			})();
+		</script>
 	</head>
 	<body>
 		<div id="app"></div>
 		<script type="module" src="/src/main.ts"></script>
+		<!-- GoatCounter Analytics - disable in development -->
+		<script>
+			if (location.hostname === 'localhost' || location.hostname === '127.0.0.1') {
+				window.goatcounter = { no_onload: true };
+			}
+		</script>
+		<script
+			data-goatcounter="https://rackarr.goatcounter.com/count"
+			async
+			src="//gc.zgo.at/count.js"
+		></script>
+		<noscript>
+			<img src="https://rackarr.goatcounter.com/count?p=/rackarr/" />
+		</noscript>
 	</body>
 </html>

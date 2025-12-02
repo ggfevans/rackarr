@@ -111,7 +111,20 @@ npm run lint         # ESLint check
 
 ## Repository
 
-| Location | URL                                              |
-| -------- | ------------------------------------------------ |
-| Primary  | https://git.falcon-wahoe.ts.net/ggfevans/rackarr |
-| Mirror   | https://github.com/ggfevans/rackarr              |
+| Location  | URL                                              |
+| --------- | ------------------------------------------------ |
+| Live Demo | https://ggfevans.github.io/rackarr/              |
+| Primary   | https://git.falcon-wahoe.ts.net/ggfevans/rackarr |
+| Mirror    | https://github.com/ggfevans/rackarr              |
+
+## Deployment
+
+GitHub Pages deployment is automated via GitHub Actions on push to `main`.
+
+**Manual deploy:** Push to GitHub mirror triggers deployment:
+
+```bash
+git push github main
+```
+
+**Analytics:** GoatCounter at `rackarr.goatcounter.com` (privacy-focused, no cookies)

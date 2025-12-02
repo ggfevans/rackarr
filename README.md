@@ -4,6 +4,8 @@
 
 A browser-based visual tool for planning and documenting server rack layouts. Design your homelab rack configurations with an intuitive drag-and-drop interface, then export them for documentation.
 
+**[Live Demo](https://ggfevans.github.io/rackarr/)**
+
 ## Features
 
 - **Visual Rack Editor**: Single rack editing with heights from 1U to 100U (multi-rack support planned for v0.3)
@@ -116,6 +118,17 @@ Rackarr saves layouts as JSON files with the `.rackarr.json` extension:
 ## Contributing
 
 See [CONTRIBUTING.md](CONTRIBUTING.md) for development setup and guidelines.
+
+## Privacy & Analytics
+
+The hosted demo uses [GoatCounter](https://www.goatcounter.com/) for basic, privacy-focused analytics:
+
+- **No cookies** - No consent banner needed
+- **No personal data** - Only page views, referrers, and browser/device stats
+- **Open source** - GoatCounter is fully open source
+- **Minimal tracking** - Just basic usage metrics to understand if people find this useful
+
+Self-hosted or local instances have no analytics. The GoatCounter script only runs on the GitHub Pages demo.
 
 ## License
 

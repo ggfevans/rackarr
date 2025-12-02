@@ -3,11 +3,234 @@
  * JSON serialization, deserialization, and validation
  */
 
+import { z } from 'zod';
 import type { Layout, Device, Rack } from '$lib/types';
 import { CURRENT_VERSION } from '$lib/types/constants';
 import { getDeviceURange, doRangesOverlap } from './collision';
 import { getStarterLibrary } from '$lib/data/starterLibrary';
 import { migrateLayout } from './migration';
+
+/**
+ * Zod validation result type
+ */
+export interface ZodValidationResult {
+	success: boolean;
+	errors: string[];
+}
+
+/**
+ * Compatible Device schema using existing naming conventions
+ * (id/height instead of spec's slug/u_height)
+ */
+const CompatDeviceSchema = z.object({
+	id: z.string().min(1),
+	name: z.string().min(1, { message: 'Device name is required' }),
+	height: z.number().min(0.5).max(100).multipleOf(0.5),
+	colour: z.string().regex(/^#[a-fA-F0-9]{6}$/),
+	category: z.enum([
+		'server',
+		'network',
+		'patch-panel',
+		'power',
+		'storage',
+		'kvm',
+		'av-media',
+		'cooling',
+		'shelf',
+		'blank',
+		'other'
+	]),
+	notes: z.string().optional(),
+	manufacturer: z.string().max(100).optional(),
+	model: z.string().max(100).optional(),
+	part_number: z.string().max(50).optional(),
+	airflow: z
+		.enum([
+			'front-to-rear',
+			'rear-to-front',
+			'left-to-right',
+			'right-to-left',
+			'side-to-rear',
+			'rear-to-side',
+			'bottom-to-top',
+			'top-to-bottom',
+			'passive',
+			'mixed'
+		])
+		.optional(),
+	weight: z.number().min(0).optional(),
+	weight_unit: z.enum(['kg', 'g', 'lb', 'oz']).optional(),
+	is_full_depth: z.boolean().optional(),
+	face: z.enum(['front', 'rear', 'both']).optional(),
+	images: z
+		.object({
+			front: z.string().optional(),
+			rear: z.string().optional()
+		})
+		.optional()
+});
+
+/**
+ * Compatible PlacedDevice schema using libraryId instead of slug
+ */
+const CompatPlacedDeviceSchema = z.object({
+	libraryId: z.string(),
+	position: z.number().int().min(1),
+	face: z.enum(['front', 'rear', 'both']).optional()
+});
+
+/**
+ * Compatible Rack schema
+ */
+const CompatRackSchema = z.object({
+	id: z.string().min(1),
+	name: z.string().min(1),
+	height: z.number().int().min(1).max(100),
+	width: z.number().int(),
+	position: z.number().int().min(0),
+	view: z.enum(['front', 'rear']),
+	devices: z.array(CompatPlacedDeviceSchema),
+	form_factor: z
+		.enum([
+			'4-post-cabinet',
+			'4-post-frame',
+			'2-post-frame',
+			'wall-cabinet',
+			'wall-frame',
+			'wall-frame-vertical',
+			'wall-cabinet-vertical'
+		])
+		.optional(),
+	desc_units: z.boolean().optional(),
+	starting_unit: z.number().int().min(1).optional()
+});
+
+/**
+ * Compatible Layout schema for validation
+ */
+const CompatLayoutSchema = z.object({
+	version: z.string(),
+	name: z.string().min(1, { message: 'Layout name is required' }),
+	created: z.string().datetime({ message: 'Created must be a valid ISO datetime' }),
+	modified: z.string().datetime({ message: 'Modified must be a valid ISO datetime' }),
+	settings: z.object({
+		theme: z.enum(['dark', 'light']),
+		view: z.enum(['front', 'rear']).optional(),
+		displayMode: z.enum(['label', 'image']).optional(),
+		showLabelsOnImages: z.boolean().optional()
+	}),
+	deviceLibrary: z.array(CompatDeviceSchema),
+	racks: z.array(CompatRackSchema)
+});
+
+/**
+ * Schema using spec naming (slug, u_height) for import validation
+ */
+const SpecDeviceSchema = z.object({
+	slug: z.string().regex(/^[-a-z0-9_]+$/, { message: 'Slug must be lowercase with hyphens only' }),
+	name: z.string().min(1),
+	u_height: z.number().min(0.5).max(100).multipleOf(0.5),
+	category: z.enum([
+		'server',
+		'network',
+		'patch-panel',
+		'power',
+		'storage',
+		'kvm',
+		'av-media',
+		'cooling',
+		'shelf',
+		'blank',
+		'other'
+	]),
+	colour: z.string().regex(/^#[a-fA-F0-9]{6}$/),
+	is_full_depth: z.boolean().optional(),
+	manufacturer: z.string().max(100).optional(),
+	model: z.string().max(100).optional(),
+	part_number: z.string().max(50).optional(),
+	airflow: z
+		.enum([
+			'front-to-rear',
+			'rear-to-front',
+			'left-to-right',
+			'right-to-left',
+			'side-to-rear',
+			'rear-to-side',
+			'bottom-to-top',
+			'top-to-bottom',
+			'passive',
+			'mixed'
+		])
+		.optional(),
+	weight: z.number().min(0).optional(),
+	weight_unit: z.enum(['kg', 'g', 'lb', 'oz']).optional(),
+	face: z.enum(['front', 'rear', 'both']).optional(),
+	images: z
+		.object({
+			front: z.string().optional(),
+			rear: z.string().optional()
+		})
+		.optional(),
+	notes: z.string().optional()
+});
+
+const SpecLayoutSchema = z.object({
+	version: z.string(),
+	name: z.string().min(1, { message: 'Layout name is required' }),
+	created: z.string().datetime({ message: 'Created must be a valid ISO datetime' }),
+	modified: z.string().datetime({ message: 'Modified must be a valid ISO datetime' }),
+	settings: z.object({
+		theme: z.enum(['dark', 'light']),
+		view: z.enum(['front', 'rear']).optional(),
+		displayMode: z.enum(['label', 'image']).optional(),
+		showLabelsOnImages: z.boolean().optional()
+	}),
+	deviceLibrary: z.array(SpecDeviceSchema),
+	racks: z.array(CompatRackSchema)
+});
+
+/**
+ * Format Zod errors into user-friendly messages
+ */
+function formatZodErrors(error: z.ZodError): string[] {
+	// Use issues property (errors is an alias)
+	const issues = error?.issues ?? error?.errors ?? [];
+	return issues.map((e) => {
+		const path = e.path.join('.');
+		return path ? `${path}: ${e.message}` : e.message;
+	});
+}
+
+/**
+ * Validate a layout using Zod schema
+ * @param obj - Object to validate
+ * @returns Validation result with success flag and error messages
+ */
+export function validateLayoutWithZod(obj: unknown): ZodValidationResult {
+	// First try the compatible schema (existing naming)
+	const compatResult = CompatLayoutSchema.safeParse(obj);
+	if (compatResult.success) {
+		return { success: true, errors: [] };
+	}
+
+	// Then try the spec schema (slug/u_height naming)
+	const specResult = SpecLayoutSchema.safeParse(obj);
+	if (specResult.success) {
+		return { success: true, errors: [] };
+	}
+
+	// Return errors - prefer compat errors, fall back to spec errors
+	const errors = compatResult.error
+		? formatZodErrors(compatResult.error)
+		: specResult.error
+			? formatZodErrors(specResult.error)
+			: ['Unknown validation error'];
+
+	return {
+		success: false,
+		errors
+	};
+}
 
 /**
  * Create a new empty layout

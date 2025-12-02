@@ -418,4 +418,95 @@ describe('Layout Serialization', () => {
 			expect(result.racks[0]!.devices[0]!.face).toBe('both');
 		});
 	});
+
+	describe('Zod Validation', () => {
+		it('validates layout structure with Zod', async () => {
+			// Dynamic import to get the new function
+			const { validateLayoutWithZod } = await import('$lib/utils/serialization');
+			const layout = createLayout('Test');
+			const result = validateLayoutWithZod(layout);
+
+			expect(result.success).toBe(true);
+		});
+
+		it('returns errors for invalid layout with Zod', async () => {
+			const { validateLayoutWithZod } = await import('$lib/utils/serialization');
+			const invalidLayout = {
+				version: '0.2.0',
+				name: '', // Empty name should fail
+				created: 'not-a-date', // Invalid date format
+				modified: mockDate,
+				settings: { theme: 'dark' },
+				deviceLibrary: [],
+				racks: []
+			};
+
+			const result = validateLayoutWithZod(invalidLayout);
+			expect(result.success).toBe(false);
+			if (!result.success) {
+				expect(result.errors.length).toBeGreaterThan(0);
+			}
+		});
+
+		it('provides user-friendly error messages', async () => {
+			const { validateLayoutWithZod } = await import('$lib/utils/serialization');
+			const invalidLayout = {
+				version: '0.2.0',
+				name: '',
+				created: mockDate,
+				modified: mockDate,
+				settings: { theme: 'dark' },
+				deviceLibrary: [],
+				racks: []
+			};
+
+			const result = validateLayoutWithZod(invalidLayout);
+			expect(result.success).toBe(false);
+			if (!result.success) {
+				// Error message should be readable
+				expect(result.errors[0]).toContain('name');
+			}
+		});
+
+		it('catches issues manual validation might miss', async () => {
+			const { validateLayoutWithZod } = await import('$lib/utils/serialization');
+			// Invalid datetime format but other fields valid
+			const subtlyInvalid = {
+				version: '0.2.0',
+				name: 'Test',
+				created: '2025-01-15', // Missing time component
+				modified: mockDate,
+				settings: { theme: 'dark' },
+				deviceLibrary: [],
+				racks: []
+			};
+
+			const result = validateLayoutWithZod(subtlyInvalid);
+			expect(result.success).toBe(false);
+		});
+
+		it('validates device library entries with Zod schema', async () => {
+			const { validateLayoutWithZod } = await import('$lib/utils/serialization');
+			const layoutWithInvalidDevice = {
+				version: '0.2.0',
+				name: 'Test',
+				created: mockDate,
+				modified: mockDate,
+				settings: { theme: 'dark' },
+				deviceLibrary: [
+					{
+						slug: 'INVALID_SLUG', // Uppercase not allowed in slug
+						name: 'Device',
+						u_height: 1,
+						category: 'server',
+						colour: '#4A90D9'
+					}
+				],
+				racks: []
+			};
+
+			const result = validateLayoutWithZod(layoutWithInvalidDevice);
+			expect(result.success).toBe(false);
+		});
+	});
 });

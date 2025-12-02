@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { migrateLayout } from './migration';
+import { migrateLayout } from '$lib/utils/migration';
 import type { Layout } from '$lib/types';
 
 describe('migrateLayout', () => {

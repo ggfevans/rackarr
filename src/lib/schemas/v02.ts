@@ -88,6 +88,32 @@ export const WeightUnitSchemaV02 = z.enum(['kg', 'lb']);
 export const DisplayModeSchemaV02 = z.enum(['label', 'image']);
 
 // ============================================================================
+// Utility Functions
+// ============================================================================
+
+/**
+ * Validates that all slugs in an array are unique
+ * @param device_types - Array of objects with slug property
+ * @returns Array of duplicate slugs (empty if all unique)
+ */
+export function validateSlugUniqueness(device_types: { slug: string }[]): string[] {
+	const slugCounts = new Map<string, number>();
+
+	for (const dt of device_types) {
+		slugCounts.set(dt.slug, (slugCounts.get(dt.slug) ?? 0) + 1);
+	}
+
+	const duplicates: string[] = [];
+	for (const [slug, count] of slugCounts) {
+		if (count > 1) {
+			duplicates.push(slug);
+		}
+	}
+
+	return duplicates;
+}
+
+// ============================================================================
 // Composite Schemas
 // ============================================================================
 
@@ -158,14 +184,28 @@ export const LayoutSettingsSchemaV02 = z.object({
 });
 
 /**
- * Complete layout schema
+ * Complete layout schema (base, without refinements)
  */
-export const LayoutSchemaV02 = z.object({
+const LayoutSchemaV02Base = z.object({
 	version: z.string(),
 	name: z.string().min(1, 'Name is required').max(100, 'Name must be 100 characters or less'),
 	rack: RackSchemaV02,
 	device_types: z.array(DeviceTypeSchemaV02),
 	settings: LayoutSettingsSchemaV02
+});
+
+/**
+ * Complete layout schema with slug uniqueness validation
+ */
+export const LayoutSchemaV02 = LayoutSchemaV02Base.superRefine((data, ctx) => {
+	const duplicates = validateSlugUniqueness(data.device_types);
+	if (duplicates.length > 0) {
+		ctx.addIssue({
+			code: z.ZodIssueCode.custom,
+			message: `Duplicate device type slugs: ${duplicates.join(', ')}`,
+			path: ['device_types']
+		});
+	}
 });
 
 // ============================================================================

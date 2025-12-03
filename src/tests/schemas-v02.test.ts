@@ -16,7 +16,8 @@ import {
 	DeviceSchemaV02,
 	RackSchemaV02,
 	LayoutSettingsSchemaV02,
-	LayoutSchemaV02
+	LayoutSchemaV02,
+	validateSlugUniqueness
 } from '$lib/schemas/v02';
 
 describe('v0.2 Zod Schemas', () => {
@@ -609,6 +610,178 @@ describe('v0.2 Zod Schemas', () => {
 				}
 			});
 			expect(result.success).toBe(false);
+		});
+
+		it('accepts layout with unique slugs', () => {
+			const result = LayoutSchemaV02.safeParse({
+				version: '0.2.0',
+				name: 'Test Layout',
+				rack: {
+					name: 'Main Rack',
+					height: 42,
+					width: 19,
+					desc_units: false,
+					form_factor: '4-post-cabinet',
+					starting_unit: 1,
+					position: 0,
+					devices: []
+				},
+				device_types: [
+					{
+						slug: 'device-1',
+						u_height: 1,
+						rackarr: { colour: '#000000', category: 'server' }
+					},
+					{
+						slug: 'device-2',
+						u_height: 2,
+						rackarr: { colour: '#111111', category: 'storage' }
+					}
+				],
+				settings: {
+					display_mode: 'label',
+					show_labels_on_images: true
+				}
+			});
+			expect(result.success).toBe(true);
+		});
+
+		it('rejects layout with duplicate slugs', () => {
+			const result = LayoutSchemaV02.safeParse({
+				version: '0.2.0',
+				name: 'Test Layout',
+				rack: {
+					name: 'Main Rack',
+					height: 42,
+					width: 19,
+					desc_units: false,
+					form_factor: '4-post-cabinet',
+					starting_unit: 1,
+					position: 0,
+					devices: []
+				},
+				device_types: [
+					{
+						slug: 'duplicate-slug',
+						u_height: 1,
+						rackarr: { colour: '#000000', category: 'server' }
+					},
+					{
+						slug: 'duplicate-slug',
+						u_height: 2,
+						rackarr: { colour: '#111111', category: 'storage' }
+					}
+				],
+				settings: {
+					display_mode: 'label',
+					show_labels_on_images: true
+				}
+			});
+			expect(result.success).toBe(false);
+			if (!result.success) {
+				expect(result.error.issues[0].message).toContain('Duplicate device type slugs');
+			}
+		});
+
+		it('rejects layout with multiple duplicate slugs', () => {
+			const result = LayoutSchemaV02.safeParse({
+				version: '0.2.0',
+				name: 'Test Layout',
+				rack: {
+					name: 'Main Rack',
+					height: 42,
+					width: 19,
+					desc_units: false,
+					form_factor: '4-post-cabinet',
+					starting_unit: 1,
+					position: 0,
+					devices: []
+				},
+				device_types: [
+					{
+						slug: 'slug-a',
+						u_height: 1,
+						rackarr: { colour: '#000000', category: 'server' }
+					},
+					{
+						slug: 'slug-a',
+						u_height: 2,
+						rackarr: { colour: '#111111', category: 'storage' }
+					},
+					{
+						slug: 'slug-b',
+						u_height: 1,
+						rackarr: { colour: '#222222', category: 'networking' }
+					},
+					{
+						slug: 'slug-b',
+						u_height: 2,
+						rackarr: { colour: '#333333', category: 'power' }
+					}
+				],
+				settings: {
+					display_mode: 'label',
+					show_labels_on_images: true
+				}
+			});
+			expect(result.success).toBe(false);
+			if (!result.success) {
+				const errorMsg = result.error.issues[0].message;
+				expect(errorMsg).toContain('slug-a');
+				expect(errorMsg).toContain('slug-b');
+			}
+		});
+	});
+
+	describe('validateSlugUniqueness', () => {
+		it('returns empty array for empty input', () => {
+			const result = validateSlugUniqueness([]);
+			expect(result).toEqual([]);
+		});
+
+		it('returns empty array when all slugs are unique', () => {
+			const result = validateSlugUniqueness([
+				{ slug: 'device-1' },
+				{ slug: 'device-2' },
+				{ slug: 'device-3' }
+			]);
+			expect(result).toEqual([]);
+		});
+
+		it('returns duplicate slug when one exists', () => {
+			const result = validateSlugUniqueness([
+				{ slug: 'device-1' },
+				{ slug: 'device-1' },
+				{ slug: 'device-2' }
+			]);
+			expect(result).toEqual(['device-1']);
+		});
+
+		it('returns multiple duplicates when they exist', () => {
+			const result = validateSlugUniqueness([
+				{ slug: 'device-a' },
+				{ slug: 'device-a' },
+				{ slug: 'device-b' },
+				{ slug: 'device-b' },
+				{ slug: 'device-c' }
+			]);
+			expect(result).toHaveLength(2);
+			expect(result).toContain('device-a');
+			expect(result).toContain('device-b');
+		});
+
+		it('returns slug once even if it appears three times', () => {
+			const result = validateSlugUniqueness([
+				{ slug: 'device-1' },
+				{ slug: 'device-1' },
+				{ slug: 'device-1' }
+			]);
+			expect(result).toEqual(['device-1']);
+		});
+
+		it('handles single device type', () => {
+			const result = validateSlugUniqueness([{ slug: 'single-device' }]);
+			expect(result).toEqual([]);
 		});
 	});
 });

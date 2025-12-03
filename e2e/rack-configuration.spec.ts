@@ -97,21 +97,31 @@ test.describe('Rack Configuration', () => {
 		await expect(firstLabel).toHaveText('1');
 	});
 
-	test('rack with ascending units shows U1 at bottom', async ({ page }) => {
+	test('rack with ascending units shows U1 at bottom (default desc_units=false, starting_unit=1)', async ({
+		page
+	}) => {
 		await openNewRackForm(page);
 
 		await page.fill('#rack-name', 'Ascending Rack');
 		await page.click('.height-btn:has-text("Custom")');
 		await page.fill('#custom-height', '10');
 
-		// Ensure descending is NOT checked (default)
+		// Uses defaults: desc_units=false (ascending), starting_unit=1
 		await page.click('button:has-text("Create")');
 
 		await expect(page.locator('.rack-container')).toBeVisible();
 
-		// In ascending mode, U1 is at the bottom (last in DOM order typically)
+		// Verify defaults are applied:
+		// - starting_unit=1: labels should include "1" and "10" (not higher)
+		// - desc_units=false: U1 at bottom, U10 at top
 		const uLabels = page.locator('.u-label');
+		const count = await uLabels.count();
+		expect(count).toBe(10);
+
+		// First label (top) should be "10", last label (bottom) should be "1"
+		const firstLabel = uLabels.first();
 		const lastLabel = uLabels.last();
+		await expect(firstLabel).toHaveText('10');
 		await expect(lastLabel).toHaveText('1');
 	});
 

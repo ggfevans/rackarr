@@ -27,6 +27,30 @@
 	const uiStore = getUIStore();
 	const toastStore = getToastStore();
 
+	/**
+	 * Perform undo with toast notification
+	 */
+	function performUndo() {
+		if (!layoutStore.canUndo) return;
+
+		// Capture description before undo
+		const desc = layoutStore.undoDescription?.replace('Undo: ', '') ?? 'action';
+		layoutStore.undo();
+		toastStore.showToast(`Undid: ${desc}`, 'info');
+	}
+
+	/**
+	 * Perform redo with toast notification
+	 */
+	function performRedo() {
+		if (!layoutStore.canRedo) return;
+
+		// Capture description before redo
+		const desc = layoutStore.redoDescription?.replace('Redo: ', '') ?? 'action';
+		layoutStore.redo();
+		toastStore.showToast(`Redid: ${desc}`, 'info');
+	}
+
 	// Define all shortcuts
 	function getShortcuts(): ShortcutHandler[] {
 		return [
@@ -38,6 +62,42 @@
 					uiStore.closeLeftDrawer();
 					uiStore.closeRightDrawer();
 				}
+			},
+
+			// Ctrl/Cmd+Z - undo
+			{
+				key: 'z',
+				ctrl: true,
+				action: () => performUndo()
+			},
+			{
+				key: 'z',
+				meta: true,
+				action: () => performUndo()
+			},
+
+			// Ctrl/Cmd+Shift+Z or Ctrl+Y - redo
+			{
+				key: 'z',
+				ctrl: true,
+				shift: true,
+				action: () => performRedo()
+			},
+			{
+				key: 'z',
+				meta: true,
+				shift: true,
+				action: () => performRedo()
+			},
+			{
+				key: 'y',
+				ctrl: true,
+				action: () => performRedo()
+			},
+			{
+				key: 'y',
+				meta: true,
+				action: () => performRedo()
 			},
 
 			// Delete / Backspace - delete selected item

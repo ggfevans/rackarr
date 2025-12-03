@@ -57,8 +57,8 @@ describe('HelpPanel', () => {
 		it('shows Ctrl/Cmd shortcuts', () => {
 			render(HelpPanel, { props: { open: true } });
 
-			// Should show save, load, export shortcuts
-			expect(screen.getByText(/\+\s*s/i)).toBeInTheDocument();
+			// Should show save shortcut (Ctrl/Cmd + S)
+			expect(screen.getByText('Ctrl/Cmd + S')).toBeInTheDocument();
 		});
 	});
 

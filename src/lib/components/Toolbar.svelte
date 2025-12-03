@@ -16,9 +16,13 @@
 		IconHelp,
 		IconLabel,
 		IconImage,
-		IconLogo
+		IconLogo,
+		IconUndo,
+		IconRedo
 	} from './icons';
 	import type { DisplayMode } from '$lib/types';
+	import { getLayoutStore } from '$lib/stores/layout.svelte';
+	import { getToastStore } from '$lib/stores/toast.svelte';
 
 	interface Props {
 		hasSelection?: boolean;
@@ -57,6 +61,23 @@
 	}: Props = $props();
 
 	const displayModeLabel = $derived(displayMode === 'label' ? 'Label' : 'Image');
+
+	const layoutStore = getLayoutStore();
+	const toastStore = getToastStore();
+
+	function handleUndo() {
+		if (!layoutStore.canUndo) return;
+		const desc = layoutStore.undoDescription?.replace('Undo: ', '') ?? 'action';
+		layoutStore.undo();
+		toastStore.showToast(`Undid: ${desc}`, 'info');
+	}
+
+	function handleRedo() {
+		if (!layoutStore.canRedo) return;
+		const desc = layoutStore.redoDescription?.replace('Redo: ', '') ?? 'action';
+		layoutStore.redo();
+		toastStore.showToast(`Redid: ${desc}`, 'info');
+	}
 </script>
 
 <header class="toolbar">
@@ -136,6 +157,32 @@
 				</label>
 			</Tooltip>
 		{/if}
+
+		<div class="separator" aria-hidden="true"></div>
+
+		<Tooltip text={layoutStore.undoDescription ?? 'Undo'} shortcut="Ctrl+Z" position="bottom">
+			<button
+				class="toolbar-action-btn"
+				aria-label={layoutStore.undoDescription ?? 'Undo'}
+				disabled={!layoutStore.canUndo}
+				onclick={handleUndo}
+			>
+				<IconUndo size={16} />
+				<span>Undo</span>
+			</button>
+		</Tooltip>
+
+		<Tooltip text={layoutStore.redoDescription ?? 'Redo'} shortcut="Ctrl+Shift+Z" position="bottom">
+			<button
+				class="toolbar-action-btn"
+				aria-label={layoutStore.redoDescription ?? 'Redo'}
+				disabled={!layoutStore.canRedo}
+				onclick={handleRedo}
+			>
+				<IconRedo size={16} />
+				<span>Redo</span>
+			</button>
+		</Tooltip>
 
 		<div class="separator" aria-hidden="true"></div>
 

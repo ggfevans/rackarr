@@ -1,9 +1,17 @@
 # CLAUDE.md — Rackarr
 
 **Project:** Rackarr — Rack Layout Designer for Homelabbers
-**Version:** 0.3.0
+**Version:** 0.3.1
 
 ---
+
+## v0.3.1 Features
+
+- **Undo/Redo** with Ctrl+Z / Ctrl+Shift+Z (or Ctrl+Y)
+- Toolbar buttons for Undo/Redo with tooltips
+- Toast notifications for undo/redo actions
+- Command pattern with history stack (50 max depth)
+- All features from v0.3.0
 
 ## v0.3.0 Features
 
@@ -97,17 +105,20 @@ npm run lint         # ESLint check
 
 ### Keyboard Shortcuts
 
-| Key      | Action                  |
-| -------- | ----------------------- |
-| `Ctrl+S` | Save layout             |
-| `Ctrl+O` | Load layout             |
-| `Ctrl+E` | Export                  |
-| `I`      | Toggle display mode     |
-| `F`      | Fit all                 |
-| `Delete` | Delete selection        |
-| `?`      | Show help               |
-| `Escape` | Clear selection / close |
-| `↑↓`     | Move device in rack     |
+| Key            | Action                  |
+| -------------- | ----------------------- |
+| `Ctrl+Z`       | Undo                    |
+| `Ctrl+Shift+Z` | Redo                    |
+| `Ctrl+Y`       | Redo (alternative)      |
+| `Ctrl+S`       | Save layout             |
+| `Ctrl+O`       | Load layout             |
+| `Ctrl+E`       | Export                  |
+| `I`            | Toggle display mode     |
+| `F`            | Fit all                 |
+| `Delete`       | Delete selection        |
+| `?`            | Show help               |
+| `Escape`       | Clear selection / close |
+| `↑↓`           | Move device in rack     |
 
 ---
 

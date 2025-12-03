@@ -26,6 +26,21 @@ import {
 } from '$lib/stores/layout-helpers-v02';
 import { migrateToV02 } from '$lib/utils/migrate-v02';
 import { migrateLayout } from '$lib/utils/migration';
+import { getHistoryStore } from './history.svelte';
+import {
+	createAddDeviceTypeCommand,
+	createUpdateDeviceTypeCommand,
+	createDeleteDeviceTypeCommand,
+	createPlaceDeviceCommand,
+	createMoveDeviceCommand,
+	createRemoveDeviceCommand,
+	createUpdateDeviceFaceCommand,
+	createUpdateRackCommand,
+	createClearRackCommand,
+	type DeviceTypeCommandStore,
+	type DeviceCommandStore,
+	type RackCommandStore
+} from './commands';
 
 // Module-level state (using $state rune)
 let layout = $state<LayoutV02>(createLayoutV02('Untitled'));
@@ -148,7 +163,50 @@ export function getLayoutStore() {
 
 		// Dirty tracking
 		markDirty,
-		markClean
+		markClean,
+
+		// Raw actions for undo/redo system (bypass dirty tracking)
+		addDeviceTypeRaw,
+		removeDeviceTypeRaw,
+		updateDeviceTypeRaw,
+		placeDeviceRaw,
+		removeDeviceAtIndexRaw,
+		moveDeviceRaw,
+		updateDeviceFaceRaw,
+		getDeviceAtIndex,
+		getPlacedDevicesForType,
+		updateRackRaw,
+		replaceRackRaw,
+		clearRackDevicesRaw,
+		restoreRackDevicesRaw,
+
+		// Recorded actions (use undo/redo)
+		addDeviceTypeRecorded,
+		updateDeviceTypeRecorded,
+		deleteDeviceTypeRecorded,
+		placeDeviceRecorded,
+		moveDeviceRecorded,
+		removeDeviceRecorded,
+		updateDeviceFaceRecorded,
+		updateRackRecorded,
+		clearRackRecorded,
+
+		// Undo/Redo
+		undo,
+		redo,
+		clearHistory,
+		get canUndo() {
+			return getHistoryStore().canUndo;
+		},
+		get canRedo() {
+			return getHistoryStore().canRedo;
+		},
+		get undoDescription() {
+			return getHistoryStore().undoDescription;
+		},
+		get redoDescription() {
+			return getHistoryStore().redoDescription;
+		}
 	};
 }
 
@@ -610,4 +668,491 @@ function updateShowLabelsOnImages(value: boolean): void {
 		settings: { ...layout.settings, show_labels_on_images: value }
 	};
 	isDirty = true;
+}
+
+// =============================================================================
+// Raw Actions for Undo/Redo System
+// These bypass dirty tracking and validation - used by the command pattern
+// =============================================================================
+
+/**
+ * Add a device type directly (raw)
+ * @param deviceType - Device type to add
+ */
+function addDeviceTypeRaw(deviceType: DeviceTypeV02): void {
+	layout = {
+		...layout,
+		device_types: [...layout.device_types, deviceType]
+	};
+}
+
+/**
+ * Remove a device type directly (raw)
+ * Also removes any placed devices of this type
+ * @param slug - Device type slug to remove
+ */
+function removeDeviceTypeRaw(slug: string): void {
+	layout = {
+		...layout,
+		device_types: layout.device_types.filter((dt) => dt.slug !== slug),
+		rack: {
+			...layout.rack,
+			devices: layout.rack.devices.filter((d) => d.device_type !== slug)
+		}
+	};
+}
+
+/**
+ * Update a device type directly (raw)
+ * @param slug - Device type slug to update
+ * @param updates - Properties to update
+ */
+function updateDeviceTypeRaw(slug: string, updates: Partial<DeviceTypeV02>): void {
+	layout = {
+		...layout,
+		device_types: layout.device_types.map((dt) => (dt.slug === slug ? { ...dt, ...updates } : dt))
+	};
+}
+
+/**
+ * Place a device directly (raw) - no validation
+ * @param device - Device to place
+ * @returns Index where device was placed
+ */
+function placeDeviceRaw(device: DeviceV02): number {
+	const newDevices = [...layout.rack.devices, device];
+	layout = {
+		...layout,
+		rack: {
+			...layout.rack,
+			devices: newDevices
+		}
+	};
+	return newDevices.length - 1;
+}
+
+/**
+ * Remove a device at index directly (raw)
+ * @param index - Device index to remove
+ * @returns The removed device or undefined
+ */
+function removeDeviceAtIndexRaw(index: number): DeviceV02 | undefined {
+	if (index < 0 || index >= layout.rack.devices.length) return undefined;
+
+	const removed = layout.rack.devices[index];
+	layout = {
+		...layout,
+		rack: {
+			...layout.rack,
+			devices: layout.rack.devices.filter((_, i) => i !== index)
+		}
+	};
+	return removed;
+}
+
+/**
+ * Move a device directly (raw) - no collision checking
+ * @param index - Device index
+ * @param newPosition - New position
+ * @returns true if moved
+ */
+function moveDeviceRaw(index: number, newPosition: number): boolean {
+	if (index < 0 || index >= layout.rack.devices.length) return false;
+
+	layout = {
+		...layout,
+		rack: {
+			...layout.rack,
+			devices: layout.rack.devices.map((d, i) =>
+				i === index ? { ...d, position: newPosition } : d
+			)
+		}
+	};
+	return true;
+}
+
+/**
+ * Update a device's face directly (raw)
+ * @param index - Device index
+ * @param face - New face value
+ */
+function updateDeviceFaceRaw(index: number, face: 'front' | 'rear'): void {
+	if (index < 0 || index >= layout.rack.devices.length) return;
+
+	layout = {
+		...layout,
+		rack: {
+			...layout.rack,
+			devices: layout.rack.devices.map((d, i) => (i === index ? { ...d, face } : d))
+		}
+	};
+}
+
+/**
+ * Get a device at a specific index
+ * @param index - Device index
+ * @returns The device or undefined
+ */
+function getDeviceAtIndex(index: number): DeviceV02 | undefined {
+	return layout.rack.devices[index];
+}
+
+/**
+ * Get all placed devices for a device type
+ * @param slug - Device type slug
+ * @returns Array of placed devices
+ */
+function getPlacedDevicesForType(slug: string): DeviceV02[] {
+	return layout.rack.devices.filter((d) => d.device_type === slug);
+}
+
+/**
+ * Update rack settings directly (raw)
+ * @param updates - Settings to update
+ */
+function updateRackRaw(updates: Partial<Omit<RackV02, 'devices' | 'view'>>): void {
+	layout = {
+		...layout,
+		rack: { ...layout.rack, ...updates }
+	};
+	// Sync layout name with rack name
+	if (updates.name !== undefined) {
+		layout = { ...layout, name: updates.name };
+	}
+}
+
+/**
+ * Replace the entire rack directly (raw)
+ * @param newRack - New rack data
+ */
+function replaceRackRaw(newRack: RackV02): void {
+	layout = {
+		...layout,
+		rack: newRack,
+		name: newRack.name
+	};
+}
+
+/**
+ * Clear all devices from the rack directly (raw)
+ * @returns The removed devices
+ */
+function clearRackDevicesRaw(): DeviceV02[] {
+	const removed = [...layout.rack.devices];
+	layout = {
+		...layout,
+		rack: {
+			...layout.rack,
+			devices: []
+		}
+	};
+	return removed;
+}
+
+/**
+ * Restore devices to the rack directly (raw)
+ * @param devices - Devices to restore
+ */
+function restoreRackDevicesRaw(devices: DeviceV02[]): void {
+	layout = {
+		...layout,
+		rack: {
+			...layout.rack,
+			devices: [...devices]
+		}
+	};
+}
+
+// =============================================================================
+// Command Store Adapter
+// Creates an adapter that implements the command store interfaces
+// =============================================================================
+
+function getCommandStoreAdapter(): DeviceTypeCommandStore & DeviceCommandStore & RackCommandStore {
+	return {
+		// DeviceTypeCommandStore
+		addDeviceTypeRaw,
+		removeDeviceTypeRaw,
+		updateDeviceTypeRaw,
+		placeDeviceRaw,
+		removeDeviceAtIndexRaw,
+		getPlacedDevicesForType,
+
+		// DeviceCommandStore
+		moveDeviceRaw,
+		updateDeviceFaceRaw,
+		getDeviceAtIndex,
+
+		// RackCommandStore
+		updateRackRaw,
+		replaceRackRaw,
+		clearRackDevicesRaw,
+		restoreRackDevicesRaw,
+		getRack: () => layout.rack
+	};
+}
+
+// =============================================================================
+// Recorded Actions (with Undo/Redo support)
+// These create commands and execute them through the history system
+// =============================================================================
+
+/**
+ * Add a device type with undo/redo support
+ */
+function addDeviceTypeRecorded(data: CreateDeviceTypeInput): DeviceTypeV02 {
+	const deviceType = createDeviceTypeHelper(data);
+	const history = getHistoryStore();
+	const adapter = getCommandStoreAdapter();
+
+	const command = createAddDeviceTypeCommand(deviceType, adapter);
+	history.execute(command);
+	isDirty = true;
+
+	return deviceType;
+}
+
+/**
+ * Update a device type with undo/redo support
+ */
+function updateDeviceTypeRecorded(slug: string, updates: Partial<DeviceTypeV02>): void {
+	const existing = findDeviceType(layout.device_types, slug);
+	if (!existing) return;
+
+	// Capture before state for the fields being updated
+	const before: Partial<DeviceTypeV02> = {};
+	for (const key of Object.keys(updates) as (keyof DeviceTypeV02)[]) {
+		before[key] = existing[key] as never;
+	}
+
+	const history = getHistoryStore();
+	const adapter = getCommandStoreAdapter();
+
+	const command = createUpdateDeviceTypeCommand(slug, before, updates, adapter);
+	history.execute(command);
+	isDirty = true;
+}
+
+/**
+ * Delete a device type with undo/redo support
+ */
+function deleteDeviceTypeRecorded(slug: string): void {
+	const existing = findDeviceType(layout.device_types, slug);
+	if (!existing) return;
+
+	const placedDevices = getPlacedDevicesForType(slug);
+	const history = getHistoryStore();
+	const adapter = getCommandStoreAdapter();
+
+	const command = createDeleteDeviceTypeCommand(existing, placedDevices, adapter);
+	history.execute(command);
+	isDirty = true;
+}
+
+/**
+ * Place a device with undo/redo support
+ * @returns true if placed successfully
+ */
+function placeDeviceRecorded(
+	deviceTypeSlug: string,
+	position: number,
+	face: DeviceFaceV02 = DEFAULT_DEVICE_FACE
+): boolean {
+	const deviceType = findDeviceType(layout.device_types, deviceTypeSlug);
+	if (!deviceType) return false;
+
+	// Validate bounds
+	if (position < 1 || position + deviceType.u_height - 1 > layout.rack.height) {
+		return false;
+	}
+
+	// Check for collisions
+	for (const existingDevice of layout.rack.devices) {
+		const existingType = findDeviceType(layout.device_types, existingDevice.device_type);
+		if (!existingType) continue;
+
+		const existingStart = existingDevice.position;
+		const existingEnd = existingDevice.position + existingType.u_height - 1;
+		const newStart = position;
+		const newEnd = position + deviceType.u_height - 1;
+
+		if (newStart <= existingEnd && newEnd >= existingStart) {
+			return false; // Collision
+		}
+	}
+
+	const device: DeviceV02 = {
+		device_type: deviceTypeSlug,
+		position,
+		face
+	};
+
+	const history = getHistoryStore();
+	const adapter = getCommandStoreAdapter();
+	const deviceName = deviceType.model ?? deviceType.slug;
+
+	const command = createPlaceDeviceCommand(device, adapter, deviceName);
+	history.execute(command);
+	isDirty = true;
+
+	return true;
+}
+
+/**
+ * Move a device with undo/redo support
+ * @returns true if moved successfully
+ */
+function moveDeviceRecorded(deviceIndex: number, newPosition: number): boolean {
+	if (deviceIndex < 0 || deviceIndex >= layout.rack.devices.length) return false;
+
+	const device = layout.rack.devices[deviceIndex]!;
+	const deviceType = findDeviceType(layout.device_types, device.device_type);
+	if (!deviceType) return false;
+
+	// Validate bounds
+	if (newPosition < 1 || newPosition + deviceType.u_height - 1 > layout.rack.height) {
+		return false;
+	}
+
+	// Check for collisions (excluding device being moved)
+	for (let i = 0; i < layout.rack.devices.length; i++) {
+		if (i === deviceIndex) continue;
+
+		const existingDevice = layout.rack.devices[i]!;
+		const existingType = findDeviceType(layout.device_types, existingDevice.device_type);
+		if (!existingType) continue;
+
+		const existingStart = existingDevice.position;
+		const existingEnd = existingDevice.position + existingType.u_height - 1;
+		const newStart = newPosition;
+		const newEnd = newPosition + deviceType.u_height - 1;
+
+		if (newStart <= existingEnd && newEnd >= existingStart) {
+			return false; // Collision
+		}
+	}
+
+	const oldPosition = device.position;
+	const history = getHistoryStore();
+	const adapter = getCommandStoreAdapter();
+	const deviceName = deviceType.model ?? deviceType.slug;
+
+	const command = createMoveDeviceCommand(
+		deviceIndex,
+		oldPosition,
+		newPosition,
+		adapter,
+		deviceName
+	);
+	history.execute(command);
+	isDirty = true;
+
+	return true;
+}
+
+/**
+ * Remove a device with undo/redo support
+ */
+function removeDeviceRecorded(deviceIndex: number): void {
+	if (deviceIndex < 0 || deviceIndex >= layout.rack.devices.length) return;
+
+	const device = layout.rack.devices[deviceIndex]!;
+	const deviceType = findDeviceType(layout.device_types, device.device_type);
+	const deviceName = deviceType?.model ?? deviceType?.slug ?? 'device';
+
+	const history = getHistoryStore();
+	const adapter = getCommandStoreAdapter();
+
+	const command = createRemoveDeviceCommand(deviceIndex, device, adapter, deviceName);
+	history.execute(command);
+	isDirty = true;
+}
+
+/**
+ * Update device face with undo/redo support
+ */
+function updateDeviceFaceRecorded(deviceIndex: number, face: DeviceFaceV02): void {
+	if (deviceIndex < 0 || deviceIndex >= layout.rack.devices.length) return;
+
+	const device = layout.rack.devices[deviceIndex]!;
+	const oldFace = device.face ?? 'front';
+	const deviceType = findDeviceType(layout.device_types, device.device_type);
+	const deviceName = deviceType?.model ?? deviceType?.slug ?? 'device';
+
+	const history = getHistoryStore();
+	const adapter = getCommandStoreAdapter();
+
+	const command = createUpdateDeviceFaceCommand(deviceIndex, oldFace, face, adapter, deviceName);
+	history.execute(command);
+	isDirty = true;
+}
+
+/**
+ * Update rack settings with undo/redo support
+ */
+function updateRackRecorded(updates: Partial<Omit<RackV02, 'devices' | 'view'>>): void {
+	// Capture before state
+	const before: Partial<Omit<RackV02, 'devices' | 'view'>> = {};
+	for (const key of Object.keys(updates) as (keyof Omit<RackV02, 'devices' | 'view'>)[]) {
+		before[key] = layout.rack[key] as never;
+	}
+
+	const history = getHistoryStore();
+	const adapter = getCommandStoreAdapter();
+
+	const command = createUpdateRackCommand(before, updates, adapter);
+	history.execute(command);
+	isDirty = true;
+}
+
+/**
+ * Clear rack devices with undo/redo support
+ */
+function clearRackRecorded(): void {
+	if (layout.rack.devices.length === 0) return;
+
+	const devices = [...layout.rack.devices];
+	const history = getHistoryStore();
+	const adapter = getCommandStoreAdapter();
+
+	const command = createClearRackCommand(devices, adapter);
+	history.execute(command);
+	isDirty = true;
+}
+
+// =============================================================================
+// Undo/Redo Functions
+// =============================================================================
+
+/**
+ * Undo the last action
+ * @returns true if undo was performed
+ */
+function undo(): boolean {
+	const history = getHistoryStore();
+	const result = history.undo();
+	if (result) {
+		isDirty = true;
+	}
+	return result;
+}
+
+/**
+ * Redo the last undone action
+ * @returns true if redo was performed
+ */
+function redo(): boolean {
+	const history = getHistoryStore();
+	const result = history.redo();
+	if (result) {
+		isDirty = true;
+	}
+	return result;
+}
+
+/**
+ * Clear all undo/redo history
+ */
+function clearHistory(): void {
+	getHistoryStore().clear();
 }

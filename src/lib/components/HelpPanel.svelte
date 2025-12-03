@@ -13,7 +13,7 @@
 
 	let { open, onclose }: Props = $props();
 
-	// Keyboard shortcuts (v0.1.0)
+	// Keyboard shortcuts
 	const shortcuts = [
 		{ key: 'Escape', action: 'Clear selection / Close dialog' },
 		{ key: 'Delete / Backspace', action: 'Delete selected rack or device' },
@@ -21,6 +21,9 @@
 		{ key: 'Arrow Down', action: 'Move device down 1U' },
 		{ key: 'I', action: 'Toggle display mode (Label/Image)' },
 		{ key: 'F', action: 'Fit all (zoom to fit)' },
+		{ key: 'Ctrl/Cmd + Z', action: 'Undo' },
+		{ key: 'Ctrl/Cmd + Shift + Z', action: 'Redo' },
+		{ key: 'Ctrl/Cmd + Y', action: 'Redo (alternative)' },
 		{ key: 'Ctrl/Cmd + S', action: 'Save layout (.rackarr.zip)' },
 		{ key: 'Ctrl/Cmd + O', action: 'Load layout' },
 		{ key: 'Ctrl/Cmd + E', action: 'Export image' },

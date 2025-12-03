@@ -15,3 +15,5 @@ export { default as IconGrip } from './IconGrip.svelte';
 export { default as IconLabel } from './IconLabel.svelte';
 export { default as IconImage } from './IconImage.svelte';
 export { default as IconLogo } from './IconLogo.svelte';
+export { default as IconUndo } from './IconUndo.svelte';
+export { default as IconRedo } from './IconRedo.svelte';

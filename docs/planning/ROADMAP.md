@@ -147,11 +147,13 @@ Priority order for future development:
 
 ---
 
-### 6. Power Consumption
+### 6. Basic Power Consumption
 
-- Device power draw metadata
-- Total rack power calculation
-- PDU capacity planning
+- Basic device power requirements (# of plugs on PDU, device powered y/n)
+
+### 7. Basic Network connectivity requirements
+
+- Basic device network requirements (# of ports on patch panel, device networked y/n)
 
 ---
 
@@ -173,6 +175,12 @@ Features explicitly deferred with no priority assigned:
 | Device library export       | Save library to file                        |
 | 0U vertical PDU support     | Rail-mounted PDUs (left/right rails)        |
 | Screen reader improvements  | Live region announcements for state changes |
+| Rack Power management       | - Device power draw metadata                |
+
+                              - Total rack power calculation
+                              - PDU capacity planning                        |
+
+for future planning:
 
 ---
 

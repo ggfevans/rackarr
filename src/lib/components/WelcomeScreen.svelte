@@ -24,12 +24,12 @@
 		<div class="welcome-header">
 			<div class="logo">
 				<svg viewBox="0 0 48 48" class="logo-icon" aria-hidden="true">
-					<!-- Simplified rack icon with hardcoded colors for better compatibility -->
-					<rect x="8" y="4" width="32" height="40" rx="2" fill="#404040" />
-					<rect x="12" y="8" width="24" height="32" fill="#2d2d2d" />
-					<rect x="14" y="10" width="20" height="6" rx="1" fill="#4A90D9" />
-					<rect x="14" y="18" width="20" height="4" rx="1" fill="#50C878" />
-					<rect x="14" y="24" width="20" height="8" rx="1" fill="#9B59B6" />
+					<!-- Rack icon using design tokens -->
+					<rect x="8" y="4" width="32" height="40" rx="2" class="logo-frame" />
+					<rect x="12" y="8" width="24" height="32" class="logo-interior" />
+					<rect x="14" y="10" width="20" height="6" rx="1" class="logo-device-1" />
+					<rect x="14" y="18" width="20" height="4" rx="1" class="logo-device-2" />
+					<rect x="14" y="24" width="20" height="8" rx="1" class="logo-device-3" />
 				</svg>
 			</div>
 			<h1 class="app-name">Rackarr</h1>
@@ -75,6 +75,22 @@
 	.logo-icon {
 		width: 80px;
 		height: 80px;
+	}
+
+	.logo-frame {
+		fill: var(--logo-frame);
+	}
+	.logo-interior {
+		fill: var(--logo-interior);
+	}
+	.logo-device-1 {
+		fill: var(--logo-device-1);
+	}
+	.logo-device-2 {
+		fill: var(--logo-device-2);
+	}
+	.logo-device-3 {
+		fill: var(--logo-device-3);
 	}
 
 	.app-name {

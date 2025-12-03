@@ -246,12 +246,13 @@
 		gap: 8px;
 	}
 
-	.import-button {
+	.import-button,
+	.add-device-button {
 		display: flex;
 		align-items: center;
 		justify-content: center;
-		gap: 4px;
-		flex: 0 0 auto;
+		gap: 6px;
+		flex: 1;
 		padding: 10px 12px;
 		font-size: 13px;
 		font-weight: 500;
@@ -265,58 +266,25 @@
 			transform 0.1s ease;
 	}
 
-	.import-button:hover {
+	.import-button:hover,
+	.add-device-button:hover {
 		background-color: var(--colour-button-hover, #4a4a4a);
 	}
 
-	.import-button:active {
-		transform: scale(0.98);
-	}
-
-	.import-button:focus {
-		outline: 2px solid var(--colour-selection, #0066ff);
-		outline-offset: 2px;
-	}
-
-	.import-icon {
-		font-size: 14px;
-		font-weight: bold;
-	}
-
-	.add-device-button {
-		display: flex;
-		align-items: center;
-		justify-content: center;
-		gap: 6px;
-		flex: 1;
-		padding: 10px 16px;
-		font-size: 13px;
-		font-weight: 500;
-		color: #ffffff;
-		background-color: var(--colour-selection, #0066ff);
-		border: none;
-		border-radius: 4px;
-		cursor: pointer;
-		transition:
-			background-color 0.15s ease,
-			transform 0.1s ease;
-	}
-
-	.add-device-button:hover {
-		background-color: var(--colour-selection-hover, #0055dd);
-	}
-
+	.import-button:active,
 	.add-device-button:active {
 		transform: scale(0.98);
 	}
 
+	.import-button:focus,
 	.add-device-button:focus {
 		outline: 2px solid var(--colour-selection, #0066ff);
 		outline-offset: 2px;
 	}
 
+	.import-icon,
 	.add-icon {
-		font-size: 16px;
+		font-size: 14px;
 		font-weight: bold;
 	}
 </style>

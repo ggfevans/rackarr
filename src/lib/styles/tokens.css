@@ -193,6 +193,13 @@
 	--toast-bg: var(--neutral-800);
 	--toast-border: var(--neutral-700);
 	--toast-radius: var(--radius-md);
+
+	/* Logo */
+	--logo-frame: var(--neutral-700);
+	--logo-interior: var(--neutral-800);
+	--logo-device-1: var(--blue-500);
+	--logo-device-2: #50c878; /* Emerald green */
+	--logo-device-3: #9b59b6; /* Purple */
 }
 
 /* ============================================================
@@ -248,6 +255,13 @@
 
 	--toast-bg: #ffffff;
 	--toast-border: var(--neutral-200);
+
+	/* Logo */
+	--logo-frame: var(--neutral-300);
+	--logo-interior: var(--neutral-200);
+	--logo-device-1: var(--blue-600);
+	--logo-device-2: #16a34a; /* Green 600 */
+	--logo-device-3: #7c3aed; /* Violet 600 */
 
 	/* Lighter shadows for light theme */
 	--shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.08);

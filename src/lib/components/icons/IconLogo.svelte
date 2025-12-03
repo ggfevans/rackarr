@@ -1,5 +1,5 @@
 <!--
-  Rackarr logo icon
+  Rackarr logo icon - uses design tokens for theming
 -->
 <script lang="ts">
 	interface Props {
@@ -9,21 +9,37 @@
 	let { size = 20 }: Props = $props();
 </script>
 
-<svg width={size} height={size} viewBox="0 0 32 32" fill="none" aria-hidden="true">
-	<rect
-		x="4"
-		y="2"
-		width="24"
-		height="28"
-		rx="2"
-		fill="#2d2d2d"
-		stroke="#4A90D9"
-		stroke-width="2"
-	/>
-	<rect x="8" y="6" width="16" height="4" rx="1" fill="#4A90D9" />
-	<rect x="8" y="12" width="16" height="4" rx="1" fill="#7B68EE" />
-	<rect x="8" y="18" width="16" height="6" rx="1" fill="#228B22" />
-	<circle cx="22" cy="8" r="1" fill="#1a1a1a" />
-	<circle cx="22" cy="14" r="1" fill="#1a1a1a" />
-	<circle cx="22" cy="21" r="1" fill="#1a1a1a" />
+<svg
+	class="logo-icon"
+	width={size}
+	height={size}
+	viewBox="0 0 48 48"
+	fill="none"
+	aria-hidden="true"
+>
+	<!-- Rack frame -->
+	<rect x="8" y="4" width="32" height="40" rx="2" class="logo-frame" />
+	<rect x="12" y="8" width="24" height="32" class="logo-interior" />
+	<!-- Devices -->
+	<rect x="14" y="10" width="20" height="6" rx="1" class="logo-device-1" />
+	<rect x="14" y="18" width="20" height="4" rx="1" class="logo-device-2" />
+	<rect x="14" y="24" width="20" height="8" rx="1" class="logo-device-3" />
 </svg>
+
+<style>
+	.logo-frame {
+		fill: var(--logo-frame);
+	}
+	.logo-interior {
+		fill: var(--logo-interior);
+	}
+	.logo-device-1 {
+		fill: var(--logo-device-1);
+	}
+	.logo-device-2 {
+		fill: var(--logo-device-2);
+	}
+	.logo-device-3 {
+		fill: var(--logo-device-3);
+	}
+</style>

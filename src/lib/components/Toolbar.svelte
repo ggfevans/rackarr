@@ -71,7 +71,7 @@
 	<!-- Left section: Branding -->
 	<div class="toolbar-section toolbar-left">
 		<div class="toolbar-brand">
-			<IconLogo size={22} />
+			<IconLogo size={26} />
 			<span>Rackarr</span>
 		</div>
 	</div>

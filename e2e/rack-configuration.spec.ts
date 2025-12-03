@@ -68,34 +68,7 @@ test.describe('Rack Configuration', () => {
 		}
 	});
 
-	test.skip('rack with descending units shows U1 at top', async ({ page }) => {
-		// SKIP: Descending units checkbox not yet implemented in NewRackForm
-		await openNewRackForm(page);
-
-		await page.fill('#rack-name', 'Descending Rack');
-
-		// Use custom height to get a smaller rack for easier testing
-		await page.click('.height-btn:has-text("Custom")');
-		await page.fill('#custom-height', '10');
-
-		// Check descending units option
-		const checkbox = page.locator('.checkbox-label:has-text("Descending") input[type="checkbox"]');
-		await checkbox.check();
-
-		await page.click('button:has-text("Create")');
-
-		await expect(page.locator('.rack-container')).toBeVisible();
-
-		// Get U labels - in descending mode, U1 should be at the top
-		// The first label visually (lowest y) should be "1"
-		const uLabels = page.locator('.u-label');
-		const count = await uLabels.count();
-		expect(count).toBe(10);
-
-		// The first label text should be "1" in descending mode (labels show numbers only)
-		const firstLabel = uLabels.first();
-		await expect(firstLabel).toHaveText('1');
-	});
+	// Descending units test removed - feature not in current UI
 
 	test('rack with ascending units shows U1 at bottom', async ({ page }) => {
 		await openNewRackForm(page);
@@ -104,7 +77,6 @@ test.describe('Rack Configuration', () => {
 		await page.click('.height-btn:has-text("Custom")');
 		await page.fill('#custom-height', '10');
 
-		// Ensure descending is NOT checked (default)
 		await page.click('button:has-text("Create")');
 
 		await expect(page.locator('.rack-container')).toBeVisible();

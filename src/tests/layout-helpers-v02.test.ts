@@ -8,9 +8,13 @@ import {
 	createDeviceType,
 	createDevice,
 	findDeviceType,
-	getDeviceDisplayName
+	getDeviceDisplayName,
+	addDeviceTypeToLayout,
+	removeDeviceTypeFromLayout,
+	placeDeviceInRack,
+	removeDeviceFromRack
 } from '$lib/stores/layout-helpers-v02';
-import type { DeviceTypeV02, DeviceV02 } from '$lib/types/v02';
+import type { DeviceTypeV02, DeviceV02, LayoutV02 } from '$lib/types/v02';
 import { isValidSlug } from '$lib/utils/slug';
 
 describe('createDeviceType', () => {
@@ -265,5 +269,353 @@ describe('getDeviceDisplayName', () => {
 			face: 'front'
 		};
 		expect(getDeviceDisplayName(device, [])).toBe('any-device');
+	});
+});
+
+// Helper to create a minimal test layout
+function createTestLayout(overrides: Partial<LayoutV02> = {}): LayoutV02 {
+	return {
+		version: '0.2.0',
+		name: 'Test Layout',
+		rack: {
+			name: 'Test Rack',
+			height: 42,
+			width: 19,
+			desc_units: false,
+			form_factor: '4-post-cabinet',
+			starting_unit: 1,
+			position: 0,
+			devices: []
+		},
+		device_types: [],
+		settings: {
+			display_mode: 'label',
+			show_labels_on_images: true
+		},
+		...overrides
+	};
+}
+
+describe('addDeviceTypeToLayout', () => {
+	it('adds device type to empty layout', () => {
+		const layout = createTestLayout();
+		const deviceType: DeviceTypeV02 = {
+			slug: 'new-server',
+			u_height: 2,
+			rackarr: { colour: '#3b82f6', category: 'server' }
+		};
+
+		const result = addDeviceTypeToLayout(layout, deviceType);
+
+		expect(result.device_types).toHaveLength(1);
+		expect(result.device_types[0].slug).toBe('new-server');
+	});
+
+	it('adds to existing device_types', () => {
+		const layout = createTestLayout({
+			device_types: [
+				{
+					slug: 'existing-device',
+					u_height: 1,
+					rackarr: { colour: '#000000', category: 'network' }
+				}
+			]
+		});
+		const deviceType: DeviceTypeV02 = {
+			slug: 'new-device',
+			u_height: 4,
+			rackarr: { colour: '#ffffff', category: 'storage' }
+		};
+
+		const result = addDeviceTypeToLayout(layout, deviceType);
+
+		expect(result.device_types).toHaveLength(2);
+		expect(result.device_types[1].slug).toBe('new-device');
+	});
+
+	it('throws on duplicate slug', () => {
+		const layout = createTestLayout({
+			device_types: [
+				{
+					slug: 'my-server',
+					u_height: 2,
+					rackarr: { colour: '#000000', category: 'server' }
+				}
+			]
+		});
+		const deviceType: DeviceTypeV02 = {
+			slug: 'my-server',
+			u_height: 4,
+			rackarr: { colour: '#ffffff', category: 'storage' }
+		};
+
+		expect(() => addDeviceTypeToLayout(layout, deviceType)).toThrow(/duplicate/i);
+	});
+
+	it('original layout unchanged (immutable)', () => {
+		const layout = createTestLayout();
+		const deviceType: DeviceTypeV02 = {
+			slug: 'new-server',
+			u_height: 2,
+			rackarr: { colour: '#3b82f6', category: 'server' }
+		};
+
+		const result = addDeviceTypeToLayout(layout, deviceType);
+
+		expect(result).not.toBe(layout);
+		expect(result.device_types).not.toBe(layout.device_types);
+		expect(layout.device_types).toHaveLength(0);
+	});
+});
+
+describe('removeDeviceTypeFromLayout', () => {
+	it('removes device type by slug', () => {
+		const layout = createTestLayout({
+			device_types: [
+				{
+					slug: 'to-remove',
+					u_height: 2,
+					rackarr: { colour: '#000000', category: 'server' }
+				},
+				{
+					slug: 'to-keep',
+					u_height: 1,
+					rackarr: { colour: '#ffffff', category: 'network' }
+				}
+			]
+		});
+
+		const result = removeDeviceTypeFromLayout(layout, 'to-remove');
+
+		expect(result.device_types).toHaveLength(1);
+		expect(result.device_types[0].slug).toBe('to-keep');
+	});
+
+	it('removes placed devices referencing the device type', () => {
+		const layout = createTestLayout({
+			device_types: [
+				{
+					slug: 'server-type',
+					u_height: 2,
+					rackarr: { colour: '#000000', category: 'server' }
+				},
+				{
+					slug: 'other-type',
+					u_height: 1,
+					rackarr: { colour: '#ffffff', category: 'network' }
+				}
+			],
+			rack: {
+				name: 'Test Rack',
+				height: 42,
+				width: 19,
+				desc_units: false,
+				form_factor: '4-post-cabinet',
+				starting_unit: 1,
+				position: 0,
+				devices: [
+					{ device_type: 'server-type', position: 1, face: 'front' },
+					{ device_type: 'other-type', position: 10, face: 'front' },
+					{ device_type: 'server-type', position: 20, face: 'rear' }
+				]
+			}
+		});
+
+		const result = removeDeviceTypeFromLayout(layout, 'server-type');
+
+		expect(result.device_types).toHaveLength(1);
+		expect(result.rack.devices).toHaveLength(1);
+		expect(result.rack.devices[0].device_type).toBe('other-type');
+	});
+
+	it('no-op if slug does not exist', () => {
+		const layout = createTestLayout({
+			device_types: [
+				{
+					slug: 'existing',
+					u_height: 2,
+					rackarr: { colour: '#000000', category: 'server' }
+				}
+			]
+		});
+
+		const result = removeDeviceTypeFromLayout(layout, 'non-existent');
+
+		expect(result.device_types).toHaveLength(1);
+	});
+});
+
+describe('placeDeviceInRack', () => {
+	it('adds device to rack.devices', () => {
+		const layout = createTestLayout({
+			device_types: [
+				{
+					slug: 'my-server',
+					u_height: 2,
+					rackarr: { colour: '#000000', category: 'server' }
+				}
+			]
+		});
+		const device: DeviceV02 = {
+			device_type: 'my-server',
+			position: 10,
+			face: 'front'
+		};
+
+		const result = placeDeviceInRack(layout, device);
+
+		expect(result.rack.devices).toHaveLength(1);
+		expect(result.rack.devices[0].device_type).toBe('my-server');
+		expect(result.rack.devices[0].position).toBe(10);
+	});
+
+	it('throws if device_type does not exist in device_types', () => {
+		const layout = createTestLayout();
+		const device: DeviceV02 = {
+			device_type: 'non-existent',
+			position: 10,
+			face: 'front'
+		};
+
+		expect(() => placeDeviceInRack(layout, device)).toThrow(/device.*type/i);
+	});
+
+	it('adds multiple devices', () => {
+		const layout = createTestLayout({
+			device_types: [
+				{
+					slug: 'server',
+					u_height: 2,
+					rackarr: { colour: '#000000', category: 'server' }
+				}
+			]
+		});
+		const device1: DeviceV02 = { device_type: 'server', position: 1, face: 'front' };
+		const device2: DeviceV02 = { device_type: 'server', position: 5, face: 'rear' };
+
+		let result = placeDeviceInRack(layout, device1);
+		result = placeDeviceInRack(result, device2);
+
+		expect(result.rack.devices).toHaveLength(2);
+	});
+
+	it('is immutable', () => {
+		const layout = createTestLayout({
+			device_types: [
+				{
+					slug: 'server',
+					u_height: 2,
+					rackarr: { colour: '#000000', category: 'server' }
+				}
+			]
+		});
+		const device: DeviceV02 = {
+			device_type: 'server',
+			position: 10,
+			face: 'front'
+		};
+
+		const result = placeDeviceInRack(layout, device);
+
+		expect(result).not.toBe(layout);
+		expect(result.rack).not.toBe(layout.rack);
+		expect(result.rack.devices).not.toBe(layout.rack.devices);
+		expect(layout.rack.devices).toHaveLength(0);
+	});
+});
+
+describe('removeDeviceFromRack', () => {
+	it('removes device at index', () => {
+		const layout = createTestLayout({
+			device_types: [
+				{
+					slug: 'server',
+					u_height: 2,
+					rackarr: { colour: '#000000', category: 'server' }
+				}
+			],
+			rack: {
+				name: 'Test Rack',
+				height: 42,
+				width: 19,
+				desc_units: false,
+				form_factor: '4-post-cabinet',
+				starting_unit: 1,
+				position: 0,
+				devices: [
+					{ device_type: 'server', position: 1, face: 'front' },
+					{ device_type: 'server', position: 5, face: 'rear' },
+					{ device_type: 'server', position: 10, face: 'both' }
+				]
+			}
+		});
+
+		const result = removeDeviceFromRack(layout, 1);
+
+		expect(result.rack.devices).toHaveLength(2);
+		expect(result.rack.devices[0].position).toBe(1);
+		expect(result.rack.devices[1].position).toBe(10);
+	});
+
+	it('handles out-of-bounds gracefully', () => {
+		const layout = createTestLayout({
+			rack: {
+				name: 'Test Rack',
+				height: 42,
+				width: 19,
+				desc_units: false,
+				form_factor: '4-post-cabinet',
+				starting_unit: 1,
+				position: 0,
+				devices: [{ device_type: 'server', position: 1, face: 'front' }]
+			}
+		});
+
+		// Should not throw, just return unchanged
+		const result = removeDeviceFromRack(layout, 10);
+		expect(result.rack.devices).toHaveLength(1);
+	});
+
+	it('handles negative index gracefully', () => {
+		const layout = createTestLayout({
+			rack: {
+				name: 'Test Rack',
+				height: 42,
+				width: 19,
+				desc_units: false,
+				form_factor: '4-post-cabinet',
+				starting_unit: 1,
+				position: 0,
+				devices: [{ device_type: 'server', position: 1, face: 'front' }]
+			}
+		});
+
+		const result = removeDeviceFromRack(layout, -1);
+		expect(result.rack.devices).toHaveLength(1);
+	});
+
+	it('is immutable', () => {
+		const layout = createTestLayout({
+			rack: {
+				name: 'Test Rack',
+				height: 42,
+				width: 19,
+				desc_units: false,
+				form_factor: '4-post-cabinet',
+				starting_unit: 1,
+				position: 0,
+				devices: [
+					{ device_type: 'server', position: 1, face: 'front' },
+					{ device_type: 'server', position: 5, face: 'rear' }
+				]
+			}
+		});
+
+		const result = removeDeviceFromRack(layout, 0);
+
+		expect(result).not.toBe(layout);
+		expect(result.rack).not.toBe(layout.rack);
+		expect(result.rack.devices).not.toBe(layout.rack.devices);
+		expect(layout.rack.devices).toHaveLength(2);
 	});
 });

@@ -3,7 +3,7 @@
  * Helper functions for working with v0.2 types in the layout store
  */
 
-import type { DeviceTypeV02, DeviceV02, DeviceFaceV02 } from '$lib/types/v02';
+import type { DeviceTypeV02, DeviceV02, DeviceFaceV02, LayoutV02 } from '$lib/types/v02';
 import type { DeviceCategory } from '$lib/types';
 import { generateDeviceSlug } from '$lib/utils/slug';
 import type { AirflowV02, WeightUnitV02 } from '$lib/types/v02';
@@ -138,4 +138,95 @@ export function getDeviceDisplayName(device: DeviceV02, device_types: DeviceType
 
 	// Fall back to slug
 	return device.device_type;
+}
+
+/**
+ * Add a device type to the layout (immutable)
+ * @param layout - The layout to modify
+ * @param deviceType - The device type to add
+ * @returns A new layout with the device type added
+ * @throws Error if a device type with the same slug already exists
+ */
+export function addDeviceTypeToLayout(layout: LayoutV02, deviceType: DeviceTypeV02): LayoutV02 {
+	// Check for duplicate slug
+	const existing = findDeviceType(layout.device_types, deviceType.slug);
+	if (existing) {
+		throw new Error(`Duplicate device type slug: ${deviceType.slug}`);
+	}
+
+	return {
+		...layout,
+		device_types: [...layout.device_types, deviceType]
+	};
+}
+
+/**
+ * Remove a device type from the layout (immutable)
+ * Also removes all placed devices referencing this device type
+ * @param layout - The layout to modify
+ * @param slug - The slug of the device type to remove
+ * @returns A new layout with the device type and referencing devices removed
+ */
+export function removeDeviceTypeFromLayout(layout: LayoutV02, slug: string): LayoutV02 {
+	// Filter out the device type
+	const newDeviceTypes = layout.device_types.filter((dt) => dt.slug !== slug);
+
+	// Filter out placed devices referencing this type
+	const newDevices = layout.rack.devices.filter((d) => d.device_type !== slug);
+
+	return {
+		...layout,
+		device_types: newDeviceTypes,
+		rack: {
+			...layout.rack,
+			devices: newDevices
+		}
+	};
+}
+
+/**
+ * Place a device in the rack (immutable)
+ * @param layout - The layout to modify
+ * @param device - The device to place
+ * @returns A new layout with the device placed
+ * @throws Error if the device type does not exist in device_types
+ */
+export function placeDeviceInRack(layout: LayoutV02, device: DeviceV02): LayoutV02 {
+	// Validate device type exists
+	const deviceType = findDeviceType(layout.device_types, device.device_type);
+	if (!deviceType) {
+		throw new Error(`Device type not found: ${device.device_type}`);
+	}
+
+	return {
+		...layout,
+		rack: {
+			...layout.rack,
+			devices: [...layout.rack.devices, device]
+		}
+	};
+}
+
+/**
+ * Remove a device from the rack by index (immutable)
+ * @param layout - The layout to modify
+ * @param index - The index of the device to remove
+ * @returns A new layout with the device removed
+ */
+export function removeDeviceFromRack(layout: LayoutV02, index: number): LayoutV02 {
+	// Handle out-of-bounds gracefully
+	if (index < 0 || index >= layout.rack.devices.length) {
+		return layout;
+	}
+
+	const newDevices = [...layout.rack.devices];
+	newDevices.splice(index, 1);
+
+	return {
+		...layout,
+		rack: {
+			...layout.rack,
+			devices: newDevices
+		}
+	};
 }

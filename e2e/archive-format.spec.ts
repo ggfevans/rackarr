@@ -22,7 +22,8 @@ async function replaceRack(page: Page, name: string, height: number = 24) {
 	}
 
 	await page.click('button:has-text("Create")');
-	await expect(page.locator('.rack-container')).toBeVisible();
+	// In dual-view mode, there are two rack containers
+	await expect(page.locator('.rack-container').first()).toBeVisible();
 }
 
 /**
@@ -30,8 +31,9 @@ async function replaceRack(page: Page, name: string, height: number = 24) {
  */
 async function dragDeviceToRack(page: Page) {
 	// Get element handles using Playwright locators
+	// In dual-view mode, there are two rack-svg elements - use first one
 	const deviceHandle = await page.locator('.device-palette-item').first().elementHandle();
-	const rackHandle = await page.locator('.rack-svg').elementHandle();
+	const rackHandle = await page.locator('.rack-svg').first().elementHandle();
 
 	if (!deviceHandle || !rackHandle) {
 		throw new Error('Could not find device item or rack');
@@ -106,15 +108,21 @@ test.describe('Archive Format', () => {
 
 	test.beforeEach(async ({ page }) => {
 		await page.goto('/');
-		await page.evaluate(() => sessionStorage.clear());
+		// Clear both storage types - hasStarted flag is in localStorage
+		await page.evaluate(() => {
+			sessionStorage.clear();
+			localStorage.clear();
+			localStorage.setItem('rackarr_has_started', 'true');
+		});
 		await page.reload();
+		await page.waitForTimeout(500);
 	});
 
 	test('save creates .rackarr.zip file', async ({ page }) => {
 		// Replace the default rack with a named test rack
 		await replaceRack(page, 'Archive Test Rack', 24);
 		await dragDeviceToRack(page);
-		await expect(page.locator('.rack-device')).toBeVisible({ timeout: 5000 });
+		await expect(page.locator('.rack-device').first()).toBeVisible({ timeout: 5000 });
 
 		// Set up download listener
 		const downloadPromise = page.waitForEvent('download');
@@ -184,8 +192,9 @@ test.describe('Archive Format', () => {
 		await fileChooser.setFiles(legacyJsonPath);
 
 		// Verify the layout is loaded (migrated from legacy format)
-		await expect(page.locator('.rack-container')).toBeVisible();
-		await expect(page.locator('.rack-name')).toContainText('Old Rack');
+		await expect(page.locator('.rack-container').first()).toBeVisible();
+		// Rack name is displayed in dual-view header
+		await expect(page.locator('.rack-dual-view-name')).toContainText('Old Rack');
 	});
 
 	test('error handling for corrupted archive', async ({ page }) => {

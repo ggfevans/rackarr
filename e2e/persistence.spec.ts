@@ -32,8 +32,14 @@ async function replaceRack(page: Page, name: string, height: number) {
 test.describe('Persistence', () => {
 	test.beforeEach(async ({ page }) => {
 		await page.goto('/');
-		await page.evaluate(() => sessionStorage.clear());
+		// Clear both storage types - hasStarted flag is in localStorage
+		await page.evaluate(() => {
+			sessionStorage.clear();
+			localStorage.clear();
+			localStorage.setItem('rackarr_has_started', 'true');
+		});
 		await page.reload();
+		await page.waitForTimeout(500);
 	});
 
 	test('save layout downloads ZIP file', async ({ page }) => {
@@ -165,8 +171,10 @@ test.describe('Persistence', () => {
 
 		// Note: Playwright doesn't support testing beforeunload dialogs directly
 		// This test verifies the page state is dirty (rack exists with our changes)
-		await expect(page.locator('.rack-name')).toContainText('Warning Test');
-		expect(await page.locator('.rack-container').count()).toBeGreaterThan(0);
+		// Rack name is displayed in dual-view header
+		await expect(page.locator('.rack-dual-view-name')).toContainText('Warning Test');
+		// In dual-view mode, there are 2 rack containers
+		expect(await page.locator('.rack-container').count()).toBe(2);
 	});
 
 	test('no warning after saving', async ({ page }) => {

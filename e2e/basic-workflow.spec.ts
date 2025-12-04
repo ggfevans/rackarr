@@ -88,24 +88,30 @@ async function dragDeviceToRack(page: Page) {
 test.describe('Basic Workflow', () => {
 	test.beforeEach(async ({ page }) => {
 		await page.goto('/');
-		// Clear any existing session storage
-		await page.evaluate(() => sessionStorage.clear());
+		// Clear both storage types - hasStarted flag is in localStorage
+		await page.evaluate(() => {
+			sessionStorage.clear();
+			localStorage.clear();
+			// Set hasStarted flag so rack is displayed (v0.4 dual-view mode)
+			localStorage.setItem('rackarr_has_started', 'true');
+		});
 		await page.reload();
+		await page.waitForTimeout(500);
 	});
 
 	test('rack is visible on initial load (v0.2 always has a rack)', async ({ page }) => {
-		// In v0.2, a rack is always visible - no welcome screen
-		await expect(page.locator('.rack-container')).toBeVisible();
-		// Default rack name
-		await expect(page.locator('.rack-name')).toBeVisible();
+		// In v0.4 dual-view mode, two rack containers exist (front and rear)
+		await expect(page.locator('.rack-container').first()).toBeVisible();
+		// Default rack name is displayed in dual-view header
+		await expect(page.locator('.rack-dual-view-name')).toBeVisible();
 	});
 
 	test('can replace current rack with a new one', async ({ page }) => {
 		// Replace the default rack with a new one
 		await replaceRack(page, 'Main Rack', 18);
 
-		// Verify rack appears on canvas
-		await expect(page.locator('.rack-container')).toBeVisible();
+		// Verify rack appears on canvas (dual-view has two rack containers)
+		await expect(page.locator('.rack-container').first()).toBeVisible();
 		await expect(page.locator('text=Main Rack')).toBeVisible();
 	});
 
@@ -113,67 +119,67 @@ test.describe('Basic Workflow', () => {
 		// Replace the default rack
 		await replaceRack(page, 'Test Rack', 24);
 
-		// Verify the rack is visible
-		const rackSvg = page.locator('.rack-svg');
+		// Verify the rack is visible (first of the dual-view)
+		const rackSvg = page.locator('.rack-svg').first();
 		await expect(rackSvg).toBeVisible();
 
-		// Verify the rack name is displayed
-		await expect(page.locator('.rack-name')).toHaveText('Test Rack');
+		// Verify the rack name is displayed in dual-view header
+		await expect(page.locator('.rack-dual-view-name')).toHaveText('Test Rack');
 	});
 
 	test('can drag device from palette to rack', async ({ page }) => {
-		// In v0.2, rack already exists - no need to create one
-		await expect(page.locator('.rack-container')).toBeVisible();
+		// In v0.4 dual-view mode, two rack containers exist
+		await expect(page.locator('.rack-container').first()).toBeVisible();
 
-		// Drag device using helper
+		// Drag device using helper (drops on first .rack-svg which is front view)
 		await dragDeviceToRack(page);
 
 		// Verify device appears in rack
-		await expect(page.locator('.rack-device')).toBeVisible({ timeout: 5000 });
+		await expect(page.locator('.rack-device').first()).toBeVisible({ timeout: 5000 });
 	});
 
 	test('device appears at correct position in rack', async ({ page }) => {
-		// Rack already exists in v0.2
-		await expect(page.locator('.rack-container')).toBeVisible();
+		// Rack already exists in v0.4 dual-view mode
+		await expect(page.locator('.rack-container').first()).toBeVisible();
 
 		// Drag device
 		await dragDeviceToRack(page);
 
 		// Verify device is in the rack
-		await expect(page.locator('.rack-device')).toBeVisible();
+		await expect(page.locator('.rack-device').first()).toBeVisible();
 	});
 
 	test('can move device within rack', async ({ page }) => {
 		// Rack exists by default
-		await expect(page.locator('.rack-container')).toBeVisible();
+		await expect(page.locator('.rack-container').first()).toBeVisible();
 
 		// Drag device
 		await dragDeviceToRack(page);
 
 		// Wait for device to appear
-		await expect(page.locator('.rack-device')).toBeVisible();
+		await expect(page.locator('.rack-device').first()).toBeVisible();
 
 		// Move the device within the rack using arrow keys
-		const device = page.locator('.rack-device');
+		const device = page.locator('.rack-device').first();
 		await device.click();
 		await page.keyboard.press('ArrowUp');
 
 		// Device should still be visible
-		await expect(page.locator('.rack-device')).toBeVisible();
+		await expect(page.locator('.rack-device').first()).toBeVisible();
 	});
 
 	test('can delete device from rack', async ({ page }) => {
 		// Rack exists by default
-		await expect(page.locator('.rack-container')).toBeVisible();
+		await expect(page.locator('.rack-container').first()).toBeVisible();
 
 		// Drag device
 		await dragDeviceToRack(page);
 
 		// Wait for device
-		await expect(page.locator('.rack-device')).toBeVisible();
+		await expect(page.locator('.rack-device').first()).toBeVisible();
 
 		// Click on device to select it
-		await page.locator('.rack-device').click();
+		await page.locator('.rack-device').first().click();
 
 		// Click delete button
 		await page.click('button[aria-label="Delete"]');
@@ -188,10 +194,10 @@ test.describe('Basic Workflow', () => {
 	test('can clear rack (v0.2 does not remove the rack)', async ({ page }) => {
 		// Add a device first
 		await dragDeviceToRack(page);
-		await expect(page.locator('.rack-device')).toBeVisible();
+		await expect(page.locator('.rack-device').first()).toBeVisible();
 
-		// Click on rack to select it
-		await page.locator('.rack-svg').click();
+		// Click on rack to select it (dual-view container)
+		await page.locator('.rack-svg').first().click();
 
 		// Click delete button
 		await page.click('button[aria-label="Delete"]');
@@ -200,7 +206,7 @@ test.describe('Basic Workflow', () => {
 		await page.click('[role="dialog"] button:has-text("Delete Rack")');
 
 		// In v0.2, rack still exists but devices are cleared
-		await expect(page.locator('.rack-container')).toBeVisible();
+		await expect(page.locator('.rack-container').first()).toBeVisible();
 		await expect(page.locator('.rack-device')).not.toBeVisible();
 	});
 });

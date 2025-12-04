@@ -20,13 +20,14 @@ async function fillRackForm(page: Page, name: string, height: number) {
 
 /**
  * Helper to replace the current rack (v0.2 flow)
+ * Note: In dual-view mode, there are two .rack-container elements
  */
 async function replaceRack(page: Page, name: string, height: number) {
 	await page.click('button[aria-label="New Rack"]');
 	await page.click('button:has-text("Replace")');
 	await fillRackForm(page, name, height);
 	await page.click('button:has-text("Create")');
-	await expect(page.locator('.rack-container')).toBeVisible();
+	await expect(page.locator('.rack-container').first()).toBeVisible();
 }
 
 /**
@@ -38,8 +39,9 @@ async function dragDeviceToRack(page: Page) {
 	await expect(page.locator('.device-palette-item').first()).toBeVisible();
 
 	// Get element handles using Playwright locators
+	// In dual-view mode, there are two rack-svg elements - use first one
 	const deviceHandle = await page.locator('.device-palette-item').first().elementHandle();
-	const rackHandle = await page.locator('.rack-svg').elementHandle();
+	const rackHandle = await page.locator('.rack-svg').first().elementHandle();
 
 	if (!deviceHandle || !rackHandle) {
 		throw new Error('Could not find device item or rack');
@@ -70,15 +72,21 @@ async function dragDeviceToRack(page: Page) {
 test.describe('Export Functionality', () => {
 	test.beforeEach(async ({ page }) => {
 		await page.goto('/');
-		await page.evaluate(() => sessionStorage.clear());
+		// Clear both storage types - hasStarted flag is in localStorage
+		await page.evaluate(() => {
+			sessionStorage.clear();
+			localStorage.clear();
+			localStorage.setItem('rackarr_has_started', 'true');
+		});
 		await page.reload();
+		await page.waitForTimeout(500);
 
 		// In v0.2, rack already exists. Replace it with a test rack for consistency.
 		await replaceRack(page, 'Export Test Rack', 12);
 
-		// Add a device
+		// Add a device (drag to first rack-svg which is front view)
 		await dragDeviceToRack(page);
-		await expect(page.locator('.rack-device')).toBeVisible();
+		await expect(page.locator('.rack-device').first()).toBeVisible();
 	});
 
 	test('export dialog opens', async ({ page }) => {

@@ -19,7 +19,8 @@ async function replaceRack(page: Page, name: string, height: number = 24) {
 	}
 
 	await page.click('button:has-text("Create")');
-	await expect(page.locator('.rack-container')).toBeVisible();
+	// In dual-view mode, there are two rack containers
+	await expect(page.locator('.rack-container').first()).toBeVisible();
 }
 
 /**
@@ -31,8 +32,9 @@ async function dragDeviceToRack(page: Page, deviceName: string) {
 	await expect(deviceLocator).toBeVisible();
 
 	// Get the element handle and use evaluate on it
+	// In dual-view mode, there are two rack-svg elements - use first one
 	const deviceHandle = await deviceLocator.elementHandle();
-	const rackHandle = await page.locator('.rack-svg').elementHandle();
+	const rackHandle = await page.locator('.rack-svg').first().elementHandle();
 
 	if (!deviceHandle || !rackHandle) {
 		throw new Error(`Could not find device "${deviceName}" or rack`);
@@ -62,8 +64,14 @@ async function dragDeviceToRack(page: Page, deviceName: string) {
 test.describe('Shelf Category', () => {
 	test.beforeEach(async ({ page }) => {
 		await page.goto('/');
-		await page.evaluate(() => sessionStorage.clear());
+		// Clear both storage types - hasStarted flag is in localStorage
+		await page.evaluate(() => {
+			sessionStorage.clear();
+			localStorage.clear();
+			localStorage.setItem('rackarr_has_started', 'true');
+		});
 		await page.reload();
+		await page.waitForTimeout(500);
 	});
 
 	test('shelf devices appear in device library', async ({ page }) => {

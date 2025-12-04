@@ -38,8 +38,9 @@ async function dragDeviceToRack(page: Page) {
 	await expect(page.locator('.device-palette-item').first()).toBeVisible();
 
 	// Get element handles using Playwright locators
+	// In dual-view mode, there are two rack-svg elements - use first one
 	const deviceHandle = await page.locator('.device-palette-item').first().elementHandle();
-	const rackHandle = await page.locator('.rack-svg').elementHandle();
+	const rackHandle = await page.locator('.rack-svg').first().elementHandle();
 
 	if (!deviceHandle || !rackHandle) {
 		throw new Error('Could not find device item or rack');
@@ -70,8 +71,14 @@ async function dragDeviceToRack(page: Page) {
 test.describe('Keyboard Shortcuts', () => {
 	test.beforeEach(async ({ page }) => {
 		await page.goto('/');
-		await page.evaluate(() => sessionStorage.clear());
+		// Clear both storage types - hasStarted flag is in localStorage
+		await page.evaluate(() => {
+			sessionStorage.clear();
+			localStorage.clear();
+			localStorage.setItem('rackarr_has_started', 'true');
+		});
 		await page.reload();
+		await page.waitForTimeout(500);
 
 		// In v0.2, rack already exists. Replace it with a specific one for testing.
 		await replaceRack(page, 'Test Rack', 12);
@@ -80,10 +87,10 @@ test.describe('Keyboard Shortcuts', () => {
 	test('Delete key clears rack devices (v0.2 cannot remove the rack)', async ({ page }) => {
 		// Add a device first
 		await dragDeviceToRack(page);
-		await expect(page.locator('.rack-device')).toBeVisible();
+		await expect(page.locator('.rack-device').first()).toBeVisible();
 
-		// Select the rack
-		await page.locator('.rack-svg').click();
+		// Select the rack (click on first rack-svg in dual-view)
+		await page.locator('.rack-svg').first().click();
 
 		// Press Delete
 		await page.keyboard.press('Delete');
@@ -93,17 +100,17 @@ test.describe('Keyboard Shortcuts', () => {
 		await page.click('[role="dialog"] button:has-text("Delete Rack")');
 
 		// In v0.2, rack still exists but devices are cleared
-		await expect(page.locator('.rack-container')).toBeVisible();
+		await expect(page.locator('.rack-container').first()).toBeVisible();
 		await expect(page.locator('.rack-device')).not.toBeVisible();
 	});
 
 	test('Backspace key clears rack devices (v0.2 cannot remove the rack)', async ({ page }) => {
 		// Add a device first
 		await dragDeviceToRack(page);
-		await expect(page.locator('.rack-device')).toBeVisible();
+		await expect(page.locator('.rack-device').first()).toBeVisible();
 
-		// Select the rack
-		await page.locator('.rack-svg').click();
+		// Select the rack (click on first rack-svg in dual-view)
+		await page.locator('.rack-svg').first().click();
 
 		// Press Backspace
 		await page.keyboard.press('Backspace');
@@ -113,13 +120,13 @@ test.describe('Keyboard Shortcuts', () => {
 		await page.click('[role="dialog"] button:has-text("Delete Rack")');
 
 		// In v0.2, rack still exists but devices are cleared
-		await expect(page.locator('.rack-container')).toBeVisible();
+		await expect(page.locator('.rack-container').first()).toBeVisible();
 		await expect(page.locator('.rack-device')).not.toBeVisible();
 	});
 
 	test('Escape clears selection', async ({ page }) => {
-		// Select the rack
-		await page.locator('.rack-svg').click();
+		// Select the rack (click on first rack-svg in dual-view)
+		await page.locator('.rack-svg').first().click();
 
 		// Edit panel should open
 		await expect(page.locator('.drawer-right.open')).toBeVisible();
@@ -171,15 +178,15 @@ test.describe('Keyboard Shortcuts', () => {
 		await dragDeviceToRack(page);
 
 		// Wait for device
-		await expect(page.locator('.rack-device')).toBeVisible();
+		await expect(page.locator('.rack-device').first()).toBeVisible();
 
-		// Select the device
-		await page.locator('.rack-device').click();
+		// Select the device (first one in dual-view)
+		await page.locator('.rack-device').first().click();
 
 		// Press Arrow Up
 		await page.keyboard.press('ArrowUp');
 
 		// Note: This test verifies the key is handled, actual movement depends on implementation
-		await expect(page.locator('.rack-device')).toBeVisible();
+		await expect(page.locator('.rack-device').first()).toBeVisible();
 	});
 });

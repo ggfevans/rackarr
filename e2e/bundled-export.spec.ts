@@ -22,7 +22,8 @@ async function replaceRack(page: Page, name: string, height: number = 24) {
 	}
 
 	await page.click('button:has-text("Create")');
-	await expect(page.locator('.rack-container')).toBeVisible();
+	// In dual-view mode, there are two rack containers
+	await expect(page.locator('.rack-container').first()).toBeVisible();
 }
 
 test.describe('Bundled Export', () => {
@@ -46,8 +47,14 @@ test.describe('Bundled Export', () => {
 
 	test.beforeEach(async ({ page }) => {
 		await page.goto('/');
-		await page.evaluate(() => sessionStorage.clear());
+		// Clear both storage types - hasStarted flag is in localStorage
+		await page.evaluate(() => {
+			sessionStorage.clear();
+			localStorage.clear();
+			localStorage.setItem('rackarr_has_started', 'true');
+		});
 		await page.reload();
+		await page.waitForTimeout(500);
 	});
 
 	test('export dialog shows export mode options', async ({ page }) => {

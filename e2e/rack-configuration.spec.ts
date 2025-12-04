@@ -13,8 +13,14 @@ async function openNewRackForm(page: Page) {
 test.describe('Rack Configuration', () => {
 	test.beforeEach(async ({ page }) => {
 		await page.goto('/');
-		await page.evaluate(() => sessionStorage.clear());
+		// Clear both storage types - hasStarted flag is in localStorage
+		await page.evaluate(() => {
+			sessionStorage.clear();
+			localStorage.clear();
+			localStorage.setItem('rackarr_has_started', 'true');
+		});
 		await page.reload();
+		await page.waitForTimeout(500);
 	});
 
 	test('can create 10-inch rack with narrower render', async ({ page }) => {
@@ -29,8 +35,8 @@ test.describe('Rack Configuration', () => {
 
 		await page.click('button:has-text("Create")');
 
-		// Rack should be visible
-		await expect(page.locator('.rack-container')).toBeVisible();
+		// Rack should be visible (dual-view has 2 containers)
+		await expect(page.locator('.rack-container').first()).toBeVisible();
 
 		// The rack SVG should have a narrower viewBox for 10" rack
 		const rackSvg = page.locator('.rack-svg').first();
@@ -54,7 +60,8 @@ test.describe('Rack Configuration', () => {
 
 		await page.click('button:has-text("Create")');
 
-		await expect(page.locator('.rack-container')).toBeVisible();
+		// Rack should be visible (dual-view has 2 containers)
+		await expect(page.locator('.rack-container').first()).toBeVisible();
 
 		const rackSvg = page.locator('.rack-svg').first();
 		const viewBox = await rackSvg.getAttribute('viewBox');
@@ -109,12 +116,15 @@ test.describe('Rack Configuration', () => {
 		// Uses defaults: desc_units=false (ascending), starting_unit=1
 		await page.click('button:has-text("Create")');
 
-		await expect(page.locator('.rack-container')).toBeVisible();
+		// Rack should be visible (dual-view has 2 containers)
+		await expect(page.locator('.rack-container').first()).toBeVisible();
 
 		// Verify defaults are applied:
 		// - starting_unit=1: labels should include "1" and "10" (not higher)
 		// - desc_units=false: U1 at bottom, U10 at top
-		const uLabels = page.locator('.u-label');
+		// In dual-view mode, each view has its own U labels - scope to first view
+		const firstRackSvg = page.locator('.rack-svg').first();
+		const uLabels = firstRackSvg.locator('.u-label');
 		const count = await uLabels.count();
 		expect(count).toBe(10);
 

@@ -254,18 +254,7 @@ describe('Rack SVG Component', () => {
 		});
 	});
 
-	describe('Rack View Toggle', () => {
-		it('renders view toggle', () => {
-			const { getByRole } = render(Rack, {
-				props: {
-					rack: { ...mockRack, view: 'front' },
-					deviceLibrary: mockDeviceLibrary,
-					selected: false
-				}
-			});
-			expect(getByRole('group', { name: /rack view/i })).toBeTruthy();
-		});
-
+	describe('Rack View Filtering', () => {
 		it('shows front-face devices in front view', () => {
 			const device: Device = {
 				id: 'dev-1',
@@ -674,21 +663,6 @@ describe('Rack SVG Component', () => {
 			});
 
 			expect(screen.getByText('Test Rack')).toBeInTheDocument();
-		});
-
-		it('hides view toggle when hideViewToggle=true', () => {
-			const { container } = render(Rack, {
-				props: {
-					rack: mockRack,
-					deviceLibrary: [],
-					selected: false,
-					hideViewToggle: true
-				}
-			});
-
-			// View toggle should not be visible
-			const viewToggle = container.querySelector('.view-toggle-overlay');
-			expect(viewToggle).toBeNull();
 		});
 	});
 

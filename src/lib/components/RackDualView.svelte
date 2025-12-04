@@ -121,7 +121,6 @@
 				{showLabelsOnImages}
 				faceFilter="front"
 				hideRackName={true}
-				hideViewToggle={true}
 				onselect={() => handleSelect()}
 				{ondeviceselect}
 				ondevicedrop={handleFrontDeviceDrop}
@@ -142,7 +141,6 @@
 				{showLabelsOnImages}
 				faceFilter="rear"
 				hideRackName={true}
-				hideViewToggle={true}
 				onselect={() => handleSelect()}
 				{ondeviceselect}
 				ondevicedrop={handleRearDeviceDrop}

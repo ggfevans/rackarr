@@ -4,9 +4,8 @@
   Accepts device drops for placement
 -->
 <script lang="ts">
-	import type { Rack as RackType, Device, RackView, DisplayMode } from '$lib/types';
+	import type { Rack as RackType, Device, DisplayMode } from '$lib/types';
 	import RackDevice from './RackDevice.svelte';
-	import RackViewToggle from './RackViewToggle.svelte';
 	import {
 		parseDragData,
 		calculateDropPosition,
@@ -32,8 +31,6 @@
 		viewLabel?: string;
 		/** Hide the rack name (useful when container shows it instead) */
 		hideRackName?: boolean;
-		/** Hide the view toggle (useful in dual-view mode) */
-		hideViewToggle?: boolean;
 		onselect?: (event: CustomEvent<{ rackId: string }>) => void;
 		ondeviceselect?: (event: CustomEvent<{ libraryId: string; position: number }>) => void;
 		ondevicedrop?: (
@@ -50,7 +47,6 @@
 				targetPosition: number;
 			}>
 		) => void;
-		onrackviewchange?: (event: CustomEvent<{ rackId: string; view: RackView }>) => void;
 	}
 
 	let {
@@ -63,13 +59,11 @@
 		faceFilter,
 		viewLabel,
 		hideRackName = false,
-		hideViewToggle = false,
 		onselect,
 		ondeviceselect,
 		ondevicedrop,
 		ondevicemove,
-		ondevicemoverack,
-		onrackviewchange
+		ondevicemoverack
 	}: Props = $props();
 
 	// Track which device is being dragged (for internal moves)
@@ -156,14 +150,6 @@
 		}
 
 		onselect?.(new CustomEvent('select', { detail: { rackId: rack.id } }));
-	}
-
-	function handleViewChange(newView: RackView) {
-		onrackviewchange?.(
-			new CustomEvent('rackviewchange', {
-				detail: { rackId: rack.id, view: newView }
-			})
-		);
 	}
 
 	function handleKeyDown(event: KeyboardEvent) {
@@ -503,21 +489,6 @@
 			/>
 		{/if}
 
-		<!-- View toggle in top bar (centered) - hidden when hideViewToggle=true -->
-		{#if !hideViewToggle}
-			<foreignObject
-				x="0"
-				y={RACK_PADDING}
-				width={RACK_WIDTH}
-				height={RAIL_WIDTH}
-				class="view-toggle-overlay"
-			>
-				<div class="view-toggle-wrapper">
-					<RackViewToggle view={rack.view} onchange={handleViewChange} />
-				</div>
-			</foreignObject>
-		{/if}
-
 		<!-- Rack name at top (rendered last so it's on top) - hidden when hideRackName=true -->
 		{#if !hideRackName}
 			<text
@@ -569,24 +540,8 @@
 		outline-offset: 4px;
 	}
 
-	.view-toggle-overlay {
-		overflow: visible;
-	}
-
-	.view-toggle-wrapper {
-		width: 100%;
-		height: 100%;
-		display: flex;
-		align-items: center;
-		justify-content: center;
-		pointer-events: none;
-	}
-
-	.view-toggle-wrapper > :global(*) {
-		pointer-events: all;
-	}
-
 	/* NOTE: Drag handle CSS removed in v0.1.1 (single-rack mode) */
+	/* NOTE: View toggle CSS removed in v0.4.0 (dual-view mode) */
 
 	svg {
 		pointer-events: auto;

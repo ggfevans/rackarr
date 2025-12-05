@@ -29,7 +29,6 @@
 	import {
 		downloadArchiveV02,
 		generateArchiveFilenameV02,
-		createFolderArchive,
 		extractFolderArchive
 	} from '$lib/utils/folder';
 	import { migrateToV02, migrateImages } from '$lib/utils/migrate-v02';
@@ -39,13 +38,9 @@
 		exportAsPNG,
 		exportAsJPEG,
 		downloadBlob,
-		generateExportFilename,
-		createBundledExport,
-		generateBundledExportFilename,
-		type ExportImageBlobs,
-		type BundledExportData
+		generateExportFilename
 	} from '$lib/utils/export';
-	import type { ExportOptions, BundledExportOptions } from '$lib/types';
+	import type { ExportOptions } from '$lib/types';
 
 	const layoutStore = getLayoutStore();
 	const selectionStore = getSelectionStore();
@@ -228,7 +223,7 @@
 		exportDialogOpen = true;
 	}
 
-	async function handleExportSubmit(options: ExportOptions | BundledExportOptions) {
+	async function handleExportSubmit(options: ExportOptions) {
 		exportDialogOpen = false;
 
 		try {
@@ -238,9 +233,7 @@
 					? layoutStore.racks.filter((r) => r.id === selectionStore.selectedId)
 					: layoutStore.racks;
 
-			// Get the first rack for bundled export metadata
-			const rack = racksToExport[0];
-			if (!rack) {
+			if (racksToExport.length === 0) {
 				toastStore.showToast('No rack to export', 'warning');
 				return;
 			}
@@ -248,28 +241,7 @@
 			// Generate the SVG
 			const svg = generateExportSVG(racksToExport, layoutStore.deviceLibrary, options);
 
-			// Check if bundled export
-			const isBundled = options.exportMode === 'bundled';
-
-			// Handle bundled export - generates all formats
-			if (isBundled) {
-				// Generate all three formats
-				const svgString = exportAsSVG(svg);
-				const svgBlob = new Blob([svgString], { type: 'image/svg+xml' });
-				const pngBlob = await exportAsPNG(svg);
-				const jpegBlob = await exportAsJPEG(svg);
-
-				const imageBlobs: ExportImageBlobs = {
-					png: pngBlob,
-					jpeg: jpegBlob,
-					svg: svgBlob
-				};
-
-				await handleBundledExport(imageBlobs, options as BundledExportOptions);
-				return;
-			}
-
-			// Single format export
+			// Export based on selected format
 			if (options.format === 'svg') {
 				const svgString = exportAsSVG(svg);
 				const blob = new Blob([svgString], { type: 'image/svg+xml' });
@@ -294,36 +266,6 @@
 			console.error('Export failed:', error);
 			toastStore.showToast(error instanceof Error ? error.message : 'Export failed', 'error');
 		}
-	}
-
-	async function handleBundledExport(imageBlobs: ExportImageBlobs, options: BundledExportOptions) {
-		// Get device images
-		const images = imageStore.getAllImages();
-
-		// Get source layout if requested (use v0.2 folder archive)
-		let sourceBlob: Blob | undefined;
-		if (options.includeSource) {
-			sourceBlob = await createFolderArchive(layoutStore.layout, images);
-		}
-
-		// Create bundled export with all formats, device images, and metadata
-		const exportData: BundledExportData = {
-			imageBlobs,
-			layout: layoutStore.layout,
-			rack: layoutStore.rack,
-			deviceLibrary: layoutStore.deviceLibrary,
-			images,
-			options,
-			includeSource: options.includeSource,
-			sourceBlob
-		};
-
-		const zipBlob = await createBundledExport(exportData);
-
-		// Download the ZIP
-		const filename = generateBundledExportFilename(layoutStore.layout.name, options.format);
-		downloadBlob(zipBlob, filename);
-		toastStore.showToast('Bundled export created successfully', 'success');
 	}
 
 	function handleExportCancel() {

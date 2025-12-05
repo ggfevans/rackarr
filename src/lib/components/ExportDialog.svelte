@@ -3,22 +3,14 @@
   Allows user to configure export options for rack layouts
 -->
 <script lang="ts">
-	import type {
-		Rack,
-		ExportFormat,
-		ExportBackground,
-		ExportOptions,
-		ExportMode,
-		ExportView,
-		BundledExportOptions
-	} from '$lib/types';
+	import type { Rack, ExportFormat, ExportBackground, ExportOptions, ExportView } from '$lib/types';
 	import Dialog from './Dialog.svelte';
 
 	interface Props {
 		open: boolean;
 		racks: Rack[];
 		selectedRackId: string | null;
-		onexport?: (event: CustomEvent<ExportOptions | BundledExportOptions>) => void;
+		onexport?: (event: CustomEvent<ExportOptions>) => void;
 		oncancel?: () => void;
 	}
 
@@ -28,7 +20,6 @@
 	let format = $state<ExportFormat>('png');
 	let includeLegend = $state(false);
 	let background = $state<ExportBackground>('dark');
-	let exportMode = $state<ExportMode>('quick');
 	let exportView = $state<ExportView>('both');
 	let transparent = $state(false);
 
@@ -37,9 +28,6 @@
 
 	// Computed: Can export (has racks)
 	const canExport = $derived(racks.length > 0);
-
-	// Computed: Show bundled options
-	const isBundled = $derived(exportMode === 'bundled');
 
 	// Reset transparent when switching to format that doesn't support it
 	$effect(() => {
@@ -52,30 +40,15 @@
 		// Use transparent background if checkbox is checked, otherwise use selected background
 		const effectiveBackground = transparent ? 'transparent' : background;
 
-		if (exportMode === 'bundled') {
-			const options: BundledExportOptions = {
-				format,
-				scope: 'all',
-				includeNames: true,
-				includeLegend,
-				background: effectiveBackground,
-				exportMode: 'bundled',
-				includeSource: true, // Always include source in bundled export
-				exportView
-			};
-			onexport?.(new CustomEvent('export', { detail: options }));
-		} else {
-			const options: ExportOptions = {
-				format,
-				scope: 'all',
-				includeNames: true,
-				includeLegend,
-				background: effectiveBackground,
-				exportMode: 'quick',
-				exportView
-			};
-			onexport?.(new CustomEvent('export', { detail: options }));
-		}
+		const options: ExportOptions = {
+			format,
+			scope: 'all',
+			includeNames: true,
+			includeLegend,
+			background: effectiveBackground,
+			exportView
+		};
+		onexport?.(new CustomEvent('export', { detail: options }));
 	}
 
 	function handleCancel() {
@@ -102,59 +75,45 @@
 <Dialog {open} title="Export" width="380px" onclose={handleCancel}>
 	<div class="export-form">
 		<div class="form-group">
-			<label for="export-mode">Export Mode</label>
-			<select id="export-mode" bind:value={exportMode}>
-				<option value="quick">Single Image</option>
-				<option value="bundled">Bundled (ZIP with Metadata)</option>
+			<label for="export-format">Format</label>
+			<select id="export-format" bind:value={format}>
+				<option value="png">PNG</option>
+				<option value="jpeg">JPEG</option>
+				<option value="svg">SVG</option>
 			</select>
 		</div>
 
-		{#if !isBundled}
-			<div class="form-group">
-				<label for="export-format">Format</label>
-				<select id="export-format" bind:value={format}>
-					<option value="png">PNG</option>
-					<option value="jpeg">JPEG</option>
-					<option value="svg">SVG</option>
-				</select>
-			</div>
+		<div class="form-group">
+			<label for="export-view">View</label>
+			<select id="export-view" bind:value={exportView}>
+				<option value="both">Front & Rear (Side-by-Side)</option>
+				<option value="front">Front Only</option>
+				<option value="rear">Rear Only</option>
+			</select>
+		</div>
 
-			<div class="form-group">
-				<label for="export-view">View</label>
-				<select id="export-view" bind:value={exportView}>
-					<option value="both">Front & Rear (Side-by-Side)</option>
-					<option value="front">Front Only</option>
-					<option value="rear">Rear Only</option>
-				</select>
-			</div>
+		<div class="form-group checkbox-group">
+			<label>
+				<input type="checkbox" bind:checked={includeLegend} />
+				Include legend
+			</label>
+		</div>
 
+		<div class="form-group">
+			<label for="export-background">Background</label>
+			<select id="export-background" bind:value={background} disabled={transparent}>
+				<option value="dark">Dark</option>
+				<option value="light">Light</option>
+			</select>
+		</div>
+
+		{#if canSelectTransparent}
 			<div class="form-group checkbox-group">
 				<label>
-					<input type="checkbox" bind:checked={includeLegend} />
-					Include legend
+					<input type="checkbox" bind:checked={transparent} />
+					Transparent background
 				</label>
 			</div>
-
-			<div class="form-group">
-				<label for="export-background">Background</label>
-				<select id="export-background" bind:value={background} disabled={transparent}>
-					<option value="dark">Dark</option>
-					<option value="light">Light</option>
-				</select>
-			</div>
-
-			{#if canSelectTransparent}
-				<div class="form-group checkbox-group">
-					<label>
-						<input type="checkbox" bind:checked={transparent} />
-						Transparent background
-					</label>
-				</div>
-			{/if}
-		{:else}
-			<p class="bundled-description">
-				Exports all formats (PNG, JPEG, SVG) with metadata and source file in a single ZIP archive.
-			</p>
 		{/if}
 	</div>
 
@@ -223,16 +182,6 @@
 		height: 16px;
 		accent-color: var(--colour-selection, #0066ff);
 		cursor: pointer;
-	}
-
-	.bundled-description {
-		font-size: 14px;
-		color: var(--colour-text-muted, #808080);
-		margin: 8px 0 0 0;
-		padding: 12px;
-		background: var(--colour-surface, #252525);
-		border-radius: 4px;
-		line-height: 1.5;
 	}
 
 	.form-group select:disabled {

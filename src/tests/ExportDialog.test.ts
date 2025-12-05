@@ -148,7 +148,6 @@ describe('ExportDialog', () => {
 				includeNames: true,
 				includeLegend: false,
 				background: 'dark',
-				exportMode: 'quick',
 				exportView: 'both'
 			});
 		});
@@ -186,7 +185,6 @@ describe('ExportDialog', () => {
 				includeNames: true,
 				includeLegend: true,
 				background: 'transparent',
-				exportMode: 'quick',
 				exportView: 'both'
 			});
 		});

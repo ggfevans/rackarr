@@ -1,7 +1,7 @@
 # CLAUDE.md — Rackarr
 
 **Project:** Rackarr — Rack Layout Designer for Homelabbers
-**Version:** 0.3.1
+**Version:** 0.3.5
 
 ---
 

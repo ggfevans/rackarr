@@ -175,7 +175,7 @@
 	}
 
 	.rack-dual-view-name {
-		font-size: 15px;
+		font-size: 20px;
 		font-weight: 500;
 		color: var(--colour-text);
 		font-family: var(--font-family, system-ui, sans-serif);

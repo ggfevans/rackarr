@@ -80,12 +80,15 @@
 	const U_HEIGHT = 22;
 	const BASE_RACK_WIDTH = 220; // Base width for 19" rack
 	const RAIL_WIDTH = 17;
-	const RACK_PADDING = 18; // Space at top for rack name (13px font + margin)
+	const BASE_RACK_PADDING = 18; // Space at top for rack name (13px font + margin)
 	const NAME_Y_OFFSET = 4; // Extra space above rack name to prevent cutoff on narrow racks
 
 	// Calculate actual width based on rack.width (10" or 19")
 	// Scale proportionally: 10" rack = 220 * 10/19 ≈ 116
 	const RACK_WIDTH = $derived(Math.round((BASE_RACK_WIDTH * rack.width) / 19));
+
+	// Rack padding is reduced when rack name is hidden (in dual-view mode)
+	const RACK_PADDING = $derived(hideRackName ? 4 : BASE_RACK_PADDING);
 
 	// Calculated dimensions
 	const totalHeight = $derived(rack.height * U_HEIGHT);

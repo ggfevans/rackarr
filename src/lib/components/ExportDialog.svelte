@@ -29,11 +29,11 @@
 	let includeLegend = $state(false);
 	let background = $state<ExportBackground>('dark');
 	let exportMode = $state<ExportMode>('quick');
-	let includeSource = $state(true);
 	let exportView = $state<ExportView>('both');
+	let transparent = $state(false);
 
-	// Computed: Can select transparent background (only for SVG)
-	const canSelectTransparent = $derived(format === 'svg');
+	// Computed: Can select transparent background (PNG and SVG only)
+	const canSelectTransparent = $derived(format === 'svg' || format === 'png');
 
 	// Computed: Can export (has racks)
 	const canExport = $derived(racks.length > 0);
@@ -41,33 +41,26 @@
 	// Computed: Show bundled options
 	const isBundled = $derived(exportMode === 'bundled');
 
-	// Computed: Bundled not available for SVG (since it's already text-based)
-	const canUseBundled = $derived(format !== 'svg');
-
-	// Reset transparent background when switching away from SVG
+	// Reset transparent when switching to format that doesn't support it
 	$effect(() => {
-		if (!canSelectTransparent && background === 'transparent') {
-			background = 'dark';
-		}
-	});
-
-	// Reset export mode to quick when switching to SVG
-	$effect(() => {
-		if (!canUseBundled && exportMode === 'bundled') {
-			exportMode = 'quick';
+		if (!canSelectTransparent && transparent) {
+			transparent = false;
 		}
 	});
 
 	function handleExport() {
+		// Use transparent background if checkbox is checked, otherwise use selected background
+		const effectiveBackground = transparent ? 'transparent' : background;
+
 		if (exportMode === 'bundled') {
 			const options: BundledExportOptions = {
 				format,
 				scope: 'all',
 				includeNames: true,
 				includeLegend,
-				background,
+				background: effectiveBackground,
 				exportMode: 'bundled',
-				includeSource,
+				includeSource: true, // Always include source in bundled export
 				exportView
 			};
 			onexport?.(new CustomEvent('export', { detail: options }));
@@ -77,7 +70,7 @@
 				scope: 'all',
 				includeNames: true,
 				includeLegend,
-				background,
+				background: effectiveBackground,
 				exportMode: 'quick',
 				exportView
 			};
@@ -109,60 +102,60 @@
 <Dialog {open} title="Export" width="380px" onclose={handleCancel}>
 	<div class="export-form">
 		<div class="form-group">
-			<label for="export-format">Format</label>
-			<select id="export-format" bind:value={format}>
-				<option value="png">PNG</option>
-				<option value="jpeg">JPEG</option>
-				<option value="svg">SVG</option>
-				<option value="pdf">PDF</option>
-			</select>
-		</div>
-
-		<div class="form-group">
-			<label for="export-view">View</label>
-			<select id="export-view" bind:value={exportView}>
-				<option value="both">Front & Rear (Side-by-Side)</option>
-				<option value="front">Front Only</option>
-				<option value="rear">Rear Only</option>
-			</select>
-		</div>
-
-		<div class="form-group">
 			<label for="export-mode">Export Mode</label>
-			<select id="export-mode" bind:value={exportMode} disabled={!canUseBundled}>
-				<option value="quick">Quick (Single File)</option>
+			<select id="export-mode" bind:value={exportMode}>
+				<option value="quick">Single Image</option>
 				<option value="bundled">Bundled (ZIP with Metadata)</option>
 			</select>
-			{#if !canUseBundled}
-				<span class="help-text">Bundled export not available for SVG format</span>
-			{/if}
 		</div>
 
-		{#if isBundled}
-			<div class="form-group checkbox-group bundled-option">
-				<label>
-					<input type="checkbox" bind:checked={includeSource} />
-					Include source layout
-				</label>
-				<span class="help-text">Include the .rackarr.zip file for editing later</span>
+		{#if !isBundled}
+			<div class="form-group">
+				<label for="export-format">Format</label>
+				<select id="export-format" bind:value={format}>
+					<option value="png">PNG</option>
+					<option value="jpeg">JPEG</option>
+					<option value="svg">SVG</option>
+				</select>
 			</div>
+
+			<div class="form-group">
+				<label for="export-view">View</label>
+				<select id="export-view" bind:value={exportView}>
+					<option value="both">Front & Rear (Side-by-Side)</option>
+					<option value="front">Front Only</option>
+					<option value="rear">Rear Only</option>
+				</select>
+			</div>
+
+			<div class="form-group checkbox-group">
+				<label>
+					<input type="checkbox" bind:checked={includeLegend} />
+					Include legend
+				</label>
+			</div>
+
+			<div class="form-group">
+				<label for="export-background">Background</label>
+				<select id="export-background" bind:value={background} disabled={transparent}>
+					<option value="dark">Dark</option>
+					<option value="light">Light</option>
+				</select>
+			</div>
+
+			{#if canSelectTransparent}
+				<div class="form-group checkbox-group">
+					<label>
+						<input type="checkbox" bind:checked={transparent} />
+						Transparent background
+					</label>
+				</div>
+			{/if}
+		{:else}
+			<p class="bundled-description">
+				Exports all formats (PNG, JPEG, SVG) with metadata and source file in a single ZIP archive.
+			</p>
 		{/if}
-
-		<div class="form-group checkbox-group">
-			<label>
-				<input type="checkbox" bind:checked={includeLegend} />
-				Include legend
-			</label>
-		</div>
-
-		<div class="form-group">
-			<label for="export-background">Background</label>
-			<select id="export-background" bind:value={background}>
-				<option value="dark">Dark</option>
-				<option value="light">Light</option>
-				<option value="transparent" disabled={!canSelectTransparent}>Transparent</option>
-			</select>
-		</div>
 	</div>
 
 	<div class="dialog-actions">
@@ -232,15 +225,14 @@
 		cursor: pointer;
 	}
 
-	.help-text {
-		font-size: 12px;
+	.bundled-description {
+		font-size: 14px;
 		color: var(--colour-text-muted, #808080);
-		margin-top: 4px;
-	}
-
-	.bundled-option {
-		flex-direction: column;
-		align-items: flex-start;
+		margin: 8px 0 0 0;
+		padding: 12px;
+		background: var(--colour-surface, #252525);
+		border-radius: 4px;
+		line-height: 1.5;
 	}
 
 	.form-group select:disabled {

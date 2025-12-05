@@ -46,7 +46,7 @@ describe('ExportDialog', () => {
 	});
 
 	describe('Format Options', () => {
-		it('shows all format options', () => {
+		it('shows format options in Single Image mode', () => {
 			render(ExportDialog, {
 				props: { open: true, racks: mockRacks, selectedRackId: null }
 			});
@@ -54,11 +54,10 @@ describe('ExportDialog', () => {
 			const formatSelect = screen.getByLabelText(/format/i);
 			expect(formatSelect).toBeInTheDocument();
 
-			// Check all options exist
+			// Check format options exist (PNG, JPEG, SVG - no PDF in Single Image mode)
 			expect(screen.getByRole('option', { name: /png/i })).toBeInTheDocument();
 			expect(screen.getByRole('option', { name: /jpeg/i })).toBeInTheDocument();
 			expect(screen.getByRole('option', { name: /svg/i })).toBeInTheDocument();
-			expect(screen.getByRole('option', { name: /pdf/i })).toBeInTheDocument();
 		});
 
 		it('defaults to PNG format', () => {
@@ -89,27 +88,40 @@ describe('ExportDialog', () => {
 				props: { open: true, racks: mockRacks, selectedRackId: null }
 			});
 
-			const bgSelect = screen.getByLabelText(/background/i);
+			const bgSelect = screen.getByLabelText(/^background$/i);
 			expect(bgSelect).toBeInTheDocument();
 			expect(screen.getByRole('option', { name: /dark/i })).toBeInTheDocument();
 			expect(screen.getByRole('option', { name: /light/i })).toBeInTheDocument();
 		});
 
-		it('transparent option only enabled for SVG format', async () => {
+		it('transparent checkbox shown for PNG and SVG formats', async () => {
 			render(ExportDialog, {
 				props: { open: true, racks: mockRacks, selectedRackId: null }
 			});
 
-			// Default is PNG - transparent should be disabled
-			const transparentOption = screen.getByRole('option', { name: /transparent/i });
-			expect(transparentOption).toBeDisabled();
+			// Default is PNG - transparent checkbox should be visible
+			const transparentCheckbox = screen.getByLabelText(/transparent background/i);
+			expect(transparentCheckbox).toBeInTheDocument();
 
-			// Change to SVG format
+			// Change to SVG format - checkbox should still be visible
 			const formatSelect = screen.getByLabelText(/format/i);
 			await fireEvent.change(formatSelect, { target: { value: 'svg' } });
+			expect(screen.getByLabelText(/transparent background/i)).toBeInTheDocument();
 
-			// Now transparent should be enabled
-			expect(transparentOption).not.toBeDisabled();
+			// Change to JPEG format - checkbox should be hidden
+			await fireEvent.change(formatSelect, { target: { value: 'jpeg' } });
+			expect(screen.queryByLabelText(/transparent background/i)).not.toBeInTheDocument();
+		});
+
+		it('transparent checkbox defaults to unchecked', () => {
+			render(ExportDialog, {
+				props: { open: true, racks: mockRacks, selectedRackId: null }
+			});
+
+			const transparentCheckbox = screen.getByLabelText(
+				/transparent background/i
+			) as HTMLInputElement;
+			expect(transparentCheckbox.checked).toBe(false);
 		});
 	});
 
@@ -161,9 +173,9 @@ describe('ExportDialog', () => {
 			const legendCheckbox = screen.getByLabelText(/include legend/i);
 			await fireEvent.click(legendCheckbox);
 
-			// Change background to transparent
-			const bgSelect = screen.getByLabelText(/background/i);
-			await fireEvent.change(bgSelect, { target: { value: 'transparent' } });
+			// Enable transparent background using the checkbox
+			const transparentCheckbox = screen.getByLabelText(/transparent background/i);
+			await fireEvent.click(transparentCheckbox);
 
 			const exportButton = screen.getByRole('button', { name: /^export$/i });
 			await fireEvent.click(exportButton);

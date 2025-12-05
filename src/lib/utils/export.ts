@@ -5,13 +5,13 @@
 import type { Rack, Device, ExportOptions, ExportFormat, ExportMetadata } from '$lib/types';
 import JSZip from 'jszip';
 
-// Interface for layout metadata (supports both Layout and LayoutV02)
+// Interface for layout metadata (supports both Layout and Layout)
 interface LayoutLike {
 	version: string;
 	name: string;
 }
 
-// Interface for rack metadata (supports both Rack and RackV02)
+// Interface for rack metadata (supports both Rack and Rack)
 interface RackLike {
 	name: string;
 	height: number;

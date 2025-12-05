@@ -14,7 +14,7 @@ import {
 	placeDeviceInRack,
 	removeDeviceFromRack
 } from '$lib/stores/layout-helpers-v02';
-import type { DeviceTypeV02, DeviceV02, LayoutV02 } from '$lib/types/v02';
+import type { DeviceType, PlacedDevice, Layout } from '$lib/types/v02';
 import { isValidSlug } from '$lib/utils/slug';
 
 describe('createDeviceType', () => {
@@ -149,7 +149,7 @@ describe('createDevice', () => {
 });
 
 describe('findDeviceType', () => {
-	const deviceTypes: DeviceTypeV02[] = [
+	const deviceTypes: DeviceType[] = [
 		{
 			slug: 'server-one',
 			u_height: 2,
@@ -194,7 +194,7 @@ describe('findDeviceType', () => {
 });
 
 describe('getDeviceDisplayName', () => {
-	const deviceTypes: DeviceTypeV02[] = [
+	const deviceTypes: DeviceType[] = [
 		{
 			slug: 'server-basic',
 			u_height: 2,
@@ -216,7 +216,7 @@ describe('getDeviceDisplayName', () => {
 	];
 
 	it('returns device name if set', () => {
-		const device: DeviceV02 = {
+		const device: PlacedDevice = {
 			device_type: 'server-basic',
 			name: 'Primary Database',
 			position: 10,
@@ -226,7 +226,7 @@ describe('getDeviceDisplayName', () => {
 	});
 
 	it('returns model if name not set', () => {
-		const device: DeviceV02 = {
+		const device: PlacedDevice = {
 			device_type: 'server-with-model',
 			position: 10,
 			face: 'front'
@@ -235,7 +235,7 @@ describe('getDeviceDisplayName', () => {
 	});
 
 	it('returns slug as fallback when no name or model', () => {
-		const device: DeviceV02 = {
+		const device: PlacedDevice = {
 			device_type: 'server-basic',
 			position: 10,
 			face: 'front'
@@ -244,7 +244,7 @@ describe('getDeviceDisplayName', () => {
 	});
 
 	it('prefers device name over model', () => {
-		const device: DeviceV02 = {
+		const device: PlacedDevice = {
 			device_type: 'nas-synology',
 			name: 'Backup NAS',
 			position: 5,
@@ -254,7 +254,7 @@ describe('getDeviceDisplayName', () => {
 	});
 
 	it('returns slug when device type not found', () => {
-		const device: DeviceV02 = {
+		const device: PlacedDevice = {
 			device_type: 'non-existent',
 			position: 10,
 			face: 'front'
@@ -263,7 +263,7 @@ describe('getDeviceDisplayName', () => {
 	});
 
 	it('handles empty device types array', () => {
-		const device: DeviceV02 = {
+		const device: PlacedDevice = {
 			device_type: 'any-device',
 			position: 10,
 			face: 'front'
@@ -273,7 +273,7 @@ describe('getDeviceDisplayName', () => {
 });
 
 // Helper to create a minimal test layout
-function createTestLayout(overrides: Partial<LayoutV02> = {}): LayoutV02 {
+function createTestLayout(overrides: Partial<Layout> = {}): Layout {
 	return {
 		version: '0.2.0',
 		name: 'Test Layout',
@@ -299,7 +299,7 @@ function createTestLayout(overrides: Partial<LayoutV02> = {}): LayoutV02 {
 describe('addDeviceTypeToLayout', () => {
 	it('adds device type to empty layout', () => {
 		const layout = createTestLayout();
-		const deviceType: DeviceTypeV02 = {
+		const deviceType: DeviceType = {
 			slug: 'new-server',
 			u_height: 2,
 			rackarr: { colour: '#3b82f6', category: 'server' }
@@ -321,7 +321,7 @@ describe('addDeviceTypeToLayout', () => {
 				}
 			]
 		});
-		const deviceType: DeviceTypeV02 = {
+		const deviceType: DeviceType = {
 			slug: 'new-device',
 			u_height: 4,
 			rackarr: { colour: '#ffffff', category: 'storage' }
@@ -343,7 +343,7 @@ describe('addDeviceTypeToLayout', () => {
 				}
 			]
 		});
-		const deviceType: DeviceTypeV02 = {
+		const deviceType: DeviceType = {
 			slug: 'my-server',
 			u_height: 4,
 			rackarr: { colour: '#ffffff', category: 'storage' }
@@ -354,7 +354,7 @@ describe('addDeviceTypeToLayout', () => {
 
 	it('original layout unchanged (immutable)', () => {
 		const layout = createTestLayout();
-		const deviceType: DeviceTypeV02 = {
+		const deviceType: DeviceType = {
 			slug: 'new-server',
 			u_height: 2,
 			rackarr: { colour: '#3b82f6', category: 'server' }
@@ -456,7 +456,7 @@ describe('placeDeviceInRack', () => {
 				}
 			]
 		});
-		const device: DeviceV02 = {
+		const device: PlacedDevice = {
 			device_type: 'my-server',
 			position: 10,
 			face: 'front'
@@ -471,7 +471,7 @@ describe('placeDeviceInRack', () => {
 
 	it('throws if device_type does not exist in device_types', () => {
 		const layout = createTestLayout();
-		const device: DeviceV02 = {
+		const device: PlacedDevice = {
 			device_type: 'non-existent',
 			position: 10,
 			face: 'front'
@@ -490,8 +490,8 @@ describe('placeDeviceInRack', () => {
 				}
 			]
 		});
-		const device1: DeviceV02 = { device_type: 'server', position: 1, face: 'front' };
-		const device2: DeviceV02 = { device_type: 'server', position: 5, face: 'rear' };
+		const device1: PlacedDevice = { device_type: 'server', position: 1, face: 'front' };
+		const device2: PlacedDevice = { device_type: 'server', position: 5, face: 'rear' };
 
 		let result = placeDeviceInRack(layout, device1);
 		result = placeDeviceInRack(result, device2);
@@ -509,7 +509,7 @@ describe('placeDeviceInRack', () => {
 				}
 			]
 		});
-		const device: DeviceV02 = {
+		const device: PlacedDevice = {
 			device_type: 'server',
 			position: 10,
 			face: 'front'

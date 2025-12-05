@@ -21,6 +21,7 @@
 		displayMode?: DisplayMode;
 		rackView?: RackView;
 		showLabelsOnImages?: boolean;
+		placedDeviceName?: string;
 		onselect?: (event: CustomEvent<{ libraryId: string; position: number }>) => void;
 		ondragstart?: (event: CustomEvent<{ rackId: string; deviceIndex: number }>) => void;
 		ondragend?: () => void;
@@ -38,10 +39,14 @@
 		displayMode = 'label',
 		rackView = 'front',
 		showLabelsOnImages = false,
+		placedDeviceName,
 		onselect,
 		ondragstart: ondragstartProp,
 		ondragend: ondragendProp
 	}: Props = $props();
+
+	// Display name: custom name if set, otherwise device type name
+	const displayName = $derived(placedDeviceName ?? device.name);
 
 	const imageStore = getImageStore();
 
@@ -175,7 +180,7 @@
 				height={deviceHeight}
 				class="label-overlay-wrapper"
 			>
-				<div class="label-overlay">{device.name}</div>
+				<div class="label-overlay">{displayName}</div>
 			</foreignObject>
 		{/if}
 	{:else}
@@ -187,7 +192,7 @@
 			dominant-baseline="middle"
 			text-anchor="middle"
 		>
-			{device.name}
+			{displayName}
 		</text>
 
 		<!-- Category icon (vertically centered) -->

@@ -246,6 +246,15 @@ Single rack per project.
 
 #### 3.4.4 Placed Devices
 
+Each device placement in a rack references a device type and specifies position and optional overrides.
+
+| Property   | Type   | Required | Default          | Notes                                  |
+| ---------- | ------ | -------- | ---------------- | -------------------------------------- |
+| `slug`     | string | Yes      | -                | References device type by slug         |
+| `position` | number | Yes      | -                | Bottom U position (1-indexed)          |
+| `face`     | enum   | No       | Device's default | `front`, `rear`, or `both`             |
+| `name`     | string | No       | Device type name | Custom display name for this placement |
+
 ```yaml
 rack:
   id: rack-uuid-001
@@ -255,6 +264,7 @@ rack:
     - slug: synology-ds920-plus
       position: 1 # Bottom U occupied (1-indexed)
       face: front # Override device default
+      name: 'Primary NAS' # Custom display name (optional)
 ```
 
 ### 3.5 Starter Device Library

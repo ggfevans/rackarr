@@ -5,9 +5,9 @@ import {
 	createDeleteDeviceTypeCommand,
 	type DeviceTypeCommandStore
 } from './device-type';
-import type { DeviceTypeV02, DeviceV02 } from '$lib/types/v02';
+import type { DeviceType, PlacedDevice } from '$lib/types/v02';
 
-function createMockDeviceType(overrides: Partial<DeviceTypeV02> = {}): DeviceTypeV02 {
+function createMockDeviceType(overrides: Partial<DeviceType> = {}): DeviceType {
 	return {
 		slug: 'test-device',
 		height: 2,
@@ -16,7 +16,7 @@ function createMockDeviceType(overrides: Partial<DeviceTypeV02> = {}): DeviceTyp
 	};
 }
 
-function createMockDevice(overrides: Partial<DeviceV02> = {}): DeviceV02 {
+function createMockDevice(overrides: Partial<PlacedDevice> = {}): PlacedDevice {
 	return {
 		device_type: 'test-device',
 		position: 10,
@@ -174,7 +174,7 @@ describe('Device Type Commands', () => {
 		it('undo restores placed devices', () => {
 			const store = createMockStore();
 			const deviceType = createMockDeviceType({ slug: 'server-type' });
-			const placedDevices: DeviceV02[] = [
+			const placedDevices: PlacedDevice[] = [
 				createMockDevice({ device_type: 'server-type', position: 5 }),
 				createMockDevice({ device_type: 'server-type', position: 10 })
 			];
@@ -195,7 +195,7 @@ describe('Device Type Commands', () => {
 		it('stores copies of placed devices to avoid mutation', () => {
 			const store = createMockStore();
 			const deviceType = createMockDeviceType();
-			const placedDevices: DeviceV02[] = [createMockDevice({ position: 5 })];
+			const placedDevices: PlacedDevice[] = [createMockDevice({ position: 5 })];
 
 			const command = createDeleteDeviceTypeCommand(deviceType, placedDevices, store);
 

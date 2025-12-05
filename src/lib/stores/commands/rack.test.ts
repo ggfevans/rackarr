@@ -6,9 +6,9 @@ import {
 	type RackCommandStore,
 	type RackSettings
 } from './rack';
-import type { RackV02, DeviceV02 } from '$lib/types/v02';
+import type { Rack, PlacedDevice } from '$lib/types/v02';
 
-function createMockRack(overrides: Partial<RackV02> = {}): RackV02 {
+function createMockRack(overrides: Partial<Rack> = {}): Rack {
 	return {
 		name: 'Main Rack',
 		height: 42,
@@ -22,7 +22,7 @@ function createMockRack(overrides: Partial<RackV02> = {}): RackV02 {
 	};
 }
 
-function createMockDevice(overrides: Partial<DeviceV02> = {}): DeviceV02 {
+function createMockDevice(overrides: Partial<PlacedDevice> = {}): PlacedDevice {
 	return {
 		device_type: 'test-device',
 		position: 10,
@@ -30,7 +30,7 @@ function createMockDevice(overrides: Partial<DeviceV02> = {}): DeviceV02 {
 	};
 }
 
-function createMockStore(rack: RackV02 = createMockRack()): RackCommandStore & {
+function createMockStore(rack: Rack = createMockRack()): RackCommandStore & {
 	updateRackRaw: ReturnType<typeof vi.fn>;
 	replaceRackRaw: ReturnType<typeof vi.fn>;
 	clearRackDevicesRaw: ReturnType<typeof vi.fn>;
@@ -184,7 +184,7 @@ describe('Rack Commands', () => {
 
 		it('creates command with correct description for empty rack', () => {
 			const store = createMockStore();
-			const devices: DeviceV02[] = [];
+			const devices: PlacedDevice[] = [];
 
 			const command = createClearRackCommand(devices, store);
 

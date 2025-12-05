@@ -3,24 +3,25 @@
  */
 
 import type { Command } from './types';
-import type { DeviceV02 } from '$lib/types/v02';
+import type { PlacedDevice } from '$lib/types/v02';
 
 /**
  * Interface for layout store operations needed by device commands
  */
 export interface DeviceCommandStore {
-	placeDeviceRaw(device: DeviceV02): number;
-	removeDeviceAtIndexRaw(index: number): DeviceV02 | undefined;
+	placeDeviceRaw(device: PlacedDevice): number;
+	removeDeviceAtIndexRaw(index: number): PlacedDevice | undefined;
 	moveDeviceRaw(index: number, newPosition: number): boolean;
 	updateDeviceFaceRaw(index: number, face: 'front' | 'rear'): void;
-	getDeviceAtIndex(index: number): DeviceV02 | undefined;
+	updateDeviceNameRaw(index: number, name: string | undefined): void;
+	getDeviceAtIndex(index: number): PlacedDevice | undefined;
 }
 
 /**
  * Create a command to place a device
  */
 export function createPlaceDeviceCommand(
-	device: DeviceV02,
+	device: PlacedDevice,
 	store: DeviceCommandStore,
 	deviceName: string = 'device'
 ): Command {
@@ -69,7 +70,7 @@ export function createMoveDeviceCommand(
  */
 export function createRemoveDeviceCommand(
 	index: number,
-	device: DeviceV02,
+	device: PlacedDevice,
 	store: DeviceCommandStore,
 	deviceName: string = 'device'
 ): Command {
@@ -108,6 +109,30 @@ export function createUpdateDeviceFaceCommand(
 		},
 		undo() {
 			store.updateDeviceFaceRaw(index, oldFace);
+		}
+	};
+}
+
+/**
+ * Create a command to update a device's custom display name
+ */
+export function createUpdateDeviceNameCommand(
+	index: number,
+	oldName: string | undefined,
+	newName: string | undefined,
+	store: DeviceCommandStore,
+	deviceTypeName: string = 'device'
+): Command {
+	const displayName = newName || deviceTypeName;
+	return {
+		type: 'UPDATE_DEVICE_NAME',
+		description: `Rename ${displayName}`,
+		timestamp: Date.now(),
+		execute() {
+			store.updateDeviceNameRaw(index, newName);
+		},
+		undo() {
+			store.updateDeviceNameRaw(index, oldName);
 		}
 	};
 }

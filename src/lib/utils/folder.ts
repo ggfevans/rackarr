@@ -4,7 +4,7 @@
  */
 
 import JSZip from 'jszip';
-import type { LayoutV02 } from '$lib/types/v02';
+import type { Layout } from '$lib/types/v02';
 import type { ImageData, ImageStoreMap } from '$lib/types/images';
 import { slugify } from './slug';
 import { serializeLayoutToYaml, parseLayoutYaml } from './yaml';
@@ -47,7 +47,7 @@ export function getMimeType(filename: string): string {
  * Create a folder-based ZIP archive from layout and images
  * Structure: [name]/[name].yaml + [name]/assets/[slug]/[face].[ext]
  */
-export async function createFolderArchive(layout: LayoutV02, images: ImageStoreMap): Promise<Blob> {
+export async function createFolderArchive(layout: Layout, images: ImageStoreMap): Promise<Blob> {
 	const zip = new JSZip();
 
 	// Sanitize folder name using slugify
@@ -96,7 +96,7 @@ export async function createFolderArchive(layout: LayoutV02, images: ImageStoreM
  */
 export async function extractFolderArchive(
 	blob: Blob
-): Promise<{ layout: LayoutV02; images: ImageStoreMap }> {
+): Promise<{ layout: Layout; images: ImageStoreMap }> {
 	const zip = await JSZip.loadAsync(blob);
 
 	// Find the YAML file (should be [name]/[name].yaml)
@@ -192,7 +192,7 @@ function blobToDataUrl(blob: Blob): Promise<string> {
  * @param layout - The layout to generate filename for
  * @returns Filename with .rackarr.zip extension
  */
-export function generateArchiveFilenameV02(layout: LayoutV02): string {
+export function generateArchiveFilenameV02(layout: Layout): string {
 	const safeName = slugify(layout.name) || 'untitled';
 	return `${safeName}.rackarr.zip`;
 }
@@ -204,7 +204,7 @@ export function generateArchiveFilenameV02(layout: LayoutV02): string {
  * @param filename - Optional custom filename
  */
 export async function downloadArchiveV02(
-	layout: LayoutV02,
+	layout: Layout,
 	images: ImageStoreMap,
 	filename?: string
 ): Promise<void> {

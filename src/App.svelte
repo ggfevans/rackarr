@@ -153,7 +153,7 @@
 				}
 
 				// Load v0.2 layout directly
-				layoutStore.loadLayoutV02(layout);
+				layoutStore.loadLayout(layout);
 			} else if (format === 'legacy-archive') {
 				// Load legacy ZIP archive and migrate to v0.2
 				const { layout: legacyLayout, images: legacyImages } = await extractArchive(file);
@@ -175,7 +175,7 @@
 					}
 				}
 
-				layoutStore.loadLayoutV02(v02Layout);
+				layoutStore.loadLayout(v02Layout);
 
 				// Check if multiple racks were truncated
 				if (legacyLayout.racks && legacyLayout.racks.length > 1) {
@@ -191,7 +191,7 @@
 
 				// No images in JSON format
 				imageStore.clearAllImages();
-				layoutStore.loadLayoutV02(v02Layout);
+				layoutStore.loadLayout(v02Layout);
 
 				// Check if multiple racks were truncated
 				if (legacyLayout.racks && legacyLayout.racks.length > 1) {

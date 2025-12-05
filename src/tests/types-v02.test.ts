@@ -5,21 +5,21 @@
 
 import { describe, it, expect } from 'vitest';
 import type {
-	DeviceTypeV02,
-	DeviceV02,
-	RackV02,
-	LayoutV02,
-	LayoutSettingsV02,
-	AirflowV02,
-	DeviceFaceV02,
-	CreateDeviceTypeDataV02,
-	CreateRackDataV02
+	DeviceType,
+	PlacedDevice,
+	Rack,
+	Layout,
+	LayoutSettings,
+	Airflow,
+	DeviceFace,
+	CreateDeviceTypeData,
+	CreateRackData
 } from '$lib/types/v02';
 
 describe('v0.2 Type Definitions', () => {
-	describe('DeviceTypeV02', () => {
+	describe('DeviceType', () => {
 		it('accepts valid device type with required fields', () => {
-			const deviceType: DeviceTypeV02 = {
+			const deviceType: DeviceType = {
 				slug: 'synology-ds920-plus',
 				u_height: 2,
 				rackarr: {
@@ -35,7 +35,7 @@ describe('v0.2 Type Definitions', () => {
 		});
 
 		it('accepts device type with all optional fields', () => {
-			const deviceType: DeviceTypeV02 = {
+			const deviceType: DeviceType = {
 				slug: 'dell-poweredge-r740',
 				u_height: 2,
 				manufacturer: 'Dell',
@@ -63,9 +63,9 @@ describe('v0.2 Type Definitions', () => {
 		});
 	});
 
-	describe('DeviceV02', () => {
+	describe('PlacedDevice', () => {
 		it('accepts valid device with required fields', () => {
-			const device: DeviceV02 = {
+			const device: PlacedDevice = {
 				device_type: 'synology-ds920-plus',
 				position: 10,
 				face: 'front'
@@ -77,7 +77,7 @@ describe('v0.2 Type Definitions', () => {
 		});
 
 		it('accepts device with optional name', () => {
-			const device: DeviceV02 = {
+			const device: PlacedDevice = {
 				device_type: 'synology-ds920-plus',
 				name: 'Primary NAS',
 				position: 10,
@@ -88,10 +88,10 @@ describe('v0.2 Type Definitions', () => {
 		});
 
 		it('accepts all face values', () => {
-			const faces: DeviceFaceV02[] = ['front', 'rear', 'both'];
+			const faces: DeviceFace[] = ['front', 'rear', 'both'];
 
 			faces.forEach((face) => {
-				const device: DeviceV02 = {
+				const device: PlacedDevice = {
 					device_type: 'test',
 					position: 1,
 					face
@@ -101,9 +101,9 @@ describe('v0.2 Type Definitions', () => {
 		});
 	});
 
-	describe('RackV02', () => {
+	describe('Rack', () => {
 		it('accepts valid rack with required fields', () => {
-			const rack: RackV02 = {
+			const rack: Rack = {
 				name: 'Homelab Rack',
 				height: 42,
 				width: 19,
@@ -125,7 +125,7 @@ describe('v0.2 Type Definitions', () => {
 		});
 
 		it('accepts rack with devices', () => {
-			const rack: RackV02 = {
+			const rack: Rack = {
 				name: 'Test Rack',
 				height: 42,
 				width: 19,
@@ -145,7 +145,7 @@ describe('v0.2 Type Definitions', () => {
 		});
 
 		it('accepts 10-inch rack width', () => {
-			const rack: RackV02 = {
+			const rack: Rack = {
 				name: 'Network Rack',
 				height: 12,
 				width: 10,
@@ -160,7 +160,7 @@ describe('v0.2 Type Definitions', () => {
 		});
 
 		it('accepts optional view property', () => {
-			const rack: RackV02 = {
+			const rack: Rack = {
 				name: 'Test Rack',
 				height: 42,
 				width: 19,
@@ -176,9 +176,9 @@ describe('v0.2 Type Definitions', () => {
 		});
 	});
 
-	describe('LayoutV02', () => {
+	describe('Layout', () => {
 		it('accepts valid layout', () => {
-			const layout: LayoutV02 = {
+			const layout: Layout = {
 				version: '0.2.0',
 				name: 'My Homelab',
 				rack: {
@@ -206,7 +206,7 @@ describe('v0.2 Type Definitions', () => {
 		});
 
 		it('accepts layout with device types and devices', () => {
-			const layout: LayoutV02 = {
+			const layout: Layout = {
 				version: '0.2.0',
 				name: 'Complete Layout',
 				rack: {
@@ -243,14 +243,14 @@ describe('v0.2 Type Definitions', () => {
 		});
 	});
 
-	describe('LayoutSettingsV02', () => {
+	describe('LayoutSettings', () => {
 		it('accepts both display modes', () => {
-			const labelSettings: LayoutSettingsV02 = {
+			const labelSettings: LayoutSettings = {
 				display_mode: 'label',
 				show_labels_on_images: false
 			};
 
-			const imageSettings: LayoutSettingsV02 = {
+			const imageSettings: LayoutSettings = {
 				display_mode: 'image',
 				show_labels_on_images: true
 			};
@@ -260,9 +260,9 @@ describe('v0.2 Type Definitions', () => {
 		});
 	});
 
-	describe('AirflowV02', () => {
+	describe('Airflow', () => {
 		it('includes all NetBox-compatible airflow options', () => {
-			const airflowOptions: AirflowV02[] = [
+			const airflowOptions: Airflow[] = [
 				'front-to-rear',
 				'rear-to-front',
 				'left-to-right',
@@ -275,9 +275,9 @@ describe('v0.2 Type Definitions', () => {
 		});
 	});
 
-	describe('WeightUnitV02', () => {
+	describe('WeightUnit', () => {
 		it('includes both weight units', () => {
-			const kgDevice: DeviceTypeV02 = {
+			const kgDevice: DeviceType = {
 				slug: 'test-kg',
 				u_height: 1,
 				weight: 5.5,
@@ -285,7 +285,7 @@ describe('v0.2 Type Definitions', () => {
 				rackarr: { colour: '#000', category: 'other' }
 			};
 
-			const lbDevice: DeviceTypeV02 = {
+			const lbDevice: DeviceType = {
 				slug: 'test-lb',
 				u_height: 1,
 				weight: 12.1,
@@ -298,9 +298,9 @@ describe('v0.2 Type Definitions', () => {
 		});
 	});
 
-	describe('CreateDeviceTypeDataV02', () => {
+	describe('CreateDeviceTypeData', () => {
 		it('accepts input data for creating device type', () => {
-			const data: CreateDeviceTypeDataV02 = {
+			const data: CreateDeviceTypeData = {
 				name: 'Test Server',
 				u_height: 2,
 				category: 'server',
@@ -312,9 +312,9 @@ describe('v0.2 Type Definitions', () => {
 		});
 	});
 
-	describe('CreateRackDataV02', () => {
+	describe('CreateRackData', () => {
 		it('accepts input data for creating rack', () => {
-			const data: CreateRackDataV02 = {
+			const data: CreateRackData = {
 				name: 'New Rack',
 				height: 42
 			};
@@ -324,7 +324,7 @@ describe('v0.2 Type Definitions', () => {
 		});
 
 		it('accepts all optional fields', () => {
-			const data: CreateRackDataV02 = {
+			const data: CreateRackData = {
 				name: 'Full Rack',
 				height: 42,
 				width: 19,

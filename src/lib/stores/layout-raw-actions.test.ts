@@ -1,8 +1,8 @@
 import { describe, it, expect, beforeEach } from 'vitest';
 import { getLayoutStore, resetLayoutStore } from './layout.svelte';
-import type { DeviceTypeV02, DeviceV02 } from '$lib/types/v02';
+import type { DeviceType, PlacedDevice } from '$lib/types/v02';
 
-function createTestDeviceType(overrides: Partial<DeviceTypeV02> = {}): DeviceTypeV02 {
+function createTestDeviceType(overrides: Partial<DeviceType> = {}): DeviceType {
 	return {
 		slug: 'test-device',
 		u_height: 2,
@@ -15,7 +15,7 @@ function createTestDeviceType(overrides: Partial<DeviceTypeV02> = {}): DeviceTyp
 	};
 }
 
-function createTestDevice(overrides: Partial<DeviceV02> = {}): DeviceV02 {
+function createTestDevice(overrides: Partial<PlacedDevice> = {}): PlacedDevice {
 	return {
 		device_type: 'test-device',
 		position: 10,

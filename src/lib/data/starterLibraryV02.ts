@@ -3,7 +3,7 @@
  * Common device types pre-populated in new layouts
  */
 
-import type { DeviceTypeV02 } from '$lib/types/v02';
+import type { DeviceType } from '$lib/types/v02';
 import type { DeviceCategory } from '$lib/types';
 import { CATEGORY_COLOURS } from '$lib/types/constants';
 import { slugify } from '$lib/utils/slug';
@@ -69,7 +69,7 @@ const STARTER_DEVICES: StarterDeviceSpec[] = [
  * Get the v0.2 starter device type library
  * These are the default device types available in a new layout
  */
-export function getStarterLibraryV02(): DeviceTypeV02[] {
+export function getStarterLibraryV02(): DeviceType[] {
 	return STARTER_DEVICES.map((spec) => ({
 		slug: slugify(spec.name),
 		u_height: spec.u_height,

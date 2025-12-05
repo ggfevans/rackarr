@@ -4,17 +4,10 @@
  * Uses v0.2 types with slug-based device identification
  */
 
-import type { FormFactor, DeviceCategory, Layout, Device } from '$lib/types';
-import type {
-	LayoutV02,
-	RackV02,
-	DeviceTypeV02,
-	DeviceV02,
-	DeviceFaceV02,
-	RackView
-} from '$lib/types/v02';
+import type { FormFactor, DeviceCategory, Device, Layout as LegacyLayout } from '$lib/types';
+import type { Layout, Rack, DeviceType, PlacedDevice, DeviceFace, RackView } from '$lib/types/v02';
 import { DEFAULT_DEVICE_FACE } from '$lib/types/constants';
-import { createLayoutV02, createRackV02 } from '$lib/utils/serialization-v02';
+import { createLayout, createRack } from '$lib/utils/serialization-v02';
 import {
 	createDeviceType as createDeviceTypeHelper,
 	findDeviceType,
@@ -31,6 +24,7 @@ import {
 	createMoveDeviceCommand,
 	createRemoveDeviceCommand,
 	createUpdateDeviceFaceCommand,
+	createUpdateDeviceNameCommand,
 	createUpdateRackCommand,
 	createClearRackCommand,
 	type DeviceTypeCommandStore,
@@ -64,7 +58,7 @@ function saveHasStarted(value: boolean): void {
 }
 
 // Module-level state (using $state rune)
-let layout = $state<LayoutV02>(createLayoutV02('Racky McRackface'));
+let layout = $state<Layout>(createLayout('Racky McRackface'));
 let isDirty = $state(false);
 let hasStarted = $state(loadHasStarted());
 
@@ -84,7 +78,8 @@ const racks = $derived([
 		devices: layout.rack.devices.map((d) => ({
 			libraryId: d.device_type,
 			position: d.position,
-			face: d.face
+			face: d.face,
+			name: d.name
 		}))
 	}
 ]);
@@ -107,7 +102,7 @@ const canAddRack = $derived(false); // No multi-rack in v0.2
  * @param clearStarted - If true, also clears the hasStarted flag (default: true)
  */
 export function resetLayoutStore(clearStarted: boolean = true): void {
-	layout = createLayoutV02('Racky McRackface');
+	layout = createLayout('Racky McRackface');
 	isDirty = false;
 	if (clearStarted) {
 		hasStarted = false;
@@ -159,7 +154,7 @@ export function getLayoutStore() {
 		// Layout actions
 		createNewLayout,
 		loadLayout,
-		loadLayoutV02,
+		loadLegacyLayout,
 		resetLayout: resetLayoutStore,
 
 		// Rack actions (simplified for single rack)
@@ -187,6 +182,7 @@ export function getLayoutStore() {
 		moveDeviceToRack,
 		removeDeviceFromRack,
 		updateDeviceFace,
+		updateDeviceName,
 
 		// Settings actions
 		updateDisplayMode,
@@ -207,6 +203,7 @@ export function getLayoutStore() {
 		removeDeviceAtIndexRaw,
 		moveDeviceRaw,
 		updateDeviceFaceRaw,
+		updateDeviceNameRaw,
 		getDeviceAtIndex,
 		getPlacedDevicesForType,
 		updateRackRaw,
@@ -222,6 +219,7 @@ export function getLayoutStore() {
 		moveDeviceRecorded,
 		removeDeviceRecorded,
 		updateDeviceFaceRecorded,
+		updateDeviceNameRecorded,
 		updateRackRecorded,
 		clearRackRecorded,
 
@@ -249,7 +247,7 @@ export function getLayoutStore() {
  * @param name - Layout name
  */
 function createNewLayout(name: string): void {
-	layout = createLayoutV02(name);
+	layout = createLayout(name);
 	isDirty = false;
 }
 
@@ -257,7 +255,7 @@ function createNewLayout(name: string): void {
  * Load a v0.2 layout directly
  * @param layoutData - v0.2 layout to load
  */
-function loadLayoutV02(layoutData: LayoutV02): void {
+function loadLayout(layoutData: Layout): void {
 	// Ensure runtime view is set
 	layout = {
 		...layoutData,
@@ -279,7 +277,7 @@ function loadLayoutV02(layoutData: LayoutV02): void {
  * @param layoutData - Legacy layout to load
  * @returns Number of racks that were in the original file (for toast display)
  */
-function loadLayout(layoutData: Layout): number {
+function loadLegacyLayout(layoutData: LegacyLayout): number {
 	// First apply legacy migrations (v0.1.0 → v0.3.0)
 	const migrated = migrateLayout(layoutData);
 	const originalRackCount = migrated.racks.length;
@@ -322,8 +320,8 @@ function addRack(
 	form_factor?: FormFactor,
 	desc_units?: boolean,
 	starting_unit?: number
-): (RackV02 & { id: string }) | null {
-	const newRack = createRackV02(
+): (Rack & { id: string }) | null {
+	const newRack = createRack(
 		name,
 		height,
 		(width as 10 | 19) ?? 19,
@@ -354,7 +352,7 @@ function addRack(
  * @param _id - Rack ID (ignored in v0.2)
  * @param updates - Properties to update
  */
-function updateRack(_id: string, updates: Partial<RackV02>): void {
+function updateRack(_id: string, updates: Partial<Rack>): void {
 	// Handle view separately (doesn't need undo/redo)
 	if (updates.view !== undefined) {
 		layout = {
@@ -420,7 +418,7 @@ function duplicateRack(_id: string): { error?: string } {
  * @param data - Device type data
  * @returns The created device type
  */
-function addDeviceType(data: CreateDeviceTypeInput): DeviceTypeV02 {
+function addDeviceType(data: CreateDeviceTypeInput): DeviceType {
 	// Delegate to recorded version for undo/redo support
 	return addDeviceTypeRecorded(data);
 }
@@ -431,7 +429,7 @@ function addDeviceType(data: CreateDeviceTypeInput): DeviceTypeV02 {
  * @param slug - Device type slug
  * @param updates - Properties to update
  */
-function updateDeviceType(slug: string, updates: Partial<DeviceTypeV02>): void {
+function updateDeviceType(slug: string, updates: Partial<DeviceType>): void {
 	// Delegate to recorded version for undo/redo support
 	updateDeviceTypeRecorded(slug, updates);
 }
@@ -486,7 +484,7 @@ function addDeviceToLibrary(deviceData: {
  * @deprecated Use updateDeviceType instead
  */
 function updateDeviceInLibrary(id: string, updates: Partial<Device>): void {
-	const typeUpdates: Partial<DeviceTypeV02> = {};
+	const typeUpdates: Partial<DeviceType> = {};
 
 	if (updates.height !== undefined) {
 		typeUpdates.u_height = updates.height;
@@ -529,7 +527,7 @@ function placeDevice(
 	_rackId: string,
 	deviceTypeSlug: string,
 	position: number,
-	face: DeviceFaceV02 = DEFAULT_DEVICE_FACE
+	face: DeviceFace = DEFAULT_DEVICE_FACE
 ): boolean {
 	// Delegate to recorded version for undo/redo support
 	return placeDeviceRecorded(deviceTypeSlug, position, face);
@@ -584,9 +582,21 @@ function removeDeviceFromRack(_rackId: string, deviceIndex: number): void {
  * @param deviceIndex - Index of device in rack's devices array
  * @param face - New face value
  */
-function updateDeviceFace(_rackId: string, deviceIndex: number, face: DeviceFaceV02): void {
+function updateDeviceFace(_rackId: string, deviceIndex: number, face: DeviceFace): void {
 	// Delegate to recorded version for undo/redo support
 	updateDeviceFaceRecorded(deviceIndex, face);
+}
+
+/**
+ * Update a device's custom display name
+ * Uses undo/redo support via updateDeviceNameRecorded
+ * @param _rackId - Rack ID (ignored in v0.2)
+ * @param deviceIndex - Index of device in rack's devices array
+ * @param name - New custom name (undefined or empty to clear)
+ */
+function updateDeviceName(_rackId: string, deviceIndex: number, name: string | undefined): void {
+	// Delegate to recorded version for undo/redo support
+	updateDeviceNameRecorded(deviceIndex, name);
 }
 
 /**
@@ -645,7 +655,7 @@ function updateShowLabelsOnImages(value: boolean): void {
  * Add a device type directly (raw)
  * @param deviceType - Device type to add
  */
-function addDeviceTypeRaw(deviceType: DeviceTypeV02): void {
+function addDeviceTypeRaw(deviceType: DeviceType): void {
 	layout = {
 		...layout,
 		device_types: [...layout.device_types, deviceType]
@@ -673,7 +683,7 @@ function removeDeviceTypeRaw(slug: string): void {
  * @param slug - Device type slug to update
  * @param updates - Properties to update
  */
-function updateDeviceTypeRaw(slug: string, updates: Partial<DeviceTypeV02>): void {
+function updateDeviceTypeRaw(slug: string, updates: Partial<DeviceType>): void {
 	layout = {
 		...layout,
 		device_types: layout.device_types.map((dt) => (dt.slug === slug ? { ...dt, ...updates } : dt))
@@ -685,7 +695,7 @@ function updateDeviceTypeRaw(slug: string, updates: Partial<DeviceTypeV02>): voi
  * @param device - Device to place
  * @returns Index where device was placed
  */
-function placeDeviceRaw(device: DeviceV02): number {
+function placeDeviceRaw(device: PlacedDevice): number {
 	const newDevices = [...layout.rack.devices, device];
 	layout = {
 		...layout,
@@ -702,7 +712,7 @@ function placeDeviceRaw(device: DeviceV02): number {
  * @param index - Device index to remove
  * @returns The removed device or undefined
  */
-function removeDeviceAtIndexRaw(index: number): DeviceV02 | undefined {
+function removeDeviceAtIndexRaw(index: number): PlacedDevice | undefined {
 	if (index < 0 || index >= layout.rack.devices.length) return undefined;
 
 	const removed = layout.rack.devices[index];
@@ -755,11 +765,31 @@ function updateDeviceFaceRaw(index: number, face: 'front' | 'rear'): void {
 }
 
 /**
+ * Update a device's custom display name directly (raw)
+ * @param index - Device index
+ * @param name - New custom name (undefined to clear)
+ */
+function updateDeviceNameRaw(index: number, name: string | undefined): void {
+	if (index < 0 || index >= layout.rack.devices.length) return;
+
+	// Normalize empty string to undefined
+	const normalizedName = name?.trim() || undefined;
+
+	layout = {
+		...layout,
+		rack: {
+			...layout.rack,
+			devices: layout.rack.devices.map((d, i) => (i === index ? { ...d, name: normalizedName } : d))
+		}
+	};
+}
+
+/**
  * Get a device at a specific index
  * @param index - Device index
  * @returns The device or undefined
  */
-function getDeviceAtIndex(index: number): DeviceV02 | undefined {
+function getDeviceAtIndex(index: number): PlacedDevice | undefined {
 	return layout.rack.devices[index];
 }
 
@@ -768,7 +798,7 @@ function getDeviceAtIndex(index: number): DeviceV02 | undefined {
  * @param slug - Device type slug
  * @returns Array of placed devices
  */
-function getPlacedDevicesForType(slug: string): DeviceV02[] {
+function getPlacedDevicesForType(slug: string): PlacedDevice[] {
 	return layout.rack.devices.filter((d) => d.device_type === slug);
 }
 
@@ -776,7 +806,7 @@ function getPlacedDevicesForType(slug: string): DeviceV02[] {
  * Update rack settings directly (raw)
  * @param updates - Settings to update
  */
-function updateRackRaw(updates: Partial<Omit<RackV02, 'devices' | 'view'>>): void {
+function updateRackRaw(updates: Partial<Omit<Rack, 'devices' | 'view'>>): void {
 	layout = {
 		...layout,
 		rack: { ...layout.rack, ...updates }
@@ -791,7 +821,7 @@ function updateRackRaw(updates: Partial<Omit<RackV02, 'devices' | 'view'>>): voi
  * Replace the entire rack directly (raw)
  * @param newRack - New rack data
  */
-function replaceRackRaw(newRack: RackV02): void {
+function replaceRackRaw(newRack: Rack): void {
 	layout = {
 		...layout,
 		rack: newRack,
@@ -803,7 +833,7 @@ function replaceRackRaw(newRack: RackV02): void {
  * Clear all devices from the rack directly (raw)
  * @returns The removed devices
  */
-function clearRackDevicesRaw(): DeviceV02[] {
+function clearRackDevicesRaw(): PlacedDevice[] {
 	const removed = [...layout.rack.devices];
 	layout = {
 		...layout,
@@ -819,7 +849,7 @@ function clearRackDevicesRaw(): DeviceV02[] {
  * Restore devices to the rack directly (raw)
  * @param devices - Devices to restore
  */
-function restoreRackDevicesRaw(devices: DeviceV02[]): void {
+function restoreRackDevicesRaw(devices: PlacedDevice[]): void {
 	layout = {
 		...layout,
 		rack: {
@@ -847,6 +877,7 @@ function getCommandStoreAdapter(): DeviceTypeCommandStore & DeviceCommandStore &
 		// DeviceCommandStore
 		moveDeviceRaw,
 		updateDeviceFaceRaw,
+		updateDeviceNameRaw,
 		getDeviceAtIndex,
 
 		// RackCommandStore
@@ -866,7 +897,7 @@ function getCommandStoreAdapter(): DeviceTypeCommandStore & DeviceCommandStore &
 /**
  * Add a device type with undo/redo support
  */
-function addDeviceTypeRecorded(data: CreateDeviceTypeInput): DeviceTypeV02 {
+function addDeviceTypeRecorded(data: CreateDeviceTypeInput): DeviceType {
 	const deviceType = createDeviceTypeHelper(data);
 	const history = getHistoryStore();
 	const adapter = getCommandStoreAdapter();
@@ -881,13 +912,13 @@ function addDeviceTypeRecorded(data: CreateDeviceTypeInput): DeviceTypeV02 {
 /**
  * Update a device type with undo/redo support
  */
-function updateDeviceTypeRecorded(slug: string, updates: Partial<DeviceTypeV02>): void {
+function updateDeviceTypeRecorded(slug: string, updates: Partial<DeviceType>): void {
 	const existing = findDeviceType(layout.device_types, slug);
 	if (!existing) return;
 
 	// Capture before state for the fields being updated
-	const before: Partial<DeviceTypeV02> = {};
-	for (const key of Object.keys(updates) as (keyof DeviceTypeV02)[]) {
+	const before: Partial<DeviceType> = {};
+	for (const key of Object.keys(updates) as (keyof DeviceType)[]) {
 		before[key] = existing[key] as never;
 	}
 
@@ -922,7 +953,7 @@ function deleteDeviceTypeRecorded(slug: string): void {
 function placeDeviceRecorded(
 	deviceTypeSlug: string,
 	position: number,
-	face: DeviceFaceV02 = DEFAULT_DEVICE_FACE
+	face: DeviceFace = DEFAULT_DEVICE_FACE
 ): boolean {
 	const deviceType = findDeviceType(layout.device_types, deviceTypeSlug);
 	if (!deviceType) return false;
@@ -947,7 +978,7 @@ function placeDeviceRecorded(
 		}
 	}
 
-	const device: DeviceV02 = {
+	const device: PlacedDevice = {
 		device_type: deviceTypeSlug,
 		position,
 		face
@@ -1037,7 +1068,7 @@ function removeDeviceRecorded(deviceIndex: number): void {
 /**
  * Update device face with undo/redo support
  */
-function updateDeviceFaceRecorded(deviceIndex: number, face: DeviceFaceV02): void {
+function updateDeviceFaceRecorded(deviceIndex: number, face: DeviceFace): void {
 	if (deviceIndex < 0 || deviceIndex >= layout.rack.devices.length) return;
 
 	const device = layout.rack.devices[deviceIndex]!;
@@ -1054,12 +1085,40 @@ function updateDeviceFaceRecorded(deviceIndex: number, face: DeviceFaceV02): voi
 }
 
 /**
+ * Update device custom name with undo/redo support
+ */
+function updateDeviceNameRecorded(deviceIndex: number, name: string | undefined): void {
+	if (deviceIndex < 0 || deviceIndex >= layout.rack.devices.length) return;
+
+	const device = layout.rack.devices[deviceIndex]!;
+	const oldName = device.name;
+	const deviceType = findDeviceType(layout.device_types, device.device_type);
+	const deviceTypeName = deviceType?.model ?? deviceType?.slug ?? 'device';
+
+	// Normalize empty string to undefined
+	const normalizedName = name?.trim() || undefined;
+
+	const history = getHistoryStore();
+	const adapter = getCommandStoreAdapter();
+
+	const command = createUpdateDeviceNameCommand(
+		deviceIndex,
+		oldName,
+		normalizedName,
+		adapter,
+		deviceTypeName
+	);
+	history.execute(command);
+	isDirty = true;
+}
+
+/**
  * Update rack settings with undo/redo support
  */
-function updateRackRecorded(updates: Partial<Omit<RackV02, 'devices' | 'view'>>): void {
+function updateRackRecorded(updates: Partial<Omit<Rack, 'devices' | 'view'>>): void {
 	// Capture before state
-	const before: Partial<Omit<RackV02, 'devices' | 'view'>> = {};
-	for (const key of Object.keys(updates) as (keyof Omit<RackV02, 'devices' | 'view'>)[]) {
+	const before: Partial<Omit<Rack, 'devices' | 'view'>> = {};
+	for (const key of Object.keys(updates) as (keyof Omit<Rack, 'devices' | 'view'>)[]) {
 		before[key] = layout.rack[key] as never;
 	}
 

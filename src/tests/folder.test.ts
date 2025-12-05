@@ -11,11 +11,11 @@ import {
 	getImageExtension,
 	getMimeType
 } from '$lib/utils/folder';
-import type { LayoutV02 } from '$lib/types/v02';
+import type { Layout } from '$lib/types/v02';
 import type { ImageStoreMap, ImageData } from '$lib/types/images';
 
 describe('Folder Archive Utilities', () => {
-	const createTestLayout = (): LayoutV02 => ({
+	const createTestLayout = (): Layout => ({
 		version: '0.2.0',
 		name: 'My Homelab',
 		rack: {

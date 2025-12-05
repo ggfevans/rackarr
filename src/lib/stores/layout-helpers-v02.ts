@@ -3,10 +3,10 @@
  * Helper functions for working with v0.2 types in the layout store
  */
 
-import type { DeviceTypeV02, DeviceV02, DeviceFaceV02, LayoutV02 } from '$lib/types/v02';
+import type { DeviceType, PlacedDevice, DeviceFace, Layout } from '$lib/types/v02';
 import type { DeviceCategory } from '$lib/types';
 import { generateDeviceSlug } from '$lib/utils/slug';
-import type { AirflowV02, WeightUnitV02 } from '$lib/types/v02';
+import type { Airflow, WeightUnit } from '$lib/types/v02';
 
 /**
  * Input data for creating a new device type
@@ -20,8 +20,8 @@ export interface CreateDeviceTypeInput {
 	model?: string;
 	is_full_depth?: boolean;
 	weight?: number;
-	weight_unit?: WeightUnitV02;
-	airflow?: AirflowV02;
+	weight_unit?: WeightUnit;
+	airflow?: Airflow;
 	comments?: string;
 	tags?: string[];
 }
@@ -29,13 +29,13 @@ export interface CreateDeviceTypeInput {
 /**
  * Create a new DeviceType with auto-generated slug
  * @param data - Input data for the device type
- * @returns A complete DeviceTypeV02 object
+ * @returns A complete DeviceType object
  */
-export function createDeviceType(data: CreateDeviceTypeInput): DeviceTypeV02 {
+export function createDeviceType(data: CreateDeviceTypeInput): DeviceType {
 	// Generate slug from manufacturer/model or name
 	const slug = generateDeviceSlug(data.manufacturer, data.model, data.name);
 
-	const deviceType: DeviceTypeV02 = {
+	const deviceType: DeviceType = {
 		slug,
 		u_height: data.u_height,
 		rackarr: {
@@ -79,15 +79,15 @@ export function createDeviceType(data: CreateDeviceTypeInput): DeviceTypeV02 {
  * @param position - U position in rack
  * @param face - Which face(s) the device occupies
  * @param name - Optional display name override
- * @returns A DeviceV02 object
+ * @returns A PlacedDevice object
  */
 export function createDevice(
 	device_type: string,
 	position: number,
-	face: DeviceFaceV02,
+	face: DeviceFace,
 	name?: string
-): DeviceV02 {
-	const device: DeviceV02 = {
+): PlacedDevice {
+	const device: PlacedDevice = {
 		device_type,
 		position,
 		face
@@ -106,10 +106,7 @@ export function createDevice(
  * @param slug - Slug to find
  * @returns The device type or undefined if not found
  */
-export function findDeviceType(
-	device_types: DeviceTypeV02[],
-	slug: string
-): DeviceTypeV02 | undefined {
+export function findDeviceType(device_types: DeviceType[], slug: string): DeviceType | undefined {
 	return device_types.find((dt) => dt.slug === slug);
 }
 
@@ -120,7 +117,7 @@ export function findDeviceType(
  * @param device_types - Array of device types for lookup
  * @returns The display name string
  */
-export function getDeviceDisplayName(device: DeviceV02, device_types: DeviceTypeV02[]): string {
+export function getDeviceDisplayName(device: PlacedDevice, device_types: DeviceType[]): string {
 	// Use device name if set
 	if (device.name) {
 		return device.name;
@@ -147,7 +144,7 @@ export function getDeviceDisplayName(device: DeviceV02, device_types: DeviceType
  * @returns A new layout with the device type added
  * @throws Error if a device type with the same slug already exists
  */
-export function addDeviceTypeToLayout(layout: LayoutV02, deviceType: DeviceTypeV02): LayoutV02 {
+export function addDeviceTypeToLayout(layout: Layout, deviceType: DeviceType): Layout {
 	// Check for duplicate slug
 	const existing = findDeviceType(layout.device_types, deviceType.slug);
 	if (existing) {
@@ -167,7 +164,7 @@ export function addDeviceTypeToLayout(layout: LayoutV02, deviceType: DeviceTypeV
  * @param slug - The slug of the device type to remove
  * @returns A new layout with the device type and referencing devices removed
  */
-export function removeDeviceTypeFromLayout(layout: LayoutV02, slug: string): LayoutV02 {
+export function removeDeviceTypeFromLayout(layout: Layout, slug: string): Layout {
 	// Filter out the device type
 	const newDeviceTypes = layout.device_types.filter((dt) => dt.slug !== slug);
 
@@ -191,7 +188,7 @@ export function removeDeviceTypeFromLayout(layout: LayoutV02, slug: string): Lay
  * @returns A new layout with the device placed
  * @throws Error if the device type does not exist in device_types
  */
-export function placeDeviceInRack(layout: LayoutV02, device: DeviceV02): LayoutV02 {
+export function placeDeviceInRack(layout: Layout, device: PlacedDevice): Layout {
 	// Validate device type exists
 	const deviceType = findDeviceType(layout.device_types, device.device_type);
 	if (!deviceType) {
@@ -213,7 +210,7 @@ export function placeDeviceInRack(layout: LayoutV02, device: DeviceV02): LayoutV
  * @param index - The index of the device to remove
  * @returns A new layout with the device removed
  */
-export function removeDeviceFromRack(layout: LayoutV02, index: number): LayoutV02 {
+export function removeDeviceFromRack(layout: Layout, index: number): Layout {
 	// Handle out-of-bounds gracefully
 	if (index < 0 || index >= layout.rack.devices.length) {
 		return layout;

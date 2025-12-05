@@ -124,6 +124,8 @@ export interface PlacedDevice {
 	position: number;
 	/** Which face(s) of the rack the device occupies */
 	face: DeviceFace;
+	/** Optional custom display name for this placement */
+	name?: string;
 }
 
 /**

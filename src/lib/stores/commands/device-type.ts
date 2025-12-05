@@ -3,25 +3,25 @@
  */
 
 import type { Command } from './types';
-import type { DeviceTypeV02, DeviceV02 } from '$lib/types/v02';
+import type { DeviceType, PlacedDevice } from '$lib/types/v02';
 
 /**
  * Interface for layout store operations needed by device type commands
  */
 export interface DeviceTypeCommandStore {
-	addDeviceTypeRaw(deviceType: DeviceTypeV02): void;
+	addDeviceTypeRaw(deviceType: DeviceType): void;
 	removeDeviceTypeRaw(slug: string): void;
-	updateDeviceTypeRaw(slug: string, updates: Partial<DeviceTypeV02>): void;
-	placeDeviceRaw(device: DeviceV02): number;
+	updateDeviceTypeRaw(slug: string, updates: Partial<DeviceType>): void;
+	placeDeviceRaw(device: PlacedDevice): number;
 	removeDeviceAtIndexRaw(index: number): void;
-	getPlacedDevicesForType(slug: string): DeviceV02[];
+	getPlacedDevicesForType(slug: string): PlacedDevice[];
 }
 
 /**
  * Create a command to add a device type
  */
 export function createAddDeviceTypeCommand(
-	deviceType: DeviceTypeV02,
+	deviceType: DeviceType,
 	store: DeviceTypeCommandStore
 ): Command {
 	return {
@@ -42,8 +42,8 @@ export function createAddDeviceTypeCommand(
  */
 export function createUpdateDeviceTypeCommand(
 	slug: string,
-	before: Partial<DeviceTypeV02>,
-	after: Partial<DeviceTypeV02>,
+	before: Partial<DeviceType>,
+	after: Partial<DeviceType>,
 	store: DeviceTypeCommandStore
 ): Command {
 	return {
@@ -63,8 +63,8 @@ export function createUpdateDeviceTypeCommand(
  * Create a command to delete a device type (including placed instances)
  */
 export function createDeleteDeviceTypeCommand(
-	deviceType: DeviceTypeV02,
-	placedDevices: DeviceV02[],
+	deviceType: DeviceType,
+	placedDevices: PlacedDevice[],
 	store: DeviceTypeCommandStore
 ): Command {
 	// Store device indices for restoration (in reverse order for proper undo)

@@ -17,81 +17,39 @@ Single source of truth for version planning.
 - **Spec-driven** — No implementation without spec
 - **User value** — Each release solves real problems
 - **Single rack focus** — One rack per project, no multi-rack complexity
+- **Minimalism** — Keep it simple and focused
+- **Consistency** — Design and behaviour should be consistent across the app
+- **Accessibility** — Ensure usability for all users, including those with disabilities
 
 ---
 
-## Released
+## Outstanding issues (to be addressed before any additional featurework)
 
-### v0.1.0 — MVP
+# Guidance:
 
-**Status:** Released
-**Released:** 2025-11-28
+For each of these, we should create a new branch. Then we will write a spec and subsequent prompt plan and todo list in detail to ensure clarity and completeness. We will then, using that output, create test cases to meet the spec and then source code to satisfy the tests.
 
-**Delivered:**
+# Issue list
 
-- [x] Single-page rack layout designer
-- [x] Create/edit racks (1-100U)
-- [x] Device palette with starter library
-- [x] Drag-and-drop placement with collision detection
-- [x] Save/load JSON layouts
-- [x] Export PNG/JPEG/SVG/PDF
-- [x] Dark/light theme
-- [x] Full keyboard navigation
-- [x] Docker deployment
+Work through each top level heading one by one, mark with x only once complete.
 
----
+- [x] DeviceV02 mention - remove the "V02" in all instances, it is unnecessary
+- [] export improvements:
+  - [] export bundled zip does not need the "include source layout", this is always going to be added in the bundled view
+  - [] export bundled zip should include all devices and their images
+  - [] export bundled zip should include all images and their metadata
+  - [] export bundled zip should include all possible formats of rack image export (PNG, JPEG, SVG, PDF)
+  - [] the rack image should have a 10px margin around it to ensure proper spacing and alignment
+  - [] the rack image should be centered within the exported zip file
+  - [] the rack image should have a consistent aspect ratio across all formats
+  - [] specific for SVG and PNG export, there should be a "Transparent background" tickbox that defaults to off and when enabled will export with transparent background
 
-### v0.2.0 — Multi-View & Polish
+- [] Rack name - move rack name down to be 8px from top of rack
 
-**Status:** Released
-**Released:** 2025-11-30
-
-**Delivered:**
-
-- [x] Front/rear rack view toggle
-- [x] Device face assignment (front/rear/both)
-- [x] "Fit All" zoom button (F shortcut)
-- [x] Import device library from JSON
-- [x] Panzoom library integration
-- [x] Layout migration (v0.1 → v0.2)
-
----
-
-### v0.2.1 — Design Polish
-
-**Status:** Released
-**Released:** 2025-12-01
-
-**Delivered:**
-
-- [x] WCAG AA accessibility compliance (ARIA audit)
-- [x] Color contrast verification utilities
-- [x] Animation keyframes system
-- [x] Reduced motion support (CSS + JS)
-- [x] 5th U number highlighting
-- [x] Design tokens consolidation
-- [x] 1059 tests passing
-
----
-
-### v0.3.0 — Archive Format & Polish
-
-**Status:** Released
-**Released:** 2025-12-03
-
-**Delivered:**
-
-- [x] `.rackarr.zip` YAML folder-based archive format
-- [x] Legacy format migration (v0.1/v0.2 → v0.3)
-- [x] Device images (front/rear) embedded in archive
-- [x] Label/image display mode toggle (I key)
-- [x] Shelf category with starter devices (1U, 2U, 4U)
-- [x] Fixed device library sidebar (always visible)
-- [x] 10" rack width option
-- [x] Bundled export option (image + metadata.json)
-- [x] Single-rack mode enforced
-
----
+- [] Device Images: Upload front/rear images with label/image display toggle
+- - [] device images are specific to each placed device and are shown when the image view is toggled on
+- - [] device images are shown both in canvas view and export view with image view on
+  - [] device images are included in the full export and successfully import
 
 ## Planned
 

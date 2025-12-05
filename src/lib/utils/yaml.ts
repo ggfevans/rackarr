@@ -4,8 +4,8 @@
  */
 
 import yaml from 'js-yaml';
-import type { LayoutV02, RackV02 } from '$lib/types/v02';
-import { LayoutSchemaV02 } from '$lib/schemas/v02';
+import type { Layout, Rack } from '$lib/types/v02';
+import { LayoutSchema } from '$lib/schemas/v02';
 
 /**
  * Serialize object to YAML string
@@ -31,7 +31,7 @@ export function parseYaml<T = unknown>(yamlString: string): T {
  * Serialize a v0.2 layout to YAML string
  * Excludes runtime-only fields (view)
  */
-export function serializeLayoutToYaml(layout: LayoutV02): string {
+export function serializeLayoutToYaml(layout: Layout): string {
 	// Create a copy without runtime-only fields
 	const { view: _view, ...rackWithoutView } = layout.rack;
 
@@ -50,12 +50,12 @@ export function serializeLayoutToYaml(layout: LayoutV02): string {
  * Parse YAML string to v0.2 layout
  * Validates against schema and adds runtime defaults
  */
-export function parseLayoutYaml(yamlString: string): LayoutV02 {
+export function parseLayoutYaml(yamlString: string): Layout {
 	// Parse YAML (may throw on invalid syntax)
 	const parsed = parseYaml(yamlString);
 
 	// Validate against schema
-	const result = LayoutSchemaV02.safeParse(parsed);
+	const result = LayoutSchema.safeParse(parsed);
 
 	if (!result.success) {
 		// Format error message with details
@@ -70,8 +70,8 @@ export function parseLayoutYaml(yamlString: string): LayoutV02 {
 	}
 
 	// Add runtime defaults
-	const layout = result.data as LayoutV02;
-	(layout.rack as RackV02).view = 'front';
+	const layout = result.data as Layout;
+	(layout.rack as Rack).view = 'front';
 
 	return layout;
 }

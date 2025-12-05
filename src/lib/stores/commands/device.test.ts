@@ -6,9 +6,9 @@ import {
 	createUpdateDeviceFaceCommand,
 	type DeviceCommandStore
 } from './device';
-import type { DeviceV02 } from '$lib/types/v02';
+import type { PlacedDevice } from '$lib/types/v02';
 
-function createMockDevice(overrides: Partial<DeviceV02> = {}): DeviceV02 {
+function createMockDevice(overrides: Partial<PlacedDevice> = {}): PlacedDevice {
 	return {
 		device_type: 'test-device',
 		position: 10,

@@ -462,6 +462,7 @@
 						{displayMode}
 						rackView={rack.view}
 						{showLabelsOnImages}
+						placedDeviceName={placedDevice.name}
 						onselect={ondeviceselect}
 						ondragstart={() => handleDeviceDragStart(deviceIndex)}
 						ondragend={handleDeviceDragEnd}

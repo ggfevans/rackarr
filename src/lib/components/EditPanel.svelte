@@ -19,6 +19,10 @@
 	let rackName = $state('');
 	let rackHeight = $state(42);
 
+	// State for device name editing
+	let editingDeviceName = $state(false);
+	let deviceNameInput = $state('');
+
 	// Get the selected rack if any
 	const selectedRack = $derived.by(() => {
 		if (!selectionStore.isRackSelected || !selectionStore.selectedId) return null;
@@ -126,6 +130,43 @@
 		}
 	}
 
+	// Start editing device name
+	function startEditingDeviceName() {
+		if (selectedDeviceInfo) {
+			deviceNameInput = selectedDeviceInfo.placedDevice.name ?? selectedDeviceInfo.device.name;
+			editingDeviceName = true;
+		}
+	}
+
+	// Save device name
+	function saveDeviceName() {
+		if (
+			selectionStore.selectedRackId !== null &&
+			selectionStore.selectedDeviceIndex !== null &&
+			selectedDeviceInfo
+		) {
+			const newName = deviceNameInput.trim();
+			// If same as device type name, clear the custom name
+			const nameToSave =
+				newName === selectedDeviceInfo.device.name || newName === '' ? undefined : newName;
+			layoutStore.updateDeviceName(
+				selectionStore.selectedRackId,
+				selectionStore.selectedDeviceIndex,
+				nameToSave
+			);
+		}
+		editingDeviceName = false;
+	}
+
+	// Handle device name input keydown
+	function handleDeviceNameKeydown(event: KeyboardEvent) {
+		if (event.key === 'Enter') {
+			saveDeviceName();
+		} else if (event.key === 'Escape') {
+			editingDeviceName = false;
+		}
+	}
+
 	// Close drawer
 	function handleClose() {
 		uiStore.closeRightDrawer();
@@ -211,11 +252,48 @@
 			</div>
 		</div>
 	{:else if selectedDeviceInfo}
-		<!-- Device view (read-only) -->
+		<!-- Device view -->
 		<div class="device-view">
 			<div class="device-header">
 				<ColourSwatch colour={selectedDeviceInfo.device.colour} size={24} />
 				<span class="device-name">{selectedDeviceInfo.device.name}</span>
+			</div>
+
+			<!-- Display Name (click-to-edit) -->
+			<div class="display-name-section">
+				<span class="info-label">Display Name</span>
+				{#if editingDeviceName}
+					<input
+						type="text"
+						class="display-name-input"
+						bind:value={deviceNameInput}
+						onblur={saveDeviceName}
+						onkeydown={handleDeviceNameKeydown}
+					/>
+				{:else}
+					<button
+						type="button"
+						class="display-name-display"
+						onclick={startEditingDeviceName}
+						aria-label="Edit display name"
+					>
+						<span class="display-name-text">
+							{selectedDeviceInfo.placedDevice.name ?? selectedDeviceInfo.device.name}
+						</span>
+						<svg
+							class="edit-icon"
+							width="14"
+							height="14"
+							viewBox="0 0 24 24"
+							fill="none"
+							stroke="currentColor"
+							stroke-width="2"
+						>
+							<path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
+							<path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" />
+						</svg>
+					</button>
+				{/if}
 			</div>
 
 			<div class="info-section">
@@ -419,6 +497,71 @@
 	.device-name {
 		font-size: 16px;
 		font-weight: 600;
+	}
+
+	.display-name-section {
+		display: flex;
+		flex-direction: column;
+		gap: 6px;
+		padding: 12px 0;
+		border-bottom: 1px solid var(--colour-border);
+	}
+
+	.display-name-display {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		gap: 8px;
+		width: 100%;
+		padding: 8px 12px;
+		background: var(--colour-surface);
+		border: 1px solid var(--colour-border);
+		border-radius: 4px;
+		cursor: pointer;
+		text-align: left;
+		color: var(--colour-text);
+		font-size: 14px;
+		transition: border-color 0.15s ease;
+	}
+
+	.display-name-display:hover {
+		border-color: var(--colour-selection);
+	}
+
+	.display-name-display:focus {
+		outline: 2px solid var(--colour-selection);
+		outline-offset: 2px;
+	}
+
+	.display-name-text {
+		flex: 1;
+		overflow: hidden;
+		text-overflow: ellipsis;
+		white-space: nowrap;
+	}
+
+	.edit-icon {
+		flex-shrink: 0;
+		opacity: 0.6;
+	}
+
+	.display-name-display:hover .edit-icon {
+		opacity: 1;
+	}
+
+	.display-name-input {
+		width: 100%;
+		padding: 8px 12px;
+		font-size: 14px;
+		border: 1px solid var(--colour-selection);
+		border-radius: 4px;
+		background: var(--colour-bg);
+		color: var(--colour-text);
+		outline: none;
+	}
+
+	.display-name-input:focus {
+		box-shadow: 0 0 0 2px var(--colour-selection-muted, rgba(0, 102, 255, 0.2));
 	}
 
 	.notes-section {

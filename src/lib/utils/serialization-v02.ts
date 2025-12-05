@@ -2,16 +2,16 @@
  * v0.2 Layout Serialization and Factory Functions
  */
 
-import type { LayoutV02, RackV02 } from '$lib/types/v02';
+import type { Layout, Rack } from '$lib/types/v02';
 import type { FormFactor } from '$lib/types';
 import { getStarterLibraryV02 } from '$lib/data/starterLibraryV02';
 
 /**
  * Create a new empty v0.2 layout
  * @param name - Layout name (default: "Racky McRackface")
- * @returns New LayoutV02 object with starter device type library
+ * @returns New Layout object with starter device type library
  */
-export function createLayoutV02(name: string = 'Racky McRackface'): LayoutV02 {
+export function createLayout(name: string = 'Racky McRackface'): Layout {
 	return {
 		version: '0.2.0',
 		name,
@@ -27,9 +27,9 @@ export function createLayoutV02(name: string = 'Racky McRackface'): LayoutV02 {
 /**
  * Create a default rack for a new layout
  * @param name - Rack name
- * @returns A default RackV02 with empty devices
+ * @returns A default Rack with empty devices
  */
-function createDefaultRack(name: string): RackV02 {
+function createDefaultRack(name: string): Rack {
 	return {
 		name,
 		height: 42,
@@ -51,16 +51,16 @@ function createDefaultRack(name: string): RackV02 {
  * @param form_factor - Form factor
  * @param desc_units - Whether units are numbered top-down
  * @param starting_unit - First U number
- * @returns A new RackV02 object
+ * @returns A new Rack object
  */
-export function createRackV02(
+export function createRack(
 	name: string,
 	height: number,
 	width: 10 | 19 = 19,
 	form_factor: FormFactor = '4-post-cabinet',
 	desc_units: boolean = false,
 	starting_unit: number = 1
-): RackV02 {
+): Rack {
 	return {
 		name,
 		height,

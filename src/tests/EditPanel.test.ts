@@ -206,8 +206,9 @@ describe('EditPanel Component', () => {
 
 			render(EditPanel);
 
-			// Should show device name (read-only)
-			expect(screen.getByText('Test Server')).toBeInTheDocument();
+			// Should show device name (may appear multiple times with display name field)
+			const deviceNames = screen.getAllByText('Test Server');
+			expect(deviceNames.length).toBeGreaterThan(0);
 			// Should show height
 			expect(screen.getByText('2U')).toBeInTheDocument();
 			// Should show category (capitalized)

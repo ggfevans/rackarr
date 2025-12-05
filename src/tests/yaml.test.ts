@@ -10,7 +10,7 @@ import {
 	serializeLayoutToYaml,
 	parseLayoutYaml
 } from '$lib/utils/yaml';
-import type { LayoutV02 } from '$lib/types/v02';
+import type { Layout } from '$lib/types/v02';
 
 describe('YAML Utilities', () => {
 	describe('js-yaml dependency', () => {
@@ -111,7 +111,7 @@ items:
 });
 
 describe('v0.2 Layout YAML Serialization', () => {
-	const createValidLayout = (): LayoutV02 => ({
+	const createValidLayout = (): Layout => ({
 		version: '0.2.0',
 		name: 'My Homelab',
 		rack: {

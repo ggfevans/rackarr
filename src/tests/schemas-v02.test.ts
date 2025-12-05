@@ -5,82 +5,82 @@
 
 import { describe, it, expect } from 'vitest';
 import {
-	SlugSchemaV02,
-	DeviceCategorySchemaV02,
-	FormFactorSchemaV02,
-	AirflowSchemaV02,
-	DeviceFaceSchemaV02,
-	WeightUnitSchemaV02,
-	RackarrExtensionsSchemaV02,
-	DeviceTypeSchemaV02,
-	DeviceSchemaV02,
-	RackSchemaV02,
-	LayoutSettingsSchemaV02,
-	LayoutSchemaV02,
+	SlugSchema,
+	DeviceCategorySchema,
+	FormFactorSchema,
+	AirflowSchema,
+	DeviceFaceSchema,
+	WeightUnitSchema,
+	RackarrExtensionsSchema,
+	DeviceTypeSchema,
+	PlacedDeviceSchema,
+	RackSchema,
+	LayoutSettingsSchema,
+	LayoutSchema,
 	validateSlugUniqueness
 } from '$lib/schemas/v02';
 
 describe('v0.2 Zod Schemas', () => {
-	describe('SlugSchemaV02', () => {
+	describe('SlugSchema', () => {
 		it('accepts valid slug', () => {
-			expect(SlugSchemaV02.safeParse('valid-slug').success).toBe(true);
+			expect(SlugSchema.safeParse('valid-slug').success).toBe(true);
 		});
 
 		it('accepts slug with numbers', () => {
-			expect(SlugSchemaV02.safeParse('synology-ds920-plus').success).toBe(true);
+			expect(SlugSchema.safeParse('synology-ds920-plus').success).toBe(true);
 		});
 
 		it('accepts simple slug', () => {
-			expect(SlugSchemaV02.safeParse('simple').success).toBe(true);
+			expect(SlugSchema.safeParse('simple').success).toBe(true);
 		});
 
 		it('accepts numbers only', () => {
-			expect(SlugSchemaV02.safeParse('123').success).toBe(true);
+			expect(SlugSchema.safeParse('123').success).toBe(true);
 		});
 
 		it('rejects empty string', () => {
-			const result = SlugSchemaV02.safeParse('');
+			const result = SlugSchema.safeParse('');
 			expect(result.success).toBe(false);
 		});
 
 		it('rejects uppercase', () => {
-			const result = SlugSchemaV02.safeParse('Invalid-Slug');
+			const result = SlugSchema.safeParse('Invalid-Slug');
 			expect(result.success).toBe(false);
 		});
 
 		it('rejects spaces', () => {
-			const result = SlugSchemaV02.safeParse('invalid slug');
+			const result = SlugSchema.safeParse('invalid slug');
 			expect(result.success).toBe(false);
 		});
 
 		it('rejects leading hyphen', () => {
-			const result = SlugSchemaV02.safeParse('-invalid');
+			const result = SlugSchema.safeParse('-invalid');
 			expect(result.success).toBe(false);
 		});
 
 		it('rejects trailing hyphen', () => {
-			const result = SlugSchemaV02.safeParse('invalid-');
+			const result = SlugSchema.safeParse('invalid-');
 			expect(result.success).toBe(false);
 		});
 
 		it('rejects consecutive hyphens', () => {
-			const result = SlugSchemaV02.safeParse('invalid--slug');
+			const result = SlugSchema.safeParse('invalid--slug');
 			expect(result.success).toBe(false);
 		});
 
 		it('rejects underscores', () => {
-			const result = SlugSchemaV02.safeParse('invalid_slug');
+			const result = SlugSchema.safeParse('invalid_slug');
 			expect(result.success).toBe(false);
 		});
 
 		it('rejects slugs over 100 characters', () => {
 			const longSlug = 'a'.repeat(101);
-			const result = SlugSchemaV02.safeParse(longSlug);
+			const result = SlugSchema.safeParse(longSlug);
 			expect(result.success).toBe(false);
 		});
 	});
 
-	describe('DeviceCategorySchemaV02', () => {
+	describe('DeviceCategorySchema', () => {
 		const validCategories = [
 			'server',
 			'storage',
@@ -97,27 +97,27 @@ describe('v0.2 Zod Schemas', () => {
 		];
 
 		it.each(validCategories)('accepts category: %s', (category) => {
-			expect(DeviceCategorySchemaV02.safeParse(category).success).toBe(true);
+			expect(DeviceCategorySchema.safeParse(category).success).toBe(true);
 		});
 
 		it('rejects invalid category', () => {
-			expect(DeviceCategorySchemaV02.safeParse('invalid').success).toBe(false);
+			expect(DeviceCategorySchema.safeParse('invalid').success).toBe(false);
 		});
 	});
 
-	describe('FormFactorSchemaV02', () => {
+	describe('FormFactorSchema', () => {
 		const validFormFactors = ['2-post', '4-post', '4-post-cabinet', 'wall-mount', 'open-frame'];
 
 		it.each(validFormFactors)('accepts form factor: %s', (formFactor) => {
-			expect(FormFactorSchemaV02.safeParse(formFactor).success).toBe(true);
+			expect(FormFactorSchema.safeParse(formFactor).success).toBe(true);
 		});
 
 		it('rejects invalid form factor', () => {
-			expect(FormFactorSchemaV02.safeParse('invalid').success).toBe(false);
+			expect(FormFactorSchema.safeParse('invalid').success).toBe(false);
 		});
 	});
 
-	describe('AirflowSchemaV02', () => {
+	describe('AirflowSchema', () => {
 		const validAirflows = [
 			'front-to-rear',
 			'rear-to-front',
@@ -128,49 +128,49 @@ describe('v0.2 Zod Schemas', () => {
 		];
 
 		it.each(validAirflows)('accepts airflow: %s', (airflow) => {
-			expect(AirflowSchemaV02.safeParse(airflow).success).toBe(true);
+			expect(AirflowSchema.safeParse(airflow).success).toBe(true);
 		});
 
 		it('rejects invalid airflow', () => {
-			expect(AirflowSchemaV02.safeParse('invalid').success).toBe(false);
+			expect(AirflowSchema.safeParse('invalid').success).toBe(false);
 		});
 	});
 
-	describe('DeviceFaceSchemaV02', () => {
+	describe('DeviceFaceSchema', () => {
 		it('accepts front', () => {
-			expect(DeviceFaceSchemaV02.safeParse('front').success).toBe(true);
+			expect(DeviceFaceSchema.safeParse('front').success).toBe(true);
 		});
 
 		it('accepts rear', () => {
-			expect(DeviceFaceSchemaV02.safeParse('rear').success).toBe(true);
+			expect(DeviceFaceSchema.safeParse('rear').success).toBe(true);
 		});
 
 		it('accepts both', () => {
-			expect(DeviceFaceSchemaV02.safeParse('both').success).toBe(true);
+			expect(DeviceFaceSchema.safeParse('both').success).toBe(true);
 		});
 
 		it('rejects invalid face', () => {
-			expect(DeviceFaceSchemaV02.safeParse('side').success).toBe(false);
+			expect(DeviceFaceSchema.safeParse('side').success).toBe(false);
 		});
 	});
 
-	describe('WeightUnitSchemaV02', () => {
+	describe('WeightUnitSchema', () => {
 		it('accepts kg', () => {
-			expect(WeightUnitSchemaV02.safeParse('kg').success).toBe(true);
+			expect(WeightUnitSchema.safeParse('kg').success).toBe(true);
 		});
 
 		it('accepts lb', () => {
-			expect(WeightUnitSchemaV02.safeParse('lb').success).toBe(true);
+			expect(WeightUnitSchema.safeParse('lb').success).toBe(true);
 		});
 
 		it('rejects invalid unit', () => {
-			expect(WeightUnitSchemaV02.safeParse('oz').success).toBe(false);
+			expect(WeightUnitSchema.safeParse('oz').success).toBe(false);
 		});
 	});
 
-	describe('RackarrExtensionsSchemaV02', () => {
+	describe('RackarrExtensionsSchema', () => {
 		it('accepts valid extensions', () => {
-			const result = RackarrExtensionsSchemaV02.safeParse({
+			const result = RackarrExtensionsSchema.safeParse({
 				colour: '#10b981',
 				category: 'storage'
 			});
@@ -178,7 +178,7 @@ describe('v0.2 Zod Schemas', () => {
 		});
 
 		it('accepts extensions with tags', () => {
-			const result = RackarrExtensionsSchemaV02.safeParse({
+			const result = RackarrExtensionsSchema.safeParse({
 				colour: '#10b981',
 				category: 'storage',
 				tags: ['nas', 'synology']
@@ -187,7 +187,7 @@ describe('v0.2 Zod Schemas', () => {
 		});
 
 		it('rejects invalid hex colour', () => {
-			const result = RackarrExtensionsSchemaV02.safeParse({
+			const result = RackarrExtensionsSchema.safeParse({
 				colour: 'not-a-colour',
 				category: 'storage'
 			});
@@ -195,7 +195,7 @@ describe('v0.2 Zod Schemas', () => {
 		});
 
 		it('rejects 3-character hex colour', () => {
-			const result = RackarrExtensionsSchemaV02.safeParse({
+			const result = RackarrExtensionsSchema.safeParse({
 				colour: '#abc',
 				category: 'storage'
 			});
@@ -203,7 +203,7 @@ describe('v0.2 Zod Schemas', () => {
 		});
 
 		it('rejects invalid category', () => {
-			const result = RackarrExtensionsSchemaV02.safeParse({
+			const result = RackarrExtensionsSchema.safeParse({
 				colour: '#10b981',
 				category: 'invalid'
 			});
@@ -211,9 +211,9 @@ describe('v0.2 Zod Schemas', () => {
 		});
 	});
 
-	describe('DeviceTypeSchemaV02', () => {
+	describe('DeviceTypeSchema', () => {
 		it('accepts valid device type with required fields', () => {
-			const result = DeviceTypeSchemaV02.safeParse({
+			const result = DeviceTypeSchema.safeParse({
 				slug: 'synology-ds920-plus',
 				u_height: 2,
 				rackarr: {
@@ -225,7 +225,7 @@ describe('v0.2 Zod Schemas', () => {
 		});
 
 		it('accepts device type with all optional fields', () => {
-			const result = DeviceTypeSchemaV02.safeParse({
+			const result = DeviceTypeSchema.safeParse({
 				slug: 'dell-poweredge-r740',
 				u_height: 2,
 				manufacturer: 'Dell',
@@ -245,7 +245,7 @@ describe('v0.2 Zod Schemas', () => {
 		});
 
 		it('rejects missing slug', () => {
-			const result = DeviceTypeSchemaV02.safeParse({
+			const result = DeviceTypeSchema.safeParse({
 				u_height: 2,
 				rackarr: {
 					colour: '#10b981',
@@ -256,7 +256,7 @@ describe('v0.2 Zod Schemas', () => {
 		});
 
 		it('rejects invalid slug format', () => {
-			const result = DeviceTypeSchemaV02.safeParse({
+			const result = DeviceTypeSchema.safeParse({
 				slug: 'Invalid Slug!',
 				u_height: 2,
 				rackarr: {
@@ -268,7 +268,7 @@ describe('v0.2 Zod Schemas', () => {
 		});
 
 		it('rejects missing u_height', () => {
-			const result = DeviceTypeSchemaV02.safeParse({
+			const result = DeviceTypeSchema.safeParse({
 				slug: 'test-device',
 				rackarr: {
 					colour: '#10b981',
@@ -279,7 +279,7 @@ describe('v0.2 Zod Schemas', () => {
 		});
 
 		it('rejects u_height less than 1', () => {
-			const result = DeviceTypeSchemaV02.safeParse({
+			const result = DeviceTypeSchema.safeParse({
 				slug: 'test-device',
 				u_height: 0,
 				rackarr: {
@@ -291,7 +291,7 @@ describe('v0.2 Zod Schemas', () => {
 		});
 
 		it('rejects u_height greater than 50', () => {
-			const result = DeviceTypeSchemaV02.safeParse({
+			const result = DeviceTypeSchema.safeParse({
 				slug: 'test-device',
 				u_height: 51,
 				rackarr: {
@@ -303,7 +303,7 @@ describe('v0.2 Zod Schemas', () => {
 		});
 
 		it('rejects missing rackarr extensions', () => {
-			const result = DeviceTypeSchemaV02.safeParse({
+			const result = DeviceTypeSchema.safeParse({
 				slug: 'test-device',
 				u_height: 2
 			});
@@ -311,9 +311,9 @@ describe('v0.2 Zod Schemas', () => {
 		});
 	});
 
-	describe('DeviceSchemaV02', () => {
+	describe('PlacedDeviceSchema', () => {
 		it('accepts valid device', () => {
-			const result = DeviceSchemaV02.safeParse({
+			const result = PlacedDeviceSchema.safeParse({
 				device_type: 'synology-ds920-plus',
 				position: 10,
 				face: 'front'
@@ -322,7 +322,7 @@ describe('v0.2 Zod Schemas', () => {
 		});
 
 		it('accepts device with optional name', () => {
-			const result = DeviceSchemaV02.safeParse({
+			const result = PlacedDeviceSchema.safeParse({
 				device_type: 'synology-ds920-plus',
 				name: 'Primary NAS',
 				position: 10,
@@ -332,7 +332,7 @@ describe('v0.2 Zod Schemas', () => {
 		});
 
 		it('rejects missing device_type', () => {
-			const result = DeviceSchemaV02.safeParse({
+			const result = PlacedDeviceSchema.safeParse({
 				position: 10,
 				face: 'front'
 			});
@@ -340,7 +340,7 @@ describe('v0.2 Zod Schemas', () => {
 		});
 
 		it('rejects position less than 1', () => {
-			const result = DeviceSchemaV02.safeParse({
+			const result = PlacedDeviceSchema.safeParse({
 				device_type: 'test',
 				position: 0,
 				face: 'front'
@@ -349,7 +349,7 @@ describe('v0.2 Zod Schemas', () => {
 		});
 
 		it('rejects invalid face', () => {
-			const result = DeviceSchemaV02.safeParse({
+			const result = PlacedDeviceSchema.safeParse({
 				device_type: 'test',
 				position: 10,
 				face: 'invalid'
@@ -358,7 +358,7 @@ describe('v0.2 Zod Schemas', () => {
 		});
 
 		it('rejects name over 100 characters', () => {
-			const result = DeviceSchemaV02.safeParse({
+			const result = PlacedDeviceSchema.safeParse({
 				device_type: 'test',
 				name: 'a'.repeat(101),
 				position: 10,
@@ -368,9 +368,9 @@ describe('v0.2 Zod Schemas', () => {
 		});
 	});
 
-	describe('RackSchemaV02', () => {
+	describe('RackSchema', () => {
 		it('accepts valid rack', () => {
-			const result = RackSchemaV02.safeParse({
+			const result = RackSchema.safeParse({
 				name: 'Homelab Rack',
 				height: 42,
 				width: 19,
@@ -384,7 +384,7 @@ describe('v0.2 Zod Schemas', () => {
 		});
 
 		it('accepts rack with devices', () => {
-			const result = RackSchemaV02.safeParse({
+			const result = RackSchema.safeParse({
 				name: 'Test Rack',
 				height: 42,
 				width: 19,
@@ -401,7 +401,7 @@ describe('v0.2 Zod Schemas', () => {
 		});
 
 		it('accepts 10-inch rack width', () => {
-			const result = RackSchemaV02.safeParse({
+			const result = RackSchema.safeParse({
 				name: 'Network Rack',
 				height: 12,
 				width: 10,
@@ -415,7 +415,7 @@ describe('v0.2 Zod Schemas', () => {
 		});
 
 		it('rejects missing name', () => {
-			const result = RackSchemaV02.safeParse({
+			const result = RackSchema.safeParse({
 				height: 42,
 				width: 19,
 				desc_units: false,
@@ -428,7 +428,7 @@ describe('v0.2 Zod Schemas', () => {
 		});
 
 		it('rejects invalid width', () => {
-			const result = RackSchemaV02.safeParse({
+			const result = RackSchema.safeParse({
 				name: 'Test Rack',
 				height: 42,
 				width: 15,
@@ -442,7 +442,7 @@ describe('v0.2 Zod Schemas', () => {
 		});
 
 		it('rejects height less than 1', () => {
-			const result = RackSchemaV02.safeParse({
+			const result = RackSchema.safeParse({
 				name: 'Test Rack',
 				height: 0,
 				width: 19,
@@ -456,7 +456,7 @@ describe('v0.2 Zod Schemas', () => {
 		});
 
 		it('rejects height greater than 50', () => {
-			const result = RackSchemaV02.safeParse({
+			const result = RackSchema.safeParse({
 				name: 'Test Rack',
 				height: 51,
 				width: 19,
@@ -470,9 +470,9 @@ describe('v0.2 Zod Schemas', () => {
 		});
 	});
 
-	describe('LayoutSettingsSchemaV02', () => {
+	describe('LayoutSettingsSchema', () => {
 		it('accepts valid settings with label mode', () => {
-			const result = LayoutSettingsSchemaV02.safeParse({
+			const result = LayoutSettingsSchema.safeParse({
 				display_mode: 'label',
 				show_labels_on_images: false
 			});
@@ -480,7 +480,7 @@ describe('v0.2 Zod Schemas', () => {
 		});
 
 		it('accepts valid settings with image mode', () => {
-			const result = LayoutSettingsSchemaV02.safeParse({
+			const result = LayoutSettingsSchema.safeParse({
 				display_mode: 'image',
 				show_labels_on_images: true
 			});
@@ -488,7 +488,7 @@ describe('v0.2 Zod Schemas', () => {
 		});
 
 		it('rejects invalid display mode', () => {
-			const result = LayoutSettingsSchemaV02.safeParse({
+			const result = LayoutSettingsSchema.safeParse({
 				display_mode: 'invalid',
 				show_labels_on_images: true
 			});
@@ -496,9 +496,9 @@ describe('v0.2 Zod Schemas', () => {
 		});
 	});
 
-	describe('LayoutSchemaV02', () => {
+	describe('LayoutSchema', () => {
 		it('accepts valid layout', () => {
-			const result = LayoutSchemaV02.safeParse({
+			const result = LayoutSchema.safeParse({
 				version: '0.2.0',
 				name: 'My Homelab',
 				rack: {
@@ -521,7 +521,7 @@ describe('v0.2 Zod Schemas', () => {
 		});
 
 		it('accepts layout with device types and devices', () => {
-			const result = LayoutSchemaV02.safeParse({
+			const result = LayoutSchema.safeParse({
 				version: '0.2.0',
 				name: 'Complete Layout',
 				rack: {
@@ -555,7 +555,7 @@ describe('v0.2 Zod Schemas', () => {
 		});
 
 		it('rejects missing version', () => {
-			const result = LayoutSchemaV02.safeParse({
+			const result = LayoutSchema.safeParse({
 				name: 'Test Layout',
 				rack: {
 					name: 'Main Rack',
@@ -577,7 +577,7 @@ describe('v0.2 Zod Schemas', () => {
 		});
 
 		it('rejects missing rack', () => {
-			const result = LayoutSchemaV02.safeParse({
+			const result = LayoutSchema.safeParse({
 				version: '0.2.0',
 				name: 'Test Layout',
 				device_types: [],
@@ -590,7 +590,7 @@ describe('v0.2 Zod Schemas', () => {
 		});
 
 		it('rejects empty name', () => {
-			const result = LayoutSchemaV02.safeParse({
+			const result = LayoutSchema.safeParse({
 				version: '0.2.0',
 				name: '',
 				rack: {
@@ -613,7 +613,7 @@ describe('v0.2 Zod Schemas', () => {
 		});
 
 		it('accepts layout with unique slugs', () => {
-			const result = LayoutSchemaV02.safeParse({
+			const result = LayoutSchema.safeParse({
 				version: '0.2.0',
 				name: 'Test Layout',
 				rack: {
@@ -647,7 +647,7 @@ describe('v0.2 Zod Schemas', () => {
 		});
 
 		it('rejects layout with duplicate slugs', () => {
-			const result = LayoutSchemaV02.safeParse({
+			const result = LayoutSchema.safeParse({
 				version: '0.2.0',
 				name: 'Test Layout',
 				rack: {
@@ -684,7 +684,7 @@ describe('v0.2 Zod Schemas', () => {
 		});
 
 		it('rejects layout with multiple duplicate slugs', () => {
-			const result = LayoutSchemaV02.safeParse({
+			const result = LayoutSchema.safeParse({
 				version: '0.2.0',
 				name: 'Test Layout',
 				rack: {

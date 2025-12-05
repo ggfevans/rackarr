@@ -180,8 +180,9 @@ describe('EditPanel Visual Hierarchy', () => {
 
 			render(EditPanel);
 
-			// Should show device name
-			expect(screen.getByText('Dell PowerEdge R730')).toBeInTheDocument();
+			// Should show device name (may appear in multiple places)
+			const deviceNames = screen.getAllByText('Dell PowerEdge R730');
+			expect(deviceNames.length).toBeGreaterThan(0);
 		});
 
 		it('shows device properties in info section', () => {

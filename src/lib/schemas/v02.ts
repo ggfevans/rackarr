@@ -1,5 +1,5 @@
 /**
- * v0.2 Zod Validation Schemas
+ * Layout Zod Validation Schemas
  * NetBox-compatible validation with snake_case naming
  */
 
@@ -22,7 +22,7 @@ const HEX_COLOUR_PATTERN = /^#[0-9a-fA-F]{6}$/;
 /**
  * Slug schema for device identification
  */
-export const SlugSchemaV02 = z
+export const SlugSchema = z
 	.string()
 	.min(1, 'Slug is required')
 	.max(100, 'Slug must be 100 characters or less')
@@ -34,7 +34,7 @@ export const SlugSchemaV02 = z
 /**
  * Device category enum
  */
-export const DeviceCategorySchemaV02 = z.enum([
+export const DeviceCategorySchema = z.enum([
 	'server',
 	'storage',
 	'networking',
@@ -52,7 +52,7 @@ export const DeviceCategorySchemaV02 = z.enum([
 /**
  * Rack form factor enum
  */
-export const FormFactorSchemaV02 = z.enum([
+export const FormFactorSchema = z.enum([
 	'2-post',
 	'4-post',
 	'4-post-cabinet',
@@ -63,7 +63,7 @@ export const FormFactorSchemaV02 = z.enum([
 /**
  * Airflow direction enum (NetBox-compatible)
  */
-export const AirflowSchemaV02 = z.enum([
+export const AirflowSchema = z.enum([
 	'front-to-rear',
 	'rear-to-front',
 	'left-to-right',
@@ -75,17 +75,17 @@ export const AirflowSchemaV02 = z.enum([
 /**
  * Device face in rack
  */
-export const DeviceFaceSchemaV02 = z.enum(['front', 'rear', 'both']);
+export const DeviceFaceSchema = z.enum(['front', 'rear', 'both']);
 
 /**
  * Weight unit enum
  */
-export const WeightUnitSchemaV02 = z.enum(['kg', 'lb']);
+export const WeightUnitSchema = z.enum(['kg', 'lb']);
 
 /**
  * Display mode enum
  */
-export const DisplayModeSchemaV02 = z.enum(['label', 'image']);
+export const DisplayModeSchema = z.enum(['label', 'image']);
 
 // ============================================================================
 // Utility Functions
@@ -120,18 +120,18 @@ export function validateSlugUniqueness(device_types: { slug: string }[]): string
 /**
  * Rackarr-specific extensions for DeviceType
  */
-export const RackarrExtensionsSchemaV02 = z.object({
+export const RackarrExtensionsSchema = z.object({
 	colour: z.string().regex(HEX_COLOUR_PATTERN, 'Colour must be a valid 6-character hex code'),
-	category: DeviceCategorySchemaV02,
+	category: DeviceCategorySchema,
 	tags: z.array(z.string()).optional()
 });
 
 /**
  * Device Type schema - library template definition
  */
-export const DeviceTypeSchemaV02 = z.object({
+export const DeviceTypeSchema = z.object({
 	// Required fields
-	slug: SlugSchemaV02,
+	slug: SlugSchema,
 	u_height: z
 		.number()
 		.int()
@@ -143,61 +143,61 @@ export const DeviceTypeSchemaV02 = z.object({
 	model: z.string().max(100).optional(),
 	is_full_depth: z.boolean().optional(),
 	weight: z.number().positive().optional(),
-	weight_unit: WeightUnitSchemaV02.optional(),
-	airflow: AirflowSchemaV02.optional(),
+	weight_unit: WeightUnitSchema.optional(),
+	airflow: AirflowSchema.optional(),
 	comments: z.string().max(1000).optional(),
 
 	// Rackarr extensions
-	rackarr: RackarrExtensionsSchemaV02
+	rackarr: RackarrExtensionsSchema
 });
 
 /**
- * Device schema - placed instance in rack
+ * Placed device schema - instance in rack
  */
-export const DeviceSchemaV02 = z.object({
-	device_type: SlugSchemaV02, // Reference to DeviceType.slug
+export const PlacedDeviceSchema = z.object({
+	device_type: SlugSchema, // Reference to DeviceType.slug
 	name: z.string().max(100, 'Name must be 100 characters or less').optional(),
 	position: z.number().int().min(1, 'Position must be at least 1'),
-	face: DeviceFaceSchemaV02
+	face: DeviceFaceSchema
 });
 
 /**
  * Rack schema
  */
-export const RackSchemaV02 = z.object({
+export const RackSchema = z.object({
 	name: z.string().min(1, 'Name is required').max(100, 'Name must be 100 characters or less'),
 	height: z.number().int().min(1, 'Height must be at least 1U').max(50, 'Height cannot exceed 50U'),
 	width: z.union([z.literal(10), z.literal(19)]),
 	desc_units: z.boolean(),
-	form_factor: FormFactorSchemaV02,
+	form_factor: FormFactorSchema,
 	starting_unit: z.number().int().min(1),
 	position: z.number().int().min(0),
-	devices: z.array(DeviceSchemaV02)
+	devices: z.array(PlacedDeviceSchema)
 });
 
 /**
  * Layout settings schema
  */
-export const LayoutSettingsSchemaV02 = z.object({
-	display_mode: DisplayModeSchemaV02,
+export const LayoutSettingsSchema = z.object({
+	display_mode: DisplayModeSchema,
 	show_labels_on_images: z.boolean()
 });
 
 /**
  * Complete layout schema (base, without refinements)
  */
-const LayoutSchemaV02Base = z.object({
+const LayoutSchemaBase = z.object({
 	version: z.string(),
 	name: z.string().min(1, 'Name is required').max(100, 'Name must be 100 characters or less'),
-	rack: RackSchemaV02,
-	device_types: z.array(DeviceTypeSchemaV02),
-	settings: LayoutSettingsSchemaV02
+	rack: RackSchema,
+	device_types: z.array(DeviceTypeSchema),
+	settings: LayoutSettingsSchema
 });
 
 /**
  * Complete layout schema with slug uniqueness validation
  */
-export const LayoutSchemaV02 = LayoutSchemaV02Base.superRefine((data, ctx) => {
+export const LayoutSchema = LayoutSchemaBase.superRefine((data, ctx) => {
 	const duplicates = validateSlugUniqueness(data.device_types);
 	if (duplicates.length > 0) {
 		ctx.addIssue({
@@ -212,16 +212,75 @@ export const LayoutSchemaV02 = LayoutSchemaV02Base.superRefine((data, ctx) => {
 // Type Exports (inferred from schemas)
 // ============================================================================
 
-export type SlugV02 = z.infer<typeof SlugSchemaV02>;
-export type DeviceCategoryV02 = z.infer<typeof DeviceCategorySchemaV02>;
-export type FormFactorV02 = z.infer<typeof FormFactorSchemaV02>;
-export type AirflowV02 = z.infer<typeof AirflowSchemaV02>;
-export type DeviceFaceV02 = z.infer<typeof DeviceFaceSchemaV02>;
-export type WeightUnitV02 = z.infer<typeof WeightUnitSchemaV02>;
-export type DisplayModeV02 = z.infer<typeof DisplayModeSchemaV02>;
-export type RackarrExtensionsV02 = z.infer<typeof RackarrExtensionsSchemaV02>;
-export type DeviceTypeZodV02 = z.infer<typeof DeviceTypeSchemaV02>;
-export type DeviceZodV02 = z.infer<typeof DeviceSchemaV02>;
-export type RackZodV02 = z.infer<typeof RackSchemaV02>;
-export type LayoutSettingsZodV02 = z.infer<typeof LayoutSettingsSchemaV02>;
-export type LayoutZodV02 = z.infer<typeof LayoutSchemaV02>;
+export type Slug = z.infer<typeof SlugSchema>;
+export type DeviceCategory = z.infer<typeof DeviceCategorySchema>;
+export type FormFactor = z.infer<typeof FormFactorSchema>;
+export type Airflow = z.infer<typeof AirflowSchema>;
+export type DeviceFace = z.infer<typeof DeviceFaceSchema>;
+export type WeightUnit = z.infer<typeof WeightUnitSchema>;
+export type DisplayMode = z.infer<typeof DisplayModeSchema>;
+export type RackarrExtensions = z.infer<typeof RackarrExtensionsSchema>;
+export type DeviceTypeZod = z.infer<typeof DeviceTypeSchema>;
+export type PlacedDeviceZod = z.infer<typeof PlacedDeviceSchema>;
+export type RackZod = z.infer<typeof RackSchema>;
+export type LayoutSettingsZod = z.infer<typeof LayoutSettingsSchema>;
+export type LayoutZod = z.infer<typeof LayoutSchema>;
+
+// ============================================================================
+// Backwards Compatibility Aliases (deprecated - use new names)
+// ============================================================================
+
+/** @deprecated Use SlugSchema instead */
+export const SlugSchemaV02 = SlugSchema;
+/** @deprecated Use DeviceCategorySchema instead */
+export const DeviceCategorySchemaV02 = DeviceCategorySchema;
+/** @deprecated Use FormFactorSchema instead */
+export const FormFactorSchemaV02 = FormFactorSchema;
+/** @deprecated Use AirflowSchema instead */
+export const AirflowSchemaV02 = AirflowSchema;
+/** @deprecated Use DeviceFaceSchema instead */
+export const DeviceFaceSchemaV02 = DeviceFaceSchema;
+/** @deprecated Use WeightUnitSchema instead */
+export const WeightUnitSchemaV02 = WeightUnitSchema;
+/** @deprecated Use DisplayModeSchema instead */
+export const DisplayModeSchemaV02 = DisplayModeSchema;
+/** @deprecated Use RackarrExtensionsSchema instead */
+export const RackarrExtensionsSchemaV02 = RackarrExtensionsSchema;
+/** @deprecated Use DeviceTypeSchema instead */
+export const DeviceTypeSchemaV02 = DeviceTypeSchema;
+/** @deprecated Use PlacedDeviceSchema instead */
+export const DeviceSchemaV02 = PlacedDeviceSchema;
+/** @deprecated Use RackSchema instead */
+export const RackSchemaV02 = RackSchema;
+/** @deprecated Use LayoutSettingsSchema instead */
+export const LayoutSettingsSchemaV02 = LayoutSettingsSchema;
+/** @deprecated Use LayoutSchema instead */
+export const LayoutSchemaV02 = LayoutSchema;
+
+// Type aliases for backwards compatibility
+/** @deprecated Use Slug instead */
+export type SlugV02 = Slug;
+/** @deprecated Use DeviceCategory instead */
+export type DeviceCategoryV02 = DeviceCategory;
+/** @deprecated Use FormFactor instead */
+export type FormFactorV02 = FormFactor;
+/** @deprecated Use Airflow instead */
+export type AirflowV02 = Airflow;
+/** @deprecated Use DeviceFace instead */
+export type DeviceFaceV02 = DeviceFace;
+/** @deprecated Use WeightUnit instead */
+export type WeightUnitV02 = WeightUnit;
+/** @deprecated Use DisplayMode instead */
+export type DisplayModeV02 = DisplayMode;
+/** @deprecated Use RackarrExtensions instead */
+export type RackarrExtensionsV02 = RackarrExtensions;
+/** @deprecated Use DeviceTypeZod instead */
+export type DeviceTypeZodV02 = DeviceTypeZod;
+/** @deprecated Use PlacedDeviceZod instead */
+export type DeviceZodV02 = PlacedDeviceZod;
+/** @deprecated Use RackZod instead */
+export type RackZodV02 = RackZod;
+/** @deprecated Use LayoutSettingsZod instead */
+export type LayoutSettingsZodV02 = LayoutSettingsZod;
+/** @deprecated Use LayoutZod instead */
+export type LayoutZodV02 = LayoutZod;

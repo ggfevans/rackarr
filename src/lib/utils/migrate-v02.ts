@@ -3,8 +3,8 @@
  * Convert v0.1/v0.3 layouts to v0.2 format
  */
 
-import type { Layout, Device } from '$lib/types';
-import type { LayoutV02, DeviceTypeV02, DeviceV02, RackV02 } from '$lib/types/v02';
+import type { Layout as LegacyLayout, Device } from '$lib/types';
+import type { Layout, DeviceType, PlacedDevice, Rack } from '$lib/types/v02';
 import type { ImageStoreMap, DeviceImageData } from '$lib/types/images';
 import { generateDeviceSlug, ensureUniqueSlug } from './slug';
 
@@ -13,7 +13,7 @@ import { generateDeviceSlug, ensureUniqueSlug } from './slug';
  * The mapping is needed for image migration
  */
 export interface MigrationResult {
-	layout: LayoutV02;
+	layout: Layout;
 	idToSlugMap: Map<string, string>;
 }
 
@@ -49,12 +49,12 @@ export function detectLayoutVersion(data: unknown): string {
 }
 
 /**
- * Convert a legacy Device to a DeviceTypeV02
+ * Convert a legacy Device to a DeviceType
  */
 function convertDeviceToDeviceType(
 	device: Device,
 	existingSlugs: Set<string>
-): { deviceType: DeviceTypeV02; slug: string } {
+): { deviceType: DeviceType; slug: string } {
 	// Generate slug from manufacturer/model or name
 	let rawSlug = generateDeviceSlug(device.manufacturer, device.model, device.name);
 
@@ -67,7 +67,7 @@ function convertDeviceToDeviceType(
 	const slug = ensureUniqueSlug(rawSlug, existingSlugs);
 	existingSlugs.add(slug);
 
-	const deviceType: DeviceTypeV02 = {
+	const deviceType: DeviceType = {
 		slug,
 		u_height: device.height,
 		rackarr: {
@@ -103,7 +103,7 @@ function convertDeviceToDeviceType(
 			'passive'
 		].includes(device.airflow)
 	) {
-		deviceType.airflow = device.airflow as DeviceTypeV02['airflow'];
+		deviceType.airflow = device.airflow as DeviceType['airflow'];
 	}
 	if (device.notes) {
 		deviceType.comments = device.notes;
@@ -117,12 +117,12 @@ function convertDeviceToDeviceType(
  * @param legacy - Legacy layout to migrate
  * @returns Migration result with layout and id-to-slug mapping
  */
-export function migrateToV02(legacy: Layout): MigrationResult {
+export function migrateToV02(legacy: LegacyLayout): MigrationResult {
 	const idToSlugMap = new Map<string, string>();
 	const existingSlugs = new Set<string>();
 
 	// Convert deviceLibrary to device_types
-	const device_types: DeviceTypeV02[] = [];
+	const device_types: DeviceType[] = [];
 	for (const device of legacy.deviceLibrary) {
 		const { deviceType, slug } = convertDeviceToDeviceType(device, existingSlugs);
 		device_types.push(deviceType);
@@ -130,12 +130,12 @@ export function migrateToV02(legacy: Layout): MigrationResult {
 	}
 
 	// Convert first rack (or create default)
-	let rack: RackV02;
+	let rack: Rack;
 	if (legacy.racks.length > 0) {
 		const legacyRack = legacy.racks[0]!;
 
 		// Convert placed devices, skipping unknown references
-		const devices: DeviceV02[] = [];
+		const devices: PlacedDevice[] = [];
 		for (const placedDevice of legacyRack.devices) {
 			const deviceTypeSlug = idToSlugMap.get(placedDevice.libraryId);
 			if (deviceTypeSlug) {
@@ -179,7 +179,7 @@ export function migrateToV02(legacy: Layout): MigrationResult {
 		show_labels_on_images: legacy.settings?.showLabelsOnImages ?? true
 	};
 
-	const layout: LayoutV02 = {
+	const layout: Layout = {
 		version: '0.2.0',
 		name: legacy.name,
 		rack,

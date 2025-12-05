@@ -178,8 +178,10 @@
 	--rack-text: var(--neutral-400); /* U label text - stays light on dark rack */
 	--rack-text-highlight: var(--neutral-200); /* Highlighted U labels (multiples of 5) */
 
-	/* Blocked Slots (dual-view mode) */
-	--colour-rack-blocked: rgba(128, 128, 128, 0.3); /* Dark theme - subtle gray */
+	/* Blocked Slots (dual-view mode) - diagonal stripe pattern */
+	--colour-blocked-stripe: rgba(239, 68, 68, 0.35); /* Red stripe for visibility */
+	--colour-blocked-bg: rgba(239, 68, 68, 0.08); /* Subtle red wash behind stripes */
+	--colour-rack-blocked: rgba(128, 128, 128, 0.3); /* Legacy - kept for compatibility */
 
 	/* Toolbar */
 	--toolbar-height: 56px;
@@ -266,6 +268,8 @@
 	/* NOTE: Rack tokens intentionally NOT overridden - racks stay dark in all themes */
 
 	/* Blocked Slots - slightly lighter for light theme (rack stays dark) */
+	--colour-blocked-stripe: rgba(220, 38, 38, 0.3);
+	--colour-blocked-bg: rgba(220, 38, 38, 0.06);
 	--colour-rack-blocked: rgba(0, 0, 0, 0.1);
 
 	--toolbar-bg: #ffffff;

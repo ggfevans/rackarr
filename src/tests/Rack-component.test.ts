@@ -747,9 +747,9 @@ describe('Rack SVG Component', () => {
 				}
 			});
 
-			// Should have blocked-slot rect elements
+			// Should have blocked-slot rect elements (2 per slot: background + stripes)
 			const blockedSlots = container.querySelectorAll('.blocked-slot');
-			expect(blockedSlots.length).toBe(1);
+			expect(blockedSlots.length).toBe(2);
 		});
 
 		it('blocked slot rects have correct position based on U', () => {
@@ -866,8 +866,9 @@ describe('Rack SVG Component', () => {
 				}
 			});
 
+			// 2 per slot: background + stripes pattern
 			const frontBlockedSlots = frontContainer.querySelectorAll('.blocked-slot');
-			expect(frontBlockedSlots.length).toBe(1);
+			expect(frontBlockedSlots.length).toBe(2);
 
 			// Check rear view
 			const { container: rearContainer } = render(Rack, {
@@ -879,8 +880,9 @@ describe('Rack SVG Component', () => {
 				}
 			});
 
+			// 2 per slot: background + stripes pattern
 			const rearBlockedSlots = rearContainer.querySelectorAll('.blocked-slot');
-			expect(rearBlockedSlots.length).toBe(1);
+			expect(rearBlockedSlots.length).toBe(2);
 		});
 
 		it('blocked slots have appropriate opacity', () => {

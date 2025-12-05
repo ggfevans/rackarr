@@ -428,18 +428,42 @@
 			</text>
 		{/each}
 
+		<!-- SVG Defs for blocked slots pattern -->
+		<defs>
+			<!-- Diagonal stripe pattern for blocked slots -->
+			<pattern
+				id="blocked-stripe-pattern"
+				patternUnits="userSpaceOnUse"
+				width="8"
+				height="8"
+				patternTransform="rotate(45)"
+			>
+				<rect width="4" height="8" class="blocked-stripe-rect" />
+			</pattern>
+		</defs>
+
 		<!-- Blocked Slots Overlay (renders before devices so devices appear on top) -->
 		{#if blockedSlots.length > 0}
 			<g class="blocked-slots-layer" transform="translate(0, {RACK_PADDING + RAIL_WIDTH})">
 				{#each blockedSlots as slot (slot.bottom + '-' + slot.top)}
+					<!-- Background wash -->
 					<rect
-						class="blocked-slot"
+						class="blocked-slot blocked-slot-bg"
 						x={RAIL_WIDTH}
 						y={(rack.height - slot.top) * U_HEIGHT}
 						width={RACK_WIDTH - 2 * RAIL_WIDTH}
 						height={(slot.top - slot.bottom + 1) * U_HEIGHT}
-						fill="var(--colour-rack-blocked, rgba(128, 128, 128, 0.3))"
-						opacity="0.15"
+						opacity="0.5"
+					/>
+					<!-- Diagonal stripe pattern -->
+					<rect
+						class="blocked-slot blocked-slot-stripes"
+						x={RAIL_WIDTH}
+						y={(rack.height - slot.top) * U_HEIGHT}
+						width={RACK_WIDTH - 2 * RAIL_WIDTH}
+						height={(slot.top - slot.bottom + 1) * U_HEIGHT}
+						fill="url(#blocked-stripe-pattern)"
+						opacity="0.8"
 					/>
 				{/each}
 			</g>
@@ -639,5 +663,18 @@
 		fill: var(--colour-dnd-invalid-bg);
 		stroke: var(--colour-dnd-invalid);
 		stroke-width: 2;
+	}
+
+	/* Blocked Slots - Diagonal stripe pattern */
+	.blocked-stripe-rect {
+		fill: var(--colour-blocked-stripe, rgba(239, 68, 68, 0.35));
+	}
+
+	.blocked-slot-bg {
+		fill: var(--colour-blocked-bg, rgba(239, 68, 68, 0.08));
+	}
+
+	.blocked-slot-stripes {
+		pointer-events: none;
 	}
 </style>

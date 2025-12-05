@@ -34,6 +34,14 @@ For each of these, we should create a new branch. Then we will write a spec and 
 Work through each top level heading one by one, mark with x only once complete.
 
 - [x] DeviceV02 mention - remove the "V02" in all instances, it is unnecessary
+
+- [x] Rack device placement - improved blocked slots visual indicator with diagonal stripe pattern
+
+- [x] repo community standards
+  - [x] code of conduct - Contributor Covenant v2.1 with AI agent guidelines
+  - [x] issue template - bug report and feature request templates
+  - [x] pull request template - with testing checklist
+
 - [] export improvements:
   - [] export bundled zip does not need the "include source layout", this is always going to be added in the bundled view
   - [] export bundled zip should include all devices and their images

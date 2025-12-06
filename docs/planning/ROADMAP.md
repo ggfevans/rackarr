@@ -47,6 +47,23 @@ Work through each top level heading one by one, mark with x only once complete.
 
 ## Planned
 
+### v0.4.0 — Code Audit & Legacy Cleanup
+
+**Priority:** Blocking (before any new feature work)
+**Breaking Change:** Drops v0.1/v0.2 format support
+
+| Area               | Tasks                                                               |
+| ------------------ | ------------------------------------------------------------------- |
+| Legacy Removal     | Remove v0.1/v0.2 migration code, drop old `.rackarr` format support |
+| Dead Code (Source) | Unused imports, exports, functions, unreachable code paths          |
+| Dead Code (Tests)  | Redundant tests, duplicate coverage, obsolete test fixtures         |
+| CSS Cleanup        | Unused CSS classes/variables in tokens.css and component styles     |
+| Dependencies       | Audit and remove unused npm packages                                |
+| Config             | Clean up vite/vitest/eslint/tsconfig if needed                      |
+| Documentation      | Remove legacy references from spec-combined.md, CLAUDE.md, ROADMAP  |
+
+**Spec:** `docs/planning/v0.4.0-code-audit-spec.md`
+
 ---
 
 ## Medium-Term Responsive (before v1.0)
@@ -100,11 +117,11 @@ Priority order for future development:
 
 ---
 
-### 2. Undo/Redo
+### ~~2. Undo/Redo~~ ✅ Complete (v0.3.1)
 
-- Undo/redo system (command pattern)
-- History stack with configurable depth
-- Keyboard shortcuts (Ctrl/Cmd+Z, Ctrl/Cmd+Shift+Z)
+- ~~Undo/redo system (command pattern)~~
+- ~~History stack with configurable depth~~
+- ~~Keyboard shortcuts (Ctrl/Cmd+Z, Ctrl/Cmd+Shift+Z)~~
 
 ---
 
@@ -212,6 +229,8 @@ Backlog → Future Roadmap → Planned (current) → Released
 | 2025-12-02 | Consolidated spec; single-rack permanent scope  |
 | 2025-12-03 | v0.3.0 released (YAML archive format)           |
 | 2025-12-05 | Responsive quick-wins implemented               |
+| 2025-12-06 | v0.3.4 released (responsive quick-wins)         |
+| 2025-12-06 | v0.4.0 code audit planned                       |
 
 ---
 

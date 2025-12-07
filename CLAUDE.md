@@ -1,22 +1,20 @@
 # CLAUDE.md — Rackarr
 
 **Project:** Rackarr — Rack Layout Designer for Homelabbers
-**Version:** 0.3.4
+**Version:** 0.4.0
 
 ---
 
-## v0.3.1 Features
+## v0.4.0 Changes (BREAKING)
+
+- **Removed v0.1/v0.2 legacy format support** - only `.rackarr.zip` (YAML) format supported
+- Code cleanup: removed dead code, unused CSS tokens, redundant dependencies
+- All features from v0.3.x preserved
+
+## v0.3.x Features
 
 - **Undo/Redo** with Ctrl+Z / Ctrl+Shift+Z (or Ctrl+Y)
-- Toolbar buttons for Undo/Redo with tooltips
-- Toast notifications for undo/redo actions
-- Command pattern with history stack (50 max depth)
-- All features from v0.3.0
-
-## v0.3.0 Features
-
 - YAML folder-based `.rackarr.zip` archive format
-- Legacy format migration (v0.1/v0.2 → v0.3)
 - 11 device categories (+ shelf category)
 - Device images (front/rear) embedded in archive
 - Label/image display mode toggle (keyboard: `I`)

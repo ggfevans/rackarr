@@ -207,29 +207,29 @@
 	.new-rack-form {
 		display: flex;
 		flex-direction: column;
-		gap: 20px;
+		gap: var(--space-5);
 	}
 
 	.form-group {
 		display: flex;
 		flex-direction: column;
-		gap: 8px;
+		gap: var(--space-2);
 	}
 
 	.form-group label,
 	.form-group .form-label {
-		font-weight: 500;
+		font-weight: var(--font-weight-medium);
 		color: var(--colour-text);
 	}
 
 	.form-group input[type='text'],
 	.form-group input[type='number'] {
-		padding: 10px 12px;
+		padding: var(--space-2) var(--space-3);
 		background: var(--colour-input-bg, var(--colour-bg));
 		border: 1px solid var(--colour-border);
-		border-radius: 6px;
+		border-radius: var(--radius-md);
 		color: var(--colour-text);
-		font-size: 14px;
+		font-size: var(--font-size-base);
 	}
 
 	.form-group input:focus {
@@ -239,27 +239,27 @@
 	}
 
 	.form-group input.error {
-		border-color: var(--colour-error, #e74c3c);
+		border-color: var(--colour-error);
 	}
 
 	.error-message {
-		font-size: 13px;
-		color: var(--colour-error, #e74c3c);
+		font-size: var(--font-size-sm);
+		color: var(--colour-error);
 	}
 
 	.height-buttons {
 		display: flex;
-		gap: 8px;
+		gap: var(--space-2);
 		flex-wrap: wrap;
 	}
 
 	.height-btn {
-		padding: 8px 16px;
-		background: var(--colour-button-bg, #3a3a3a);
+		padding: var(--space-2) var(--space-4);
+		background: var(--colour-button-bg);
 		border: 1px solid var(--colour-border);
-		border-radius: 6px;
+		border-radius: var(--radius-md);
 		color: var(--colour-text);
-		font-size: 14px;
+		font-size: var(--font-size-base);
 		cursor: pointer;
 		transition: all var(--transition-fast);
 	}
@@ -277,23 +277,23 @@
 	.custom-height-input {
 		display: flex;
 		align-items: center;
-		gap: 8px;
-		margin-top: 8px;
+		gap: var(--space-2);
+		margin-top: var(--space-2);
 	}
 
 	.custom-height-input input {
 		width: 80px;
-		padding: 8px 12px;
+		padding: var(--space-2) var(--space-3);
 		background: var(--colour-input-bg, var(--colour-bg));
 		border: 1px solid var(--colour-border);
-		border-radius: 6px;
+		border-radius: var(--radius-md);
 		color: var(--colour-text);
-		font-size: 14px;
+		font-size: var(--font-size-base);
 	}
 
 	.custom-height-input .unit {
 		color: var(--colour-text-muted);
-		font-size: 14px;
+		font-size: var(--font-size-base);
 	}
 
 	.sr-only {
@@ -310,13 +310,13 @@
 
 	.width-options {
 		display: flex;
-		gap: 16px;
+		gap: var(--space-4);
 	}
 
 	.width-option {
 		display: flex;
 		align-items: center;
-		gap: 8px;
+		gap: var(--space-2);
 		cursor: pointer;
 	}
 
@@ -328,29 +328,29 @@
 	}
 
 	.width-label {
-		font-size: 14px;
+		font-size: var(--font-size-base);
 		color: var(--colour-text);
 	}
 
 	.form-actions {
 		display: flex;
 		justify-content: flex-end;
-		gap: 12px;
-		margin-top: 8px;
+		gap: var(--space-3);
+		margin-top: var(--space-2);
 	}
 
 	.btn {
-		padding: 10px 20px;
+		padding: var(--space-2) var(--space-5);
 		border: none;
-		border-radius: 6px;
-		font-size: 14px;
-		font-weight: 500;
+		border-radius: var(--radius-md);
+		font-size: var(--font-size-base);
+		font-weight: var(--font-weight-medium);
 		cursor: pointer;
 		transition: all var(--transition-fast);
 	}
 
 	.btn-secondary {
-		background: var(--colour-button-bg, #3a3a3a);
+		background: var(--colour-button-bg);
 		color: var(--colour-text);
 	}
 
@@ -364,6 +364,6 @@
 	}
 
 	.btn-primary:hover {
-		background: var(--colour-selection-hover, #3a7bbf);
+		background: var(--colour-selection-hover);
 	}
 </style>

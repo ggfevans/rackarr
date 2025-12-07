@@ -166,18 +166,18 @@
 	}
 
 	.search-container {
-		padding: 16px 8px 12px;
-		border-bottom: 1px solid var(--colour-border, #333333);
+		padding: var(--space-4) var(--space-2) var(--space-3);
+		border-bottom: 1px solid var(--colour-border);
 	}
 
 	.search-input {
 		width: 100%;
-		padding: 8px 12px;
-		font-size: 13px;
+		padding: var(--space-2) var(--space-3);
+		font-size: var(--font-size-sm);
 		color: var(--colour-text);
 		background-color: var(--input-bg);
 		border: 1px solid var(--input-border);
-		border-radius: 4px;
+		border-radius: var(--radius-sm);
 		outline: none;
 		transition: border-color 0.15s ease;
 	}
@@ -187,23 +187,23 @@
 	}
 
 	.search-input:focus {
-		border-color: var(--colour-selection, #0066ff);
+		border-color: var(--colour-selection);
 	}
 
 	.device-list {
 		flex: 1;
 		overflow-y: auto;
-		padding: 8px 0;
+		padding: var(--space-2) 0;
 	}
 
 	.category-group {
-		margin-bottom: 8px;
+		margin-bottom: var(--space-2);
 	}
 
 	.category-header {
 		margin: 0;
-		padding: 8px 12px 4px;
-		font-size: 11px;
+		padding: var(--space-2) var(--space-3) 4px;
+		font-size: var(--font-size-xs);
 		font-weight: 600;
 		text-transform: uppercase;
 		letter-spacing: 0.5px;
@@ -220,30 +220,30 @@
 		flex-direction: column;
 		align-items: center;
 		justify-content: center;
-		padding: 24px;
+		padding: var(--space-6);
 		text-align: center;
 	}
 
 	.empty-message {
 		margin: 0;
-		font-size: 14px;
-		color: var(--colour-text, #ffffff);
+		font-size: var(--font-size-base);
+		color: var(--colour-text);
 	}
 
 	.empty-hint {
 		margin: 4px 0 0;
-		font-size: 12px;
+		font-size: var(--font-size-sm);
 		color: var(--colour-text-muted);
 	}
 
 	.actions {
-		padding: 12px;
-		border-top: 1px solid var(--colour-border, #333333);
+		padding: var(--space-3);
+		border-top: 1px solid var(--colour-border);
 	}
 
 	.actions-row {
 		display: flex;
-		gap: 8px;
+		gap: var(--space-2);
 	}
 
 	.import-button,
@@ -251,15 +251,15 @@
 		display: flex;
 		align-items: center;
 		justify-content: center;
-		gap: 6px;
+		gap: var(--space-1-5);
 		flex: 1;
-		padding: 10px 12px;
-		font-size: 13px;
+		padding: 10px var(--space-3);
+		font-size: var(--font-size-sm);
 		font-weight: 500;
 		color: var(--colour-text);
 		background-color: var(--button-bg);
 		border: 1px solid var(--button-border);
-		border-radius: 4px;
+		border-radius: var(--radius-sm);
 		cursor: pointer;
 		transition:
 			background-color 0.15s ease,
@@ -278,13 +278,13 @@
 
 	.import-button:focus,
 	.add-device-button:focus {
-		outline: 2px solid var(--colour-selection, #0066ff);
+		outline: 2px solid var(--colour-selection);
 		outline-offset: 2px;
 	}
 
 	.import-icon,
 	.add-icon {
-		font-size: 14px;
+		font-size: var(--font-size-base);
 		font-weight: bold;
 	}
 </style>

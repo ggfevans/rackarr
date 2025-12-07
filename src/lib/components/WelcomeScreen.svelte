@@ -152,7 +152,7 @@
 
 	.rack-unit-num {
 		fill: var(--rack-text);
-		font-size: 10px;
+		font-size: var(--font-size-2xs);
 		text-anchor: middle;
 		font-family: var(--font-mono, monospace);
 		font-variant-numeric: tabular-nums;

@@ -77,12 +77,12 @@
 	.confirm-dialog {
 		display: flex;
 		flex-direction: column;
-		gap: 20px;
+		gap: var(--space-5);
 	}
 
 	.message {
 		margin: 0;
-		font-size: 14px;
+		font-size: var(--font-size-base);
 		line-height: 1.5;
 		color: var(--colour-text);
 	}
@@ -90,21 +90,21 @@
 	.actions {
 		display: flex;
 		justify-content: flex-end;
-		gap: 12px;
+		gap: var(--space-3);
 	}
 
 	.btn {
-		padding: 10px 20px;
+		padding: var(--space-2) var(--space-5);
 		border: none;
-		border-radius: 6px;
-		font-size: 14px;
-		font-weight: 500;
+		border-radius: var(--radius-md);
+		font-size: var(--font-size-base);
+		font-weight: var(--font-weight-medium);
 		cursor: pointer;
 		transition: all var(--transition-fast);
 	}
 
 	.btn-secondary {
-		background: var(--colour-button-bg, #3a3a3a);
+		background: var(--colour-button-bg);
 		color: var(--colour-text);
 	}
 
@@ -118,16 +118,16 @@
 	}
 
 	.btn-primary:hover {
-		background: var(--colour-selection-hover, #3a7bbf);
+		background: var(--colour-selection-hover);
 	}
 
 	.btn-destructive {
-		background: var(--colour-error, #e74c3c);
+		background: var(--colour-error);
 		color: white;
 	}
 
 	.btn-destructive:hover {
-		background: var(--colour-error-hover, #c0392b);
+		background: var(--colour-error-hover);
 	}
 
 	.btn:focus-visible {

@@ -130,45 +130,45 @@
 	.help-content {
 		display: flex;
 		flex-direction: column;
-		gap: 20px;
+		gap: var(--space-5);
 	}
 
 	.help-section {
 		display: flex;
 		flex-direction: column;
-		gap: 8px;
+		gap: var(--space-2);
 	}
 
 	.help-section h4 {
 		margin: 0;
-		font-size: 14px;
+		font-size: var(--font-size-base);
 		font-weight: 600;
-		color: var(--colour-text, #ffffff);
-		border-bottom: 1px solid var(--colour-border, #404040);
-		padding-bottom: 8px;
+		color: var(--colour-text);
+		border-bottom: 1px solid var(--colour-border);
+		padding-bottom: var(--space-2);
 	}
 
 	.app-header {
 		display: flex;
 		align-items: baseline;
-		gap: 12px;
+		gap: var(--space-3);
 	}
 
 	.app-name {
 		margin: 0;
-		font-size: 24px;
+		font-size: var(--font-size-2xl);
 		font-weight: 700;
-		color: var(--colour-text, #ffffff);
+		color: var(--colour-text);
 	}
 
 	.version {
-		font-size: 14px;
-		color: var(--colour-text-muted, #808080);
+		font-size: var(--font-size-base);
+		color: var(--colour-text-muted);
 	}
 
 	.description {
 		margin: 0;
-		font-size: 14px;
+		font-size: var(--font-size-base);
 		color: var(--colour-text-muted);
 		line-height: 1.5;
 	}
@@ -176,14 +176,14 @@
 	.shortcuts-table {
 		width: 100%;
 		border-collapse: collapse;
-		font-size: 13px;
+		font-size: var(--font-size-sm);
 	}
 
 	.shortcuts-table th,
 	.shortcuts-table td {
-		padding: 8px;
+		padding: var(--space-2);
 		text-align: left;
-		border-bottom: 1px solid var(--colour-border, #404040);
+		border-bottom: 1px solid var(--colour-border);
 	}
 
 	.shortcuts-table th {
@@ -192,24 +192,24 @@
 	}
 
 	.shortcuts-table td {
-		color: var(--colour-text, #ffffff);
+		color: var(--colour-text);
 	}
 
 	.key-cell {
 		font-family: monospace;
-		background: var(--colour-panel, #2d2d2d);
-		border-radius: 3px;
-		padding: 4px 8px !important;
+		background: var(--colour-surface);
+		border-radius: var(--radius-sm);
+		padding: 4px var(--space-2) !important;
 		white-space: nowrap;
 	}
 
 	.features-list {
 		margin: 0;
-		padding: 0 0 0 20px;
+		padding: 0 0 0 var(--space-5);
 		display: flex;
 		flex-direction: column;
 		gap: 4px;
-		font-size: 13px;
+		font-size: var(--font-size-sm);
 		color: var(--colour-text-muted);
 	}
 
@@ -219,13 +219,13 @@
 		list-style: none;
 		display: flex;
 		flex-direction: column;
-		gap: 8px;
+		gap: var(--space-2);
 	}
 
 	.links-list a {
-		color: var(--colour-selection, #0066ff);
+		color: var(--colour-selection);
 		text-decoration: none;
-		font-size: 14px;
+		font-size: var(--font-size-base);
 	}
 
 	.links-list a:hover {
@@ -234,31 +234,31 @@
 
 	.license {
 		margin: 0;
-		font-size: 14px;
+		font-size: var(--font-size-base);
 		color: var(--colour-text-muted);
 	}
 
 	.dialog-actions {
 		display: flex;
 		justify-content: flex-end;
-		margin-top: 20px;
-		padding-top: 16px;
-		border-top: 1px solid var(--colour-border, #404040);
+		margin-top: var(--space-5);
+		padding-top: var(--space-4);
+		border-top: 1px solid var(--colour-border);
 	}
 
 	.btn-primary {
-		padding: 8px 20px;
-		border-radius: 4px;
-		font-size: 14px;
+		padding: var(--space-2) var(--space-5);
+		border-radius: var(--radius-sm);
+		font-size: var(--font-size-base);
 		font-weight: 500;
 		cursor: pointer;
-		background: var(--colour-selection, #0066ff);
+		background: var(--colour-selection);
 		border: none;
-		color: #ffffff;
+		color: var(--neutral-50);
 		transition: background-color 0.15s ease;
 	}
 
 	.btn-primary:hover {
-		background: #0055dd;
+		background: var(--colour-selection-hover);
 	}
 </style>

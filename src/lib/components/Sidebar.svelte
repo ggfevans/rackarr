@@ -30,14 +30,14 @@
 <style>
 	.sidebar {
 		position: fixed;
-		top: var(--toolbar-height, 56px);
+		top: var(--toolbar-height);
 		bottom: 0;
-		width: var(--sidebar-width, 300px);
-		background: var(--colour-sidebar-bg, var(--colour-bg));
+		width: var(--sidebar-width);
+		background: var(--colour-sidebar-bg);
 		border-right: 1px solid var(--colour-border);
 		display: flex;
 		flex-direction: column;
-		z-index: var(--z-sidebar, 10);
+		z-index: var(--z-sidebar);
 	}
 
 	.sidebar-left {
@@ -53,14 +53,14 @@
 	}
 
 	.sidebar-header {
-		padding: 16px;
+		padding: var(--space-4);
 		border-bottom: 1px solid var(--colour-border);
 		flex-shrink: 0;
 	}
 
 	.sidebar-title {
 		margin: 0;
-		font-size: 16px;
+		font-size: var(--font-size-md);
 		font-weight: 600;
 		color: var(--colour-text);
 	}

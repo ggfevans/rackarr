@@ -95,8 +95,8 @@
 		position: absolute;
 		z-index: var(--z-tooltip, 1000);
 		padding: var(--space-1) var(--space-2);
-		background-color: var(--colour-surface-overlay, #1a1a1a);
-		color: var(--colour-text-inverse, #ffffff);
+		background-color: var(--colour-surface-overlay);
+		color: var(--colour-text-inverse);
 		font-size: var(--font-size-xs);
 		border-radius: var(--radius-sm);
 		white-space: nowrap;
@@ -155,7 +155,7 @@
 	.tooltip-shortcut {
 		padding: 1px 4px;
 		background-color: rgba(255, 255, 255, 0.15);
-		border-radius: var(--radius-xs, 2px);
+		border-radius: 2px;
 		font-size: var(--font-size-xs);
 		font-family: var(--font-mono, monospace);
 		color: var(--colour-text-muted-inverse, rgba(255, 255, 255, 0.7));

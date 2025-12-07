@@ -129,39 +129,39 @@
 	.export-form {
 		display: flex;
 		flex-direction: column;
-		gap: 16px;
-		padding: 8px 0;
+		gap: var(--space-4);
+		padding: var(--space-2) 0;
 	}
 
 	.form-group {
 		display: flex;
 		flex-direction: column;
-		gap: 6px;
+		gap: var(--space-1-5);
 	}
 
 	.form-group label {
-		font-size: 14px;
-		font-weight: 500;
-		color: var(--colour-text, #ffffff);
+		font-size: var(--font-size-base);
+		font-weight: var(--font-weight-medium);
+		color: var(--colour-text);
 	}
 
 	.form-group select {
-		padding: 8px 12px;
-		border: 1px solid var(--colour-border, #404040);
-		border-radius: 4px;
-		background: var(--colour-panel, #2d2d2d);
-		color: var(--colour-text, #ffffff);
-		font-size: 14px;
+		padding: var(--space-2) var(--space-3);
+		border: 1px solid var(--colour-border);
+		border-radius: var(--radius-sm);
+		background: var(--input-bg);
+		color: var(--colour-text);
+		font-size: var(--font-size-base);
 		cursor: pointer;
 	}
 
 	.form-group select:focus {
-		outline: 2px solid var(--colour-selection, #0066ff);
+		outline: 2px solid var(--colour-selection);
 		outline-offset: 1px;
 	}
 
 	.form-group select option:disabled {
-		color: var(--colour-text-muted, #808080);
+		color: var(--colour-text-muted);
 	}
 
 	.checkbox-group {
@@ -172,15 +172,15 @@
 	.checkbox-group label {
 		display: flex;
 		align-items: center;
-		gap: 8px;
+		gap: var(--space-2);
 		cursor: pointer;
-		font-weight: 400;
+		font-weight: var(--font-weight-normal);
 	}
 
 	.checkbox-group input[type='checkbox'] {
-		width: 16px;
-		height: 16px;
-		accent-color: var(--colour-selection, #0066ff);
+		width: var(--space-4);
+		height: var(--space-4);
+		accent-color: var(--colour-selection);
 		cursor: pointer;
 	}
 
@@ -192,42 +192,42 @@
 	.dialog-actions {
 		display: flex;
 		justify-content: flex-end;
-		gap: 12px;
-		margin-top: 24px;
-		padding-top: 16px;
-		border-top: 1px solid var(--colour-border, #404040);
+		gap: var(--space-3);
+		margin-top: var(--space-6);
+		padding-top: var(--space-4);
+		border-top: 1px solid var(--colour-border);
 	}
 
 	.btn-secondary,
 	.btn-primary {
-		padding: 8px 16px;
-		border-radius: 4px;
-		font-size: 14px;
-		font-weight: 500;
+		padding: var(--space-2) var(--space-4);
+		border-radius: var(--radius-sm);
+		font-size: var(--font-size-base);
+		font-weight: var(--font-weight-medium);
 		cursor: pointer;
 		transition:
-			background-color 0.15s ease,
-			opacity 0.15s ease;
+			background-color var(--duration-fast) ease,
+			opacity var(--duration-fast) ease;
 	}
 
 	.btn-secondary {
 		background: transparent;
-		border: 1px solid var(--colour-border, #404040);
-		color: var(--colour-text, #ffffff);
+		border: 1px solid var(--colour-border);
+		color: var(--colour-text);
 	}
 
 	.btn-secondary:hover {
-		background: var(--colour-hover, #3d3d3d);
+		background: var(--colour-surface-hover);
 	}
 
 	.btn-primary {
-		background: var(--colour-selection, #0066ff);
+		background: var(--colour-selection);
 		border: none;
-		color: #ffffff;
+		color: var(--neutral-50);
 	}
 
 	.btn-primary:hover:not(:disabled) {
-		background: #0055dd;
+		background: var(--colour-selection-hover);
 	}
 
 	.btn-primary:disabled {

@@ -330,7 +330,7 @@
 	.toolbar-action-btn.primary {
 		background: var(--colour-selection);
 		border-color: var(--colour-selection);
-		color: var(--colour-text-on-primary, #ffffff);
+		color: var(--colour-text-on-primary);
 	}
 
 	.toolbar-action-btn.primary:hover:not(:disabled) {

@@ -156,26 +156,26 @@
 		display: inline-flex;
 		flex-direction: column;
 		align-items: center;
-		gap: var(--spacing-sm, 8px);
-		padding: var(--spacing-md, 12px);
-		border-radius: var(--radius-md, 8px);
+		gap: var(--space-2);
+		padding: var(--space-3);
+		border-radius: var(--radius-md);
 		background: transparent;
 		cursor: inherit;
 	}
 
 	.rack-dual-view:focus {
-		outline: 2px solid var(--colour-selection, #0066ff);
+		outline: 2px solid var(--colour-selection);
 		outline-offset: 2px;
 	}
 
 	.rack-dual-view[aria-selected='true'],
 	.rack-dual-view.selected {
-		outline: 2px solid var(--colour-selection, #0066ff);
+		outline: 2px solid var(--colour-selection);
 		outline-offset: 4px;
 	}
 
 	.rack-dual-view-name {
-		font-size: 20px;
+		font-size: var(--font-size-xl);
 		font-weight: 500;
 		color: var(--colour-text);
 		font-family: var(--font-family, system-ui, sans-serif);

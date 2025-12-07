@@ -140,7 +140,7 @@
 
 	.device-height {
 		background-color: var(--colour-surface-raised);
-		padding: 2px 8px;
+		padding: 2px var(--space-2);
 		border-radius: var(--radius-full);
 		font-size: var(--font-size-xs);
 		font-weight: var(--font-weight-medium);

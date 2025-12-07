@@ -18,6 +18,10 @@ describe('Design Token System', () => {
 				expect(tokensCSS).toContain(`--space-${n}:`);
 			});
 		});
+
+		it('defines half-step spacing token for 6px gap', () => {
+			expect(tokensCSS).toContain('--space-1-5:');
+		});
 	});
 
 	describe('Primitives - Colors', () => {
@@ -44,7 +48,7 @@ describe('Design Token System', () => {
 
 	describe('Primitives - Typography', () => {
 		it('defines font size scale', () => {
-			const sizes = ['xs', 'sm', 'base', 'md', 'lg', 'xl'];
+			const sizes = ['2xs', 'xs', 'sm', 'base', 'md', 'lg', 'xl', '2xl'];
 			sizes.forEach((size) => {
 				expect(tokensCSS).toContain(`--font-size-${size}:`);
 			});

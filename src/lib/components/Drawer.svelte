@@ -43,10 +43,10 @@
 <style>
 	.drawer {
 		position: fixed;
-		top: var(--toolbar-height, 52px);
+		top: var(--toolbar-height);
 		bottom: 0;
-		width: var(--drawer-width, 300px);
-		background: var(--drawer-bg, var(--colour-bg));
+		width: var(--drawer-width);
+		background: var(--drawer-bg);
 		border: 1px solid var(--colour-border);
 		display: flex;
 		flex-direction: column;
@@ -77,6 +77,6 @@
 	.drawer-content {
 		flex: 1;
 		overflow-y: auto;
-		padding: 16px;
+		padding: var(--space-4);
 	}
 </style>

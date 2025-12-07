@@ -97,13 +97,13 @@
 	.image-upload {
 		display: flex;
 		flex-direction: column;
-		gap: 8px;
+		gap: var(--space-2);
 	}
 
 	.image-upload-label {
 		font-weight: 500;
 		color: var(--colour-text);
-		font-size: 14px;
+		font-size: var(--font-size-base);
 	}
 
 	/* Visually hidden but accessible */
@@ -122,7 +122,7 @@
 	.image-preview {
 		display: flex;
 		align-items: center;
-		gap: 12px;
+		gap: var(--space-3);
 	}
 
 	.preview-image {
@@ -130,15 +130,15 @@
 		height: 60px;
 		object-fit: contain;
 		border: 1px solid var(--colour-border);
-		border-radius: 4px;
-		background: var(--colour-bg-secondary, #1a1a1a);
+		border-radius: var(--radius-sm);
+		background: var(--colour-bg-secondary);
 	}
 
 	.btn {
-		padding: 8px 16px;
+		padding: var(--space-2) var(--space-4);
 		border: none;
-		border-radius: 6px;
-		font-size: 13px;
+		border-radius: var(--radius-md);
+		font-size: var(--font-size-sm);
 		font-weight: 500;
 		cursor: pointer;
 		transition: all var(--transition-fast);
@@ -155,8 +155,8 @@
 
 	.btn-remove {
 		background: transparent;
-		color: var(--colour-error, #e74c3c);
-		border: 1px solid var(--colour-error, #e74c3c);
+		color: var(--colour-error);
+		border: 1px solid var(--colour-error);
 	}
 
 	.btn-remove:hover {
@@ -169,7 +169,7 @@
 	}
 
 	.error-message {
-		font-size: 13px;
-		color: var(--colour-error, #e74c3c);
+		font-size: var(--font-size-sm);
+		color: var(--colour-error);
 	}
 </style>

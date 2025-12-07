@@ -551,12 +551,12 @@
 	}
 
 	.rack-container:focus {
-		outline: 2px solid var(--colour-selection, #0066ff);
+		outline: 2px solid var(--colour-selection);
 		outline-offset: 2px;
 	}
 
 	.rack-container[aria-selected='true'] {
-		outline: 2px solid var(--colour-selection, #0066ff);
+		outline: 2px solid var(--colour-selection);
 		outline-offset: 2px;
 	}
 
@@ -610,7 +610,7 @@
 
 	.u-label {
 		fill: var(--rack-text);
-		font-size: 10px;
+		font-size: var(--font-size-2xs);
 		text-anchor: middle;
 		font-family: var(--font-mono, monospace);
 		font-variant-numeric: tabular-nums;
@@ -628,7 +628,7 @@
 
 	.rack-name {
 		fill: var(--colour-text);
-		font-size: 15px;
+		font-size: var(--font-size-base);
 		font-weight: 500;
 		text-anchor: middle;
 		font-family: var(--font-family, system-ui, sans-serif);
@@ -636,7 +636,7 @@
 
 	.rack-view-label {
 		fill: var(--colour-text-muted);
-		font-size: 11px;
+		font-size: var(--font-size-xs);
 		font-weight: 500;
 		text-transform: uppercase;
 		letter-spacing: 0.05em;

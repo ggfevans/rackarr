@@ -263,6 +263,6 @@
 		/* Single-rack mode: positioned at origin, panzoom controls viewport centering (v0.1.1) */
 		/* Note: fitAll() in canvas store handles centering via pan calculations */
 		display: inline-block;
-		padding: 16px;
+		padding: var(--space-4);
 	}
 </style>

@@ -1,9 +1,15 @@
 # CLAUDE.md — Rackarr
 
 **Project:** Rackarr — Rack Layout Designer for Homelabbers
-**Version:** 0.4.0
+**Version:** 0.4.1
 
 ---
+
+## v0.4.1 Changes
+
+- **Design token audit**: replaced hardcoded CSS values with design tokens throughout all components
+- Added new tokens: `--space-1-5` (6px), `--font-size-2xs` (10px), `--font-size-2xl` (24px)
+- Improved theme consistency and maintainability
 
 ## v0.4.0 Changes (BREAKING)
 

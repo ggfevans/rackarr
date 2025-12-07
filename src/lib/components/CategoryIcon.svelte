@@ -50,13 +50,13 @@
 		<rect x="2" y="2" width="12" height="3" rx="0.5" />
 		<rect x="2" y="6" width="12" height="3" rx="0.5" />
 		<rect x="2" y="10" width="12" height="3" rx="0.5" />
-		<circle cx="12" cy="3.5" r="0.75" fill="var(--colour-bg, #1a1a1a)" />
-		<circle cx="12" cy="7.5" r="0.75" fill="var(--colour-bg, #1a1a1a)" />
-		<circle cx="12" cy="11.5" r="0.75" fill="var(--colour-bg, #1a1a1a)" />
+		<circle cx="12" cy="3.5" r="0.75" fill="var(--neutral-950)" />
+		<circle cx="12" cy="7.5" r="0.75" fill="var(--neutral-950)" />
+		<circle cx="12" cy="11.5" r="0.75" fill="var(--neutral-950)" />
 	{:else if category === 'kvm'}
 		<!-- KVM: Monitor with keyboard -->
 		<rect x="3" y="2" width="10" height="7" rx="0.5" />
-		<rect x="4" y="3" width="8" height="5" fill="var(--colour-bg, #1a1a1a)" />
+		<rect x="4" y="3" width="8" height="5" fill="var(--neutral-950)" />
 		<rect x="2" y="11" width="12" height="3" rx="0.5" />
 	{:else if category === 'av-media'}
 		<!-- AV/Media: Speaker/wave -->

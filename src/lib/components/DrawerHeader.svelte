@@ -39,13 +39,13 @@
 		display: flex;
 		align-items: center;
 		justify-content: space-between;
-		padding: 12px 16px;
+		padding: var(--space-3) var(--space-4);
 		border-bottom: 1px solid var(--colour-border);
 		flex-shrink: 0;
 	}
 
 	.drawer-title {
-		font-size: 16px;
+		font-size: var(--font-size-md);
 		font-weight: 600;
 		margin: 0;
 		color: var(--colour-text);
@@ -57,7 +57,7 @@
 		justify-content: center;
 		width: 32px;
 		height: 32px;
-		border-radius: 6px;
+		border-radius: var(--radius-md);
 		background: transparent;
 		color: var(--colour-text-muted);
 		transition:

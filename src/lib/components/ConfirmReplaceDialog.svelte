@@ -40,13 +40,13 @@
 
 	.actions {
 		display: flex;
-		gap: 12px;
+		gap: var(--space-3);
 		justify-content: flex-end;
 	}
 
 	.btn {
-		padding: 8px 16px;
-		border-radius: 6px;
+		padding: var(--space-2) var(--space-4);
+		border-radius: var(--radius-md);
 		font-size: 0.875rem;
 		font-weight: 500;
 		cursor: pointer;
@@ -64,7 +64,7 @@
 	}
 
 	.btn-destructive {
-		background: var(--colour-error, #dc3545);
+		background: var(--colour-error);
 		color: white;
 	}
 

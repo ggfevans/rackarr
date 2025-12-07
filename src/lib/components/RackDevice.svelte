@@ -235,7 +235,7 @@
 	}
 
 	.rack-device:focus-within .device-rect {
-		stroke: var(--colour-selection, #0066ff);
+		stroke: var(--colour-selection);
 		stroke-width: 2;
 	}
 
@@ -247,13 +247,13 @@
 
 	.device-selection {
 		fill: none;
-		stroke: var(--colour-selection, #0066ff);
+		stroke: var(--colour-selection);
 		stroke-width: 2;
 		pointer-events: none;
 	}
 
 	.device-name {
-		fill: #ffffff;
+		fill: var(--neutral-50);
 		font-size: var(--font-size-device, 13px);
 		font-family: var(--font-family, system-ui, sans-serif);
 		font-weight: 500;
@@ -312,7 +312,7 @@
 		font-size: var(--font-size-device, 12px);
 		font-family: var(--font-family, system-ui, sans-serif);
 		font-weight: 500;
-		color: #ffffff;
+		color: var(--neutral-50);
 		text-shadow:
 			0 1px 2px rgba(0, 0, 0, 0.8),
 			0 0 4px rgba(0, 0, 0, 0.5);

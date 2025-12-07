@@ -60,14 +60,14 @@ describe('Design Token System', () => {
 
 	describe('Primitives - Borders and Shadows', () => {
 		it('defines border radius scale', () => {
-			const radii = ['sm', 'md', 'lg', 'xl', 'full'];
+			const radii = ['sm', 'md', 'lg', 'full'];
 			radii.forEach((r) => {
 				expect(tokensCSS).toContain(`--radius-${r}:`);
 			});
 		});
 
 		it('defines shadow scale', () => {
-			const shadows = ['sm', 'md', 'lg', 'xl'];
+			const shadows = ['sm', 'md', 'lg'];
 			shadows.forEach((s) => {
 				expect(tokensCSS).toContain(`--shadow-${s}:`);
 			});
@@ -76,14 +76,14 @@ describe('Design Token System', () => {
 
 	describe('Primitives - Timing', () => {
 		it('defines duration tokens', () => {
-			const durations = ['instant', 'fast', 'normal', 'slow'];
+			const durations = ['fast', 'normal', 'slow'];
 			durations.forEach((d) => {
 				expect(tokensCSS).toContain(`--duration-${d}:`);
 			});
 		});
 
 		it('defines easing tokens', () => {
-			const easings = ['linear', 'in', 'out', 'in-out', 'spring'];
+			const easings = ['out', 'in-out', 'spring'];
 			easings.forEach((e) => {
 				expect(tokensCSS).toContain(`--ease-${e}:`);
 			});

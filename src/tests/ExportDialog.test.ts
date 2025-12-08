@@ -163,7 +163,8 @@ describe('ExportDialog', () => {
 				includeNames: true,
 				includeLegend: false,
 				background: 'dark',
-				exportView: 'both'
+				exportView: 'both',
+				airflowMode: false
 			});
 		});
 
@@ -200,7 +201,8 @@ describe('ExportDialog', () => {
 				includeNames: true,
 				includeLegend: true,
 				background: 'transparent',
-				exportView: 'both'
+				exportView: 'both',
+				airflowMode: false
 			});
 		});
 	});

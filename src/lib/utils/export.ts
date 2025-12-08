@@ -8,7 +8,8 @@ import type {
 	ExportOptions,
 	ExportFormat,
 	DeviceCategory,
-	ExportBackground
+	ExportBackground,
+	Airflow
 } from '$lib/types';
 import type { ImageStoreMap } from '$lib/types/images';
 import { jsPDF } from 'jspdf';
@@ -34,6 +35,11 @@ const DARK_TEXT = '#ffffff';
 const LIGHT_TEXT = '#1a1a1a';
 const DARK_GRID = '#505050';
 const LIGHT_GRID = '#a0a0a0';
+
+// Airflow colours
+const AIRFLOW_INTAKE = '#60a5fa'; // blue-400
+const AIRFLOW_EXHAUST = '#f87171'; // red-400
+const AIRFLOW_PASSIVE = '#9ca3af'; // neutral-400
 
 /**
  * Filter devices by face for export
@@ -304,6 +310,107 @@ function createCategoryIconElements(
 }
 
 /**
+ * Create SVG elements for an airflow indicator
+ * @param airflow - Airflow direction
+ * @param faceFilter - Current view (front or rear)
+ * @param width - Width of the indicator area
+ * @param height - Height of the indicator area
+ * @returns SVG group element containing the airflow indicator
+ */
+function createAirflowIndicator(
+	airflow: Airflow,
+	faceFilter: 'front' | 'rear',
+	width: number,
+	height: number
+): SVGGElement {
+	const ns = 'http://www.w3.org/2000/svg';
+	const group = document.createElementNS(ns, 'g');
+	group.setAttribute('class', 'airflow-indicator');
+
+	// Determine color based on airflow direction and view
+	let color = AIRFLOW_PASSIVE;
+	if (airflow === 'front-to-rear') {
+		color = faceFilter === 'front' ? AIRFLOW_INTAKE : AIRFLOW_EXHAUST;
+	} else if (airflow === 'rear-to-front') {
+		color = faceFilter === 'rear' ? AIRFLOW_INTAKE : AIRFLOW_EXHAUST;
+	} else if (airflow === 'side-to-rear') {
+		color = faceFilter === 'front' ? AIRFLOW_INTAKE : AIRFLOW_EXHAUST;
+	}
+	// lateral flows use passive color
+
+	// Determine arrow direction
+	let arrowDirection: 'none' | 'right' | 'left' | 'corner' = 'none';
+	if (airflow === 'passive') {
+		arrowDirection = 'none';
+	} else if (airflow === 'front-to-rear' || airflow === 'left-to-right') {
+		arrowDirection = 'right';
+	} else if (airflow === 'rear-to-front' || airflow === 'right-to-left') {
+		arrowDirection = 'left';
+	} else if (airflow === 'side-to-rear') {
+		arrowDirection = faceFilter === 'front' ? 'corner' : 'right';
+	}
+
+	if (arrowDirection === 'none') {
+		// Passive: hollow circle
+		const circle = document.createElementNS(ns, 'circle');
+		circle.setAttribute('cx', String(width / 2));
+		circle.setAttribute('cy', String(height / 2));
+		circle.setAttribute('r', String(Math.min(width, height) / 4));
+		circle.setAttribute('stroke', color);
+		circle.setAttribute('stroke-width', '2');
+		circle.setAttribute('fill', 'none');
+		circle.setAttribute('opacity', '0.6');
+		group.appendChild(circle);
+	} else if (arrowDirection === 'corner') {
+		// Side-to-rear corner indicator
+		const path = document.createElementNS(ns, 'path');
+		path.setAttribute(
+			'd',
+			`M ${width * 0.2} ${height * 0.3} L ${width * 0.5} ${height * 0.7} L ${width * 0.8} ${height * 0.5}`
+		);
+		path.setAttribute('stroke', color);
+		path.setAttribute('stroke-width', '2');
+		path.setAttribute('stroke-linecap', 'round');
+		path.setAttribute('stroke-linejoin', 'round');
+		path.setAttribute('fill', 'none');
+		path.setAttribute('stroke-dasharray', '4 4');
+		group.appendChild(path);
+	} else {
+		// Horizontal arrows (right or left)
+		const isRight = arrowDirection === 'right';
+		const arrows = isRight
+			? [
+					// Right-pointing arrows
+					`M ${width * 0.15} ${height * 0.5} L ${width * 0.35} ${height * 0.5}`,
+					`M ${width * 0.3} ${height * 0.35} L ${width * 0.4} ${height * 0.5} L ${width * 0.3} ${height * 0.65}`,
+					`M ${width * 0.45} ${height * 0.5} L ${width * 0.65} ${height * 0.5}`,
+					`M ${width * 0.6} ${height * 0.35} L ${width * 0.7} ${height * 0.5} L ${width * 0.6} ${height * 0.65}`
+				]
+			: [
+					// Left-pointing arrows
+					`M ${width * 0.85} ${height * 0.5} L ${width * 0.65} ${height * 0.5}`,
+					`M ${width * 0.7} ${height * 0.35} L ${width * 0.6} ${height * 0.5} L ${width * 0.7} ${height * 0.65}`,
+					`M ${width * 0.55} ${height * 0.5} L ${width * 0.35} ${height * 0.5}`,
+					`M ${width * 0.4} ${height * 0.35} L ${width * 0.3} ${height * 0.5} L ${width * 0.4} ${height * 0.65}`
+				];
+
+		for (const d of arrows) {
+			const path = document.createElementNS(ns, 'path');
+			path.setAttribute('d', d);
+			path.setAttribute('stroke', color);
+			path.setAttribute('stroke-width', '2');
+			path.setAttribute('stroke-linecap', 'round');
+			path.setAttribute('stroke-linejoin', 'round');
+			path.setAttribute('fill', 'none');
+			path.setAttribute('stroke-dasharray', '4 4');
+			group.appendChild(path);
+		}
+	}
+
+	return group;
+}
+
+/**
  * Generate an SVG element for export
  * @param racks - Racks to export
  * @param deviceLibrary - Device library for device definitions
@@ -316,7 +423,14 @@ export function generateExportSVG(
 	options: ExportOptions,
 	images?: ImageStoreMap
 ): SVGElement {
-	const { includeNames, includeLegend, background, exportView, displayMode = 'label' } = options;
+	const {
+		includeNames,
+		includeLegend,
+		background,
+		exportView,
+		displayMode = 'label',
+		airflowMode = false
+	} = options;
 
 	// Determine if we're doing dual-view export
 	const isDualView = exportView === 'both';
@@ -592,6 +706,18 @@ export function generateExportSVG(
 			}
 			deviceName.textContent = placedDevice.name || device.name;
 			rackGroup.appendChild(deviceName);
+
+			// Airflow indicator (if airflowMode is enabled and device has airflow)
+			if (airflowMode && device.airflow) {
+				const indicatorGroup = createAirflowIndicator(
+					device.airflow,
+					faceFilter || 'front',
+					deviceWidth,
+					deviceHeight
+				);
+				indicatorGroup.setAttribute('transform', `translate(${RAIL_WIDTH + 2}, ${deviceY + 1})`);
+				rackGroup.appendChild(indicatorGroup);
+			}
 		}
 
 		// View label (FRONT/REAR) for dual-view export

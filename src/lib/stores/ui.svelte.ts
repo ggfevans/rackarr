@@ -26,6 +26,7 @@ let leftDrawerOpen = $state(false);
 let rightDrawerOpen = $state(false);
 let displayMode = $state<DisplayMode>('label');
 let showLabelsOnImages = $state(false);
+let airflowMode = $state(false);
 
 // Derived values (using $derived rune)
 const canZoomIn = $derived(zoom < ZOOM_MAX);
@@ -45,6 +46,7 @@ export function resetUIStore(): void {
 	rightDrawerOpen = false;
 	displayMode = 'label';
 	showLabelsOnImages = false;
+	airflowMode = false;
 	applyThemeToDocument(theme);
 }
 
@@ -89,6 +91,11 @@ export function getUIStore() {
 			return showLabelsOnImages;
 		},
 
+		// Airflow mode state getter
+		get airflowMode() {
+			return airflowMode;
+		},
+
 		// Theme actions
 		toggleTheme,
 		setTheme,
@@ -111,7 +118,11 @@ export function getUIStore() {
 		toggleDisplayMode,
 		setDisplayMode,
 		toggleShowLabelsOnImages,
-		setShowLabelsOnImages
+		setShowLabelsOnImages,
+
+		// Airflow mode actions
+		toggleAirflowMode,
+		setAirflowMode
 	};
 }
 
@@ -238,4 +249,19 @@ function toggleShowLabelsOnImages(): void {
  */
 function setShowLabelsOnImages(value: boolean): void {
 	showLabelsOnImages = value;
+}
+
+/**
+ * Toggle airflow visualization mode
+ */
+function toggleAirflowMode(): void {
+	airflowMode = !airflowMode;
+}
+
+/**
+ * Set airflow visualization mode
+ * @param value - Boolean value to set
+ */
+function setAirflowMode(value: boolean): void {
+	airflowMode = value;
 }

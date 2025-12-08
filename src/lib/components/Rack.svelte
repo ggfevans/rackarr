@@ -25,6 +25,7 @@
 		selectedDeviceId?: string | null;
 		displayMode?: DisplayMode;
 		showLabelsOnImages?: boolean;
+		airflowMode?: boolean;
 		/** Filter devices by face - when set, overrides rack.view for filtering */
 		faceFilter?: 'front' | 'rear';
 		/** Label to show above the rack (e.g., "FRONT" or "REAR") */
@@ -56,6 +57,7 @@
 		selectedDeviceId = null,
 		displayMode = 'label',
 		showLabelsOnImages = false,
+		airflowMode = false,
 		faceFilter,
 		viewLabel,
 		hideRackName = false,
@@ -489,6 +491,7 @@
 						{displayMode}
 						rackView={effectiveFaceFilter}
 						{showLabelsOnImages}
+						{airflowMode}
 						placedDeviceName={placedDevice.name}
 						onselect={ondeviceselect}
 						ondragstart={() => handleDeviceDragStart(deviceIndex)}

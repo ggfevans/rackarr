@@ -172,6 +172,33 @@ describe('Toolbar Component', () => {
 		});
 	});
 
+	describe('Airflow Mode Toggle', () => {
+		it('has airflow toggle button', () => {
+			render(Toolbar);
+			expect(screen.getByRole('button', { name: /airflow/i })).toBeInTheDocument();
+		});
+
+		it('shows inactive state when airflowMode is false', () => {
+			render(Toolbar, { props: { airflowMode: false } });
+			const btn = screen.getByRole('button', { name: /airflow/i });
+			expect(btn).not.toHaveAttribute('aria-pressed', 'true');
+		});
+
+		it('shows active state when airflowMode is true', () => {
+			render(Toolbar, { props: { airflowMode: true } });
+			const btn = screen.getByRole('button', { name: /airflow/i });
+			expect(btn).toHaveAttribute('aria-pressed', 'true');
+		});
+
+		it('dispatches toggleAirflowMode event when clicked', async () => {
+			const onToggleAirflowMode = vi.fn();
+			render(Toolbar, { props: { ontoggleairflowmode: onToggleAirflowMode } });
+
+			await fireEvent.click(screen.getByRole('button', { name: /airflow/i }));
+			expect(onToggleAirflowMode).toHaveBeenCalledTimes(1);
+		});
+	});
+
 	describe('New Rack CTA state', () => {
 		it('New Rack button is primary (blue) when no racks', () => {
 			const { container } = render(Toolbar, { props: { hasRacks: false } });

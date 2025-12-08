@@ -48,6 +48,7 @@
 
 	/* Color Palette - Red (Error) */
 	--red-50: #fef2f2;
+	--red-400: #f87171;
 	--red-500: #ef4444;
 	--red-600: #dc2626;
 	--red-700: #b91c1c;
@@ -151,6 +152,12 @@
 	--colour-dnd-invalid: var(--red-500);
 	--colour-dnd-invalid-bg: rgba(239, 68, 68, 0.1);
 	--colour-dnd-dragging: var(--blue-500);
+
+	/* Airflow Visualization */
+	--colour-airflow-intake: var(--blue-400);
+	--colour-airflow-exhaust: var(--red-400);
+	--colour-airflow-passive: var(--neutral-400);
+	--colour-airflow-conflict: var(--amber-500);
 }
 
 /* ============================================================
@@ -266,6 +273,12 @@
 	--colour-dnd-invalid: var(--red-600);
 	--colour-dnd-invalid-bg: rgba(220, 38, 38, 0.1);
 	--colour-dnd-dragging: var(--blue-600);
+
+	/* Airflow Visualization */
+	--colour-airflow-intake: var(--blue-500);
+	--colour-airflow-exhaust: var(--red-500);
+	--colour-airflow-passive: var(--neutral-500);
+	--colour-airflow-conflict: var(--amber-600);
 
 	/* Component Overrides */
 	/* NOTE: Rack tokens intentionally NOT overridden - racks stay dark in all themes */

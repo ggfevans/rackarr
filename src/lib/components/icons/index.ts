@@ -15,3 +15,4 @@ export { default as IconLogo } from './IconLogo.svelte';
 export { default as IconUndo } from './IconUndo.svelte';
 export { default as IconRedo } from './IconRedo.svelte';
 export { default as IconMenu } from './IconMenu.svelte';
+export { default as IconWind } from './IconWind.svelte';

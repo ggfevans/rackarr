@@ -382,4 +382,24 @@ describe('KeyboardHandler Component', () => {
 			expect(onToggleDisplayMode).toHaveBeenCalledTimes(1);
 		});
 	});
+
+	describe('Airflow Mode Toggle', () => {
+		it('A key toggles airflow mode', async () => {
+			const onToggleAirflowMode = vi.fn();
+			render(KeyboardHandler, { props: { ontoggleairflowmode: onToggleAirflowMode } });
+
+			await fireEvent.keyDown(window, { key: 'a' });
+
+			expect(onToggleAirflowMode).toHaveBeenCalledTimes(1);
+		});
+
+		it('A key is case insensitive', async () => {
+			const onToggleAirflowMode = vi.fn();
+			render(KeyboardHandler, { props: { ontoggleairflowmode: onToggleAirflowMode } });
+
+			await fireEvent.keyDown(window, { key: 'A' });
+
+			expect(onToggleAirflowMode).toHaveBeenCalledTimes(1);
+		});
+	});
 });

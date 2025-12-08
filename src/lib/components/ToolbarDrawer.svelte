@@ -14,13 +14,15 @@
 		IconLabel,
 		IconImage,
 		IconUndo,
-		IconRedo
+		IconRedo,
+		IconWind
 	} from './icons';
 	import type { DisplayMode } from '$lib/types';
 
 	interface Props {
 		open?: boolean;
 		displayMode?: DisplayMode;
+		airflowMode?: boolean;
 		canUndo?: boolean;
 		canRedo?: boolean;
 		hasSelection?: boolean;
@@ -34,6 +36,7 @@
 		ondelete?: () => void;
 		onfitall?: () => void;
 		ontoggledisplaymode?: () => void;
+		ontoggleairflowmode?: () => void;
 		onhelp?: () => void;
 		onundo?: () => void;
 		onredo?: () => void;
@@ -42,6 +45,7 @@
 	let {
 		open = false,
 		displayMode = 'label',
+		airflowMode = false,
 		canUndo = false,
 		canRedo = false,
 		hasSelection = false,
@@ -55,6 +59,7 @@
 		ondelete,
 		onfitall,
 		ontoggledisplaymode,
+		ontoggleairflowmode,
 		onhelp,
 		onundo,
 		onredo
@@ -196,6 +201,17 @@
 				<span>{displayModeLabel}</span>
 				<kbd class="drawer-shortcut">I</kbd>
 			</button>
+			<button
+				class="drawer-item"
+				class:active={airflowMode}
+				aria-label="Toggle Airflow View"
+				aria-pressed={airflowMode}
+				onclick={() => handleAction(ontoggleairflowmode)}
+			>
+				<IconWind size={18} />
+				<span>Airflow {airflowMode ? 'On' : 'Off'}</span>
+				<kbd class="drawer-shortcut">A</kbd>
+			</button>
 			<button class="drawer-item" aria-label="Reset View" onclick={() => handleAction(onfitall)}>
 				<IconFitAll size={18} />
 				<span>Reset View</span>
@@ -303,6 +319,11 @@
 	.drawer-item:disabled {
 		opacity: 0.5;
 		cursor: not-allowed;
+	}
+
+	.drawer-item.active {
+		background: var(--colour-surface-active);
+		color: var(--colour-selection);
 	}
 
 	.drawer-item span {

@@ -296,6 +296,10 @@
 		layoutStore.updateShowLabelsOnImages(uiStore.showLabelsOnImages);
 	}
 
+	function handleToggleAirflowMode() {
+		uiStore.toggleAirflowMode();
+	}
+
 	function handleHelp() {
 		helpPanelOpen = true;
 	}
@@ -365,6 +369,7 @@
 		theme={uiStore.theme}
 		displayMode={uiStore.displayMode}
 		showLabelsOnImages={uiStore.showLabelsOnImages}
+		airflowMode={uiStore.airflowMode}
 		onnewrack={handleNewRack}
 		onsave={handleSave}
 		onload={handleLoad}
@@ -374,6 +379,7 @@
 		ontoggletheme={handleToggleTheme}
 		ontoggledisplaymode={handleToggleDisplayMode}
 		ontoggleshowlabelsonimages={handleToggleShowLabelsOnImages}
+		ontoggleairflowmode={handleToggleAirflowMode}
 		onhelp={handleHelp}
 	/>
 

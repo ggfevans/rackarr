@@ -17,10 +17,19 @@
 		onfitall?: () => void;
 		onhelp?: () => void;
 		ontoggledisplaymode?: () => void;
+		ontoggleairflowmode?: () => void;
 	}
 
-	let { onsave, onload, onexport, ondelete, onfitall, onhelp, ontoggledisplaymode }: Props =
-		$props();
+	let {
+		onsave,
+		onload,
+		onexport,
+		ondelete,
+		onfitall,
+		onhelp,
+		ontoggledisplaymode,
+		ontoggleairflowmode
+	}: Props = $props();
 
 	const layoutStore = getLayoutStore();
 	const selectionStore = getSelectionStore();
@@ -200,6 +209,12 @@
 			{
 				key: 'i',
 				action: () => ontoggledisplaymode?.()
+			},
+
+			// A - toggle airflow visualization mode
+			{
+				key: 'a',
+				action: () => ontoggleairflowmode?.()
 			}
 		];
 	}

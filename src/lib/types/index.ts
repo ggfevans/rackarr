@@ -226,4 +226,6 @@ export interface ExportOptions {
 	exportView?: ExportView;
 	/** Display mode - label or image (optional, defaults to 'label') */
 	displayMode?: DisplayMode;
+	/** Show airflow indicators in export (optional, defaults to false) */
+	airflowMode?: boolean;
 }

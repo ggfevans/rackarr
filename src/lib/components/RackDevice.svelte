@@ -6,6 +6,7 @@
 	import type { Device, DisplayMode, RackView } from '$lib/types';
 	import { createRackDeviceDragData, serializeDragData } from '$lib/utils/dragdrop';
 	import CategoryIcon from './CategoryIcon.svelte';
+	import AirflowIndicator from './AirflowIndicator.svelte';
 	import { IconGrip } from './icons';
 	import { getImageStore } from '$lib/stores/images.svelte';
 
@@ -22,6 +23,7 @@
 		rackView?: RackView;
 		showLabelsOnImages?: boolean;
 		placedDeviceName?: string;
+		airflowMode?: boolean;
 		onselect?: (event: CustomEvent<{ libraryId: string; position: number }>) => void;
 		ondragstart?: (event: CustomEvent<{ rackId: string; deviceIndex: number }>) => void;
 		ondragend?: () => void;
@@ -40,6 +42,7 @@
 		rackView = 'front',
 		showLabelsOnImages = false,
 		placedDeviceName,
+		airflowMode = false,
 		onselect,
 		ondragstart: ondragstartProp,
 		ondragend: ondragendProp
@@ -204,6 +207,18 @@
 			</foreignObject>
 		{/if}
 	{/if}
+
+	<!-- Airflow indicator overlay -->
+	{#if airflowMode && device.airflow}
+		<g class="airflow-overlay">
+			<AirflowIndicator
+				airflow={device.airflow}
+				view={rackView}
+				width={deviceWidth}
+				height={deviceHeight}
+			/>
+		</g>
+	{/if}
 </g>
 
 <style>
@@ -323,5 +338,9 @@
 			transparent 100%
 		);
 		user-select: none;
+	}
+
+	.airflow-overlay {
+		pointer-events: none;
 	}
 </style>

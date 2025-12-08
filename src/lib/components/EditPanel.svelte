@@ -9,7 +9,7 @@
 	import { getSelectionStore } from '$lib/stores/selection.svelte';
 	import { getUIStore } from '$lib/stores/ui.svelte';
 	import { COMMON_RACK_HEIGHTS } from '$lib/types/constants';
-	import type { Rack, Device, PlacedDevice, DeviceFace } from '$lib/types';
+	import type { Rack, Device, PlacedDevice, DeviceFace, Airflow } from '$lib/types';
 
 	const layoutStore = getLayoutStore();
 	const selectionStore = getSelectionStore();
@@ -179,6 +179,25 @@
 			.split('-')
 			.map((word) => word.charAt(0).toUpperCase() + word.slice(1))
 			.join(' ');
+	}
+
+	// Airflow options for dropdown
+	const AIRFLOW_OPTIONS: { value: Airflow; label: string }[] = [
+		{ value: 'passive', label: 'Passive (no active cooling)' },
+		{ value: 'front-to-rear', label: 'Front to Rear' },
+		{ value: 'rear-to-front', label: 'Rear to Front' },
+		{ value: 'left-to-right', label: 'Left to Right' },
+		{ value: 'right-to-left', label: 'Right to Left' },
+		{ value: 'side-to-rear', label: 'Side to Rear' }
+	];
+
+	// Update device airflow
+	function handleAirflowChange(event: Event) {
+		const target = event.target as HTMLSelectElement;
+		const newAirflow = target.value as Airflow;
+		if (selectedDeviceInfo) {
+			layoutStore.updateDeviceInLibrary(selectedDeviceInfo.device.id, { airflow: newAirflow });
+		}
 	}
 </script>
 
@@ -360,6 +379,21 @@
 					</label>
 				</div>
 			</fieldset>
+
+			<!-- Airflow selector -->
+			<div class="form-group">
+				<label for="device-airflow">Airflow Direction</label>
+				<select
+					id="device-airflow"
+					class="select-field"
+					value={selectedDeviceInfo.device.airflow ?? 'passive'}
+					onchange={handleAirflowChange}
+				>
+					{#each AIRFLOW_OPTIONS as option (option.value)}
+						<option value={option.value}>{option.label}</option>
+					{/each}
+				</select>
+			</div>
 
 			{#if selectedDeviceInfo.device.notes}
 				<div class="notes-section">
@@ -643,5 +677,21 @@
 		width: 16px;
 		height: 16px;
 		cursor: pointer;
+	}
+
+	.select-field {
+		width: 100%;
+		padding: var(--space-2) var(--space-3);
+		background: var(--input-bg);
+		border: 1px solid var(--input-border);
+		border-radius: var(--radius-sm);
+		color: var(--colour-text);
+		font-size: var(--font-size-base);
+		cursor: pointer;
+	}
+
+	.select-field:focus {
+		outline: none;
+		border-color: var(--colour-selection);
 	}
 </style>

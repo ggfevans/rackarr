@@ -19,6 +19,7 @@
 	// Form state
 	let format = $state<ExportFormat>('png');
 	let includeLegend = $state(false);
+	let showAirflow = $state(false);
 	let background = $state<ExportBackground>('dark');
 	let exportView = $state<ExportView>('both');
 	let transparent = $state(false);
@@ -46,7 +47,8 @@
 			includeNames: true,
 			includeLegend,
 			background: effectiveBackground,
-			exportView
+			exportView,
+			airflowMode: showAirflow
 		};
 		onexport?.(new CustomEvent('export', { detail: options }));
 	}
@@ -97,6 +99,13 @@
 			<label>
 				<input type="checkbox" bind:checked={includeLegend} />
 				Include legend
+			</label>
+		</div>
+
+		<div class="form-group checkbox-group">
+			<label>
+				<input type="checkbox" bind:checked={showAirflow} />
+				Show airflow indicators
 			</label>
 		</div>
 

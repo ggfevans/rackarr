@@ -51,6 +51,21 @@ Work through each top level heading one by one, mark with x only once complete.
   - [x] **Inconsistent Spacing**: Fixed by removing absolute positioning, using flexbox
   - See `docs/planning/spec-toolbar.md` for implementation details
 
+- [ ] Toolbar UI Issues - Button Text Wrapping
+  - [ ] Multi-word buttons (New Rack, Load Layout, Reset View) wrap to multiple lines
+  - [ ] Buttons should widen instead of wrapping text - add `white-space: nowrap`
+  - [ ] Tagline still overlaps with buttons at ~1470px width
+  - [ ] Lower tagline hide threshold from 1200px to ~900px, or remove tagline entirely (move to Help/About)
+
+- [ ] Version number in Help/About stuck on 0.3.4
+  - [ ] Version should always display current package.json version
+  - [ ] Investigate why version is hardcoded or not updating
+
+- [ ] Load Layout functionality broken
+  - [ ] Open file dialog does not allow any files to be selected
+  - [ ] Even when forcing file selection, layout fails to load
+  - [ ] Investigate file picker accept types and archive extraction
+
 ## Released
 
 ### v0.4.0 — Code Audit & Legacy Cleanup
@@ -239,6 +254,7 @@ Backlog → Future Roadmap → Planned (current) → Released
 | 2025-12-07 | v0.4.0 released (breaking: removed legacy format support) |
 | 2025-12-07 | v0.4.2 released (toolbar responsiveness, hamburger menu)  |
 | 2025-12-08 | v0.4.3 released (PDF export)                              |
+| 2025-12-08 | v0.4.4 released (Docker build fix)                        |
 
 ---
 

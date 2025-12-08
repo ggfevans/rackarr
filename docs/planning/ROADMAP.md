@@ -255,6 +255,7 @@ Backlog → Future Roadmap → Planned (current) → Released
 | 2025-12-08 | v0.4.3 released (PDF export)                              |
 | 2025-12-08 | v0.4.4 released (Docker build fix)                        |
 | 2025-12-08 | v0.4.5 released (toolbar polish, file picker fix)         |
+| 2025-12-08 | v0.4.6 released (fix 0.5U device schema validation)       |
 
 ---
 

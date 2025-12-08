@@ -1,9 +1,14 @@
 # CLAUDE.md — Rackarr
 
 **Project:** Rackarr — Rack Layout Designer for Homelabbers
-**Version:** 0.4.5
+**Version:** 0.4.6
 
 ---
+
+## v0.4.6 Changes
+
+- **Schema fix**: Fixed u_height validation to allow 0.5U devices (was incorrectly requiring integers)
+- The schema now allows heights from 0.5U to 50U in 0.5U increments as per spec
 
 ## v0.4.5 Changes
 

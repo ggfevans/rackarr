@@ -133,9 +133,9 @@ export const DeviceTypeSchema = z.object({
 	slug: SlugSchema,
 	u_height: z
 		.number()
-		.int()
-		.min(1, 'Height must be at least 1U')
-		.max(50, 'Height cannot exceed 50U'),
+		.min(0.5, 'Height must be at least 0.5U')
+		.max(50, 'Height cannot exceed 50U')
+		.refine((val) => val % 0.5 === 0, 'Height must be a multiple of 0.5U'),
 
 	// Optional NetBox fields
 	manufacturer: z.string().max(100).optional(),

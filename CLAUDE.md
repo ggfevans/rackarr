@@ -1,78 +1,82 @@
 # CLAUDE.md — Rackarr
 
 **Project:** Rackarr — Rack Layout Designer for Homelabbers
-**Version:** 0.4.7
+**Version:** 0.4.8
 
 ---
 
-## v0.4.7 Changes
+## Versioning Policy
 
-- **Reset view on load**: Automatically centers rack in viewport after loading a layout file
-- Added `canvasStore.fitAll()` call in `handleLoad` to reset zoom and pan position
+We follow [Cargo semver](https://doc.rust-lang.org/cargo/reference/semver.html) conventions:
 
-## v0.4.6 Changes
+**Pre-1.0 semantics (current):**
 
-- **Schema fix**: Fixed u_height validation to allow 0.5U devices (was incorrectly requiring integers)
-- The schema now allows heights from 0.5U to 50U in 0.5U increments as per spec
+- `0.MINOR.patch` — minor version acts like major (breaking changes allowed)
+- `0.minor.PATCH` — bug fixes and small improvements only
+- Pre-1.0 means "API unstable, in active development"
 
-## v0.4.5 Changes
+**When to bump versions:**
 
-- **Toolbar polish**: Added `white-space: nowrap` to prevent button text wrapping
-- **Tagline removed**: Removed tagline from toolbar to prevent overlap issues (description remains in Help panel)
-- **File picker fix**: Improved browser compatibility for Load Layout dialog
-  - Changed accept types to use MIME types for better cross-browser support
-  - Added cancel event handling for file picker dialog
-- **GitHub Actions fix**: Updated deploy workflow to use Node 22 and `npm install` for npm version compatibility
+| Change Type        | Version Bump | Example                                                    |
+| ------------------ | ------------ | ---------------------------------------------------------- |
+| Feature milestone  | `0.X.0`      | New major capability (e.g., multi-rack, new export format) |
+| Bug fixes / polish | `0.x.Y`      | Only when releasing to users, not every commit             |
+| Breaking changes   | `0.X.0`      | Format changes, removed features                           |
 
-## v0.4.4 Changes
+**Workflow:**
 
-- **Docker build fix**: Changed Dockerfile to use `node:22-alpine` and `npm install --ignore-scripts` for npm lockfile compatibility
+- **Don't tag every commit** — accumulate changes on `main`
+- **Tag releases** when there's a coherent set of changes worth announcing
+- **Use pre-release tags** for development checkpoints: `0.5.0-alpha.1`, `0.5.0-beta.1`
+- **Batch related fixes** into single patch releases
 
-## v0.4.3 Changes
+**Current milestones:**
 
-- **PDF Export**: Implemented PDF export functionality using jspdf
-  - US Letter size (8.5x11") with rack centered
-  - Auto landscape/portrait based on aspect ratio
-  - 0.5" margins with proper scaling
-- Added `exportAsPDF` function to export utilities
-- PDF option now available in Export dialog
+- `0.4.x` — Stable single-rack workflow with YAML format
+- `0.5.0` — TBD (next feature milestone)
+- `1.0.0` — Production-ready, stable API
 
-## v0.4.2 Changes
+---
 
-- **Toolbar responsiveness**: Fixed text overlap issues between tagline and toolbar buttons
-- **Hamburger menu**: Added collapsible menu at narrow viewports (<1024px)
-  - Logo becomes clickable menu trigger with hamburger icon
-  - Left drawer slides in with grouped actions (File, Edit, View)
-  - Theme toggle remains always visible for quick access
-- **Layout fix**: Removed absolute positioning from toolbar center section for proper flexbox spacing
-- **Breakpoint adjustments**: Tagline now hides at 1200px (was 900px) to prevent overlap
-- **New components**: `IconMenu.svelte`, `ToolbarDrawer.svelte`
-- Full keyboard/accessibility support (Escape to close, focus management, ARIA attributes)
+## Recent Changes
 
-## v0.4.1 Changes
+### v0.4.x (Current)
 
-- **Design token audit**: replaced hardcoded CSS values with design tokens throughout all components
-- Added new tokens: `--space-1-5` (6px), `--font-size-2xs` (10px), `--font-size-2xl` (24px)
-- Improved theme consistency and maintainability
+**v0.4.8** — Toolbar drawer fix, z-index tokens
 
-## v0.4.0 Changes (BREAKING)
+- Moved toolbar drawer to right side (was overlapping device library)
+- Added z-index design tokens (`--z-sidebar`, `--z-drawer`, `--z-modal`, `--z-toast`)
 
-- **Removed v0.1/v0.2 legacy format support** - only `.rackarr.zip` (YAML) format supported
-- Code cleanup: removed dead code, unused CSS tokens, redundant dependencies
-- All features from v0.3.x preserved
+**v0.4.6–v0.4.7** — Load/save fixes
 
-## v0.3.x Features
+- Reset view to center rack after loading layout
+- Fixed u_height schema to allow 0.5U devices
 
-- **Undo/Redo** with Ctrl+Z / Ctrl+Shift+Z (or Ctrl+Y)
+**v0.4.3–v0.4.5** — PDF export, toolbar polish
+
+- PDF export (US Letter, auto orientation)
+- Hamburger menu for narrow viewports
+- File picker browser compatibility fixes
+
+**v0.4.1–v0.4.2** — Design token audit, responsive toolbar
+
+- Replaced hardcoded CSS with design tokens
+- Added responsive hamburger menu
+
+### v0.4.0 (BREAKING)
+
+- Removed v0.1/v0.2 legacy format support — only `.rackarr.zip` (YAML) format
+- Code cleanup: removed dead code, unused tokens, redundant dependencies
+
+### v0.3.x Features
+
+- Undo/Redo with Ctrl+Z / Ctrl+Shift+Z
 - YAML folder-based `.rackarr.zip` archive format
-- 11 device categories (+ shelf category)
-- Device images (front/rear) embedded in archive
-- Label/image display mode toggle (keyboard: `I`)
-- Fixed device library sidebar (always visible)
+- 11 device categories, device images (front/rear)
+- Label/image display mode toggle
 - 10" and 19" rack width options
-- Bundled export with metadata (ZIP containing image + metadata.json)
-- Single-rack mode (one rack per project)
-- Zod schema validation
+- Bundled export with metadata
+- Single-rack mode, Zod schema validation
 
 ## Planning Docs
 

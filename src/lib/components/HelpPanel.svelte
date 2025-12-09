@@ -78,7 +78,8 @@
 				<li>Drag and drop devices from the library to build your rack</li>
 				<li>10" and 19" rack width support</li>
 				<li>Device images (front/rear) with Label/Image display toggle</li>
-				<li>Export as PNG, JPEG, or SVG with optional bundled metadata</li>
+				<li>Airflow visualization with conflict detection</li>
+				<li>Export as PNG, JPEG, SVG, or PDF with optional bundled metadata</li>
 				<li>Save layouts as .rackarr.zip with embedded images</li>
 			</ul>
 		</section>

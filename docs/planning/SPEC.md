@@ -1,6 +1,6 @@
 # Rackarr Technical Specification
 
-**Version:** 0.5.0
+**Version:** 0.4.9
 **Updated:** 2025-12-09
 **Status:** Active
 
@@ -535,7 +535,7 @@ npm run check        # Svelte type check
 
 | Version | Changes                                  |
 | ------- | ---------------------------------------- |
-| 0.5.0   | Airflow visualization, selection bug fix |
+| 0.4.9   | Airflow visualization, selection bug fix |
 | 0.4.8   | Design token audit, CSS cleanup          |
 | 0.4.0   | Breaking: removed legacy format support  |
 | 0.3.x   | Undo/redo, YAML archive, device images   |
@@ -544,7 +544,7 @@ npm run check        # Svelte type check
 
 ---
 
-## 14. Airflow Visualization (v0.5.0)
+## 14. Airflow Visualization (v0.4.9)
 
 Visual overlay for device airflow direction, helping identify thermal conflicts.
 

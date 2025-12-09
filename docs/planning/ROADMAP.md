@@ -70,7 +70,7 @@ Work through each top level heading one by one, mark with x only once complete.
   - [ ] Investigate if these wrapper functions can be removed in favor of direct `updateDeviceType`/`deleteDeviceType` calls
   - [ ] Remove any remaining "legacy compatibility" comments from codebase
 
-- [x] Device selection highlights all instances of same device type (v0.5.0)
+- [x] Device selection highlights all instances of same device type (v0.4.9)
   - [x] When selecting a device on canvas, all devices of that type show blue outline
   - [x] Selection behaviour is correct (only one device selected), but visual is confusing
   - [x] Should only highlight the specific placed device, not all instances of the device type
@@ -78,7 +78,7 @@ Work through each top level heading one by one, mark with x only once complete.
 
 ## Released
 
-### v0.5.0 — Airflow Visualization
+### v0.4.9 — Airflow Visualization
 
 **Status:** Complete
 **Released:** 2025-12-09
@@ -175,7 +175,7 @@ Priority order for future development:
 
 ---
 
-### ~~3. Airflow Visualization~~ ✅ Complete (v0.5.0)
+### ~~3. Airflow Visualization~~ ✅ Complete (v0.4.9)
 
 - ~~Visual indicators for device airflow direction~~
 - ~~Hot/cold aisle awareness~~
@@ -288,8 +288,8 @@ Backlog → Future Roadmap → Planned (current) → Released
 | 2025-12-08 | v0.4.6 released (fix 0.5U device schema validation)        |
 | 2025-12-08 | v0.4.7 released (reset view after layout load)             |
 | 2025-12-08 | v0.4.8 released (toolbar drawer fix, z-index tokens)       |
-| 2025-12-08 | v0.5.0 spec ready (airflow visualization)                  |
-| 2025-12-09 | v0.5.0 released (airflow visualization, selection bug fix) |
+| 2025-12-08 | v0.4.9 spec ready (airflow visualization)                  |
+| 2025-12-09 | v0.4.9 released (airflow visualization, selection bug fix) |
 
 ---
 

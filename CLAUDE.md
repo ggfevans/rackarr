@@ -1,7 +1,7 @@
 # CLAUDE.md — Rackarr
 
 **Project:** Rackarr — Rack Layout Designer for Homelabbers
-**Version:** 0.5.0
+**Version:** 0.4.9
 
 ---
 
@@ -33,16 +33,16 @@ We follow [Cargo semver](https://doc.rust-lang.org/cargo/reference/semver.html) 
 **Current milestones:**
 
 - `0.4.x` — Stable single-rack workflow with YAML format
-- `0.5.0` — Airflow visualization with conflict detection
+- `0.4.9` — Airflow visualization with conflict detection
 - `1.0.0` — Production-ready, stable API
 
 ---
 
 ## Recent Changes
 
-### v0.5.0 (Current)
+### v0.4.9 (Current)
 
-**v0.5.0** — Airflow visualization
+**v0.4.9** — Airflow visualization
 
 - Edge stripe + arrow airflow indicators (4 types: passive, front-to-rear, rear-to-front, side-to-rear)
 - Conflict detection with orange border highlighting

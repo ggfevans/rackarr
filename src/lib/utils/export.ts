@@ -311,6 +311,7 @@ function createCategoryIconElements(
 
 /**
  * Create SVG elements for an airflow indicator
+ * Edge stripe + small arrow design matching AirflowIndicator.svelte
  * @param airflow - Airflow direction
  * @param faceFilter - Current view (front or rear)
  * @param width - Width of the indicator area
@@ -327,85 +328,82 @@ function createAirflowIndicator(
 	const group = document.createElementNS(ns, 'g');
 	group.setAttribute('class', 'airflow-indicator');
 
-	// Determine color based on airflow direction and view
-	let color = AIRFLOW_PASSIVE;
-	if (airflow === 'front-to-rear') {
-		color = faceFilter === 'front' ? AIRFLOW_INTAKE : AIRFLOW_EXHAUST;
-	} else if (airflow === 'rear-to-front') {
-		color = faceFilter === 'rear' ? AIRFLOW_INTAKE : AIRFLOW_EXHAUST;
-	} else if (airflow === 'side-to-rear') {
-		color = faceFilter === 'front' ? AIRFLOW_INTAKE : AIRFLOW_EXHAUST;
-	}
-	// lateral flows use passive color
+	const STRIPE_WIDTH = 4;
+	const ARROW_SIZE = 8;
 
-	// Determine arrow direction (simplified for 4 airflow types)
-	let arrowDirection: 'none' | 'right' | 'left' | 'corner' = 'none';
 	if (airflow === 'passive') {
-		arrowDirection = 'none';
-	} else if (airflow === 'front-to-rear') {
-		arrowDirection = 'right';
-	} else if (airflow === 'rear-to-front') {
-		arrowDirection = 'left';
-	} else if (airflow === 'side-to-rear') {
-		arrowDirection = faceFilter === 'front' ? 'corner' : 'right';
-	}
-
-	if (arrowDirection === 'none') {
 		// Passive: hollow circle
 		const circle = document.createElementNS(ns, 'circle');
 		circle.setAttribute('cx', String(width / 2));
 		circle.setAttribute('cy', String(height / 2));
-		circle.setAttribute('r', String(Math.min(width, height) / 4));
-		circle.setAttribute('stroke', color);
+		circle.setAttribute('r', String(Math.min(10, height / 4)));
+		circle.setAttribute('stroke', AIRFLOW_PASSIVE);
 		circle.setAttribute('stroke-width', '2');
 		circle.setAttribute('fill', 'none');
-		circle.setAttribute('opacity', '0.6');
+		circle.setAttribute('opacity', '0.7');
 		group.appendChild(circle);
-	} else if (arrowDirection === 'corner') {
-		// Side-to-rear corner indicator
-		const path = document.createElementNS(ns, 'path');
-		path.setAttribute(
-			'd',
-			`M ${width * 0.2} ${height * 0.3} L ${width * 0.5} ${height * 0.7} L ${width * 0.8} ${height * 0.5}`
-		);
-		path.setAttribute('stroke', color);
-		path.setAttribute('stroke-width', '2');
-		path.setAttribute('stroke-linecap', 'round');
-		path.setAttribute('stroke-linejoin', 'round');
-		path.setAttribute('fill', 'none');
-		path.setAttribute('stroke-dasharray', '4 4');
-		group.appendChild(path);
-	} else {
-		// Horizontal arrows (right or left)
-		const isRight = arrowDirection === 'right';
-		const arrows = isRight
-			? [
-					// Right-pointing arrows
-					`M ${width * 0.15} ${height * 0.5} L ${width * 0.35} ${height * 0.5}`,
-					`M ${width * 0.3} ${height * 0.35} L ${width * 0.4} ${height * 0.5} L ${width * 0.3} ${height * 0.65}`,
-					`M ${width * 0.45} ${height * 0.5} L ${width * 0.65} ${height * 0.5}`,
-					`M ${width * 0.6} ${height * 0.35} L ${width * 0.7} ${height * 0.5} L ${width * 0.6} ${height * 0.65}`
-				]
-			: [
-					// Left-pointing arrows
-					`M ${width * 0.85} ${height * 0.5} L ${width * 0.65} ${height * 0.5}`,
-					`M ${width * 0.7} ${height * 0.35} L ${width * 0.6} ${height * 0.5} L ${width * 0.7} ${height * 0.65}`,
-					`M ${width * 0.55} ${height * 0.5} L ${width * 0.35} ${height * 0.5}`,
-					`M ${width * 0.4} ${height * 0.35} L ${width * 0.3} ${height * 0.5} L ${width * 0.4} ${height * 0.65}`
-				];
+		return group;
+	}
 
-		for (const d of arrows) {
-			const path = document.createElementNS(ns, 'path');
-			path.setAttribute('d', d);
-			path.setAttribute('stroke', color);
-			path.setAttribute('stroke-width', '2');
-			path.setAttribute('stroke-linecap', 'round');
-			path.setAttribute('stroke-linejoin', 'round');
-			path.setAttribute('fill', 'none');
-			path.setAttribute('stroke-dasharray', '4 4');
-			group.appendChild(path);
+	// Determine if this view shows intake or exhaust
+	let isIntakeSide = false;
+	if (airflow === 'front-to-rear') {
+		isIntakeSide = faceFilter === 'front';
+	} else if (airflow === 'rear-to-front') {
+		isIntakeSide = faceFilter === 'rear';
+	} else if (airflow === 'side-to-rear') {
+		isIntakeSide = faceFilter === 'front';
+	}
+
+	// Stripe color based on intake/exhaust
+	const stripeColor = isIntakeSide ? AIRFLOW_INTAKE : AIRFLOW_EXHAUST;
+
+	// Stripe position: LEFT for front view, RIGHT for rear view
+	const stripeX = faceFilter === 'front' ? 0 : width - STRIPE_WIDTH;
+
+	// Edge stripe
+	const stripe = document.createElementNS(ns, 'rect');
+	stripe.setAttribute('x', String(stripeX));
+	stripe.setAttribute('y', '0');
+	stripe.setAttribute('width', String(STRIPE_WIDTH));
+	stripe.setAttribute('height', String(height));
+	stripe.setAttribute('fill', stripeColor);
+	stripe.setAttribute('opacity', '0.85');
+	group.appendChild(stripe);
+
+	// Arrow positioning - next to stripe, centered vertically
+	const arrowX = faceFilter === 'front' ? STRIPE_WIDTH + 8 : width - STRIPE_WIDTH - ARROW_SIZE - 8;
+	const arrowY = height / 2;
+
+	// Arrow points - chevron shape
+	let arrowPoints: string;
+	if (faceFilter === 'front') {
+		if (isIntakeSide) {
+			// Intake on front: arrow points right (into device)
+			arrowPoints = `${arrowX},${arrowY - ARROW_SIZE / 2} ${arrowX + ARROW_SIZE},${arrowY} ${arrowX},${arrowY + ARROW_SIZE / 2}`;
+		} else {
+			// Exhaust on front: arrow points left (out of device)
+			arrowPoints = `${arrowX + ARROW_SIZE},${arrowY - ARROW_SIZE / 2} ${arrowX},${arrowY} ${arrowX + ARROW_SIZE},${arrowY + ARROW_SIZE / 2}`;
+		}
+	} else {
+		if (isIntakeSide) {
+			// Intake on rear: arrow points left (into device)
+			arrowPoints = `${arrowX + ARROW_SIZE},${arrowY - ARROW_SIZE / 2} ${arrowX},${arrowY} ${arrowX + ARROW_SIZE},${arrowY + ARROW_SIZE / 2}`;
+		} else {
+			// Exhaust on rear: arrow points right (out of device)
+			arrowPoints = `${arrowX},${arrowY - ARROW_SIZE / 2} ${arrowX + ARROW_SIZE},${arrowY} ${arrowX},${arrowY + ARROW_SIZE / 2}`;
 		}
 	}
+
+	// Directional arrow (static in exports - no animation)
+	const arrow = document.createElementNS(ns, 'polyline');
+	arrow.setAttribute('points', arrowPoints);
+	arrow.setAttribute('stroke', stripeColor);
+	arrow.setAttribute('stroke-width', '2');
+	arrow.setAttribute('stroke-linecap', 'round');
+	arrow.setAttribute('stroke-linejoin', 'round');
+	arrow.setAttribute('fill', 'none');
+	group.appendChild(arrow);
 
 	return group;
 }

@@ -153,57 +153,6 @@ Then, update the schema and types:
 
 ````
 
-### Prompt 1.2 — Add Data Migration for Legacy Airflow Types
-
-```text
-Add migration logic to handle legacy airflow types when loading old layouts.
-
-**Context:**
-Old .rackarr.zip files may contain devices with airflow types that are no longer supported (left-to-right, right-to-left, bottom-to-top, top-to-bottom, rear-to-side, mixed). Per spec, these should be converted to 'passive'.
-
-**Task:**
-1. Read `src/lib/utils/migration.ts` or wherever layout loading/parsing happens
-2. Read `src/lib/stores/layout.svelte.ts` to find where layouts are loaded/imported
-
-**Implementation (TDD):**
-
-First, create/update tests in `src/tests/migration.test.ts`:
-```typescript
-describe('airflow migration', () => {
-  it('should convert left-to-right to passive', () => { ... });
-  it('should convert right-to-left to passive', () => { ... });
-  it('should convert bottom-to-top to passive', () => { ... });
-  it('should convert top-to-bottom to passive', () => { ... });
-  it('should convert rear-to-side to passive', () => { ... });
-  it('should convert mixed to passive', () => { ... });
-  it('should preserve front-to-rear unchanged', () => { ... });
-  it('should preserve rear-to-front unchanged', () => { ... });
-  it('should preserve side-to-rear unchanged', () => { ... });
-  it('should preserve passive unchanged', () => { ... });
-});
-````
-
-Then, implement migration function:
-
-1. Create `migrateAirflowType(airflow: string): Airflow` function
-2. Map deprecated types to 'passive'
-3. Pass through valid types unchanged
-4. Integrate into layout loading flow
-
-**Integration:**
-
-- Wire the migration function into the layout loading process
-- Ensure it runs BEFORE Zod validation (to prevent validation errors on old data)
-
-**Acceptance Criteria:**
-
-- Old layouts with deprecated airflow types load without errors
-- Deprecated types are silently converted to 'passive'
-- Valid types pass through unchanged
-- Tests cover all migration cases
-
-````
-
 ---
 
 ## Phase 2: Update UI Dropdowns
@@ -1054,8 +1003,7 @@ Perform final review and cleanup of all airflow-related code.
 - [ ] No TypeScript errors
 - [ ] No lint warnings
 - [ ] No console.log statements
-- [ ] All deprecated airflow types removed from UI
-- [ ] Migration handles old layouts
+- [ ] Only 4 airflow types in UI
 - [ ] Help panel updated
 - [ ] Keyboard shortcut works
 - [ ] Export includes indicators
@@ -1138,7 +1086,7 @@ Move airflow visualization from Planned to Released in roadmap.
 
 | Phase | Prompts | Focus |
 |-------|---------|-------|
-| 1 | 1.1-1.2 | Schema and type updates, migration |
+| 1 | 1.1 | Schema and type updates |
 | 2 | 2.1-2.2 | UI dropdowns (EditPanel, AddDeviceForm) |
 | 3 | 3.1-3.2 | AirflowIndicator component rewrite |
 | 4 | 4.1 | Conflict detection utilities |
@@ -1148,7 +1096,7 @@ Move airflow visualization from Planned to Released in roadmap.
 | 8 | 8.1-8.3 | E2E testing and cleanup |
 | 9 | 9.1-9.2 | Documentation updates |
 
-**Total: 14 prompts across 9 phases**
+**Total: 13 prompts across 9 phases**
 
 Each prompt is self-contained but builds on previous work. No orphaned code — each change is integrated immediately.
 ```

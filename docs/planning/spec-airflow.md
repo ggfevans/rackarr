@@ -331,24 +331,6 @@ Airflow Direction
 
 ---
 
-## Migration
-
-### Data Migration
-
-- Existing `left-to-right` → convert to `passive`
-- Existing `right-to-left` → convert to `passive`
-- Or: Keep deprecated values but render as passive
-
-### Backward Compatibility
-
-Old archive files with lateral airflow types should:
-
-1. Load without error
-2. Treat lateral types as `passive` for visualization
-3. Allow user to update to supported type
-
----
-
 ## Implementation Order
 
 1. **Schema**: Update `AirflowSchema` to 4 types

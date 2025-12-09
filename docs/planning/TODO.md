@@ -62,22 +62,6 @@ Mark items with `[x]` as they are completed. Each section corresponds to a promp
 - [ ] Run `npm run test:run` — all tests pass
 - [ ] Run `npm run check` — no TypeScript errors
 
-### 1.2 — Add Data Migration for Legacy Airflow Types
-
-- [ ] Identify layout loading/parsing location
-- [ ] Create/update `src/tests/migration.test.ts`
-- [ ] Test: left-to-right → passive
-- [ ] Test: right-to-left → passive
-- [ ] Test: bottom-to-top → passive
-- [ ] Test: top-to-bottom → passive
-- [ ] Test: rear-to-side → passive
-- [ ] Test: mixed → passive
-- [ ] Test: valid types pass through unchanged
-- [ ] Implement `migrateAirflowType()` function
-- [ ] Integrate into layout loading flow
-- [ ] Run tests — migration tests pass
-- [ ] Manually test loading old layout with deprecated types
-
 ---
 
 ## Phase 2: Update UI Dropdowns
@@ -263,8 +247,7 @@ Mark items with `[x]` as they are completed. Each section corresponds to a promp
 - [ ] Run `npm run lint` — no warnings
 - [ ] Check for console.log statements — remove any
 - [ ] Check for TODO comments — address or remove
-- [ ] Verify all deprecated types removed from UI
-- [ ] Verify migration handles old layouts
+- [ ] Verify only 4 airflow types in UI
 - [ ] Verify Help panel updated
 - [ ] Verify keyboard shortcut works
 - [ ] Verify export includes indicators
@@ -360,7 +343,6 @@ npm run build        # Production build
 | `src/lib/schemas/index.ts`                   | AirflowSchema → 4 types            |
 | `src/lib/types/index.ts`                     | Airflow type → 4 types             |
 | `src/lib/utils/airflow.ts`                   | Conflict detection updates         |
-| `src/lib/utils/migration.ts`                 | Legacy type migration              |
 | `src/lib/components/AirflowIndicator.svelte` | Complete rewrite                   |
 | `src/lib/components/RackDevice.svelte`       | Add hasConflict prop, conflict CSS |
 | `src/lib/components/Rack.svelte`             | Wire conflict detection            |
@@ -372,7 +354,6 @@ npm run build        # Production build
 | `src/tests/airflow.test.ts`                  | Updated tests                      |
 | `src/tests/AirflowIndicator.test.ts`         | New edge stripe tests              |
 | `src/tests/RackDevice.test.ts`               | Conflict tests                     |
-| `src/tests/migration.test.ts`                | Migration tests                    |
 | `e2e/airflow.spec.ts`                        | New E2E test file                  |
 | `docs/planning/SPEC.md`                      | v0.5.0 updates                     |
 | `docs/planning/ROADMAP.md`                   | Release entry                      |

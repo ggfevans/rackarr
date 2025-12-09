@@ -88,7 +88,8 @@ const deviceLibrary = $derived(
 		height: dt.u_height,
 		category: dt.rackarr.category,
 		colour: dt.rackarr.colour,
-		notes: dt.comments
+		notes: dt.comments,
+		airflow: dt.airflow
 	}))
 );
 // rackCount returns 0 until user has started (shows WelcomeScreen)
@@ -455,6 +456,9 @@ function updateDeviceInLibrary(id: string, updates: Partial<Device>): void {
 	}
 	if (updates.notes !== undefined) {
 		typeUpdates.comments = updates.notes;
+	}
+	if (updates.airflow !== undefined) {
+		typeUpdates.airflow = updates.airflow;
 	}
 	if (updates.colour !== undefined || updates.category !== undefined) {
 		const existing = findDeviceType(layout.device_types, id);

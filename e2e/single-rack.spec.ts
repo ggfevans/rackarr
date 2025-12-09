@@ -23,7 +23,7 @@ async function fillRackForm(page: Page, name: string, height: number) {
  * In v0.2, a rack always exists. To create a new one, we go through the replace dialog.
  */
 async function replaceRack(page: Page, name: string, height: number) {
-	await page.click('button[aria-label="New Rack"]');
+	await page.click('.toolbar-action-btn[aria-label="New Rack"]');
 	await page.click('button:has-text("Replace")');
 	await fillRackForm(page, name, height);
 	await page.click('button:has-text("Create")');
@@ -51,7 +51,7 @@ test.describe('Single Rack Mode (v0.2)', () => {
 
 	test('shows confirmation dialog when clicking New Rack', async ({ page }) => {
 		// In v0.2, clicking New Rack shows replace confirmation
-		await page.click('button[aria-label="New Rack"]');
+		await page.click('.toolbar-action-btn[aria-label="New Rack"]');
 
 		// Should show confirmation dialog
 		await expect(page.locator('h2:has-text("Replace Current Rack?")')).toBeVisible();
@@ -68,7 +68,7 @@ test.describe('Single Rack Mode (v0.2)', () => {
 		await expect(page.locator('.rack-dual-view-name')).toContainText('Old Rack');
 
 		// Click New Rack, then Replace
-		await page.click('button[aria-label="New Rack"]');
+		await page.click('.toolbar-action-btn[aria-label="New Rack"]');
 		await expect(page.locator('h2:has-text("Replace Current Rack?")')).toBeVisible();
 		await page.click('button:has-text("Replace")');
 
@@ -97,7 +97,7 @@ test.describe('Single Rack Mode (v0.2)', () => {
 		await expect(page.locator('.rack-dual-view-name')).toContainText('My Rack');
 
 		// Click New Rack, then Cancel
-		await page.click('button[aria-label="New Rack"]');
+		await page.click('.toolbar-action-btn[aria-label="New Rack"]');
 		await expect(page.locator('h2:has-text("Replace Current Rack?")')).toBeVisible();
 		await page.click('button:has-text("Cancel")');
 
@@ -117,7 +117,7 @@ test.describe('Single Rack Mode (v0.2)', () => {
 		await replaceRack(page, 'Test Rack', 24);
 
 		// Click New Rack to show dialog
-		await page.click('button[aria-label="New Rack"]');
+		await page.click('.toolbar-action-btn[aria-label="New Rack"]');
 		await expect(page.locator('h2:has-text("Replace Current Rack?")')).toBeVisible();
 
 		// Press Escape
@@ -136,7 +136,7 @@ test.describe('Single Rack Mode (v0.2)', () => {
 		await expect(page.locator('.rack-container')).toHaveCount(2);
 
 		// Try to create a 2nd rack should show confirmation dialog
-		await page.click('button[aria-label="New Rack"]');
+		await page.click('.toolbar-action-btn[aria-label="New Rack"]');
 
 		// Should show replace confirmation, not allow direct creation
 		await expect(page.locator('h2:has-text("Replace Current Rack?")')).toBeVisible();
@@ -153,10 +153,10 @@ test.describe('Single Rack Mode (v0.2)', () => {
 		await replaceRack(page, 'Production Server Rack', 42);
 
 		// Try to create second rack
-		await page.click('button[aria-label="New Rack"]');
+		await page.click('.toolbar-action-btn[aria-label="New Rack"]');
 
-		// Dialog should show rack name in message
-		const dialog = page.locator('[role="dialog"]');
+		// Dialog should show rack name in message (use specific selector for replace dialog, not drawer)
+		const dialog = page.locator('.dialog[role="dialog"]');
 		await expect(dialog).toBeVisible();
 		await expect(dialog.locator('text=/Production Server Rack/')).toBeVisible();
 

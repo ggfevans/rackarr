@@ -5,7 +5,7 @@ import { test, expect, Page } from '@playwright/test';
  * In v0.2, a rack always exists. To create a new one, we go through the replace dialog.
  */
 async function replaceRack(page: Page, name: string, height: number = 24) {
-	await page.click('button[aria-label="New Rack"]');
+	await page.click('.toolbar-action-btn[aria-label="New Rack"]');
 	await page.click('button:has-text("Replace")');
 
 	await page.fill('#rack-name', name);

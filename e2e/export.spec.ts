@@ -23,7 +23,7 @@ async function fillRackForm(page: Page, name: string, height: number) {
  * Note: In dual-view mode, there are two .rack-container elements
  */
 async function replaceRack(page: Page, name: string, height: number) {
-	await page.click('button[aria-label="New Rack"]');
+	await page.click('.toolbar-action-btn[aria-label="New Rack"]');
 	await page.click('button:has-text("Replace")');
 	await fillRackForm(page, name, height);
 	await page.click('button:has-text("Create")');
@@ -91,7 +91,7 @@ test.describe('Export Functionality', () => {
 
 	test('export dialog opens', async ({ page }) => {
 		// Click export button
-		await page.click('button[aria-label="Export"]');
+		await page.click('.toolbar-action-btn[aria-label="Export"]');
 
 		// Dialog should open
 		await expect(page.locator('.dialog')).toBeVisible();
@@ -99,7 +99,7 @@ test.describe('Export Functionality', () => {
 	});
 
 	test('export dialog has format options', async ({ page }) => {
-		await page.click('button[aria-label="Export"]');
+		await page.click('.toolbar-action-btn[aria-label="Export"]');
 
 		// Should have format select dropdown with options
 		const formatSelect = page.locator('#export-format');
@@ -112,7 +112,7 @@ test.describe('Export Functionality', () => {
 	});
 
 	test('export PNG downloads file', async ({ page }) => {
-		await page.click('button[aria-label="Export"]');
+		await page.click('.toolbar-action-btn[aria-label="Export"]');
 
 		// Select PNG format (default, but be explicit)
 		await page.selectOption('#export-format', 'png');
@@ -129,7 +129,7 @@ test.describe('Export Functionality', () => {
 	});
 
 	test('export SVG downloads file', async ({ page }) => {
-		await page.click('button[aria-label="Export"]');
+		await page.click('.toolbar-action-btn[aria-label="Export"]');
 
 		// Select SVG format
 		await page.selectOption('#export-format', 'svg');
@@ -146,7 +146,7 @@ test.describe('Export Functionality', () => {
 	});
 
 	test('export JPEG downloads file', async ({ page }) => {
-		await page.click('button[aria-label="Export"]');
+		await page.click('.toolbar-action-btn[aria-label="Export"]');
 
 		// Select JPEG format
 		await page.selectOption('#export-format', 'jpeg');
@@ -163,7 +163,7 @@ test.describe('Export Functionality', () => {
 	});
 
 	test('export with legend option', async ({ page }) => {
-		await page.click('button[aria-label="Export"]');
+		await page.click('.toolbar-action-btn[aria-label="Export"]');
 
 		// Check include legend checkbox - the label contains the text
 		const legendCheckbox = page.locator('label:has-text("Include legend") input[type="checkbox"]');
@@ -181,7 +181,7 @@ test.describe('Export Functionality', () => {
 	});
 
 	test('export dialog can be cancelled', async ({ page }) => {
-		await page.click('button[aria-label="Export"]');
+		await page.click('.toolbar-action-btn[aria-label="Export"]');
 		await expect(page.locator('.dialog')).toBeVisible();
 
 		// Click cancel

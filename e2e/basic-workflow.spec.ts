@@ -6,7 +6,7 @@ import { test, expect, Page } from '@playwright/test';
  */
 async function replaceRack(page: Page, name: string, height: number) {
 	// Click "New Rack" in toolbar to open replace dialog
-	await page.click('button[aria-label="New Rack"]');
+	await page.click('.toolbar-action-btn[aria-label="New Rack"]');
 
 	// Click "Replace" to open the new rack form
 	await page.click('button:has-text("Replace")');

@@ -23,7 +23,7 @@ async function fillRackForm(page: Page, name: string, height: number) {
  * In v0.2, a rack always exists. To create a new one, we go through the replace dialog.
  */
 async function replaceRack(page: Page, name: string, height: number) {
-	await page.click('button[aria-label="New Rack"]');
+	await page.click('.toolbar-action-btn[aria-label="New Rack"]');
 	await page.click('button:has-text("Replace")');
 	await fillRackForm(page, name, height);
 	await page.click('button:has-text("Create")');
@@ -163,7 +163,7 @@ test.describe('Keyboard Shortcuts', () => {
 
 	test('Escape closes dialogs', async ({ page }) => {
 		// Open new rack dialog (this shows replace dialog in v0.2)
-		await page.click('button[aria-label="New Rack"]');
+		await page.click('.toolbar-action-btn[aria-label="New Rack"]');
 		await expect(page.locator('.dialog')).toBeVisible();
 
 		// Press Escape

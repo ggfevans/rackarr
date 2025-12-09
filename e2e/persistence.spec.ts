@@ -23,7 +23,7 @@ async function fillRackForm(page: Page, name: string, height: number) {
  * In v0.2, a rack always exists. To create a new one, we go through the replace dialog.
  */
 async function replaceRack(page: Page, name: string, height: number) {
-	await page.click('button[aria-label="New Rack"]');
+	await page.click('.toolbar-action-btn[aria-label="New Rack"]');
 	await page.click('button:has-text("Replace")');
 	await fillRackForm(page, name, height);
 	await page.click('button:has-text("Create")');
@@ -50,7 +50,7 @@ test.describe('Persistence', () => {
 		const downloadPromise = page.waitForEvent('download');
 
 		// Click save button
-		await page.click('button[aria-label="Save"]');
+		await page.click('.toolbar-action-btn[aria-label="Save"]');
 
 		// Wait for download
 		const download = await downloadPromise;
@@ -65,7 +65,7 @@ test.describe('Persistence', () => {
 		const downloadPromise = page.waitForEvent('download');
 
 		// Save
-		await page.click('button[aria-label="Save"]');
+		await page.click('.toolbar-action-btn[aria-label="Save"]');
 
 		// Get the downloaded file
 		const download = await downloadPromise;
@@ -104,7 +104,7 @@ test.describe('Persistence', () => {
 		await replaceRack(page, 'Load Test Rack', 24);
 
 		const downloadPromise = page.waitForEvent('download');
-		await page.click('button[aria-label="Save"]');
+		await page.click('.toolbar-action-btn[aria-label="Save"]');
 		const download = await downloadPromise;
 
 		// Save to a specific path
@@ -126,7 +126,7 @@ test.describe('Persistence', () => {
 		const fileChooserPromise = page.waitForEvent('filechooser');
 
 		// Click load button in toolbar (v0.2 has no welcome screen)
-		await page.click('button[aria-label="Load Layout"]');
+		await page.click('.toolbar-action-btn[aria-label="Load Layout"]');
 
 		// Handle file chooser
 		const fileChooser = await fileChooserPromise;
@@ -183,7 +183,7 @@ test.describe('Persistence', () => {
 
 		// Save to clear dirty flag
 		const downloadPromise = page.waitForEvent('download');
-		await page.click('button[aria-label="Save"]');
+		await page.click('.toolbar-action-btn[aria-label="Save"]');
 		await downloadPromise;
 
 		// Should show success toast

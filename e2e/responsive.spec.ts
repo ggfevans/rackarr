@@ -17,13 +17,11 @@ test.describe('Responsive Layout', () => {
 			expect(buttonText).toContain('Save');
 		});
 
-		test('brand name and tagline visible', async ({ page }) => {
+		test('brand name visible', async ({ page }) => {
 			const brandName = page.locator('.brand-name');
 			await expect(brandName).toBeVisible();
 			await expect(brandName).toHaveText('Rackarr');
-
-			const tagline = page.locator('.brand-tagline');
-			await expect(tagline).toBeVisible();
+			// Note: Tagline was removed from toolbar in v0.4.5 (moved to Help panel)
 		});
 
 		test('sidebar is visible', async ({ page }) => {
@@ -38,6 +36,24 @@ test.describe('Responsive Layout', () => {
 			});
 			expect(hasHorizontalScroll).toBe(false);
 		});
+
+		test('brand click does NOT open drawer in full mode', async ({ page }) => {
+			// At 1200px (>= 1024px), clicking brand should NOT open drawer
+			// In full mode, brand is a div, not a button
+			const brand = page.locator('.toolbar-brand');
+			await brand.click();
+			await page.waitForTimeout(200);
+
+			// Drawer should NOT have the .open class
+			const drawer = page.locator('.toolbar-drawer.open');
+			await expect(drawer).not.toBeVisible();
+		});
+
+		test('hamburger icon is NOT visible in full mode', async ({ page }) => {
+			// At 1200px, hamburger icon should be hidden
+			const hamburgerIcon = page.locator('.hamburger-icon');
+			await expect(hamburgerIcon).not.toBeVisible();
+		});
 	});
 
 	test.describe('Medium viewport (900px)', () => {
@@ -46,21 +62,17 @@ test.describe('Responsive Layout', () => {
 			await page.goto('/');
 		});
 
-		test('toolbar buttons are icon-only', async ({ page }) => {
-			// At 900px (< 1000px breakpoint), buttons should be icon-only
-			const saveButton = page.getByRole('button', { name: /save/i });
-			await expect(saveButton).toBeVisible();
+		test('hamburger mode is active', async ({ page }) => {
+			// At 900px (< 1024px breakpoint), toolbar is in hamburger mode
+			// The hamburger icon should be visible
+			const hamburgerIcon = page.locator('.hamburger-icon');
+			await expect(hamburgerIcon).toBeVisible();
 
-			// The span inside should be hidden via CSS display: none
-			const buttonSpan = saveButton.locator('span');
-			await expect(buttonSpan).toBeHidden();
+			// The toolbar-center (action buttons) should be hidden
+			const toolbarCenter = page.locator('.toolbar-center');
+			await expect(toolbarCenter).not.toBeVisible();
 		});
-
-		test('brand tagline is hidden', async ({ page }) => {
-			// At 900px (< 900px breakpoint), tagline should be hidden
-			const tagline = page.locator('.brand-tagline');
-			await expect(tagline).toBeHidden();
-		});
+		// Note: Tagline test removed - tagline was removed from toolbar in v0.4.5
 
 		test('brand name is still visible', async ({ page }) => {
 			const brandName = page.locator('.brand-name');
@@ -84,15 +96,17 @@ test.describe('Responsive Layout', () => {
 			expect(hasHorizontalScroll).toBe(false);
 		});
 
-		test('tooltips still work for icon-only buttons', async ({ page }) => {
-			const saveButton = page.getByRole('button', { name: /save/i });
-			await saveButton.hover();
+		test('drawer menu opens on hamburger click', async ({ page }) => {
+			// Click the toolbar brand to open the drawer
+			await page.locator('.toolbar-brand').click();
+			await page.waitForTimeout(200);
 
-			// Wait for tooltip to appear
-			await page.waitForTimeout(600); // Tooltip has 500ms delay
+			// Drawer should be visible with menu items
+			const drawer = page.locator('.toolbar-drawer');
+			await expect(drawer).toBeVisible();
 
-			const tooltip = page.locator('.tooltip');
-			await expect(tooltip).toBeVisible();
+			// Should contain action items
+			await expect(page.locator('.drawer-item:has-text("Save")')).toBeVisible();
 		});
 	});
 
@@ -107,8 +121,8 @@ test.describe('Responsive Layout', () => {
 			const brandName = page.locator('.brand-name');
 			await expect(brandName).toBeHidden();
 
-			// Logo (SVG) should still be visible
-			const logo = page.locator('.toolbar-brand svg');
+			// Logo (SVG) should still be visible - use specific class
+			const logo = page.locator('.toolbar-brand .logo-icon');
 			await expect(logo).toBeVisible();
 		});
 
@@ -124,13 +138,26 @@ test.describe('Responsive Layout', () => {
 		test.beforeEach(async ({ page }) => {
 			await page.setViewportSize({ width: 800, height: 600 });
 			await page.goto('/');
+			// Clear storage and set started flag
+			await page.evaluate(() => {
+				sessionStorage.clear();
+				localStorage.clear();
+				localStorage.setItem('rackarr_has_started', 'true');
+			});
+			await page.reload();
+			await page.waitForTimeout(500);
 
-			// Create a rack first (click New Rack on welcome screen)
-			const newRackBtn = page.getByRole('button', { name: /new rack/i }).first();
-			await newRackBtn.click();
+			// At 800px viewport, toolbar is in hamburger mode
+			// Open hamburger menu by clicking on toolbar brand
+			await page.locator('.toolbar-brand').click();
+			await page.waitForTimeout(200);
+
+			// Click New Rack in the drawer
+			await page.locator('.drawer-item:has-text("New Rack")').click();
 
 			// Wait for dialog and click Create
-			const createBtn = page.getByRole('button', { name: /create/i });
+			await page.locator('button:has-text("Replace")').click();
+			const createBtn = page.locator('button:has-text("Create")');
 			await createBtn.click();
 
 			// Wait for rack to be visible
@@ -174,12 +201,16 @@ test.describe('Responsive Layout', () => {
 
 		test('reset view button works', async ({ page }) => {
 			// Rack should already be created from beforeEach
-			// Click Reset View button
-			const resetButton = page.getByRole('button', { name: /reset view/i });
+			// At 800px viewport, need to use hamburger menu
+			await page.locator('.toolbar-brand').click();
+			await page.waitForTimeout(200);
+
+			// Click Reset View in the drawer
+			const resetButton = page.locator('.drawer-item:has-text("Reset View")');
 			await resetButton.click();
 
-			// Verify the button click worked without error
-			await expect(resetButton).toBeVisible();
+			// Verify drawer closed (button click worked)
+			await expect(page.locator('.toolbar-drawer:not([aria-hidden="true"])')).not.toBeVisible();
 		});
 	});
 });

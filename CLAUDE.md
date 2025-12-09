@@ -1,7 +1,7 @@
 # CLAUDE.md — Rackarr
 
 **Project:** Rackarr — Rack Layout Designer for Homelabbers
-**Version:** 0.4.9
+**Version:** 0.4.10
 
 ---
 
@@ -33,14 +33,23 @@ We follow [Cargo semver](https://doc.rust-lang.org/cargo/reference/semver.html) 
 **Current milestones:**
 
 - `0.4.x` — Stable single-rack workflow with YAML format
-- `0.4.9` — Airflow visualization with conflict detection
+- `0.4.10` — View reset on rack resize, toolbar polish
 - `1.0.0` — Production-ready, stable API
 
 ---
 
 ## Recent Changes
 
-### v0.4.9 (Current)
+### v0.4.10 (Current)
+
+**v0.4.10** — View reset on rack resize, toolbar polish
+
+- Auto-reset view when resizing rack height in EditPanel
+- View now centers on rack after height changes (preset buttons or numeric input)
+- Toolbar brand click only opens hamburger menu when in hamburger mode (< 1024px)
+- Brand area styled as button with border only in hamburger mode
+
+### v0.4.9
 
 **v0.4.9** — Airflow visualization
 

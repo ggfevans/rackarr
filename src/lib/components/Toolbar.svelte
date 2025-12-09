@@ -76,8 +76,31 @@
 	let drawerOpen = $state(false);
 	let brandRef: HTMLElement | null = $state(null);
 
+	// Track if we're in hamburger mode (< 1024px)
+	let isHamburgerMode = $state(false);
+
+	// Set up media query listener on mount
+	$effect(() => {
+		const mediaQuery = window.matchMedia('(max-width: 1023px)');
+		isHamburgerMode = mediaQuery.matches;
+
+		const handleChange = (e: MediaQueryListEvent) => {
+			isHamburgerMode = e.matches;
+			// Close drawer if switching to full mode
+			if (!e.matches) {
+				drawerOpen = false;
+			}
+		};
+
+		mediaQuery.addEventListener('change', handleChange);
+		return () => mediaQuery.removeEventListener('change', handleChange);
+	});
+
 	function toggleDrawer() {
-		drawerOpen = !drawerOpen;
+		// Only toggle drawer in hamburger mode
+		if (isHamburgerMode) {
+			drawerOpen = !drawerOpen;
+		}
 	}
 
 	function closeDrawer() {
@@ -104,21 +127,28 @@
 <header class="toolbar">
 	<!-- Left section: Branding -->
 	<div class="toolbar-section toolbar-left">
-		<button
-			bind:this={brandRef}
-			class="toolbar-brand"
-			type="button"
-			aria-expanded={drawerOpen}
-			aria-controls="toolbar-drawer"
-			aria-label={drawerOpen ? 'Close menu' : 'Open menu'}
-			onclick={toggleDrawer}
-		>
-			<IconLogo size={36} />
-			<span class="brand-name">Rackarr</span>
-			<span class="hamburger-icon" aria-hidden="true">
-				<IconMenu size={20} />
-			</span>
-		</button>
+		{#if isHamburgerMode}
+			<button
+				bind:this={brandRef}
+				class="toolbar-brand hamburger-mode"
+				type="button"
+				aria-expanded={drawerOpen}
+				aria-controls="toolbar-drawer"
+				aria-label={drawerOpen ? 'Close menu' : 'Open menu'}
+				onclick={toggleDrawer}
+			>
+				<IconLogo size={36} />
+				<span class="brand-name">Rackarr</span>
+				<span class="hamburger-icon" aria-hidden="true">
+					<IconMenu size={20} />
+				</span>
+			</button>
+		{:else}
+			<div class="toolbar-brand">
+				<IconLogo size={36} />
+				<span class="brand-name">Rackarr</span>
+			</div>
+		{/if}
 	</div>
 
 	<!-- Center section: Main actions -->
@@ -477,24 +507,6 @@
 			display: none;
 		}
 
-		.hamburger-icon {
-			display: flex;
-		}
-
-		.toolbar-brand {
-			cursor: pointer;
-			padding: var(--space-2);
-		}
-
-		.toolbar-brand:hover {
-			background: var(--colour-surface-hover);
-		}
-
-		.toolbar-brand:focus-visible {
-			outline: none;
-			box-shadow: 0 0 0 2px var(--colour-focus-ring);
-		}
-
 		/* Keep theme toggle icon-only in hamburger mode */
 		.theme-toggle-btn span {
 			display: none;
@@ -503,6 +515,29 @@
 		.theme-toggle-btn {
 			padding: var(--space-2);
 		}
+	}
+
+	/* Hamburger mode button styles (applied via JS class) */
+	.toolbar-brand.hamburger-mode {
+		cursor: pointer;
+		padding: var(--space-2);
+		border: 1px solid var(--colour-border);
+		border-radius: var(--radius-md);
+		background: transparent;
+	}
+
+	.toolbar-brand.hamburger-mode .hamburger-icon {
+		display: flex;
+	}
+
+	.toolbar-brand.hamburger-mode:hover {
+		background: var(--colour-surface-hover);
+		border-color: var(--colour-border-hover, var(--colour-border));
+	}
+
+	.toolbar-brand.hamburger-mode:focus-visible {
+		outline: none;
+		box-shadow: 0 0 0 2px var(--colour-focus-ring);
 	}
 
 	/* Responsive: Small screens - icon-only branding */

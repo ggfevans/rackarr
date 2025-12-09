@@ -379,6 +379,42 @@ currentZoom: number(0.25 - 2.0);
 (zoomIn(), zoomOut(), fitAll(), resetZoom());
 ```
 
+### 6.6 Auto-Reset View Behavior
+
+The view automatically resets (calls `fitAll()`) to center the rack when:
+
+| Trigger            | Description                             |
+| ------------------ | --------------------------------------- |
+| Layout load        | After loading a `.rackarr.zip` file     |
+| New rack creation  | After creating a new rack via the form  |
+| Rack height change | After resizing rack height in EditPanel |
+
+This ensures the rack is always visible and centered after significant layout changes.
+
+### 6.7 Toolbar Responsive Behavior
+
+The toolbar adapts to viewport width with two distinct modes:
+
+| Mode      | Viewport | Behavior                                    |
+| --------- | -------- | ------------------------------------------- |
+| Full      | ≥ 1024px | All action buttons visible in toolbar       |
+| Hamburger | < 1024px | Buttons hidden, accessed via hamburger menu |
+
+**Hamburger Mode Behavior:**
+
+- The brand area (logo + text) becomes clickable to open the drawer menu
+- Visual styling indicates interactivity (button-like border/outline)
+- The hamburger icon (☰) appears next to the brand
+- No action buttons visible except theme toggle (far right)
+- Drawer slides in from right with all action items
+
+**Full Mode Behavior:**
+
+- Brand area is NOT clickable (no drawer interaction)
+- All action buttons visible in toolbar
+- No hamburger icon visible
+- Standard toolbar layout
+
 ---
 
 ## 7. Keyboard Shortcuts

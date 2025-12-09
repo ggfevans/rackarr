@@ -8,7 +8,7 @@ import JSZip from 'jszip';
  * In v0.2, a rack always exists. To create a new one, we go through the replace dialog.
  */
 async function replaceRack(page: Page, name: string, height: number = 24) {
-	await page.click('button[aria-label="New Rack"]');
+	await page.click('.toolbar-action-btn[aria-label="New Rack"]');
 	await page.click('button:has-text("Replace")');
 
 	await page.fill('#rack-name', name);
@@ -128,7 +128,7 @@ test.describe('Archive Format', () => {
 		const downloadPromise = page.waitForEvent('download');
 
 		// Click save button
-		await page.click('button[aria-label="Save"]');
+		await page.click('.toolbar-action-btn[aria-label="Save"]');
 
 		// Wait for download
 		const download = await downloadPromise;
@@ -156,7 +156,7 @@ test.describe('Archive Format', () => {
 		await expect(page.locator('.rack-device')).toBeVisible({ timeout: 5000 });
 
 		const downloadPromise = page.waitForEvent('download');
-		await page.click('button[aria-label="Save"]');
+		await page.click('.toolbar-action-btn[aria-label="Save"]');
 		const download = await downloadPromise;
 
 		const savedPath = path.join(downloadsPath, 'saved-layout.rackarr.zip');
@@ -169,7 +169,7 @@ test.describe('Archive Format', () => {
 
 		// In v0.2, there's no welcome screen. Click Load button in toolbar.
 		const fileChooserPromise = page.waitForEvent('filechooser');
-		await page.click('button[aria-label="Load Layout"]');
+		await page.click('.toolbar-action-btn[aria-label="Load Layout"]');
 		const fileChooser = await fileChooserPromise;
 		await fileChooser.setFiles(savedPath);
 
@@ -189,7 +189,7 @@ test.describe('Archive Format', () => {
 	}) => {
 		// In v0.4.0, legacy format support was removed
 		const fileChooserPromise = page.waitForEvent('filechooser');
-		await page.click('button[aria-label="Load Layout"]');
+		await page.click('.toolbar-action-btn[aria-label="Load Layout"]');
 		const fileChooser = await fileChooserPromise;
 		await fileChooser.setFiles(legacyJsonPath);
 
@@ -204,7 +204,7 @@ test.describe('Archive Format', () => {
 
 		// In v0.2, click Load button in toolbar
 		const fileChooserPromise = page.waitForEvent('filechooser');
-		await page.click('button[aria-label="Load Layout"]');
+		await page.click('.toolbar-action-btn[aria-label="Load Layout"]');
 		const fileChooser = await fileChooserPromise;
 		await fileChooser.setFiles(corruptedPath);
 

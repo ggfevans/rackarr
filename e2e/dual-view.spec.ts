@@ -5,7 +5,7 @@ import { test, expect, Page } from '@playwright/test';
  * Note: In dual-view mode, there are two .rack-container elements (front and rear)
  */
 async function replaceRack(page: Page, name: string, height: number) {
-	await page.click('button[aria-label="New Rack"]');
+	await page.click('.toolbar-action-btn[aria-label="New Rack"]');
 	await page.click('button:has-text("Replace")');
 	await page.fill('#rack-name', name);
 
@@ -224,7 +224,7 @@ test.describe('Dual-View Export', () => {
 	});
 
 	test('export dialog has view selection', async ({ page }) => {
-		await page.click('button[aria-label="Export"]');
+		await page.click('.toolbar-action-btn[aria-label="Export"]');
 		await expect(page.locator('.dialog')).toBeVisible();
 
 		// Should have view select dropdown
@@ -238,7 +238,7 @@ test.describe('Dual-View Export', () => {
 	});
 
 	test('export with both views downloads file', async ({ page }) => {
-		await page.click('button[aria-label="Export"]');
+		await page.click('.toolbar-action-btn[aria-label="Export"]');
 
 		// Select both views (should be default)
 		await page.selectOption('#export-view', 'both');
@@ -255,7 +255,7 @@ test.describe('Dual-View Export', () => {
 	});
 
 	test('export with front view only downloads file', async ({ page }) => {
-		await page.click('button[aria-label="Export"]');
+		await page.click('.toolbar-action-btn[aria-label="Export"]');
 
 		// Select front view only
 		await page.selectOption('#export-view', 'front');
@@ -272,7 +272,7 @@ test.describe('Dual-View Export', () => {
 	});
 
 	test('export with rear view only downloads file', async ({ page }) => {
-		await page.click('button[aria-label="Export"]');
+		await page.click('.toolbar-action-btn[aria-label="Export"]');
 
 		// Select rear view only
 		await page.selectOption('#export-view', 'rear');
@@ -289,7 +289,7 @@ test.describe('Dual-View Export', () => {
 	});
 
 	test('SVG export with both views contains two rack renderings', async ({ page }) => {
-		await page.click('button[aria-label="Export"]');
+		await page.click('.toolbar-action-btn[aria-label="Export"]');
 
 		// Select SVG format for easier inspection
 		await page.selectOption('#export-format', 'svg');

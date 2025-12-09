@@ -8,12 +8,14 @@
 	import { getLayoutStore } from '$lib/stores/layout.svelte';
 	import { getSelectionStore } from '$lib/stores/selection.svelte';
 	import { getUIStore } from '$lib/stores/ui.svelte';
+	import { getCanvasStore } from '$lib/stores/canvas.svelte';
 	import { COMMON_RACK_HEIGHTS } from '$lib/types/constants';
 	import type { Rack, Device, PlacedDevice, DeviceFace, Airflow } from '$lib/types';
 
 	const layoutStore = getLayoutStore();
 	const selectionStore = getSelectionStore();
 	const uiStore = getUIStore();
+	const canvasStore = getCanvasStore();
 
 	// Local state for form fields
 	let rackName = $state('');
@@ -97,6 +99,8 @@
 		const newHeight = parseInt(target.value, 10);
 		if (selectedRack && !rackHasDevices && newHeight >= 1 && newHeight <= 100) {
 			layoutStore.updateRack(selectedRack.id, { height: newHeight });
+			// Reset view to center the resized rack
+			canvasStore.fitAll(layoutStore.racks);
 		}
 	}
 
@@ -246,6 +250,8 @@
 									rackHeight = preset;
 									if (selectedRack) {
 										layoutStore.updateRack(selectedRack.id, { height: preset });
+										// Reset view to center the resized rack
+										canvasStore.fitAll(layoutStore.racks);
 									}
 								}}
 							>

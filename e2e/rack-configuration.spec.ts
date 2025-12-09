@@ -5,7 +5,7 @@ import { test, expect, Page } from '@playwright/test';
  * In v0.2, a rack always exists. Clicking New Rack opens replace dialog first.
  */
 async function openNewRackForm(page: Page) {
-	await page.click('button[aria-label="New Rack"]');
+	await page.click('.toolbar-action-btn[aria-label="New Rack"]');
 	await page.click('button:has-text("Replace")');
 	await expect(page.locator('.dialog')).toBeVisible();
 }

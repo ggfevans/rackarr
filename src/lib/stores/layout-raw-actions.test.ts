@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeEach } from 'vitest';
 import { getLayoutStore, resetLayoutStore } from './layout.svelte';
-import type { DeviceType, PlacedDevice } from '$lib/types/v02';
+import type { DeviceType, PlacedDevice } from '$lib/types';
 
 function createTestDeviceType(overrides: Partial<DeviceType> = {}): DeviceType {
 	return {
@@ -196,7 +196,7 @@ describe('Layout Store - Raw Actions', () => {
 				height: 24,
 				width: 10 as const,
 				desc_units: true,
-				form_factor: '2-post-frame' as const,
+				form_factor: '2-post' as const,
 				starting_unit: 0,
 				position: 0,
 				devices: []

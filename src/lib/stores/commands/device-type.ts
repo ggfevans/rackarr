@@ -3,7 +3,7 @@
  */
 
 import type { Command } from './types';
-import type { DeviceType, PlacedDevice } from '$lib/types/v02';
+import type { DeviceType, PlacedDevice } from '$lib/types';
 
 /**
  * Interface for layout store operations needed by device type commands

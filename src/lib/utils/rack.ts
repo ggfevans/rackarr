@@ -3,7 +3,7 @@
  * Pure functions for rack operations
  */
 
-import type { Device, FormFactor, Rack, RackView } from '$lib/types';
+import type { DeviceType, FormFactor, Rack, RackView } from '$lib/types';
 import {
 	MIN_RACK_HEIGHT,
 	MAX_RACK_HEIGHT,
@@ -11,7 +11,6 @@ import {
 	ALLOWED_RACK_WIDTHS,
 	DEFAULT_RACK_VIEW
 } from '$lib/types/constants';
-import { generateId } from './device';
 
 /**
  * Create a new rack with sensible defaults
@@ -20,16 +19,15 @@ export function createRack(
 	name: string,
 	height: number,
 	view?: RackView,
-	width?: number,
+	width?: 10 | 19,
 	form_factor?: FormFactor,
 	desc_units?: boolean,
 	starting_unit?: number
 ): Rack {
 	return {
-		id: generateId(),
 		name,
 		height,
-		width: width ?? STANDARD_RACK_WIDTH,
+		width: width ?? (STANDARD_RACK_WIDTH as 10 | 19),
 		position: 0,
 		view: view ?? DEFAULT_RACK_VIEW,
 		devices: [],
@@ -80,14 +78,14 @@ export function validateRack(rack: Rack): RackValidationResult {
  * @param deviceLibrary - The device library to look up device heights
  * @returns Set of occupied U positions
  */
-export function getOccupiedUs(rack: Rack, deviceLibrary: Device[]): Set<number> {
+export function getOccupiedUs(rack: Rack, deviceLibrary: DeviceType[]): Set<number> {
 	const occupied = new Set<number>();
 
 	for (const placedDevice of rack.devices) {
-		const device = deviceLibrary.find((d) => d.id === placedDevice.libraryId);
+		const device = deviceLibrary.find((d) => d.slug === placedDevice.device_type);
 		if (device) {
 			// Device at position P with height H occupies Us P through P+H-1
-			for (let u = placedDevice.position; u < placedDevice.position + device.height; u++) {
+			for (let u = placedDevice.position; u < placedDevice.position + device.u_height; u++) {
 				occupied.add(u);
 			}
 		}
@@ -103,20 +101,19 @@ export function getOccupiedUs(rack: Rack, deviceLibrary: Device[]): Set<number> 
  * @param uPosition - The U position to check
  * @returns true if the position is available, false if occupied
  */
-export function isUAvailable(rack: Rack, deviceLibrary: Device[], uPosition: number): boolean {
+export function isUAvailable(rack: Rack, deviceLibrary: DeviceType[], uPosition: number): boolean {
 	const occupied = getOccupiedUs(rack, deviceLibrary);
 	return !occupied.has(uPosition);
 }
 
 /**
- * Create a deep copy of a rack with a new ID
+ * Create a deep copy of a rack
  * @param rack - The rack to duplicate
- * @returns A new rack with a new ID, copied name, and copied devices
+ * @returns A new rack with copied name and copied devices
  */
 export function duplicateRack(rack: Rack): Rack {
 	return {
 		...rack,
-		id: generateId(),
 		name: `${rack.name} (Copy)`,
 		position: rack.position + 1,
 		devices: rack.devices.map((device) => ({ ...device }))

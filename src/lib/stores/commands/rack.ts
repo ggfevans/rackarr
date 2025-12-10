@@ -3,7 +3,7 @@
  */
 
 import type { Command } from './types';
-import type { Rack, PlacedDevice } from '$lib/types/v02';
+import type { Rack, PlacedDevice } from '$lib/types';
 
 /**
  * Rack settings that can be updated

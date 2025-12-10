@@ -22,8 +22,8 @@ describe('Rack Reordering (Single-Rack Mode)', () => {
 			// Attempt to reorder - should do nothing
 			layoutStore.reorderRacks(0, 1);
 
-			expect(layoutStore.racks).toHaveLength(1);
-			expect(layoutStore.racks[0]!.name).toBe('Only Rack');
+			expect(layoutStore.rackCount).toBe(1);
+			expect(layoutStore.rack!.name).toBe('Only Rack');
 		});
 
 		// Note: Selection tests are covered in selection-store.test.ts

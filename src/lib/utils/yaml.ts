@@ -1,10 +1,10 @@
 /**
  * YAML Serialization Utilities
- * For v0.2 folder-based project format
+ * For folder-based project format
  */
 
 import yaml from 'js-yaml';
-import type { Layout, Rack } from '$lib/types/v02';
+import type { Layout, Rack } from '$lib/types';
 import { LayoutSchema } from '$lib/schemas';
 
 /**
@@ -28,7 +28,7 @@ export function parseYaml<T = unknown>(yamlString: string): T {
 }
 
 /**
- * Serialize a v0.2 layout to YAML string
+ * Serialize a layout to YAML string
  * Excludes runtime-only fields (view)
  */
 export function serializeLayoutToYaml(layout: Layout): string {
@@ -47,7 +47,7 @@ export function serializeLayoutToYaml(layout: Layout): string {
 }
 
 /**
- * Parse YAML string to v0.2 layout
+ * Parse YAML string to layout
  * Validates against schema and adds runtime defaults
  */
 export function parseLayoutYaml(yamlString: string): Layout {

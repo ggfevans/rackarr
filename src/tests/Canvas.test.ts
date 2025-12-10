@@ -111,10 +111,10 @@ describe('Canvas Component', () => {
 		it('clicking empty space clears selection', async () => {
 			const layoutStore = getLayoutStore();
 			layoutStore.addRack('Test Rack', 12);
+			const RACK_ID = 'rack-0';
 
 			const selectionStore = getSelectionStore();
-			const rack = layoutStore.racks[0];
-			selectionStore.selectRack(rack!.id);
+			selectionStore.selectRack(RACK_ID);
 
 			expect(selectionStore.hasSelection).toBe(true);
 
@@ -131,10 +131,10 @@ describe('Canvas Component', () => {
 		it('passes selected state to dual-view container', () => {
 			const layoutStore = getLayoutStore();
 			layoutStore.addRack('Test Rack', 12);
+			const RACK_ID = 'rack-0';
 
 			const selectionStore = getSelectionStore();
-			const rack = layoutStore.racks[0];
-			selectionStore.selectRack(rack!.id);
+			selectionStore.selectRack(RACK_ID);
 
 			const { container } = render(Canvas);
 
@@ -276,10 +276,10 @@ describe('Canvas with RackDualView (v0.4)', () => {
 		it('selection outline appears on dual-view container', () => {
 			const layoutStore = getLayoutStore();
 			layoutStore.addRack('Test Rack', 12);
+			const RACK_ID = 'rack-0';
 
 			const selectionStore = getSelectionStore();
-			const rack = layoutStore.racks[0];
-			selectionStore.selectRack(rack!.id);
+			selectionStore.selectRack(RACK_ID);
 
 			const { container } = render(Canvas);
 
@@ -293,6 +293,7 @@ describe('Canvas with RackDualView (v0.4)', () => {
 		it('front-face device appears only in front view', () => {
 			const layoutStore = getLayoutStore();
 			layoutStore.addRack('Test Rack', 12);
+			const RACK_ID = 'rack-0';
 			// Add a device type to the library
 			const deviceType = layoutStore.addDeviceType({
 				name: 'Front Device',
@@ -302,8 +303,7 @@ describe('Canvas with RackDualView (v0.4)', () => {
 				is_full_depth: false
 			});
 			// Place the device with face='front'
-			const rack = layoutStore.racks[0]!;
-			layoutStore.placeDevice(rack.id, deviceType.slug, 1, 'front');
+			layoutStore.placeDevice(RACK_ID, deviceType.slug, 1, 'front');
 
 			const { container } = render(Canvas);
 
@@ -319,6 +319,7 @@ describe('Canvas with RackDualView (v0.4)', () => {
 		it('rear-face device appears only in rear view', () => {
 			const layoutStore = getLayoutStore();
 			layoutStore.addRack('Test Rack', 12);
+			const RACK_ID = 'rack-0';
 			const deviceType = layoutStore.addDeviceType({
 				name: 'Rear Device',
 				u_height: 1,
@@ -326,8 +327,7 @@ describe('Canvas with RackDualView (v0.4)', () => {
 				colour: '#888888',
 				is_full_depth: false
 			});
-			const rack = layoutStore.racks[0]!;
-			layoutStore.placeDevice(rack.id, deviceType.slug, 1, 'rear');
+			layoutStore.placeDevice(RACK_ID, deviceType.slug, 1, 'rear');
 
 			const { container } = render(Canvas);
 
@@ -343,6 +343,7 @@ describe('Canvas with RackDualView (v0.4)', () => {
 		it('both-face device appears in both views', () => {
 			const layoutStore = getLayoutStore();
 			layoutStore.addRack('Test Rack', 12);
+			const RACK_ID = 'rack-0';
 			const deviceType = layoutStore.addDeviceType({
 				name: 'Full Depth Device',
 				u_height: 1,
@@ -350,8 +351,7 @@ describe('Canvas with RackDualView (v0.4)', () => {
 				colour: '#888888',
 				is_full_depth: true
 			});
-			const rack = layoutStore.racks[0]!;
-			layoutStore.placeDevice(rack.id, deviceType.slug, 1, 'both');
+			layoutStore.placeDevice(RACK_ID, deviceType.slug, 1, 'both');
 
 			const { container } = render(Canvas);
 

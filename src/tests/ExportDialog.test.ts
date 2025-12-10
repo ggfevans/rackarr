@@ -6,21 +6,23 @@ import type { Rack } from '$lib/types';
 describe('ExportDialog', () => {
 	const mockRacks: Rack[] = [
 		{
-			id: 'rack-1',
 			name: 'Rack 1',
 			height: 42,
 			width: 19,
 			position: 0,
-			view: 'front',
+			desc_units: false,
+			form_factor: '4-post',
+			starting_unit: 1,
 			devices: []
 		},
 		{
-			id: 'rack-2',
 			name: 'Rack 2',
 			height: 24,
 			width: 19,
 			position: 1,
-			view: 'front',
+			desc_units: false,
+			form_factor: '4-post',
+			starting_unit: 1,
 			devices: []
 		}
 	];

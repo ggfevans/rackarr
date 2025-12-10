@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import type {
-	Device,
+	DeviceType,
 	PlacedDevice,
 	Rack,
 	Layout,
@@ -10,9 +10,9 @@ import type {
 	DeviceFace,
 	Airflow,
 	WeightUnit,
-	DeviceImages,
 	FormFactor,
-	DisplayMode
+	DisplayMode,
+	RackarrDeviceTypeExtensions
 } from '$lib/types';
 import {
 	CATEGORY_COLOURS,
@@ -24,89 +24,105 @@ import {
 } from '$lib/types/constants';
 
 describe('Types', () => {
-	describe('Device interface', () => {
-		it('accepts valid device object', () => {
-			const device: Device = {
-				id: '123e4567-e89b-12d3-a456-426614174000',
-				name: '1U Server',
-				height: 1,
+	describe('DeviceType interface', () => {
+		it('accepts valid device type object', () => {
+			const deviceType: DeviceType = {
+				slug: '1u-server',
+				u_height: 1,
+				rackarr: {
+					colour: '#4A90D9',
+					category: 'server'
+				}
+			};
+
+			expect(deviceType.slug).toBe('1u-server');
+			expect(deviceType.u_height).toBe(1);
+			expect(deviceType.rackarr.colour).toBe('#4A90D9');
+			expect(deviceType.rackarr.category).toBe('server');
+		});
+
+		it('accepts device type with optional comments', () => {
+			const deviceType: DeviceType = {
+				slug: '2u-server',
+				u_height: 2,
+				comments: 'Primary application server',
+				rackarr: {
+					colour: '#4A90D9',
+					category: 'server'
+				}
+			};
+
+			expect(deviceType.comments).toBe('Primary application server');
+		});
+
+		it('accepts device type with all optional fields', () => {
+			const deviceType: DeviceType = {
+				slug: 'dell-r740',
+				u_height: 2,
+				manufacturer: 'Dell',
+				model: 'PowerEdge R740',
+				is_full_depth: true,
+				weight: 25.5,
+				weight_unit: 'kg',
+				airflow: 'front-to-rear',
+				comments: 'Primary database server',
+				rackarr: {
+					colour: '#4A90D9',
+					category: 'server',
+					tags: ['production', 'database']
+				}
+			};
+
+			expect(deviceType.manufacturer).toBe('Dell');
+			expect(deviceType.model).toBe('PowerEdge R740');
+			expect(deviceType.is_full_depth).toBe(true);
+			expect(deviceType.weight).toBe(25.5);
+			expect(deviceType.weight_unit).toBe('kg');
+			expect(deviceType.airflow).toBe('front-to-rear');
+			expect(deviceType.rackarr.tags).toEqual(['production', 'database']);
+		});
+
+		it('works without optional fields', () => {
+			const deviceType: DeviceType = {
+				slug: '1u-switch',
+				u_height: 1,
+				rackarr: {
+					colour: '#7B68EE',
+					category: 'network'
+				}
+			};
+
+			expect(deviceType.manufacturer).toBeUndefined();
+			expect(deviceType.model).toBeUndefined();
+			expect(deviceType.airflow).toBeUndefined();
+			expect(deviceType.weight).toBeUndefined();
+		});
+	});
+
+	describe('RackarrDeviceTypeExtensions interface', () => {
+		it('requires colour and category', () => {
+			const extensions: RackarrDeviceTypeExtensions = {
 				colour: '#4A90D9',
 				category: 'server'
 			};
 
-			expect(device.id).toBe('123e4567-e89b-12d3-a456-426614174000');
-			expect(device.name).toBe('1U Server');
-			expect(device.height).toBe(1);
-			expect(device.colour).toBe('#4A90D9');
-			expect(device.category).toBe('server');
+			expect(extensions.colour).toBe('#4A90D9');
+			expect(extensions.category).toBe('server');
 		});
 
-		it('accepts device with optional notes', () => {
-			const device: Device = {
-				id: '123e4567-e89b-12d3-a456-426614174000',
-				name: '2U Server',
-				height: 2,
+		it('accepts optional tags', () => {
+			const extensions: RackarrDeviceTypeExtensions = {
 				colour: '#4A90D9',
 				category: 'server',
-				notes: 'Primary application server'
+				tags: ['primary', 'production']
 			};
 
-			expect(device.notes).toBe('Primary application server');
-		});
-
-		it('accepts device with all optional fields', () => {
-			const device: Device = {
-				id: '123e4567-e89b-12d3-a456-426614174000',
-				name: 'Dell R740',
-				height: 2,
-				colour: '#4A90D9',
-				category: 'server',
-				notes: 'Primary database server',
-				manufacturer: 'Dell',
-				model: 'PowerEdge R740',
-				part_number: 'R740-SKU-001',
-				airflow: 'front-to-rear',
-				weight: 25.5,
-				weight_unit: 'kg',
-				is_full_depth: true,
-				face: 'both',
-				images: {
-					front: 'images/dell-r740-front.png',
-					rear: 'images/dell-r740-rear.png'
-				}
-			};
-
-			expect(device.manufacturer).toBe('Dell');
-			expect(device.model).toBe('PowerEdge R740');
-			expect(device.part_number).toBe('R740-SKU-001');
-			expect(device.airflow).toBe('front-to-rear');
-			expect(device.weight).toBe(25.5);
-			expect(device.weight_unit).toBe('kg');
-			expect(device.is_full_depth).toBe(true);
-			expect(device.face).toBe('both');
-			expect(device.images?.front).toBe('images/dell-r740-front.png');
-			expect(device.images?.rear).toBe('images/dell-r740-rear.png');
-		});
-
-		it('works without optional fields (backwards compatible)', () => {
-			const device: Device = {
-				id: 'simple-device',
-				name: '1U Switch',
-				height: 1,
-				colour: '#7B68EE',
-				category: 'network'
-			};
-
-			expect(device.manufacturer).toBeUndefined();
-			expect(device.model).toBeUndefined();
-			expect(device.airflow).toBeUndefined();
-			expect(device.weight).toBeUndefined();
-			expect(device.images).toBeUndefined();
+			expect(extensions.tags).toEqual(['primary', 'production']);
 		});
 	});
 
 	describe('Airflow type', () => {
-		it('accepts all valid airflow values (4 types as of v0.5.0)', () => {
+		it('accepts all valid airflow values (4 types)', () => {
 			const airflowValues: Airflow[] = [
 				'passive',
 				'front-to-rear',
@@ -123,67 +139,51 @@ describe('Types', () => {
 
 	describe('WeightUnit type', () => {
 		it('accepts all valid weight unit values', () => {
-			const weightUnits: WeightUnit[] = ['kg', 'g', 'lb', 'oz'];
+			const weightUnits: WeightUnit[] = ['kg', 'lb'];
 
-			expect(weightUnits).toHaveLength(4);
+			expect(weightUnits).toHaveLength(2);
 			expect(weightUnits).toContain('kg');
-			expect(weightUnits).toContain('g');
 			expect(weightUnits).toContain('lb');
-			expect(weightUnits).toContain('oz');
-		});
-	});
-
-	describe('DeviceImages interface', () => {
-		it('accepts front and rear image paths', () => {
-			const images: DeviceImages = {
-				front: 'images/device-front.png',
-				rear: 'images/device-rear.png'
-			};
-
-			expect(images.front).toBe('images/device-front.png');
-			expect(images.rear).toBe('images/device-rear.png');
-		});
-
-		it('allows optional front and rear', () => {
-			const frontOnly: DeviceImages = { front: 'front.png' };
-			const rearOnly: DeviceImages = { rear: 'rear.png' };
-			const empty: DeviceImages = {};
-
-			expect(frontOnly.front).toBe('front.png');
-			expect(frontOnly.rear).toBeUndefined();
-			expect(rearOnly.rear).toBe('rear.png');
-			expect(rearOnly.front).toBeUndefined();
-			expect(empty.front).toBeUndefined();
-			expect(empty.rear).toBeUndefined();
 		});
 	});
 
 	describe('PlacedDevice interface', () => {
-		it('references library device correctly', () => {
+		it('references device type by slug correctly', () => {
 			const placedDevice: PlacedDevice = {
-				libraryId: '123e4567-e89b-12d3-a456-426614174000',
+				device_type: 'dell-r740',
 				position: 5,
 				face: 'front'
 			};
 
-			expect(placedDevice.libraryId).toBe('123e4567-e89b-12d3-a456-426614174000');
+			expect(placedDevice.device_type).toBe('dell-r740');
 			expect(placedDevice.position).toBe(5);
 			expect(placedDevice.face).toBe('front');
 		});
 
+		it('accepts optional custom name', () => {
+			const placedDevice: PlacedDevice = {
+				device_type: 'dell-r740',
+				position: 5,
+				face: 'front',
+				name: 'Web Server 1'
+			};
+
+			expect(placedDevice.name).toBe('Web Server 1');
+		});
+
 		it('accepts all valid face values', () => {
 			const frontDevice: PlacedDevice = {
-				libraryId: 'dev-1',
+				device_type: 'dev-1',
 				position: 1,
 				face: 'front'
 			};
 			const rearDevice: PlacedDevice = {
-				libraryId: 'dev-2',
+				device_type: 'dev-2',
 				position: 2,
 				face: 'rear'
 			};
 			const bothDevice: PlacedDevice = {
-				libraryId: 'dev-3',
+				device_type: 'dev-3',
 				position: 3,
 				face: 'both'
 			};
@@ -195,35 +195,39 @@ describe('Types', () => {
 	});
 
 	describe('Rack interface', () => {
-		it('accepts valid rack object with view', () => {
+		it('accepts valid rack object', () => {
 			const rack: Rack = {
-				id: '123e4567-e89b-12d3-a456-426614174001',
 				name: 'Main Rack',
 				height: 42,
 				width: 19,
+				desc_units: false,
+				form_factor: '4-post-cabinet',
+				starting_unit: 1,
 				position: 0,
-				view: 'front',
 				devices: []
 			};
 
-			expect(rack.id).toBe('123e4567-e89b-12d3-a456-426614174001');
 			expect(rack.name).toBe('Main Rack');
 			expect(rack.height).toBe(42);
 			expect(rack.width).toBe(19);
+			expect(rack.desc_units).toBe(false);
+			expect(rack.form_factor).toBe('4-post-cabinet');
+			expect(rack.starting_unit).toBe(1);
 			expect(rack.position).toBe(0);
-			expect(rack.view).toBe('front');
 			expect(rack.devices).toEqual([]);
 		});
 
-		it('accepts rack with rear view', () => {
+		it('accepts rack with runtime view', () => {
 			const rack: Rack = {
-				id: '123e4567-e89b-12d3-a456-426614174001',
 				name: 'Rear Rack',
 				height: 42,
 				width: 19,
+				desc_units: false,
+				form_factor: '4-post-cabinet',
+				starting_unit: 1,
 				position: 0,
-				view: 'rear',
-				devices: []
+				devices: [],
+				view: 'rear'
 			};
 
 			expect(rack.view).toBe('rear');
@@ -231,90 +235,68 @@ describe('Types', () => {
 
 		it('accepts rack with placed devices', () => {
 			const rack: Rack = {
-				id: '123e4567-e89b-12d3-a456-426614174001',
 				name: 'Main Rack',
 				height: 42,
 				width: 19,
+				desc_units: false,
+				form_factor: '4-post-cabinet',
+				starting_unit: 1,
 				position: 0,
-				view: 'front',
 				devices: [
-					{ libraryId: 'device-1', position: 1, face: 'front' },
-					{ libraryId: 'device-2', position: 5, face: 'both' }
+					{ device_type: 'device-1', position: 1, face: 'front' },
+					{ device_type: 'device-2', position: 5, face: 'both' }
 				]
 			};
 
 			expect(rack.devices).toHaveLength(2);
-			expect(rack.devices[0]?.libraryId).toBe('device-1');
+			expect(rack.devices[0]?.device_type).toBe('device-1');
 			expect(rack.devices[0]?.position).toBe(1);
 			expect(rack.devices[0]?.face).toBe('front');
 		});
 
-		it('accepts rack with all configuration fields', () => {
-			const rack: Rack = {
-				id: '123e4567-e89b-12d3-a456-426614174001',
-				name: 'Configured Rack',
-				height: 42,
-				width: 19,
-				position: 0,
-				view: 'front',
-				devices: [],
-				form_factor: '4-post-cabinet',
-				desc_units: false,
-				starting_unit: 1
-			};
-
-			expect(rack.form_factor).toBe('4-post-cabinet');
-			expect(rack.desc_units).toBe(false);
-			expect(rack.starting_unit).toBe(1);
-		});
-
 		it('accepts rack with descending units', () => {
 			const rack: Rack = {
-				id: '123e4567-e89b-12d3-a456-426614174001',
 				name: 'Descending Rack',
 				height: 42,
 				width: 19,
-				position: 0,
-				view: 'front',
-				devices: [],
 				desc_units: true,
-				starting_unit: 5
+				form_factor: '4-post-cabinet',
+				starting_unit: 5,
+				position: 0,
+				devices: []
 			};
 
 			expect(rack.desc_units).toBe(true);
 			expect(rack.starting_unit).toBe(5);
 		});
 
-		it('works without optional configuration fields (backwards compatible)', () => {
+		it('accepts 10-inch rack width', () => {
 			const rack: Rack = {
-				id: '123e4567-e89b-12d3-a456-426614174001',
-				name: 'Simple Rack',
-				height: 42,
-				width: 19,
+				name: 'Narrow Rack',
+				height: 12,
+				width: 10,
+				desc_units: false,
+				form_factor: 'wall-mount',
+				starting_unit: 1,
 				position: 0,
-				view: 'front',
 				devices: []
 			};
 
-			expect(rack.form_factor).toBeUndefined();
-			expect(rack.desc_units).toBeUndefined();
-			expect(rack.starting_unit).toBeUndefined();
+			expect(rack.width).toBe(10);
 		});
 	});
 
 	describe('FormFactor type', () => {
 		it('accepts all valid form factor values', () => {
 			const formFactors: FormFactor[] = [
+				'2-post',
+				'4-post',
 				'4-post-cabinet',
-				'4-post-frame',
-				'2-post-frame',
-				'wall-cabinet',
-				'wall-frame',
-				'wall-frame-vertical',
-				'wall-cabinet-vertical'
+				'wall-mount',
+				'open-frame'
 			];
 
-			expect(formFactors).toHaveLength(7);
+			expect(formFactors).toHaveLength(5);
 			formFactors.forEach((value) => {
 				expect(typeof value).toBe('string');
 			});
@@ -346,104 +328,92 @@ describe('Types', () => {
 	describe('Layout interface', () => {
 		it('accepts valid layout object', () => {
 			const layout: Layout = {
-				version: '1.0',
+				version: '0.2.0',
 				name: 'My Homelab',
-				created: '2025-01-15T10:30:00Z',
-				modified: '2025-01-15T14:45:00Z',
-				settings: {
-					theme: 'dark'
+				rack: {
+					name: 'Main Rack',
+					height: 42,
+					width: 19,
+					desc_units: false,
+					form_factor: '4-post-cabinet',
+					starting_unit: 1,
+					position: 0,
+					devices: []
 				},
-				deviceLibrary: [],
-				racks: []
+				device_types: [],
+				settings: {
+					display_mode: 'label',
+					show_labels_on_images: false
+				}
 			};
 
-			expect(layout.version).toBe('1.0');
+			expect(layout.version).toBe('0.2.0');
 			expect(layout.name).toBe('My Homelab');
-			expect(layout.settings.theme).toBe('dark');
-			expect(layout.deviceLibrary).toEqual([]);
-			expect(layout.racks).toEqual([]);
+			expect(layout.device_types).toEqual([]);
+			expect(layout.rack.name).toBe('Main Rack');
 		});
 
-		it('accepts layout with devices and racks', () => {
-			const device: Device = {
-				id: 'device-1',
-				name: '1U Server',
-				height: 1,
-				colour: '#4A90D9',
-				category: 'server'
-			};
-
-			const rack: Rack = {
-				id: 'rack-1',
-				name: 'Main Rack',
-				height: 42,
-				width: 19,
-				position: 0,
-				view: 'front',
-				devices: [{ libraryId: 'device-1', position: 1, face: 'front' }]
+		it('accepts layout with device types and placed devices', () => {
+			const deviceType: DeviceType = {
+				slug: '1u-server',
+				u_height: 1,
+				model: '1U Server',
+				rackarr: {
+					colour: '#4A90D9',
+					category: 'server'
+				}
 			};
 
 			const layout: Layout = {
-				version: '1.0',
+				version: '0.2.0',
 				name: 'My Homelab',
-				created: '2025-01-15T10:30:00Z',
-				modified: '2025-01-15T14:45:00Z',
-				settings: { theme: 'light' },
-				deviceLibrary: [device],
-				racks: [rack]
-			};
-
-			expect(layout.deviceLibrary).toHaveLength(1);
-			expect(layout.racks).toHaveLength(1);
-			expect(layout.settings.theme).toBe('light');
-		});
-
-		it('accepts layout with all settings fields', () => {
-			const layout: Layout = {
-				version: '1.0',
-				name: 'My Homelab',
-				created: '2025-01-15T10:30:00Z',
-				modified: '2025-01-15T14:45:00Z',
-				settings: {
-					theme: 'dark',
-					view: 'front',
-					displayMode: 'label',
-					showLabelsOnImages: false
+				rack: {
+					name: 'Main Rack',
+					height: 42,
+					width: 19,
+					desc_units: false,
+					form_factor: '4-post-cabinet',
+					starting_unit: 1,
+					position: 0,
+					devices: [{ device_type: '1u-server', position: 1, face: 'front' }]
 				},
-				deviceLibrary: [],
-				racks: []
+				device_types: [deviceType],
+				settings: {
+					display_mode: 'image',
+					show_labels_on_images: true
+				}
 			};
 
-			expect(layout.settings.view).toBe('front');
-			expect(layout.settings.displayMode).toBe('label');
-			expect(layout.settings.showLabelsOnImages).toBe(false);
+			expect(layout.device_types).toHaveLength(1);
+			expect(layout.rack.devices).toHaveLength(1);
+			expect(layout.settings.display_mode).toBe('image');
 		});
 	});
 
 	describe('LayoutSettings interface', () => {
-		it('works with just theme (backwards compatible)', () => {
+		it('requires display_mode and show_labels_on_images', () => {
 			const settings: LayoutSettings = {
-				theme: 'dark'
+				display_mode: 'label',
+				show_labels_on_images: false
 			};
 
-			expect(settings.theme).toBe('dark');
-			expect(settings.view).toBeUndefined();
-			expect(settings.displayMode).toBeUndefined();
-			expect(settings.showLabelsOnImages).toBeUndefined();
+			expect(settings.display_mode).toBe('label');
+			expect(settings.show_labels_on_images).toBe(false);
 		});
 
-		it('accepts all optional fields', () => {
-			const settings: LayoutSettings = {
-				theme: 'light',
-				view: 'rear',
-				displayMode: 'image',
-				showLabelsOnImages: true
+		it('accepts all display mode values', () => {
+			const labelSettings: LayoutSettings = {
+				display_mode: 'label',
+				show_labels_on_images: false
 			};
 
-			expect(settings.theme).toBe('light');
-			expect(settings.view).toBe('rear');
-			expect(settings.displayMode).toBe('image');
-			expect(settings.showLabelsOnImages).toBe(true);
+			const imageSettings: LayoutSettings = {
+				display_mode: 'image',
+				show_labels_on_images: true
+			};
+
+			expect(labelSettings.display_mode).toBe('label');
+			expect(imageSettings.display_mode).toBe('image');
 		});
 	});
 
@@ -545,7 +515,7 @@ describe('Constants', () => {
 	});
 });
 
-describe('Image Types (v0.1.0)', () => {
+describe('Image Types', () => {
 	describe('ImageData interface', () => {
 		it('accepts valid ImageData structure', () => {
 			// Create a mock ImageData

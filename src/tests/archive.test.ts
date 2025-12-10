@@ -11,7 +11,7 @@ import {
 	getImageExtension,
 	getMimeType
 } from '$lib/utils/archive';
-import type { Layout } from '$lib/types/v02';
+import type { Layout } from '$lib/types';
 import type { ImageStoreMap, ImageData } from '$lib/types/images';
 
 describe('Folder Archive Utilities', () => {

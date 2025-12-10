@@ -104,10 +104,10 @@ describe('App Component', () => {
 		it('edit panel opens when rack selected', async () => {
 			const layoutStore = getLayoutStore();
 			const selectionStore = getSelectionStore();
+			const RACK_ID = 'rack-0';
 
 			// Add a rack first
 			layoutStore.addRack('Test Rack', 42);
-			const rack = layoutStore.racks[0];
 
 			render(App);
 
@@ -116,7 +116,7 @@ describe('App Component', () => {
 			expect(rightDrawer).not.toHaveClass('open');
 
 			// Select the rack
-			selectionStore.selectRack(rack!.id);
+			selectionStore.selectRack(RACK_ID);
 
 			// Wait for the effect to open the drawer
 			await waitFor(() => {
@@ -127,11 +127,11 @@ describe('App Component', () => {
 		it('edit panel closes when selection cleared', async () => {
 			const layoutStore = getLayoutStore();
 			const selectionStore = getSelectionStore();
+			const RACK_ID = 'rack-0';
 
 			// Add and select a rack
 			layoutStore.addRack('Test Rack', 42);
-			const rack = layoutStore.racks[0];
-			selectionStore.selectRack(rack!.id);
+			selectionStore.selectRack(RACK_ID);
 
 			render(App);
 
@@ -264,7 +264,7 @@ describe('App Component', () => {
 
 			// v0.2: always has 1 rack
 			expect(layoutStore.rackCount).toBe(1);
-			const originalName = layoutStore.racks[0]?.name;
+			const originalName = layoutStore.rack?.name;
 
 			// Click the "New Rack" button in toolbar
 			const newRackBtn = screen.getByRole('button', { name: /new rack/i });
@@ -290,8 +290,8 @@ describe('App Component', () => {
 
 			// v0.2: rack is replaced, still 1 rack
 			expect(layoutStore.rackCount).toBe(1);
-			expect(layoutStore.racks[0]?.name).toBe('Test Rack');
-			expect(layoutStore.racks[0]?.name).not.toBe(originalName);
+			expect(layoutStore.rack?.name).toBe('Test Rack');
+			expect(layoutStore.rack?.name).not.toBe(originalName);
 		});
 	});
 
@@ -299,11 +299,11 @@ describe('App Component', () => {
 		it('delete button opens confirmation dialog', async () => {
 			const layoutStore = getLayoutStore();
 			const selectionStore = getSelectionStore();
+			const RACK_ID = 'rack-0';
 
 			// Add a rack
 			layoutStore.addRack('Test Rack', 42);
-			const rack = layoutStore.racks[0];
-			selectionStore.selectRack(rack!.id);
+			selectionStore.selectRack(RACK_ID);
 
 			render(App);
 
@@ -325,16 +325,16 @@ describe('App Component', () => {
 		it('delete confirmation clears rack devices (v0.2 cannot remove the only rack)', async () => {
 			const layoutStore = getLayoutStore();
 			const selectionStore = getSelectionStore();
+			const RACK_ID = 'rack-0';
 
 			// Add a rack with a device
 			layoutStore.addRack('Test Rack', 42);
-			const rack = layoutStore.racks[0];
 			// Add a device to the rack
 			const device = layoutStore.device_types[0];
 			if (device) {
-				layoutStore.placeDevice(rack!.id, device.slug, 1);
+				layoutStore.placeDevice(RACK_ID, device.slug, 1);
 			}
-			selectionStore.selectRack(rack!.id);
+			selectionStore.selectRack(RACK_ID);
 
 			render(App);
 

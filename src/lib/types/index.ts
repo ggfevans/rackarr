@@ -1,7 +1,11 @@
 /**
  * Rackarr Core Type Definitions
- * Based on spec.md data model
+ * NetBox-compatible data structures with snake_case naming
  */
+
+// =============================================================================
+// Enums and Primitive Types
+// =============================================================================
 
 /**
  * Rack view types - front or rear view
@@ -14,7 +18,7 @@ export type RackView = 'front' | 'rear';
 export type DeviceFace = 'front' | 'rear' | 'both';
 
 /**
- * Device category types - 12 predefined categories
+ * Device category types - 11 predefined categories
  */
 export type DeviceCategory =
 	| 'server'
@@ -30,154 +34,179 @@ export type DeviceCategory =
 	| 'other';
 
 /**
- * Airflow direction types for thermal metadata
- * Simplified to 4 types for Rackarr v0.5.0
+ * Airflow direction types (NetBox-compatible)
+ * Simplified to 4 types for Rackarr
  */
 export type Airflow = 'passive' | 'front-to-rear' | 'rear-to-front' | 'side-to-rear';
 
 /**
- * Weight unit types
+ * Weight unit types (NetBox-compatible)
  */
-export type WeightUnit = 'kg' | 'g' | 'lb' | 'oz';
+export type WeightUnit = 'kg' | 'lb';
 
 /**
- * Rack form factor types
+ * Rack form factor types (NetBox-compatible)
  */
-export type FormFactor =
-	| '4-post-cabinet'
-	| '4-post-frame'
-	| '2-post-frame'
-	| 'wall-cabinet'
-	| 'wall-frame'
-	| 'wall-frame-vertical'
-	| 'wall-cabinet-vertical';
+export type FormFactor = '2-post' | '4-post' | '4-post-cabinet' | 'wall-mount' | 'open-frame';
 
 /**
  * Display mode for devices in rack visualization
  */
 export type DisplayMode = 'label' | 'image';
 
+// =============================================================================
+// Device Types (Storage/Serialization - NetBox-compatible)
+// =============================================================================
+
 /**
- * Device images - front and rear image paths
+ * Rackarr-specific extensions to DeviceType
  */
-export interface DeviceImages {
-	/** Path to front image */
-	front?: string;
-	/** Path to rear image */
-	rear?: string;
+export interface RackarrDeviceTypeExtensions {
+	/** Hex colour for display (e.g., '#4A90D9') */
+	colour: string;
+	/** Device category for UI filtering */
+	category: DeviceCategory;
+	/** User organization tags */
+	tags?: string[];
 }
 
 /**
- * Device in the library (template)
- * Can be placed multiple times in racks
+ * Device Type - template definition in library (Storage format)
+ * NetBox-compatible with Rackarr extensions
  */
-export interface Device {
-	/** Unique identifier (UUID) */
-	id: string;
-	/** Display name */
-	name: string;
+export interface DeviceType {
+	/** Unique identifier, kebab-case slug */
+	slug: string;
 	/** Height in rack units (0.5-42U) */
-	height: number;
-	/** Hex colour for display (e.g., '#4A90D9') */
-	colour: string;
-	/** Device category */
-	category: DeviceCategory;
-	/** Optional notes/description */
-	notes?: string;
-	/** Manufacturer name (for NetBox imports) */
+	u_height: number;
+	/** Manufacturer name */
 	manufacturer?: string;
-	/** Model name (for NetBox imports) */
+	/** Model name */
 	model?: string;
-	/** Part number / SKU */
-	part_number?: string;
-	/** Airflow direction */
-	airflow?: Airflow;
+	/** Whether device occupies full rack depth (default: true) */
+	is_full_depth?: boolean;
 	/** Device weight */
 	weight?: number;
 	/** Weight unit (required if weight is provided) */
 	weight_unit?: WeightUnit;
-	/** Whether device occupies full rack depth (default: true) */
-	is_full_depth?: boolean;
-	/** Default face for placement */
-	face?: DeviceFace;
-	/** Device images */
-	images?: DeviceImages;
+	/** Airflow direction */
+	airflow?: Airflow;
+	/** Notes/comments */
+	comments?: string;
+	/** Rackarr-specific extensions */
+	rackarr: RackarrDeviceTypeExtensions;
 }
 
 /**
- * A device placed in a rack
- * References a device from the library by ID
+ * Placed device - storage format
+ * References a DeviceType by slug
  */
 export interface PlacedDevice {
-	/** Reference to Device.id in the library */
-	libraryId: string;
+	/** Reference to DeviceType.slug */
+	device_type: string;
+	/** Optional custom display name for this placement */
+	name?: string;
 	/** Bottom U position (1-indexed, U1 is at the bottom) */
 	position: number;
 	/** Which face(s) of the rack the device occupies */
 	face: DeviceFace;
-	/** Optional custom display name for this placement */
-	name?: string;
 }
+
+// =============================================================================
+// Rack Types
+// =============================================================================
 
 /**
  * A rack unit container
  */
 export interface Rack {
-	/** Unique identifier (UUID) */
-	id: string;
 	/** Display name */
 	name: string;
 	/** Height in rack units (1-100U) */
 	height: number;
 	/** Width in inches (10 or 19) */
-	width: number;
-	/** Order position in row (0-indexed) */
+	width: 10 | 19;
+	/** Descending units - if true, U1 is at top (default: false) */
+	desc_units: boolean;
+	/** Rack form factor */
+	form_factor: FormFactor;
+	/** Starting unit number (default: 1) */
+	starting_unit: number;
+	/** Order position (for future multi-rack) */
 	position: number;
-	/** Current view mode (front or rear) */
-	view: RackView;
 	/** Devices placed in this rack */
 	devices: PlacedDevice[];
-	/** Rack form factor (default: 4-post-cabinet) */
-	form_factor?: FormFactor;
-	/** Descending units - if true, U1 is at top (default: false) */
-	desc_units?: boolean;
-	/** Starting unit number (default: 1, min: 1) */
-	starting_unit?: number;
+	/** Current view mode - runtime only, not persisted */
+	view?: RackView;
 }
+
+// =============================================================================
+// Layout Types
+// =============================================================================
 
 /**
  * Layout settings
  */
 export interface LayoutSettings {
-	/** Current theme */
-	theme: 'dark' | 'light';
-	/** Global view state (default: front) */
-	view?: RackView;
 	/** Display mode for devices (default: label) */
-	displayMode?: DisplayMode;
+	display_mode: DisplayMode;
 	/** Show labels overlaid on device images (default: false) */
-	showLabelsOnImages?: boolean;
+	show_labels_on_images: boolean;
 }
 
 /**
- * Complete layout structure - matches JSON schema from spec Section 10
+ * Complete layout structure
  */
 export interface Layout {
 	/** Schema version */
 	version: string;
 	/** Layout name */
 	name: string;
-	/** Creation timestamp (ISO 8601) */
-	created: string;
-	/** Last modified timestamp (ISO 8601) */
-	modified: string;
+	/** Single rack (Rackarr is single-rack mode) */
+	rack: Rack;
+	/** Device type library */
+	device_types: DeviceType[];
 	/** Layout settings */
 	settings: LayoutSettings;
-	/** Device library - all available devices */
-	deviceLibrary: Device[];
-	/** Racks in this layout */
-	racks: Rack[];
 }
+
+// =============================================================================
+// Helper Types for Creation
+// =============================================================================
+
+/**
+ * Helper type for creating a DeviceType
+ */
+export interface CreateDeviceTypeData {
+	name: string;
+	u_height: number;
+	category: DeviceCategory;
+	colour: string;
+	manufacturer?: string;
+	model?: string;
+	is_full_depth?: boolean;
+	weight?: number;
+	weight_unit?: WeightUnit;
+	airflow?: Airflow;
+	comments?: string;
+	tags?: string[];
+}
+
+/**
+ * Helper type for creating a rack
+ */
+export interface CreateRackData {
+	name: string;
+	height: number;
+	width?: 10 | 19;
+	form_factor?: FormFactor;
+	desc_units?: boolean;
+	starting_unit?: number;
+}
+
+// =============================================================================
+// Export Types
+// =============================================================================
 
 /**
  * Export format options
@@ -213,10 +242,10 @@ export interface ExportOptions {
 	includeLegend: boolean;
 	/** Background style */
 	background: ExportBackground;
-	/** Which view(s) to export - front, rear, or both (optional, defaults to all devices) */
+	/** Which view(s) to export */
 	exportView?: ExportView;
-	/** Display mode - label or image (optional, defaults to 'label') */
+	/** Display mode */
 	displayMode?: DisplayMode;
-	/** Show airflow indicators in export (optional, defaults to false) */
+	/** Show airflow indicators */
 	airflowMode?: boolean;
 }

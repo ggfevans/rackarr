@@ -3,7 +3,7 @@
   Renders a device within a rack at the specified U position
 -->
 <script lang="ts">
-	import type { Device, DisplayMode, RackView } from '$lib/types';
+	import type { DeviceType, DisplayMode, RackView } from '$lib/types';
 	import { createRackDeviceDragData, serializeDragData } from '$lib/utils/dragdrop';
 	import CategoryIcon from './CategoryIcon.svelte';
 	import AirflowIndicator from './AirflowIndicator.svelte';
@@ -12,7 +12,7 @@
 	import { debug } from '$lib/utils/debug';
 
 	interface Props {
-		device: Device;
+		device: DeviceType;
 		position: number;
 		rackHeight: number;
 		rackId: string;
@@ -26,7 +26,7 @@
 		placedDeviceName?: string;
 		airflowMode?: boolean;
 		hasConflict?: boolean;
-		onselect?: (event: CustomEvent<{ libraryId: string; position: number }>) => void;
+		onselect?: (event: CustomEvent<{ slug: string; position: number }>) => void;
 		ondragstart?: (event: CustomEvent<{ rackId: string; deviceIndex: number }>) => void;
 		ondragend?: () => void;
 	}
@@ -51,14 +51,17 @@
 		ondragend: ondragendProp
 	}: Props = $props();
 
+	// Device display name: model or slug
+	const deviceName = $derived(device.model ?? device.slug);
+
 	// Display name: custom name if set, otherwise device type name
-	const displayName = $derived(placedDeviceName ?? device.name);
+	const displayName = $derived(placedDeviceName ?? deviceName);
 
 	// Debug airflow rendering
 	$effect(() => {
 		if (airflowMode) {
 			debug.log('RackDevice airflow check:', {
-				deviceName: device.name,
+				deviceName,
 				airflowMode,
 				deviceAirflow: device.airflow,
 				shouldRender: airflowMode && device.airflow
@@ -72,7 +75,7 @@
 	const deviceImage = $derived.by(() => {
 		if (displayMode !== 'image') return null;
 		const face = rackView === 'rear' ? 'rear' : 'front';
-		return imageStore.getDeviceImage(device.id, face);
+		return imageStore.getDeviceImage(device.slug, face);
 	});
 
 	// Should show image or fall back to label
@@ -85,26 +88,26 @@
 	const RAIL_WIDTH = 17;
 
 	// Position calculation (SVG y-coordinate, origin at top)
-	// y = (rackHeight - position - device.height + 1) * uHeight
-	const yPosition = $derived((rackHeight - position - device.height + 1) * uHeight);
-	const deviceHeight = $derived(device.height * uHeight);
+	// y = (rackHeight - position - device.u_height + 1) * uHeight
+	const yPosition = $derived((rackHeight - position - device.u_height + 1) * uHeight);
+	const deviceHeight = $derived(device.u_height * uHeight);
 	const deviceWidth = $derived(rackWidth - RAIL_WIDTH * 2);
 
 	// Aria label for accessibility
 	const ariaLabel = $derived(
-		`${device.name}, ${device.height}U ${device.category} at U${position}${selected ? ', selected' : ''}`
+		`${deviceName}, ${device.u_height}U ${device.rackarr.category} at U${position}${selected ? ', selected' : ''}`
 	);
 
 	function handleClick(event: MouseEvent) {
 		event.stopPropagation();
-		onselect?.(new CustomEvent('select', { detail: { libraryId: device.id, position } }));
+		onselect?.(new CustomEvent('select', { detail: { slug: device.slug, position } }));
 	}
 
 	function handleKeyDown(event: KeyboardEvent) {
 		if (event.key === 'Enter' || event.key === ' ') {
 			event.preventDefault();
 			event.stopPropagation();
-			onselect?.(new CustomEvent('select', { detail: { libraryId: device.id, position } }));
+			onselect?.(new CustomEvent('select', { detail: { slug: device.slug, position } }));
 		}
 	}
 
@@ -126,7 +129,7 @@
 </script>
 
 <g
-	data-device-id={device.id}
+	data-device-id={device.slug}
 	transform="translate({RAIL_WIDTH}, {yPosition})"
 	class="rack-device"
 	class:selected
@@ -159,7 +162,7 @@
 		y="0"
 		width={deviceWidth}
 		height={deviceHeight}
-		fill={device.colour}
+		fill={device.rackarr.colour}
 		rx="2"
 		ry="2"
 	/>
@@ -230,7 +233,7 @@
 		{#if deviceHeight >= 22}
 			<foreignObject x="4" y="0" width="14" height={deviceHeight} class="category-icon-wrapper">
 				<div class="icon-container">
-					<CategoryIcon category={device.category} size={12} />
+					<CategoryIcon category={device.rackarr.category} size={12} />
 				</div>
 			</foreignObject>
 		{/if}

@@ -228,29 +228,30 @@
 		if (selectionStore.selectedRackId === null || selectionStore.selectedDeviceIndex === null)
 			return;
 
-		const rack = layoutStore.racks.find((r) => r.id === selectionStore.selectedRackId);
+		// Single-rack mode
+		const rack = layoutStore.rack;
 		if (!rack) return;
 
 		const placedDevice = rack.devices[selectionStore.selectedDeviceIndex];
 		if (!placedDevice) return;
 
-		const device = layoutStore.deviceLibrary.find((d) => d.id === placedDevice.libraryId);
+		const device = layoutStore.device_types.find((d) => d.slug === placedDevice.device_type);
 		if (!device) return;
 
 		// Try to find a valid position in the direction of movement
 		let newPosition = placedDevice.position + direction;
 
 		// Keep looking for a valid position, leapfrogging over blocking devices
-		while (newPosition >= 1 && newPosition + device.height - 1 <= rack.height) {
+		while (newPosition >= 1 && newPosition + device.u_height - 1 <= rack.height) {
 			// Check if this position is valid (no collisions)
 			const hasCollision = rack.devices.some((d, idx) => {
 				if (idx === selectionStore.selectedDeviceIndex) return false; // Ignore self
-				const otherDevice = layoutStore.deviceLibrary.find((dev) => dev.id === d.libraryId);
+				const otherDevice = layoutStore.device_types.find((dev) => dev.slug === d.device_type);
 				if (!otherDevice) return false;
 
-				const otherTop = d.position + otherDevice.height - 1;
+				const otherTop = d.position + otherDevice.u_height - 1;
 				const otherBottom = d.position;
-				const newTop = newPosition + device.height - 1;
+				const newTop = newPosition + device.u_height - 1;
 				const newBottom = newPosition;
 
 				// Check overlap
@@ -275,19 +276,12 @@
 	}
 
 	/**
-	 * Move the selected rack left or right
-	 * @param direction - -1 for left, 1 for right
+	 * Move the selected rack left or right (disabled in single-rack mode)
+	 * @param _direction - -1 for left, 1 for right
 	 */
-	function moveSelectedRack(direction: number) {
-		if (!selectionStore.isRackSelected || !selectionStore.selectedId) return;
-
-		const rackIndex = layoutStore.racks.findIndex((r) => r.id === selectionStore.selectedId);
-		if (rackIndex === -1) return;
-
-		const newIndex = rackIndex + direction;
-		if (newIndex < 0 || newIndex >= layoutStore.racks.length) return;
-
-		layoutStore.reorderRacks(rackIndex, newIndex);
+	function moveSelectedRack(_direction: number) {
+		// Single-rack mode - rack reordering not applicable
+		// Reserved for future multi-rack support
 	}
 
 	/**

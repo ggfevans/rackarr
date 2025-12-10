@@ -5,7 +5,7 @@
  * Used for rendering visual indicators in dual-view mode.
  */
 
-import type { Rack, Device, RackView } from '$lib/types';
+import type { Rack, DeviceType, RackView } from '$lib/types';
 
 /**
  * Represents a range of U positions (inclusive)
@@ -27,7 +27,7 @@ export interface URange {
  * @param deviceLibrary - Array of device types to look up device heights
  * @returns Array of U ranges that are blocked
  */
-export function getBlockedSlots(rack: Rack, view: RackView, deviceLibrary: Device[]): URange[] {
+export function getBlockedSlots(rack: Rack, view: RackView, deviceLibrary: DeviceType[]): URange[] {
 	const blocked: URange[] = [];
 
 	for (const placedDevice of rack.devices) {
@@ -35,7 +35,7 @@ export function getBlockedSlots(rack: Rack, view: RackView, deviceLibrary: Devic
 		if (placedDevice.face === view) continue;
 
 		// Find the device type to get height and full-depth info
-		const deviceType = deviceLibrary.find((d) => d.id === placedDevice.libraryId);
+		const deviceType = deviceLibrary.find((d) => d.slug === placedDevice.device_type);
 		if (!deviceType) continue;
 
 		// Check if this device blocks the opposite face
@@ -49,7 +49,7 @@ export function getBlockedSlots(rack: Rack, view: RackView, deviceLibrary: Devic
 
 		// Calculate the U range this device blocks
 		const bottom = placedDevice.position;
-		const top = placedDevice.position + deviceType.height - 1;
+		const top = placedDevice.position + deviceType.u_height - 1;
 
 		blocked.push({ bottom, top });
 	}

@@ -149,7 +149,7 @@
 
 			// Reset view to center the loaded rack after DOM updates
 			requestAnimationFrame(() => {
-				canvasStore.fitAll(layoutStore.racks);
+				canvasStore.fitAll(layoutStore.rack ? [layoutStore.rack] : []);
 			});
 
 			toastStore.showToast('Layout loaded successfully', 'success');
@@ -163,7 +163,7 @@
 	}
 
 	function handleExport() {
-		if (layoutStore.racks.length === 0) {
+		if (!layoutStore.hasRack) {
 			toastStore.showToast('No racks to export', 'warning');
 			return;
 		}
@@ -174,11 +174,8 @@
 		exportDialogOpen = false;
 
 		try {
-			// Determine which racks to export
-			const racksToExport =
-				options.scope === 'selected' && selectionStore.selectedId
-					? layoutStore.racks.filter((r) => r.id === selectionStore.selectedId)
-					: layoutStore.racks;
+			// Single-rack mode: export the rack if it exists
+			const racksToExport = layoutStore.rack ? [layoutStore.rack] : [];
 
 			if (racksToExport.length === 0) {
 				toastStore.showToast('No rack to export', 'warning');
@@ -193,12 +190,7 @@
 
 			// Generate the SVG with images if in image mode
 			const images = imageStore.getAllImages();
-			const svg = generateExportSVG(
-				racksToExport,
-				layoutStore.deviceLibrary,
-				exportOptions,
-				images
-			);
+			const svg = generateExportSVG(racksToExport, layoutStore.device_types, exportOptions, images);
 
 			// Export based on selected format
 			if (options.format === 'svg') {
@@ -236,18 +228,20 @@
 
 	function handleDelete() {
 		if (selectionStore.isRackSelected && selectionStore.selectedId) {
-			const rack = layoutStore.racks.find((r) => r.id === selectionStore.selectedId);
+			// Single-rack mode
+			const rack = layoutStore.rack;
 			if (rack) {
 				deleteTarget = { type: 'rack', name: rack.name };
 				confirmDeleteOpen = true;
 			}
 		} else if (selectionStore.isDeviceSelected) {
 			if (selectionStore.selectedRackId !== null && selectionStore.selectedDeviceIndex !== null) {
-				const rack = layoutStore.racks.find((r) => r.id === selectionStore.selectedRackId);
+				// Single-rack mode
+				const rack = layoutStore.rack;
 				if (rack && rack.devices[selectionStore.selectedDeviceIndex]) {
 					const device = rack.devices[selectionStore.selectedDeviceIndex];
-					const deviceDef = layoutStore.deviceLibrary.find((d) => d.id === device?.libraryId);
-					deleteTarget = { type: 'device', name: deviceDef?.name || 'Device' };
+					const deviceDef = layoutStore.device_types.find((d) => d.slug === device?.device_type);
+					deleteTarget = { type: 'device', name: deviceDef?.model ?? deviceDef?.slug ?? 'Device' };
 					confirmDeleteOpen = true;
 				}
 			}
@@ -277,7 +271,7 @@
 	}
 
 	function handleFitAll() {
-		canvasStore.fitAll(layoutStore.racks);
+		canvasStore.fitAll(layoutStore.rack ? [layoutStore.rack] : []);
 	}
 
 	function handleToggleTheme() {
@@ -317,24 +311,26 @@
 		height: number;
 		category: import('$lib/types').DeviceCategory;
 		colour: string;
+		airflow: import('$lib/types').Airflow;
 		notes: string;
 		frontImage?: ImageData;
 		rearImage?: ImageData;
 	}) {
-		const device = layoutStore.addDeviceToLibrary({
+		const device = layoutStore.addDeviceType({
 			name: data.name,
-			height: data.height,
+			u_height: data.height,
 			category: data.category,
 			colour: data.colour,
-			notes: data.notes || undefined
+			comments: data.notes || undefined,
+			airflow: data.airflow
 		});
 
 		// Store images if provided (v0.1.0)
 		if (data.frontImage) {
-			imageStore.setDeviceImage(device.id, 'front', data.frontImage);
+			imageStore.setDeviceImage(device.slug, 'front', data.frontImage);
 		}
 		if (data.rearImage) {
-			imageStore.setDeviceImage(device.id, 'rear', data.rearImage);
+			imageStore.setDeviceImage(device.slug, 'rear', data.rearImage);
 		}
 
 		addDeviceFormOpen = false;
@@ -365,7 +361,7 @@
 <div class="app-layout">
 	<Toolbar
 		hasSelection={selectionStore.hasSelection}
-		hasRacks={layoutStore.racks.length > 0}
+		hasRacks={layoutStore.hasRack}
 		theme={uiStore.theme}
 		displayMode={uiStore.displayMode}
 		showLabelsOnImages={uiStore.showLabelsOnImages}
@@ -426,7 +422,7 @@
 
 	<ExportDialog
 		open={exportDialogOpen}
-		racks={layoutStore.racks}
+		racks={layoutStore.rack ? [layoutStore.rack] : []}
 		selectedRackId={selectionStore.isRackSelected ? selectionStore.selectedId : null}
 		onexport={(e) => handleExportSubmit(e.detail)}
 		oncancel={handleExportCancel}

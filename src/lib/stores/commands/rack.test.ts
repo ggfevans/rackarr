@@ -6,7 +6,7 @@ import {
 	type RackCommandStore,
 	type RackSettings
 } from './rack';
-import type { Rack, PlacedDevice } from '$lib/types/v02';
+import type { Rack, PlacedDevice } from '$lib/types';
 
 function createMockRack(overrides: Partial<Rack> = {}): Rack {
 	return {

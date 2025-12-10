@@ -138,7 +138,7 @@ describe('KeyboardHandler Component', () => {
 			const selectionStore = getSelectionStore();
 
 			layoutStore.addRack('Test Rack', 42);
-			selectionStore.selectRack(layoutStore.racks[0]!.id);
+			selectionStore.selectRack('rack-0');
 			expect(selectionStore.hasSelection).toBe(true);
 
 			render(KeyboardHandler);
@@ -156,27 +156,25 @@ describe('KeyboardHandler Component', () => {
 
 			// Setup: rack with device at position 5
 			layoutStore.addRack('Test Rack', 42);
-			layoutStore.addDeviceToLibrary({
+			const deviceType = layoutStore.addDeviceType({
 				name: 'Test Server',
-				height: 1,
+				u_height: 1,
 				category: 'server',
 				colour: CATEGORY_COLOURS.server
 			});
-			const rackId = layoutStore.racks[0]!.id;
-			// Find the device we added (after starter devices)
-			const deviceId = layoutStore.deviceLibrary.find((d) => d.name === 'Test Server')!.id;
-			layoutStore.placeDevice(rackId, deviceId, 5);
+			const rackId = 'rack-0';
+			layoutStore.placeDevice(rackId, deviceType.slug, 5);
 
 			// Select the device
-			selectionStore.selectDevice(rackId, 0, deviceId);
+			selectionStore.selectDevice(rackId, 0, deviceType.slug);
 
 			render(KeyboardHandler);
 
-			const initialPosition = layoutStore.racks[0]!.devices[0]!.position;
+			const initialPosition = layoutStore.rack!.devices[0]!.position;
 			await fireEvent.keyDown(window, { key: 'ArrowUp' });
 
 			// Device should move up (higher U number)
-			expect(layoutStore.racks[0]!.devices[0]!.position).toBe(initialPosition + 1);
+			expect(layoutStore.rack!.devices[0]!.position).toBe(initialPosition + 1);
 		});
 
 		it('ArrowDown moves selected device down 1U', async () => {
@@ -185,26 +183,25 @@ describe('KeyboardHandler Component', () => {
 
 			// Setup: rack with device at position 5
 			layoutStore.addRack('Test Rack', 42);
-			layoutStore.addDeviceToLibrary({
+			const deviceType = layoutStore.addDeviceType({
 				name: 'Test Server',
-				height: 1,
+				u_height: 1,
 				category: 'server',
 				colour: CATEGORY_COLOURS.server
 			});
-			const rackId = layoutStore.racks[0]!.id;
-			const deviceId = layoutStore.deviceLibrary.find((d) => d.name === 'Test Server')!.id;
-			layoutStore.placeDevice(rackId, deviceId, 5);
+			const rackId = 'rack-0';
+			layoutStore.placeDevice(rackId, deviceType.slug, 5);
 
 			// Select the device
-			selectionStore.selectDevice(rackId, 0, deviceId);
+			selectionStore.selectDevice(rackId, 0, deviceType.slug);
 
 			render(KeyboardHandler);
 
-			const initialPosition = layoutStore.racks[0]!.devices[0]!.position;
+			const initialPosition = layoutStore.rack!.devices[0]!.position;
 			await fireEvent.keyDown(window, { key: 'ArrowDown' });
 
 			// Device should move down (lower U number)
-			expect(layoutStore.racks[0]!.devices[0]!.position).toBe(initialPosition - 1);
+			expect(layoutStore.rack!.devices[0]!.position).toBe(initialPosition - 1);
 		});
 
 		it('ArrowDown does not move device below U1', async () => {
@@ -213,25 +210,24 @@ describe('KeyboardHandler Component', () => {
 
 			// Setup: rack with device at position 1 (bottom)
 			layoutStore.addRack('Test Rack', 42);
-			layoutStore.addDeviceToLibrary({
+			const deviceType = layoutStore.addDeviceType({
 				name: 'Test Server',
-				height: 1,
+				u_height: 1,
 				category: 'server',
 				colour: CATEGORY_COLOURS.server
 			});
-			const rackId = layoutStore.racks[0]!.id;
-			const deviceId = layoutStore.deviceLibrary.find((d) => d.name === 'Test Server')!.id;
-			layoutStore.placeDevice(rackId, deviceId, 1);
+			const rackId = 'rack-0';
+			layoutStore.placeDevice(rackId, deviceType.slug, 1);
 
 			// Select the device
-			selectionStore.selectDevice(rackId, 0, deviceId);
+			selectionStore.selectDevice(rackId, 0, deviceType.slug);
 
 			render(KeyboardHandler);
 
 			await fireEvent.keyDown(window, { key: 'ArrowDown' });
 
 			// Device should stay at position 1
-			expect(layoutStore.racks[0]!.devices[0]!.position).toBe(1);
+			expect(layoutStore.rack!.devices[0]!.position).toBe(1);
 		});
 	});
 
@@ -306,16 +302,16 @@ describe('KeyboardHandler Component', () => {
 			const selectionStore = getSelectionStore();
 
 			// Create and select a rack
-			const rack = layoutStore.addRack('Test Rack', 42);
-			selectionStore.selectRack(rack!.id);
-			expect(layoutStore.racks).toHaveLength(1);
+			layoutStore.addRack('Test Rack', 42);
+			selectionStore.selectRack('rack-0');
+			expect(layoutStore.rackCount).toBe(1);
 
 			render(KeyboardHandler);
 
 			await fireEvent.keyDown(window, { key: 'd', ctrlKey: true });
 
 			// Single-rack mode: duplicate is blocked, still only 1 rack
-			expect(layoutStore.racks).toHaveLength(1);
+			expect(layoutStore.rackCount).toBe(1);
 		});
 
 		it('Cmd+D does not duplicate in single-rack mode (Mac)', async () => {
@@ -323,16 +319,16 @@ describe('KeyboardHandler Component', () => {
 			const selectionStore = getSelectionStore();
 
 			// Create and select a rack
-			const rack = layoutStore.addRack('Test Rack', 42);
-			selectionStore.selectRack(rack!.id);
-			expect(layoutStore.racks).toHaveLength(1);
+			layoutStore.addRack('Test Rack', 42);
+			selectionStore.selectRack('rack-0');
+			expect(layoutStore.rackCount).toBe(1);
 
 			render(KeyboardHandler);
 
 			await fireEvent.keyDown(window, { key: 'd', metaKey: true });
 
 			// Single-rack mode: duplicate is blocked, still only 1 rack
-			expect(layoutStore.racks).toHaveLength(1);
+			expect(layoutStore.rackCount).toBe(1);
 		});
 	});
 

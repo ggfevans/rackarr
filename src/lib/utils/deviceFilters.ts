@@ -3,35 +3,38 @@
  * Utility functions for searching and grouping devices
  */
 
-import type { Device, DeviceCategory } from '$lib/types';
+import type { DeviceType, DeviceCategory } from '$lib/types';
 
 /**
- * Search devices by name (case-insensitive)
- * @param devices - Array of devices to search
+ * Search device types by model/slug (case-insensitive)
+ * @param devices - Array of device types to search
  * @param query - Search query string
- * @returns Filtered array of devices matching the query
+ * @returns Filtered array of device types matching the query
  */
-export function searchDevices(devices: Device[], query: string): Device[] {
+export function searchDevices(devices: DeviceType[], query: string): DeviceType[] {
 	if (!query.trim()) {
 		return devices;
 	}
 
 	const normalizedQuery = query.toLowerCase().trim();
 
-	return devices.filter((device) => device.name.toLowerCase().includes(normalizedQuery));
+	return devices.filter((device) => {
+		const name = device.model ?? device.slug;
+		return name.toLowerCase().includes(normalizedQuery);
+	});
 }
 
 /**
- * Group devices by category
- * @param devices - Array of devices to group
- * @returns Map of category to devices in that category
+ * Group device types by category
+ * @param devices - Array of device types to group
+ * @returns Map of category to device types in that category
  */
-export function groupDevicesByCategory(devices: Device[]): Map<DeviceCategory, Device[]> {
-	const groups = new Map<DeviceCategory, Device[]>();
+export function groupDevicesByCategory(devices: DeviceType[]): Map<DeviceCategory, DeviceType[]> {
+	const groups = new Map<DeviceCategory, DeviceType[]>();
 
 	for (const device of devices) {
-		const existing = groups.get(device.category) ?? [];
-		groups.set(device.category, [...existing, device]);
+		const existing = groups.get(device.rackarr.category) ?? [];
+		groups.set(device.rackarr.category, [...existing, device]);
 	}
 
 	return groups;

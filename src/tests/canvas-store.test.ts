@@ -373,9 +373,18 @@ describe('Canvas Store', () => {
 			store.setPanzoomInstance(mockPanzoom as ReturnType<typeof import('panzoom').default>);
 
 			// Call fitAll with mock rack data
-			const mockRacks = [{ id: 'rack-1', name: 'Test', height: 42, position: 0 }] as Parameters<
-				typeof store.fitAll
-			>[0];
+			const mockRacks = [
+				{
+					name: 'Test',
+					height: 42,
+					width: 19 as const,
+					position: 0,
+					desc_units: false,
+					form_factor: '4-post' as const,
+					starting_unit: 1,
+					devices: []
+				}
+			] as Parameters<typeof store.fitAll>[0];
 
 			store.fitAll(mockRacks);
 

@@ -1,7 +1,7 @@
 # CLAUDE.md — Rackarr
 
 **Project:** Rackarr — Rack Layout Designer for Homelabbers
-**Version:** 0.4.10
+**Version:** 0.5.0
 
 ---
 
@@ -32,15 +32,25 @@ We follow [Cargo semver](https://doc.rust-lang.org/cargo/reference/semver.html) 
 
 **Current milestones:**
 
-- `0.4.x` — Stable single-rack workflow with YAML format
-- `0.4.10` — View reset on rack resize, toolbar polish
+- `0.5.x` — Unified type system, NetBox-compatible data model
 - `1.0.0` — Production-ready, stable API
 
 ---
 
 ## Recent Changes
 
-### v0.4.10 (Current)
+### v0.5.0 (Current)
+
+**v0.5.0** — Type system consolidation
+
+- Unified on storage types only (`DeviceType`, `PlacedDevice` with `device_type`)
+- Removed deprecated UI types (`Device`, `UIPlacedDevice` with `libraryId`)
+- Removed adapter layer and deprecated store functions
+- NetBox-compatible field naming (snake_case: `u_height`, `device_type`, `form_factor`)
+- Cleaned up legacy comments throughout codebase
+- Updated documentation (SPEC.md, ROADMAP.md)
+
+### v0.4.10
 
 **v0.4.10** — View reset on rack resize, toolbar polish
 

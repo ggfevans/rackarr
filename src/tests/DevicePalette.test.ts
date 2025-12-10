@@ -13,15 +13,15 @@ describe('DevicePalette Component', () => {
 	describe('Device Rendering', () => {
 		it('renders all devices from library', () => {
 			const layoutStore = getLayoutStore();
-			layoutStore.addDeviceToLibrary({
+			layoutStore.addDeviceType({
 				name: 'Server 1',
-				height: 1,
+				u_height: 1,
 				category: 'server',
 				colour: CATEGORY_COLOURS.server
 			});
-			layoutStore.addDeviceToLibrary({
+			layoutStore.addDeviceType({
 				name: 'Switch 1',
-				height: 1,
+				u_height: 1,
 				category: 'network',
 				colour: CATEGORY_COLOURS.network
 			});
@@ -51,15 +51,15 @@ describe('DevicePalette Component', () => {
 
 		it('filters devices by name', async () => {
 			const layoutStore = getLayoutStore();
-			layoutStore.addDeviceToLibrary({
+			layoutStore.addDeviceType({
 				name: 'Server 1',
-				height: 1,
+				u_height: 1,
 				category: 'server',
 				colour: CATEGORY_COLOURS.server
 			});
-			layoutStore.addDeviceToLibrary({
+			layoutStore.addDeviceType({
 				name: 'Switch 1',
-				height: 1,
+				u_height: 1,
 				category: 'network',
 				colour: CATEGORY_COLOURS.network
 			});
@@ -75,9 +75,9 @@ describe('DevicePalette Component', () => {
 
 		it('search is case-insensitive', async () => {
 			const layoutStore = getLayoutStore();
-			layoutStore.addDeviceToLibrary({
+			layoutStore.addDeviceType({
 				name: 'Server 1',
-				height: 1,
+				u_height: 1,
 				category: 'server',
 				colour: CATEGORY_COLOURS.server
 			});
@@ -92,9 +92,9 @@ describe('DevicePalette Component', () => {
 
 		it('shows no results message when search has no matches', async () => {
 			const layoutStore = getLayoutStore();
-			layoutStore.addDeviceToLibrary({
+			layoutStore.addDeviceType({
 				name: 'Server 1',
-				height: 1,
+				u_height: 1,
 				category: 'server',
 				colour: CATEGORY_COLOURS.server
 			});
@@ -203,11 +203,13 @@ describe('DevicePalette Component', () => {
 
 describe('DevicePaletteItem Component', () => {
 	const mockDevice = {
-		id: 'device-1',
-		name: 'Test Server',
-		height: 2,
-		colour: '#4A90D9',
-		category: 'server' as const
+		slug: 'device-1',
+		model: 'Test Server',
+		u_height: 2,
+		rackarr: {
+			colour: '#4A90D9',
+			category: 'server' as const
+		}
 	};
 
 	describe('Display', () => {

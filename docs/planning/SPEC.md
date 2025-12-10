@@ -1,7 +1,7 @@
 # Rackarr Technical Specification
 
-**Version:** 0.4.9
-**Updated:** 2025-12-09
+**Version:** 0.5.0
+**Updated:** 2025-12-10
 **Status:** Active
 
 ---
@@ -103,38 +103,32 @@ type Airflow =
 	| 'rear-to-front' // Reverse airflow
 	| 'side-to-rear'; // Side intake (e.g., network switches)
 
-// Rack form factors
-type FormFactor =
-	| '4-post-cabinet'
-	| '4-post-frame'
-	| '2-post-frame'
-	| 'wall-cabinet'
-	| 'wall-frame'
-	| 'wall-frame-vertical'
-	| 'wall-cabinet-vertical';
+// Rack form factors (NetBox-compatible)
+type FormFactor = '2-post' | '4-post' | '4-post-cabinet' | 'wall-mount' | 'open-frame';
 
-type WeightUnit = 'kg' | 'g' | 'lb' | 'oz';
+// Weight units (NetBox-compatible)
+type WeightUnit = 'kg' | 'lb';
 ```
 
-### 3.2 Device (Library Item)
+### 3.2 DeviceType (Library Item)
 
 ```typescript
-interface Device {
-	id: string; // UUID
-	name: string; // Display name
-	height: number; // 0.5-42U (supports half-U)
-	colour: string; // Hex (#RRGGBB)
-	category: DeviceCategory;
-	notes?: string;
+interface DeviceType {
+	slug: string; // Unique identifier (e.g., 'dell-r650')
+	u_height: number; // 0.5-42U (supports half-U)
 	manufacturer?: string;
-	model?: string;
+	model?: string; // Display name
 	part_number?: string;
+	is_full_depth?: boolean; // Default: true
 	airflow?: Airflow;
 	weight?: number;
 	weight_unit?: WeightUnit;
-	is_full_depth?: boolean; // Default: true
-	face?: DeviceFace; // Default placement face
-	images?: DeviceImages;
+	comments?: string;
+	rackarr: {
+		colour: string; // Hex (#RRGGBB)
+		category: DeviceCategory;
+		tags?: string[];
+	};
 }
 ```
 
@@ -142,7 +136,7 @@ interface Device {
 
 ```typescript
 interface PlacedDevice {
-	libraryId: string; // Reference to Device.id
+	device_type: string; // Reference to DeviceType.slug
 	position: number; // Bottom U position (1-indexed)
 	face: DeviceFace;
 	name?: string; // Custom instance name
@@ -153,18 +147,18 @@ interface PlacedDevice {
 
 ```typescript
 interface Rack {
-	id: string;
 	name: string;
 	height: number; // 1-100U (common: 12, 18, 24, 42)
-	width: number; // 10 or 19 inches
+	width: 10 | 19; // 10 or 19 inches
 	position: number; // Order index
-	view: RackView; // Runtime only
 	devices: PlacedDevice[];
-	form_factor?: FormFactor; // Default: '4-post-cabinet'
-	desc_units?: boolean; // U1 at top if true
-	starting_unit?: number; // Default: 1
+	form_factor: FormFactor; // Default: '4-post-cabinet'
+	desc_units: boolean; // U1 at top if true (default: false)
+	starting_unit: number; // Default: 1
 }
 ```
+
+**Note:** In single-rack mode, the store adds a synthetic `id: 'rack-0'` to the rack for runtime identification.
 
 ### 3.5 Layout
 
@@ -175,8 +169,8 @@ interface Layout {
 	created: string; // ISO 8601
 	modified: string; // ISO 8601
 	settings: LayoutSettings;
-	deviceLibrary: Device[];
-	racks: Rack[]; // Single rack in v0.2+
+	device_types: DeviceType[]; // Device type library
+	rack: Rack; // Single rack
 }
 
 interface LayoutSettings {
@@ -309,12 +303,12 @@ isDirty: boolean
 hasStarted: boolean
 
 // Derived
-racks: Rack[]
-deviceLibrary: Device[]
-rackCount: number
+rack: Rack & { id: string } | null  // Single rack with synthetic id
+device_types: DeviceType[]
+rackCount: number  // 0 or 1 in single-rack mode
 
 // Methods
-addRack(), updateRack(), deleteRack()
+addRack(), updateRack()  // deleteRack() N/A (single rack mode)
 addDeviceType(), updateDeviceType(), deleteDeviceType()
 placeDevice(), moveDevice(), removeDevice()
 undo(), redo(), reset()
@@ -346,11 +340,11 @@ selectedDeviceIndex: number | null; // Index of placed device in rack.devices ar
 
 // Methods
 selectRack(rackId: string): void;
-selectDevice(rackId: string, deviceIndex: number): void;  // Select by position index, NOT libraryId
+selectDevice(rackId: string, deviceIndex: number, deviceTypeSlug: string): void;
 clearSelection(): void;
 ```
 
-**Important:** Device selection uses `deviceIndex` (position in rack's device array), NOT `libraryId`. Multiple placed devices can share the same `libraryId` (same device type), but each has a unique index. Selection must target a single placed device instance.
+**Important:** Device selection uses `deviceIndex` (position in rack's device array), NOT `device_type`. Multiple placed devices can share the same `device_type` (same device type), but each has a unique index. Selection must target a single placed device instance.
 
 ### 6.4 History Store
 
@@ -475,17 +469,22 @@ interface ExportOptions {
 ### 9.2 Key Tokens
 
 ```css
-/* Spacing */
+/* Spacing (4px base) */
 --space-0: 0;
---space-1: 4px;
---space-2: 8px;
---space-3: 12px;
---space-4: 16px;
+--space-1: 0.25rem; /* 4px */
+--space-2: 0.5rem; /* 8px */
+--space-3: 0.75rem; /* 12px */
+--space-4: 1rem; /* 16px */
+--space-6: 1.5rem; /* 24px */
+--space-8: 2rem; /* 32px */
 
 /* Typography */
---font-size-xs: 12px;
---font-size-sm: 14px;
---font-size-base: 16px;
+--font-size-2xs: 0.625rem; /* 10px */
+--font-size-xs: 0.6875rem; /* 11px */
+--font-size-sm: 0.8125rem; /* 13px */
+--font-size-base: 0.875rem; /* 14px */
+--font-size-md: 1rem; /* 16px */
+--font-size-lg: 1.125rem; /* 18px */
 
 /* Rack (stays dark in both themes) */
 --rack-u-height: 17.78px;
@@ -496,6 +495,13 @@ interface ExportOptions {
 --toolbar-height: 56px;
 --sidebar-width: 280px;
 --drawer-width: 320px;
+
+/* Z-Index Layers */
+--z-sidebar: 10;
+--z-drawer-backdrop: 99;
+--z-drawer: 100;
+--z-modal: 200;
+--z-toast: 300;
 
 /* Airflow colors */
 --colour-airflow-intake: var(--blue-400);
@@ -569,14 +575,15 @@ npm run check        # Svelte type check
 
 ## 13. Version History
 
-| Version | Changes                                  |
-| ------- | ---------------------------------------- |
-| 0.4.9   | Airflow visualization, selection bug fix |
-| 0.4.8   | Design token audit, CSS cleanup          |
-| 0.4.0   | Breaking: removed legacy format support  |
-| 0.3.x   | Undo/redo, YAML archive, device images   |
-| 0.2.x   | Single-rack mode, fixed sidebar          |
-| 0.1.x   | Initial release                          |
+| Version | Changes                                            |
+| ------- | -------------------------------------------------- |
+| 0.5.0   | Type system consolidation, legacy comments cleanup |
+| 0.4.9   | Airflow visualization, selection bug fix           |
+| 0.4.8   | Design token audit, CSS cleanup                    |
+| 0.4.0   | Breaking: removed legacy format support            |
+| 0.3.x   | Undo/redo, YAML archive, device images             |
+| 0.2.x   | Single-rack mode, fixed sidebar                    |
+| 0.1.x   | Initial release                                    |
 
 ---
 

@@ -4,12 +4,15 @@
   Replaces single-view Rack with toggle
 -->
 <script lang="ts">
-	import type { Rack as RackType, Device, DisplayMode } from '$lib/types';
+	import type { Rack as RackType, DeviceType, DisplayMode } from '$lib/types';
 	import Rack from './Rack.svelte';
+
+	// Synthetic rack ID for single-rack mode
+	const RACK_ID = 'rack-0';
 
 	interface Props {
 		rack: RackType;
-		deviceLibrary: Device[];
+		deviceLibrary: DeviceType[];
 		selected: boolean;
 		/** Index of the selected device in the rack's devices array */
 		selectedDeviceIndex?: number | null;
@@ -17,11 +20,11 @@
 		showLabelsOnImages?: boolean;
 		airflowMode?: boolean;
 		onselect?: (event: CustomEvent<{ rackId: string }>) => void;
-		ondeviceselect?: (event: CustomEvent<{ libraryId: string; position: number }>) => void;
+		ondeviceselect?: (event: CustomEvent<{ slug: string; position: number }>) => void;
 		ondevicedrop?: (
 			event: CustomEvent<{
 				rackId: string;
-				libraryId: string;
+				slug: string;
 				position: number;
 				face: 'front' | 'rear';
 			}>
@@ -57,7 +60,7 @@
 	// Now using faceFilter prop instead of virtual racks
 
 	function handleSelect() {
-		onselect?.(new CustomEvent('select', { detail: { rackId: rack.id } }));
+		onselect?.(new CustomEvent('select', { detail: { rackId: RACK_ID } }));
 	}
 
 	function handleKeyDown(event: KeyboardEvent) {
@@ -72,7 +75,7 @@
 
 	// Handle device drop on front view - add face: 'front' to the event
 	function handleFrontDeviceDrop(
-		event: CustomEvent<{ rackId: string; libraryId: string; position: number }>
+		event: CustomEvent<{ rackId: string; slug: string; position: number }>
 	) {
 		ondevicedrop?.(
 			new CustomEvent('devicedrop', {
@@ -86,7 +89,7 @@
 
 	// Handle device drop on rear view - add face: 'rear' to the event
 	function handleRearDeviceDrop(
-		event: CustomEvent<{ rackId: string; libraryId: string; position: number }>
+		event: CustomEvent<{ rackId: string; slug: string; position: number }>
 	) {
 		ondevicedrop?.(
 			new CustomEvent('devicedrop', {

@@ -3,8 +3,9 @@
  * Validation and parsing for importing device libraries from JSON
  */
 
-import type { Device, DeviceCategory } from '$lib/types';
-import { generateId, getDefaultColour } from './device';
+import type { DeviceType, DeviceCategory } from '$lib/types';
+import { getDefaultColour } from './device';
+import { generateDeviceSlug } from './slug';
 
 // Valid device categories for validation
 const VALID_CATEGORIES: DeviceCategory[] = [
@@ -16,6 +17,7 @@ const VALID_CATEGORIES: DeviceCategory[] = [
 	'kvm',
 	'av-media',
 	'cooling',
+	'shelf',
 	'blank',
 	'other'
 ];
@@ -75,43 +77,45 @@ export function validateImportDevice(device: unknown): boolean {
  * Result of parsing device library import
  */
 export interface ParseDeviceLibraryResult {
-	/** Successfully imported devices with IDs and colours assigned */
-	devices: Device[];
+	/** Successfully imported device types with slugs and colours assigned */
+	devices: DeviceType[];
 	/** Count of invalid devices that were skipped */
 	skipped: number;
 }
 
 /**
- * Generate a unique device name by adding (imported N) suffix if needed
+ * Generate a unique slug by adding suffix if needed
  */
-function generateUniqueName(baseName: string, existingNames: string[]): string {
-	if (!existingNames.includes(baseName)) {
-		return baseName;
+function generateUniqueSlug(baseName: string, existingSlugs: string[]): string {
+	const baseSlug = generateDeviceSlug(undefined, undefined, baseName);
+
+	if (!existingSlugs.includes(baseSlug)) {
+		return baseSlug;
 	}
 
-	// Try (imported)
-	const candidateName = `${baseName} (imported)`;
-	if (!existingNames.includes(candidateName)) {
-		return candidateName;
+	// Try with -imported suffix
+	const candidateSlug = `${baseSlug}-imported`;
+	if (!existingSlugs.includes(candidateSlug)) {
+		return candidateSlug;
 	}
 
-	// Try (imported N) for incrementing N
+	// Try -imported-N for incrementing N
 	let counter = 2;
-	while (existingNames.includes(`${baseName} (imported ${counter})`)) {
+	while (existingSlugs.includes(`${baseSlug}-imported-${counter}`)) {
 		counter++;
 	}
 
-	return `${baseName} (imported ${counter})`;
+	return `${baseSlug}-imported-${counter}`;
 }
 
 /**
  * Parse and validate device library import from JSON
- * Assigns UUIDs and colours to imported devices
- * Renames duplicates with (imported) suffix
+ * Assigns slugs and colours to imported device types
+ * Renames duplicates with -imported suffix
  */
 export function parseDeviceLibraryImport(
 	json: string,
-	existingNames: string[] = []
+	existingSlugs: string[] = []
 ): ParseDeviceLibraryResult {
 	let data: unknown;
 
@@ -127,9 +131,9 @@ export function parseDeviceLibraryImport(
 		return { devices: [], skipped: 0 };
 	}
 
-	const devices: Device[] = [];
+	const devices: DeviceType[] = [];
 	let skipped = 0;
-	const allNames = [...existingNames];
+	const allSlugs = [...existingSlugs];
 
 	for (const rawDevice of data.devices as RawImportDevice[]) {
 		// Validate device
@@ -138,21 +142,26 @@ export function parseDeviceLibraryImport(
 			continue;
 		}
 
-		// Generate unique name if duplicate
-		const uniqueName = generateUniqueName(rawDevice.name!, allNames);
-		allNames.push(uniqueName);
+		// Generate unique slug if duplicate
+		const uniqueSlug = generateUniqueSlug(rawDevice.name!, allSlugs);
+		allSlugs.push(uniqueSlug);
 
-		// Create device with assigned ID and colour
-		const device: Device = {
-			id: generateId(),
-			name: uniqueName,
-			height: rawDevice.height!,
-			category: rawDevice.category as DeviceCategory,
-			colour: rawDevice.colour ?? getDefaultColour(rawDevice.category as DeviceCategory),
-			notes: rawDevice.notes
+		// Create device type with assigned slug and colour
+		const deviceType: DeviceType = {
+			slug: uniqueSlug,
+			u_height: rawDevice.height!,
+			model: rawDevice.name,
+			rackarr: {
+				colour: rawDevice.colour ?? getDefaultColour(rawDevice.category as DeviceCategory),
+				category: rawDevice.category as DeviceCategory
+			}
 		};
 
-		devices.push(device);
+		if (rawDevice.notes) {
+			deviceType.comments = rawDevice.notes;
+		}
+
+		devices.push(deviceType);
 	}
 
 	return { devices, skipped };

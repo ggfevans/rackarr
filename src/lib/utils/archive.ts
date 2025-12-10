@@ -4,7 +4,7 @@
  */
 
 import JSZip from 'jszip';
-import type { Layout } from '$lib/types/v02';
+import type { Layout } from '$lib/types';
 import type { ImageData, ImageStoreMap } from '$lib/types/images';
 import { slugify } from './slug';
 import { serializeLayoutToYaml, parseLayoutYaml } from './yaml';

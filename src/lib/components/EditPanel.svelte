@@ -10,7 +10,10 @@
 	import { getUIStore } from '$lib/stores/ui.svelte';
 	import { getCanvasStore } from '$lib/stores/canvas.svelte';
 	import { COMMON_RACK_HEIGHTS } from '$lib/types/constants';
-	import type { Rack, Device, PlacedDevice, DeviceFace, Airflow } from '$lib/types';
+	import type { Rack, DeviceType, PlacedDevice, DeviceFace, Airflow } from '$lib/types';
+
+	// Synthetic rack ID for single-rack mode
+	const RACK_ID = 'rack-0';
 
 	const layoutStore = getLayoutStore();
 	const selectionStore = getSelectionStore();
@@ -25,16 +28,16 @@
 	let editingDeviceName = $state(false);
 	let deviceNameInput = $state('');
 
-	// Get the selected rack if any
+	// Get the selected rack if any (single-rack mode)
 	const selectedRack = $derived.by(() => {
-		if (!selectionStore.isRackSelected || !selectionStore.selectedId) return null;
-		return layoutStore.racks.find((r) => r.id === selectionStore.selectedId) || null;
+		if (!selectionStore.isRackSelected || selectionStore.selectedId !== RACK_ID) return null;
+		return layoutStore.rack;
 	});
 
-	// Get the selected device info if any
+	// Get the selected device info if any (single-rack mode)
 	const selectedDeviceInfo = $derived.by(
 		(): {
-			device: Device;
+			device: DeviceType;
 			placedDevice: PlacedDevice;
 			rack: Rack;
 		} | null => {
@@ -46,13 +49,13 @@
 			)
 				return null;
 
-			const rack = layoutStore.racks.find((r) => r.id === selectionStore.selectedRackId);
+			const rack = layoutStore.rack;
 			if (!rack) return null;
 
 			const placedDevice = rack.devices[selectionStore.selectedDeviceIndex];
 			if (!placedDevice) return null;
 
-			const device = layoutStore.deviceLibrary.find((d) => d.id === selectionStore.selectedId);
+			const device = layoutStore.device_types.find((d) => d.slug === selectionStore.selectedId);
 			if (!device) return null;
 
 			return { device, placedDevice, rack };
@@ -82,7 +85,7 @@
 	// Update rack name on blur
 	function handleNameBlur() {
 		if (selectedRack && rackName !== selectedRack.name) {
-			layoutStore.updateRack(selectedRack.id, { name: rackName });
+			layoutStore.updateRack(RACK_ID, { name: rackName });
 		}
 	}
 
@@ -98,16 +101,16 @@
 		const target = event.target as HTMLInputElement;
 		const newHeight = parseInt(target.value, 10);
 		if (selectedRack && !rackHasDevices && newHeight >= 1 && newHeight <= 100) {
-			layoutStore.updateRack(selectedRack.id, { height: newHeight });
+			layoutStore.updateRack(RACK_ID, { height: newHeight });
 			// Reset view to center the resized rack
-			canvasStore.fitAll(layoutStore.racks);
+			canvasStore.fitAll(layoutStore.rack ? [layoutStore.rack] : []);
 		}
 	}
 
 	// Delete selected rack
 	function handleDeleteRack() {
 		if (selectedRack) {
-			layoutStore.deleteRack(selectedRack.id);
+			layoutStore.deleteRack(RACK_ID);
 			selectionStore.clearSelection();
 		}
 	}
@@ -137,7 +140,8 @@
 	// Start editing device name
 	function startEditingDeviceName() {
 		if (selectedDeviceInfo) {
-			deviceNameInput = selectedDeviceInfo.placedDevice.name ?? selectedDeviceInfo.device.name;
+			const deviceName = selectedDeviceInfo.device.model ?? selectedDeviceInfo.device.slug;
+			deviceNameInput = selectedDeviceInfo.placedDevice.name ?? deviceName;
 			editingDeviceName = true;
 		}
 	}
@@ -150,9 +154,9 @@
 			selectedDeviceInfo
 		) {
 			const newName = deviceNameInput.trim();
+			const deviceName = selectedDeviceInfo.device.model ?? selectedDeviceInfo.device.slug;
 			// If same as device type name, clear the custom name
-			const nameToSave =
-				newName === selectedDeviceInfo.device.name || newName === '' ? undefined : newName;
+			const nameToSave = newName === deviceName || newName === '' ? undefined : newName;
 			layoutStore.updateDeviceName(
 				selectionStore.selectedRackId,
 				selectionStore.selectedDeviceIndex,
@@ -198,7 +202,7 @@
 		const target = event.target as HTMLSelectElement;
 		const newAirflow = target.value as Airflow;
 		if (selectedDeviceInfo) {
-			layoutStore.updateDeviceInLibrary(selectedDeviceInfo.device.id, { airflow: newAirflow });
+			layoutStore.updateDeviceType(selectedDeviceInfo.device.slug, { airflow: newAirflow });
 		}
 	}
 </script>
@@ -249,9 +253,9 @@
 								onclick={() => {
 									rackHeight = preset;
 									if (selectedRack) {
-										layoutStore.updateRack(selectedRack.id, { height: preset });
+										layoutStore.updateRack(RACK_ID, { height: preset });
 										// Reset view to center the resized rack
-										canvasStore.fitAll(layoutStore.racks);
+										canvasStore.fitAll(layoutStore.rack ? [layoutStore.rack] : []);
 									}
 								}}
 							>
@@ -284,8 +288,10 @@
 		<!-- Device view -->
 		<div class="device-view">
 			<div class="device-header">
-				<ColourSwatch colour={selectedDeviceInfo.device.colour} size={24} />
-				<span class="device-name">{selectedDeviceInfo.device.name}</span>
+				<ColourSwatch colour={selectedDeviceInfo.device.rackarr.colour} size={24} />
+				<span class="device-name"
+					>{selectedDeviceInfo.device.model ?? selectedDeviceInfo.device.slug}</span
+				>
 			</div>
 
 			<!-- Display Name (click-to-edit) -->
@@ -307,7 +313,9 @@
 						aria-label="Edit display name"
 					>
 						<span class="display-name-text">
-							{selectedDeviceInfo.placedDevice.name ?? selectedDeviceInfo.device.name}
+							{selectedDeviceInfo.placedDevice.name ??
+								selectedDeviceInfo.device.model ??
+								selectedDeviceInfo.device.slug}
 						</span>
 						<svg
 							class="edit-icon"
@@ -328,11 +336,13 @@
 			<div class="info-section">
 				<div class="info-row">
 					<span class="info-label">Height</span>
-					<span class="info-value">{selectedDeviceInfo.device.height}U</span>
+					<span class="info-value">{selectedDeviceInfo.device.u_height}U</span>
 				</div>
 				<div class="info-row">
 					<span class="info-label">Category</span>
-					<span class="info-value">{formatCategory(selectedDeviceInfo.device.category)}</span>
+					<span class="info-value"
+						>{formatCategory(selectedDeviceInfo.device.rackarr.category)}</span
+					>
 				</div>
 				<div class="info-row">
 					<span class="info-label">Position</span>
@@ -341,8 +351,8 @@
 				<div class="info-row">
 					<span class="info-label">Colour</span>
 					<span class="info-value colour-info">
-						<ColourSwatch colour={selectedDeviceInfo.device.colour} size={16} />
-						{selectedDeviceInfo.device.colour}
+						<ColourSwatch colour={selectedDeviceInfo.device.rackarr.colour} size={16} />
+						{selectedDeviceInfo.device.rackarr.colour}
 					</span>
 				</div>
 			</div>
@@ -399,10 +409,10 @@
 				</select>
 			</div>
 
-			{#if selectedDeviceInfo.device.notes}
+			{#if selectedDeviceInfo.device.comments}
 				<div class="notes-section">
 					<span class="info-label">Notes</span>
-					<p class="notes-text">{selectedDeviceInfo.device.notes}</p>
+					<p class="notes-text">{selectedDeviceInfo.device.comments}</p>
 				</div>
 			{/if}
 

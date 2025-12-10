@@ -26,13 +26,14 @@ describe('EditPanel Component', () => {
 		it('shows when a rack is selected', () => {
 			const layoutStore = getLayoutStore();
 			const selectionStore = getSelectionStore();
+			const RACK_ID = 'rack-0';
 
 			// Add a rack
 			const rack = layoutStore.addRack('Test Rack', 42);
 			expect(rack).not.toBeNull();
 
 			// Select it
-			selectionStore.selectRack(rack!.id);
+			selectionStore.selectRack(RACK_ID);
 
 			render(EditPanel);
 			// The panel should be open
@@ -43,22 +44,23 @@ describe('EditPanel Component', () => {
 		it('shows when a device is selected', () => {
 			const layoutStore = getLayoutStore();
 			const selectionStore = getSelectionStore();
+			const RACK_ID = 'rack-0';
 
 			// Add a rack
 			const rack = layoutStore.addRack('Test Rack', 42);
 			expect(rack).not.toBeNull();
 
 			// Add a device to library and place it
-			const device = layoutStore.addDeviceToLibrary({
+			const device = layoutStore.addDeviceType({
 				name: 'Test Server',
-				height: 2,
+				u_height: 2,
 				category: 'server',
 				colour: '#4A90D9'
 			});
-			layoutStore.placeDevice(rack!.id, device.id, 1);
+			layoutStore.placeDevice(RACK_ID, device.slug, 1);
 
 			// Select the device
-			selectionStore.selectDevice(rack!.id, 0, device.id);
+			selectionStore.selectDevice(RACK_ID, 0, device.slug);
 
 			render(EditPanel);
 			const panel = screen.getByRole('complementary');
@@ -70,9 +72,10 @@ describe('EditPanel Component', () => {
 		it('shows rack fields when rack is selected', () => {
 			const layoutStore = getLayoutStore();
 			const selectionStore = getSelectionStore();
+			const RACK_ID = 'rack-0';
 
-			const rack = layoutStore.addRack('My Rack', 24);
-			selectionStore.selectRack(rack!.id);
+			layoutStore.addRack('My Rack', 24);
+			selectionStore.selectRack(RACK_ID);
 
 			render(EditPanel);
 
@@ -85,9 +88,10 @@ describe('EditPanel Component', () => {
 		it('rack name field is editable', async () => {
 			const layoutStore = getLayoutStore();
 			const selectionStore = getSelectionStore();
+			const RACK_ID = 'rack-0';
 
-			const rack = layoutStore.addRack('My Rack', 24);
-			selectionStore.selectRack(rack!.id);
+			layoutStore.addRack('My Rack', 24);
+			selectionStore.selectRack(RACK_ID);
 
 			render(EditPanel);
 
@@ -98,16 +102,16 @@ describe('EditPanel Component', () => {
 			await fireEvent.blur(nameInput);
 
 			// Check store was updated
-			const updatedRack = layoutStore.racks.find((r) => r.id === rack!.id);
-			expect(updatedRack?.name).toBe('New Name');
+			expect(layoutStore.rack?.name).toBe('New Name');
 		});
 
 		it('rack height is editable when no devices present', async () => {
 			const layoutStore = getLayoutStore();
 			const selectionStore = getSelectionStore();
+			const RACK_ID = 'rack-0';
 
-			const rack = layoutStore.addRack('My Rack', 24);
-			selectionStore.selectRack(rack!.id);
+			layoutStore.addRack('My Rack', 24);
+			selectionStore.selectRack(RACK_ID);
 
 			render(EditPanel);
 
@@ -118,16 +122,17 @@ describe('EditPanel Component', () => {
 		it('rack height shows message when devices present', () => {
 			const layoutStore = getLayoutStore();
 			const selectionStore = getSelectionStore();
+			const RACK_ID = 'rack-0';
 
-			const rack = layoutStore.addRack('My Rack', 24);
-			const device = layoutStore.addDeviceToLibrary({
+			layoutStore.addRack('My Rack', 24);
+			const device = layoutStore.addDeviceType({
 				name: 'Server',
-				height: 2,
+				u_height: 2,
 				category: 'server',
 				colour: '#4A90D9'
 			});
-			layoutStore.placeDevice(rack!.id, device.id, 1);
-			selectionStore.selectRack(rack!.id);
+			layoutStore.placeDevice(RACK_ID, device.slug, 1);
+			selectionStore.selectRack(RACK_ID);
 
 			render(EditPanel);
 
@@ -137,9 +142,10 @@ describe('EditPanel Component', () => {
 		it('name change updates layout store', async () => {
 			const layoutStore = getLayoutStore();
 			const selectionStore = getSelectionStore();
+			const RACK_ID = 'rack-0';
 
-			const rack = layoutStore.addRack('My Rack', 24);
-			selectionStore.selectRack(rack!.id);
+			layoutStore.addRack('My Rack', 24);
+			selectionStore.selectRack(RACK_ID);
 
 			render(EditPanel);
 
@@ -147,16 +153,16 @@ describe('EditPanel Component', () => {
 			await fireEvent.input(nameInput, { target: { value: 'Updated Rack' } });
 			await fireEvent.blur(nameInput);
 
-			const updatedRack = layoutStore.racks.find((r) => r.id === rack!.id);
-			expect(updatedRack?.name).toBe('Updated Rack');
+			expect(layoutStore.rack?.name).toBe('Updated Rack');
 		});
 
 		it('delete button is present for rack', () => {
 			const layoutStore = getLayoutStore();
 			const selectionStore = getSelectionStore();
+			const RACK_ID = 'rack-0';
 
-			const rack = layoutStore.addRack('My Rack', 24);
-			selectionStore.selectRack(rack!.id);
+			layoutStore.addRack('My Rack', 24);
+			selectionStore.selectRack(RACK_ID);
 
 			render(EditPanel);
 
@@ -166,16 +172,17 @@ describe('EditPanel Component', () => {
 		it('shows device count for rack', () => {
 			const layoutStore = getLayoutStore();
 			const selectionStore = getSelectionStore();
+			const RACK_ID = 'rack-0';
 
-			const rack = layoutStore.addRack('My Rack', 24);
-			const device = layoutStore.addDeviceToLibrary({
+			layoutStore.addRack('My Rack', 24);
+			const device = layoutStore.addDeviceType({
 				name: 'Server',
-				height: 2,
+				u_height: 2,
 				category: 'server',
 				colour: '#4A90D9'
 			});
-			layoutStore.placeDevice(rack!.id, device.id, 1);
-			selectionStore.selectRack(rack!.id);
+			layoutStore.placeDevice(RACK_ID, device.slug, 1);
+			selectionStore.selectRack(RACK_ID);
 
 			const { container } = render(EditPanel);
 
@@ -192,17 +199,18 @@ describe('EditPanel Component', () => {
 		it('shows device fields when device is selected', () => {
 			const layoutStore = getLayoutStore();
 			const selectionStore = getSelectionStore();
+			const RACK_ID = 'rack-0';
 
-			const rack = layoutStore.addRack('My Rack', 24);
-			const device = layoutStore.addDeviceToLibrary({
+			layoutStore.addRack('My Rack', 24);
+			const device = layoutStore.addDeviceType({
 				name: 'Test Server',
-				height: 2,
+				u_height: 2,
 				category: 'server',
 				colour: '#4A90D9',
-				notes: 'Some notes'
+				comments: 'Some notes'
 			});
-			layoutStore.placeDevice(rack!.id, device.id, 5);
-			selectionStore.selectDevice(rack!.id, 0, device.id);
+			layoutStore.placeDevice(RACK_ID, device.slug, 5);
+			selectionStore.selectDevice(RACK_ID, 0, device.slug);
 
 			render(EditPanel);
 
@@ -220,17 +228,18 @@ describe('EditPanel Component', () => {
 		it('shows notes when present', () => {
 			const layoutStore = getLayoutStore();
 			const selectionStore = getSelectionStore();
+			const RACK_ID = 'rack-0';
 
-			const rack = layoutStore.addRack('My Rack', 24);
-			const device = layoutStore.addDeviceToLibrary({
+			layoutStore.addRack('My Rack', 24);
+			const device = layoutStore.addDeviceType({
 				name: 'Test Server',
-				height: 2,
+				u_height: 2,
 				category: 'server',
 				colour: '#4A90D9',
-				notes: 'Important server notes'
+				comments: 'Important server notes'
 			});
-			layoutStore.placeDevice(rack!.id, device.id, 1);
-			selectionStore.selectDevice(rack!.id, 0, device.id);
+			layoutStore.placeDevice(RACK_ID, device.slug, 1);
+			selectionStore.selectDevice(RACK_ID, 0, device.slug);
 
 			render(EditPanel);
 
@@ -240,16 +249,17 @@ describe('EditPanel Component', () => {
 		it('remove button is present for device', () => {
 			const layoutStore = getLayoutStore();
 			const selectionStore = getSelectionStore();
+			const RACK_ID = 'rack-0';
 
-			const rack = layoutStore.addRack('My Rack', 24);
-			const device = layoutStore.addDeviceToLibrary({
+			layoutStore.addRack('My Rack', 24);
+			const device = layoutStore.addDeviceType({
 				name: 'Test Server',
-				height: 2,
+				u_height: 2,
 				category: 'server',
 				colour: '#4A90D9'
 			});
-			layoutStore.placeDevice(rack!.id, device.id, 1);
-			selectionStore.selectDevice(rack!.id, 0, device.id);
+			layoutStore.placeDevice(RACK_ID, device.slug, 1);
+			selectionStore.selectDevice(RACK_ID, 0, device.slug);
 
 			render(EditPanel);
 
@@ -261,16 +271,17 @@ describe('EditPanel Component', () => {
 		it('shows face selector when device selected', () => {
 			const layoutStore = getLayoutStore();
 			const selectionStore = getSelectionStore();
+			const RACK_ID = 'rack-0';
 
-			const rack = layoutStore.addRack('My Rack', 24);
-			const device = layoutStore.addDeviceToLibrary({
+			layoutStore.addRack('My Rack', 24);
+			const device = layoutStore.addDeviceType({
 				name: 'Test Server',
-				height: 2,
+				u_height: 2,
 				category: 'server',
 				colour: '#4A90D9'
 			});
-			layoutStore.placeDevice(rack!.id, device.id, 1);
-			selectionStore.selectDevice(rack!.id, 0, device.id);
+			layoutStore.placeDevice(RACK_ID, device.slug, 1);
+			selectionStore.selectDevice(RACK_ID, 0, device.slug);
 
 			const { getByRole } = render(EditPanel);
 			expect(getByRole('group', { name: /mounted face/i })).toBeTruthy();
@@ -279,16 +290,17 @@ describe('EditPanel Component', () => {
 		it('has three radio options', () => {
 			const layoutStore = getLayoutStore();
 			const selectionStore = getSelectionStore();
+			const RACK_ID = 'rack-0';
 
-			const rack = layoutStore.addRack('My Rack', 24);
-			const device = layoutStore.addDeviceToLibrary({
+			layoutStore.addRack('My Rack', 24);
+			const device = layoutStore.addDeviceType({
 				name: 'Test Server',
-				height: 2,
+				u_height: 2,
 				category: 'server',
 				colour: '#4A90D9'
 			});
-			layoutStore.placeDevice(rack!.id, device.id, 1);
-			selectionStore.selectDevice(rack!.id, 0, device.id);
+			layoutStore.placeDevice(RACK_ID, device.slug, 1);
+			selectionStore.selectDevice(RACK_ID, 0, device.slug);
 
 			const { getByLabelText } = render(EditPanel);
 			expect(getByLabelText('Front')).toBeTruthy();
@@ -299,9 +311,10 @@ describe('EditPanel Component', () => {
 		it('does not show face selector for rack selection', () => {
 			const layoutStore = getLayoutStore();
 			const selectionStore = getSelectionStore();
+			const RACK_ID = 'rack-0';
 
-			const rack = layoutStore.addRack('My Rack', 24);
-			selectionStore.selectRack(rack!.id);
+			layoutStore.addRack('My Rack', 24);
+			selectionStore.selectRack(RACK_ID);
 
 			const { queryByRole } = render(EditPanel);
 			expect(queryByRole('group', { name: /mounted face/i })).toBeNull();

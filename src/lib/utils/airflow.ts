@@ -3,7 +3,7 @@
  * Conflict detection and airflow analysis for rack devices
  */
 
-import type { Rack, Device, Airflow, PlacedDevice } from '$lib/types';
+import type { Rack, DeviceType, Airflow, PlacedDevice } from '$lib/types';
 
 /**
  * Airflow conflict information
@@ -66,7 +66,7 @@ export function hasAirflowConflict(
  * @param deviceLibrary - Device library for airflow info
  * @returns Array of conflicts found
  */
-export function findAirflowConflicts(rack: Rack, deviceLibrary: Device[]): AirflowConflict[] {
+export function findAirflowConflicts(rack: Rack, deviceLibrary: DeviceType[]): AirflowConflict[] {
 	const conflicts: AirflowConflict[] = [];
 
 	// Sort devices by position (ascending)
@@ -81,13 +81,13 @@ export function findAirflowConflicts(rack: Rack, deviceLibrary: Device[]): Airfl
 		if (!lowerDevice || !upperDevice) continue;
 
 		// Get device info from library
-		const lowerInfo = deviceLibrary.find((d) => d.id === lowerDevice.libraryId);
-		const upperInfo = deviceLibrary.find((d) => d.id === upperDevice.libraryId);
+		const lowerInfo = deviceLibrary.find((d) => d.slug === lowerDevice.device_type);
+		const upperInfo = deviceLibrary.find((d) => d.slug === upperDevice.device_type);
 
 		if (!lowerInfo || !upperInfo) continue;
 
 		// Check if devices are actually adjacent (touching)
-		const lowerTop = lowerDevice.position + lowerInfo.height - 1;
+		const lowerTop = lowerDevice.position + lowerInfo.u_height - 1;
 		const upperBottom = upperDevice.position;
 
 		if (upperBottom !== lowerTop + 1) continue; // Not adjacent
@@ -124,7 +124,7 @@ export function findAirflowConflicts(rack: Rack, deviceLibrary: Device[]): Airfl
  */
 export function getDeviceAirflowConflicts(
 	rack: Rack,
-	deviceLibrary: Device[],
+	deviceLibrary: DeviceType[],
 	placedDevice: PlacedDevice
 ): AirflowConflict[] {
 	const allConflicts = findAirflowConflicts(rack, deviceLibrary);

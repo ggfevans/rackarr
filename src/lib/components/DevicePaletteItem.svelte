@@ -4,17 +4,20 @@
   Draggable for placement into racks
 -->
 <script lang="ts">
-	import type { Device } from '$lib/types';
+	import type { DeviceType } from '$lib/types';
 	import IconGrip from './icons/IconGrip.svelte';
 	import { createPaletteDragData, serializeDragData } from '$lib/utils/dragdrop';
 
 	interface Props {
-		device: Device;
+		device: DeviceType;
 		librarySelected?: boolean;
-		onselect?: (event: CustomEvent<{ device: Device }>) => void;
+		onselect?: (event: CustomEvent<{ device: DeviceType }>) => void;
 	}
 
 	let { device, librarySelected = false, onselect }: Props = $props();
+
+	// Device display name: model or slug
+	const deviceName = $derived(device.model ?? device.slug);
 
 	// Track dragging state for visual feedback
 	let isDragging = $state(false);
@@ -58,14 +61,14 @@
 	onkeydown={handleKeyDown}
 	ondragstart={handleDragStart}
 	ondragend={handleDragEnd}
-	aria-label="{device.name}, {device.height}U {device.category}"
+	aria-label="{deviceName}, {device.u_height}U {device.rackarr.category}"
 >
 	<span class="drag-handle" aria-hidden="true">
 		<IconGrip size={16} />
 	</span>
-	<span class="category-indicator" style="background-color: {device.colour}"></span>
-	<span class="device-name">{device.name}</span>
-	<span class="device-height">{device.height}U</span>
+	<span class="category-indicator" style="background-color: {device.rackarr.colour}"></span>
+	<span class="device-name">{deviceName}</span>
+	<span class="device-height">{device.u_height}U</span>
 </div>
 
 <style>

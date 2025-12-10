@@ -7,20 +7,19 @@ import {
 	findValidDropPositions,
 	snapToNearestValidPosition
 } from '$lib/utils/collision';
-import type { Device, Rack, DeviceFace } from '$lib/types';
+import type { DeviceType, Rack, DeviceFace } from '$lib/types';
 
 // Helper to create test devices
 function createTestDevice(
-	id: string,
-	height: number,
+	slug: string,
+	u_height: number,
 	options?: { is_full_depth?: boolean; face?: DeviceFace }
-): Device {
+): DeviceType {
 	return {
-		id,
-		name: `Test Device ${id}`,
-		height,
-		colour: '#4A90D9',
-		category: 'server',
+		slug,
+		model: `Test Device ${slug}`,
+		u_height,
+		rackarr: { colour: '#4A90D9', category: 'server' },
 		...(options?.is_full_depth !== undefined && { is_full_depth: options.is_full_depth }),
 		...(options?.face !== undefined && { face: options.face })
 	};
@@ -29,15 +28,16 @@ function createTestDevice(
 // Helper to create test rack
 function createTestRack(
 	height: number,
-	devices: { libraryId: string; position: number; face?: DeviceFace }[] = []
+	devices: { device_type: string; position: number; face?: DeviceFace }[] = []
 ): Rack {
 	return {
-		id: 'rack-1',
 		name: 'Test Rack',
 		height,
 		width: 19,
 		position: 0,
-		view: 'front',
+		desc_units: false,
+		form_factor: '4-post',
+		starting_unit: 1,
 		devices: devices.map((d) => ({ ...d, face: d.face ?? ('front' as const) }))
 	};
 }
@@ -85,7 +85,7 @@ describe('Collision Detection', () => {
 	describe('canPlaceDevice', () => {
 		it('returns true for empty rack', () => {
 			const rack = createTestRack(42);
-			const deviceLibrary: Device[] = [];
+			const deviceLibrary: DeviceType[] = [];
 
 			expect(canPlaceDevice(rack, deviceLibrary, 1, 1)).toBe(true);
 			expect(canPlaceDevice(rack, deviceLibrary, 4, 10)).toBe(true);
@@ -93,7 +93,7 @@ describe('Collision Detection', () => {
 
 		it('returns false when device would exceed rack top', () => {
 			const rack = createTestRack(42);
-			const deviceLibrary: Device[] = [];
+			const deviceLibrary: DeviceType[] = [];
 
 			// 4U device at position 40 would occupy 40,41,42,43 - but rack only has 42
 			expect(canPlaceDevice(rack, deviceLibrary, 4, 40)).toBe(false);
@@ -101,7 +101,7 @@ describe('Collision Detection', () => {
 
 		it('returns false for position less than 1', () => {
 			const rack = createTestRack(42);
-			const deviceLibrary: Device[] = [];
+			const deviceLibrary: DeviceType[] = [];
 
 			expect(canPlaceDevice(rack, deviceLibrary, 1, 0)).toBe(false);
 			expect(canPlaceDevice(rack, deviceLibrary, 1, -1)).toBe(false);
@@ -109,7 +109,7 @@ describe('Collision Detection', () => {
 
 		it('returns false for collision with existing device', () => {
 			const device1 = createTestDevice('device-1', 2);
-			const rack = createTestRack(42, [{ libraryId: 'device-1', position: 5 }]);
+			const rack = createTestRack(42, [{ device_type: 'device-1', position: 5 }]);
 
 			// device-1 occupies 5,6. Placing 2U device at 4 would occupy 4,5 - collision!
 			expect(canPlaceDevice(rack, [device1], 2, 4)).toBe(false);
@@ -121,7 +121,7 @@ describe('Collision Detection', () => {
 
 		it('returns true for position adjacent to existing device', () => {
 			const device1 = createTestDevice('device-1', 2);
-			const rack = createTestRack(42, [{ libraryId: 'device-1', position: 5 }]);
+			const rack = createTestRack(42, [{ device_type: 'device-1', position: 5 }]);
 
 			// device-1 occupies 5,6. Position 7 is adjacent and valid
 			expect(canPlaceDevice(rack, [device1], 1, 7)).toBe(true);
@@ -133,7 +133,7 @@ describe('Collision Detection', () => {
 	describe('findCollisions', () => {
 		it('returns empty array when no collisions', () => {
 			const device1 = createTestDevice('device-1', 2);
-			const rack = createTestRack(42, [{ libraryId: 'device-1', position: 5 }]);
+			const rack = createTestRack(42, [{ device_type: 'device-1', position: 5 }]);
 
 			const collisions = findCollisions(rack, [device1], 1, 10);
 			expect(collisions).toEqual([]);
@@ -141,19 +141,19 @@ describe('Collision Detection', () => {
 
 		it('returns colliding devices', () => {
 			const device1 = createTestDevice('device-1', 2);
-			const rack = createTestRack(42, [{ libraryId: 'device-1', position: 5 }]);
+			const rack = createTestRack(42, [{ device_type: 'device-1', position: 5 }]);
 
 			const collisions = findCollisions(rack, [device1], 2, 4);
 			expect(collisions).toHaveLength(1);
-			expect(collisions[0]).toEqual({ libraryId: 'device-1', position: 5, face: 'front' });
+			expect(collisions[0]).toEqual({ device_type: 'device-1', position: 5, face: 'front' });
 		});
 
 		it('excludes device at excludeIndex (for move operations)', () => {
 			const device1 = createTestDevice('device-1', 2);
 			const device2 = createTestDevice('device-2', 1);
 			const rack = createTestRack(42, [
-				{ libraryId: 'device-1', position: 5 },
-				{ libraryId: 'device-2', position: 10 }
+				{ device_type: 'device-1', position: 5 },
+				{ device_type: 'device-2', position: 10 }
 			]);
 
 			// Moving device at index 0 - should exclude it from collision check
@@ -165,7 +165,7 @@ describe('Collision Detection', () => {
 	describe('findValidDropPositions', () => {
 		it('returns [1..rackHeight-deviceHeight+1] for empty rack', () => {
 			const rack = createTestRack(10);
-			const deviceLibrary: Device[] = [];
+			const deviceLibrary: DeviceType[] = [];
 
 			// 1U device can go in positions 1-10
 			const positions1U = findValidDropPositions(rack, deviceLibrary, 1);
@@ -178,7 +178,7 @@ describe('Collision Detection', () => {
 
 		it('excludes positions that would collide', () => {
 			const device1 = createTestDevice('device-1', 2);
-			const rack = createTestRack(10, [{ libraryId: 'device-1', position: 5 }]);
+			const rack = createTestRack(10, [{ device_type: 'device-1', position: 5 }]);
 
 			// 1U device: device-1 at 5,6 blocks positions 5 and 6
 			const positions1U = findValidDropPositions(rack, [device1], 1);
@@ -191,11 +191,11 @@ describe('Collision Detection', () => {
 
 		it('returns empty array when rack is full', () => {
 			// Fill rack completely with 1U devices
-			const devices: Device[] = [];
-			const placedDevices: { libraryId: string; position: number }[] = [];
+			const devices: DeviceType[] = [];
+			const placedDevices: { device_type: string; position: number }[] = [];
 			for (let i = 1; i <= 5; i++) {
 				devices.push(createTestDevice(`device-${i}`, 1));
-				placedDevices.push({ libraryId: `device-${i}`, position: i });
+				placedDevices.push({ device_type: `device-${i}`, position: i });
 			}
 			const rack = createTestRack(5, placedDevices);
 
@@ -209,7 +209,7 @@ describe('Collision Detection', () => {
 
 		it('returns exact position if valid', () => {
 			const rack = createTestRack(42);
-			const deviceLibrary: Device[] = [];
+			const deviceLibrary: DeviceType[] = [];
 
 			// Target Y for position 5 (from top of rack)
 			const targetY = (42 - 5) * uHeight;
@@ -219,7 +219,7 @@ describe('Collision Detection', () => {
 
 		it('returns nearest valid position', () => {
 			const device1 = createTestDevice('device-1', 2);
-			const rack = createTestRack(42, [{ libraryId: 'device-1', position: 5 }]);
+			const rack = createTestRack(42, [{ device_type: 'device-1', position: 5 }]);
 
 			// Target somewhere near position 5 (which is blocked)
 			const targetY = (42 - 5) * uHeight;
@@ -230,11 +230,11 @@ describe('Collision Detection', () => {
 
 		it('returns null when no valid positions', () => {
 			// Fill rack completely
-			const devices: Device[] = [];
-			const placedDevices: { libraryId: string; position: number }[] = [];
+			const devices: DeviceType[] = [];
+			const placedDevices: { device_type: string; position: number }[] = [];
 			for (let i = 1; i <= 5; i++) {
 				devices.push(createTestDevice(`device-${i}`, 1));
-				placedDevices.push({ libraryId: `device-${i}`, position: i });
+				placedDevices.push({ device_type: `device-${i}`, position: i });
 			}
 			const rack = createTestRack(5, placedDevices);
 
@@ -249,7 +249,7 @@ describe('Face Independence', () => {
 		it('allows placing device on rear when front is occupied at same position', () => {
 			// Device mounted on front at position 5
 			const device = createTestDevice('device-1', 2);
-			const rack = createTestRack(42, [{ libraryId: 'device-1', position: 5, face: 'front' }]);
+			const rack = createTestRack(42, [{ device_type: 'device-1', position: 5, face: 'front' }]);
 
 			// Should be able to place a 2U device on rear at same position
 			expect(canPlaceDevice(rack, [device], 2, 5, undefined, 'rear')).toBe(true);
@@ -258,7 +258,7 @@ describe('Face Independence', () => {
 		it('allows placing device on front when rear is occupied at same position', () => {
 			// Device mounted on rear at position 5
 			const device = createTestDevice('device-1', 2);
-			const rack = createTestRack(42, [{ libraryId: 'device-1', position: 5, face: 'rear' }]);
+			const rack = createTestRack(42, [{ device_type: 'device-1', position: 5, face: 'rear' }]);
 
 			// Should be able to place a 2U device on front at same position
 			expect(canPlaceDevice(rack, [device], 2, 5, undefined, 'front')).toBe(true);
@@ -267,7 +267,7 @@ describe('Face Independence', () => {
 		it('blocks placement on same face at overlapping position', () => {
 			// Device mounted on front at position 5
 			const device = createTestDevice('device-1', 2);
-			const rack = createTestRack(42, [{ libraryId: 'device-1', position: 5, face: 'front' }]);
+			const rack = createTestRack(42, [{ device_type: 'device-1', position: 5, face: 'front' }]);
 
 			// Should NOT be able to place on front at same position
 			expect(canPlaceDevice(rack, [device], 2, 5, undefined, 'front')).toBe(false);
@@ -276,7 +276,7 @@ describe('Face Independence', () => {
 		it('blocks rear placement when existing device is full-depth', () => {
 			// Full-depth device occupies both faces
 			const device = createTestDevice('device-1', 2, { is_full_depth: true });
-			const rack = createTestRack(42, [{ libraryId: 'device-1', position: 5, face: 'both' }]);
+			const rack = createTestRack(42, [{ device_type: 'device-1', position: 5, face: 'both' }]);
 
 			// Should NOT be able to place on rear at same position
 			expect(canPlaceDevice(rack, [device], 1, 5, undefined, 'rear')).toBe(false);
@@ -285,7 +285,7 @@ describe('Face Independence', () => {
 		it('blocks front placement when existing device is full-depth', () => {
 			// Full-depth device occupies both faces
 			const device = createTestDevice('device-1', 2, { is_full_depth: true });
-			const rack = createTestRack(42, [{ libraryId: 'device-1', position: 5, face: 'both' }]);
+			const rack = createTestRack(42, [{ device_type: 'device-1', position: 5, face: 'both' }]);
 
 			// Should NOT be able to place on front at same position
 			expect(canPlaceDevice(rack, [device], 1, 5, undefined, 'front')).toBe(false);
@@ -294,7 +294,7 @@ describe('Face Independence', () => {
 		it('blocks placement when new device is full-depth and position is occupied', () => {
 			// Half-depth device on front
 			const existingDevice = createTestDevice('device-1', 2, { is_full_depth: false });
-			const rack = createTestRack(42, [{ libraryId: 'device-1', position: 5, face: 'front' }]);
+			const rack = createTestRack(42, [{ device_type: 'device-1', position: 5, face: 'front' }]);
 
 			// Placing a full-depth device ('both') should be blocked
 			expect(canPlaceDevice(rack, [existingDevice], 2, 5, undefined, 'both')).toBe(false);
@@ -303,7 +303,7 @@ describe('Face Independence', () => {
 		it('allows adjacent positions regardless of face', () => {
 			// Device on front at position 5-6
 			const device = createTestDevice('device-1', 2);
-			const rack = createTestRack(42, [{ libraryId: 'device-1', position: 5, face: 'front' }]);
+			const rack = createTestRack(42, [{ device_type: 'device-1', position: 5, face: 'front' }]);
 
 			// Should be able to place on front at position 7 (adjacent, no overlap)
 			expect(canPlaceDevice(rack, [device], 2, 7, undefined, 'front')).toBe(true);
@@ -315,7 +315,7 @@ describe('Face Independence', () => {
 	describe('findCollisions with face awareness', () => {
 		it('does not report collision when devices are on different faces', () => {
 			const device = createTestDevice('device-1', 2);
-			const rack = createTestRack(42, [{ libraryId: 'device-1', position: 5, face: 'front' }]);
+			const rack = createTestRack(42, [{ device_type: 'device-1', position: 5, face: 'front' }]);
 
 			// Checking for collisions on rear should find none
 			const collisions = findCollisions(rack, [device], 2, 5, undefined, 'rear');
@@ -324,7 +324,7 @@ describe('Face Independence', () => {
 
 		it('reports collision when devices are on same face', () => {
 			const device = createTestDevice('device-1', 2);
-			const rack = createTestRack(42, [{ libraryId: 'device-1', position: 5, face: 'front' }]);
+			const rack = createTestRack(42, [{ device_type: 'device-1', position: 5, face: 'front' }]);
 
 			// Checking for collisions on front should find the device
 			const collisions = findCollisions(rack, [device], 2, 5, undefined, 'front');
@@ -338,7 +338,7 @@ describe('Face Independence', () => {
 			// Front is fully occupied from position 1-10
 			const placedDevices = [];
 			for (let i = 1; i <= 9; i += 2) {
-				placedDevices.push({ libraryId: 'device-1', position: i, face: 'front' as DeviceFace });
+				placedDevices.push({ device_type: 'device-1', position: i, face: 'front' as DeviceFace });
 			}
 			const rack = createTestRack(10, placedDevices);
 

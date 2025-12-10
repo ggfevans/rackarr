@@ -4,7 +4,7 @@
   Accepts device drops for placement
 -->
 <script lang="ts">
-	import type { Rack as RackType, Device, DisplayMode } from '$lib/types';
+	import type { Rack as RackType, DeviceType, DisplayMode } from '$lib/types';
 	import { SvelteSet } from 'svelte/reactivity';
 	import RackDevice from './RackDevice.svelte';
 	import {
@@ -20,9 +20,12 @@
 
 	const canvasStore = getCanvasStore();
 
+	// Synthetic rack ID for single-rack mode
+	const RACK_ID = 'rack-0';
+
 	interface Props {
 		rack: RackType;
-		deviceLibrary: Device[];
+		deviceLibrary: DeviceType[];
 		selected: boolean;
 		/** Index of the selected device in the rack's devices array (null if no device selected) */
 		selectedDeviceIndex?: number | null;
@@ -36,10 +39,8 @@
 		/** Hide the rack name (useful when container shows it instead) */
 		hideRackName?: boolean;
 		onselect?: (event: CustomEvent<{ rackId: string }>) => void;
-		ondeviceselect?: (event: CustomEvent<{ libraryId: string; position: number }>) => void;
-		ondevicedrop?: (
-			event: CustomEvent<{ rackId: string; libraryId: string; position: number }>
-		) => void;
+		ondeviceselect?: (event: CustomEvent<{ slug: string; position: number }>) => void;
+		ondevicedrop?: (event: CustomEvent<{ rackId: string; slug: string; position: number }>) => void;
 		ondevicemove?: (
 			event: CustomEvent<{ rackId: string; deviceIndex: number; newPosition: number }>
 		) => void;
@@ -76,9 +77,9 @@
 	// Track if we just finished dragging a device (to prevent rack selection on release)
 	let justFinishedDrag = $state(false);
 
-	// Look up device by libraryId
-	function getDeviceById(libraryId: string): Device | undefined {
-		return deviceLibrary.find((d) => d.id === libraryId);
+	// Look up device by device_type (slug)
+	function getDeviceBySlug(slug: string): DeviceType | undefined {
+		return deviceLibrary.find((d) => d.slug === slug);
 	}
 
 	// CSS custom property values (fallbacks match app.css)
@@ -149,14 +150,14 @@
 			// Also mark the device below (the exhaust source)
 			const deviceAtPosition = rack.devices[deviceIdx];
 			if (deviceAtPosition) {
-				const deviceDef = deviceLibrary.find((d) => d.id === deviceAtPosition.libraryId);
+				const deviceDef = deviceLibrary.find((d) => d.slug === deviceAtPosition.device_type);
 				if (deviceDef) {
 					// Find the device directly below this one
 					const belowDeviceIdx = rack.devices.findIndex((d) => {
-						const belowDef = deviceLibrary.find((lib) => lib.id === d.libraryId);
+						const belowDef = deviceLibrary.find((lib) => lib.slug === d.device_type);
 						if (!belowDef) return false;
-						// Check if this device's top position (position + height - 1) is adjacent to conflict position
-						return d.position + belowDef.height === conflict.position;
+						// Check if this device's top position (position + u_height - 1) is adjacent to conflict position
+						return d.position + belowDef.u_height === conflict.position;
 					});
 					if (belowDeviceIdx !== -1) {
 						conflictingIndices.add(belowDeviceIdx);
@@ -190,13 +191,13 @@
 			return;
 		}
 
-		onselect?.(new CustomEvent('select', { detail: { rackId: rack.id } }));
+		onselect?.(new CustomEvent('select', { detail: { rackId: RACK_ID } }));
 	}
 
 	function handleKeyDown(event: KeyboardEvent) {
 		if (event.key === 'Enter' || event.key === ' ') {
 			event.preventDefault();
-			onselect?.(new CustomEvent('select', { detail: { rackId: rack.id } }));
+			onselect?.(new CustomEvent('select', { detail: { rackId: RACK_ID } }));
 		}
 	}
 
@@ -217,7 +218,7 @@
 		// Determine if this is an internal move (same rack)
 		const isInternalMove =
 			dragData.type === 'rack-device' &&
-			dragData.sourceRackId === rack.id &&
+			dragData.sourceRackId === RACK_ID &&
 			dragData.sourceIndex !== undefined;
 
 		event.dataTransfer.dropEffect = isInternalMove ? 'move' : 'copy';
@@ -234,14 +235,14 @@
 		const feedback = getDropFeedback(
 			rack,
 			deviceLibrary,
-			dragData.device.height,
+			dragData.device.u_height,
 			targetU,
 			excludeIndex
 		);
 
 		dropPreview = {
 			position: targetU,
-			height: dragData.device.height,
+			height: dragData.device.u_height,
 			feedback
 		};
 	}
@@ -287,13 +288,13 @@
 		// Determine if this is an internal move (same rack)
 		const isInternalMove =
 			dragData.type === 'rack-device' &&
-			dragData.sourceRackId === rack.id &&
+			dragData.sourceRackId === RACK_ID &&
 			dragData.sourceIndex !== undefined;
 
 		// Determine if this is a cross-rack move (from different rack)
 		const isCrossRackMove =
 			dragData.type === 'rack-device' &&
-			dragData.sourceRackId !== rack.id &&
+			dragData.sourceRackId !== RACK_ID &&
 			dragData.sourceIndex !== undefined;
 
 		// Calculate target position using transform-aware coordinates
@@ -309,7 +310,7 @@
 		const feedback = getDropFeedback(
 			rack,
 			deviceLibrary,
-			dragData.device.height,
+			dragData.device.u_height,
 			targetU,
 			excludeIndex
 		);
@@ -320,7 +321,7 @@
 				ondevicemove?.(
 					new CustomEvent('devicemove', {
 						detail: {
-							rackId: rack.id,
+							rackId: RACK_ID,
 							deviceIndex: dragData.sourceIndex,
 							newPosition: targetU
 						}
@@ -333,7 +334,7 @@
 						detail: {
 							sourceRackId: dragData.sourceRackId,
 							sourceIndex: dragData.sourceIndex,
-							targetRackId: rack.id,
+							targetRackId: RACK_ID,
 							targetPosition: targetU
 						}
 					})
@@ -343,8 +344,8 @@
 				ondevicedrop?.(
 					new CustomEvent('devicedrop', {
 						detail: {
-							rackId: rack.id,
-							libraryId: dragData.device.id,
+							rackId: RACK_ID,
+							slug: dragData.device.slug,
 							position: targetU
 						}
 					})
@@ -515,14 +516,14 @@
 
 		<!-- Devices -->
 		<g transform="translate(0, {RACK_PADDING + RAIL_WIDTH})">
-			{#each visibleDevices as { placedDevice, originalIndex } (placedDevice.libraryId + '-' + placedDevice.position)}
-				{@const device = getDeviceById(placedDevice.libraryId)}
+			{#each visibleDevices as { placedDevice, originalIndex } (placedDevice.device_type + '-' + placedDevice.position)}
+				{@const device = getDeviceBySlug(placedDevice.device_type)}
 				{#if device}
 					<RackDevice
 						{device}
 						position={placedDevice.position}
 						rackHeight={rack.height}
-						rackId={rack.id}
+						rackId={RACK_ID}
 						deviceIndex={originalIndex}
 						selected={selectedDeviceIndex === originalIndex}
 						uHeight={U_HEIGHT}

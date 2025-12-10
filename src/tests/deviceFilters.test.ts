@@ -4,19 +4,18 @@ import {
 	groupDevicesByCategory,
 	getCategoryDisplayName
 } from '$lib/utils/deviceFilters';
-import type { Device, DeviceCategory } from '$lib/types';
+import type { DeviceType, DeviceCategory } from '$lib/types';
 
-const createDevice = (id: string, name: string, category: DeviceCategory): Device => ({
-	id,
-	name,
-	height: 1,
-	colour: '#000000',
-	category
+const createDevice = (slug: string, model: string, category: DeviceCategory): DeviceType => ({
+	slug,
+	model,
+	u_height: 1,
+	rackarr: { colour: '#000000', category }
 });
 
 describe('deviceFilters', () => {
 	describe('searchDevices', () => {
-		const devices: Device[] = [
+		const devices: DeviceType[] = [
 			createDevice('1', 'Server 1', 'server'),
 			createDevice('2', 'Network Switch', 'network'),
 			createDevice('3', 'Power Strip', 'power')
@@ -44,7 +43,7 @@ describe('deviceFilters', () => {
 	});
 
 	describe('groupDevicesByCategory', () => {
-		const devices: Device[] = [
+		const devices: DeviceType[] = [
 			createDevice('1', 'Server 1', 'server'),
 			createDevice('2', 'Server 2', 'server'),
 			createDevice('3', 'Switch', 'network')

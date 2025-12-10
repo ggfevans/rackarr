@@ -15,15 +15,18 @@
 	import RackDualView from './RackDualView.svelte';
 	import WelcomeScreen from './WelcomeScreen.svelte';
 
+	// Synthetic rack ID for single-rack mode
+	const RACK_ID = 'rack-0';
+
 	interface Props {
 		onnewrack?: () => void;
 		onload?: () => void;
 		onrackselect?: (event: CustomEvent<{ rackId: string }>) => void;
-		ondeviceselect?: (event: CustomEvent<{ libraryId: string; position: number }>) => void;
+		ondeviceselect?: (event: CustomEvent<{ slug: string; position: number }>) => void;
 		ondevicedrop?: (
 			event: CustomEvent<{
 				rackId: string;
-				libraryId: string;
+				slug: string;
 				position: number;
 				face: 'front' | 'rear';
 			}>
@@ -56,8 +59,8 @@
 	const canvasStore = getCanvasStore();
 	const uiStore = getUIStore();
 
-	// Single-rack mode: direct access to first rack (v0.1.1)
-	const rack = $derived(layoutStore.racks[0]);
+	// Single-rack mode: direct access to rack
+	const rack = $derived(layoutStore.rack);
 	const hasRacks = $derived(layoutStore.rackCount > 0);
 
 	// Panzoom container reference
@@ -119,7 +122,7 @@
 
 			// Center content on initial load
 			requestAnimationFrame(() => {
-				canvasStore.fitAll(layoutStore.racks);
+				canvasStore.fitAll(rack ? [rack] : []);
 			});
 
 			return () => {
@@ -141,18 +144,15 @@
 		onrackselect?.(event);
 	}
 
-	function handleDeviceSelect(
-		event: CustomEvent<{ libraryId: string; position: number }>,
-		rackId: string
-	) {
-		// Find the device index in the rack
-		const rack = layoutStore.racks.find((r) => r.id === rackId);
-		if (rack) {
-			const deviceIndex = rack.devices.findIndex(
-				(d) => d.libraryId === event.detail.libraryId && d.position === event.detail.position
+	function handleDeviceSelect(event: CustomEvent<{ slug: string; position: number }>) {
+		// Find the device index in the rack (single-rack mode)
+		const currentRack = layoutStore.rack;
+		if (currentRack) {
+			const deviceIndex = currentRack.devices.findIndex(
+				(d) => d.device_type === event.detail.slug && d.position === event.detail.position
 			);
 			if (deviceIndex !== -1) {
-				selectionStore.selectDevice(rackId, deviceIndex, event.detail.libraryId);
+				selectionStore.selectDevice(RACK_ID, deviceIndex, event.detail.slug);
 			}
 		}
 		ondeviceselect?.(event);
@@ -165,13 +165,13 @@
 	function handleDeviceDrop(
 		event: CustomEvent<{
 			rackId: string;
-			libraryId: string;
+			slug: string;
 			position: number;
 			face: 'front' | 'rear';
 		}>
 	) {
-		const { rackId, libraryId, position, face } = event.detail;
-		layoutStore.placeDevice(rackId, libraryId, position, face);
+		const { rackId, slug, position, face } = event.detail;
+		layoutStore.placeDevice(rackId, slug, position, face);
 		ondevicedrop?.(event);
 	}
 
@@ -216,17 +216,17 @@
 			<div class="rack-wrapper">
 				<RackDualView
 					{rack}
-					deviceLibrary={layoutStore.deviceLibrary}
-					selected={selectionStore.selectedType === 'rack' && selectionStore.selectedId === rack.id}
+					deviceLibrary={layoutStore.device_types}
+					selected={selectionStore.selectedType === 'rack' && selectionStore.selectedId === RACK_ID}
 					selectedDeviceIndex={selectionStore.selectedType === 'device' &&
-					selectionStore.selectedRackId === rack.id
+					selectionStore.selectedRackId === RACK_ID
 						? selectionStore.selectedDeviceIndex
 						: null}
 					displayMode={uiStore.displayMode}
 					showLabelsOnImages={uiStore.showLabelsOnImages}
 					airflowMode={uiStore.airflowMode}
 					onselect={(e) => handleRackSelect(e)}
-					ondeviceselect={(e) => handleDeviceSelect(e, rack.id)}
+					ondeviceselect={(e) => handleDeviceSelect(e)}
 					ondevicedrop={(e) => handleDeviceDrop(e)}
 					ondevicemove={(e) => handleDeviceMove(e)}
 					ondevicemoverack={(e) => handleDeviceMoveRack(e)}

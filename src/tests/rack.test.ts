@@ -6,28 +6,28 @@ import {
 	isUAvailable,
 	duplicateRack
 } from '$lib/utils/rack';
-import type { Device, Rack } from '$lib/types';
+import type { DeviceType, Rack } from '$lib/types';
 
 // Helper to create test devices
-function createTestDevice(id: string, height: number): Device {
+function createTestDevice(slug: string, u_height: number): DeviceType {
 	return {
-		id,
-		name: `Test Device ${id}`,
-		height,
-		colour: '#4A90D9',
-		category: 'server'
+		slug,
+		model: `Test Device ${slug}`,
+		u_height,
+		rackarr: { colour: '#4A90D9', category: 'server' }
 	};
 }
 
 // Helper to create mock racks for testing
 function createMockRack(overrides: Partial<Rack> = {}): Rack {
 	return {
-		id: 'rack-1',
 		name: 'Test Rack',
 		height: 42,
 		width: 19,
 		position: 0,
-		view: 'front',
+		desc_units: false,
+		form_factor: '4-post',
+		starting_unit: 1,
 		devices: [],
 		...overrides
 	};
@@ -35,11 +35,9 @@ function createMockRack(overrides: Partial<Rack> = {}): Rack {
 
 describe('Rack Utilities', () => {
 	describe('createRack', () => {
-		it('generates valid UUID', () => {
+		it('creates rack with provided name', () => {
 			const rack = createRack('Test Rack', 42);
-			expect(rack.id).toMatch(
-				/^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i
-			);
+			expect(rack.name).toBe('Test Rack');
 		});
 
 		it('sets default width to 19', () => {
@@ -48,12 +46,12 @@ describe('Rack Utilities', () => {
 		});
 
 		it('creates rack with explicit width 19', () => {
-			const rack = createRack('Test Rack', 42, 'front', 19);
+			const rack = createRack('Test Rack', 42, undefined, 19);
 			expect(rack.width).toBe(19);
 		});
 
 		it('creates rack with width 10', () => {
-			const rack = createRack('Test Rack', 42, 'front', 10);
+			const rack = createRack('Test Rack', 42, undefined, 10);
 			expect(rack.width).toBe(10);
 		});
 
@@ -71,16 +69,6 @@ describe('Rack Utilities', () => {
 			const rack = createRack('Main Rack', 24);
 			expect(rack.name).toBe('Main Rack');
 			expect(rack.height).toBe(24);
-		});
-
-		it('creates rack with default front view', () => {
-			const rack = createRack('Test', 42);
-			expect(rack.view).toBe('front');
-		});
-
-		it('creates rack with specified rear view', () => {
-			const rack = createRack('Test', 42, 'rear');
-			expect(rack.view).toBe('rear');
 		});
 
 		it('sets default form_factor to 4-post-cabinet', () => {
@@ -102,12 +90,13 @@ describe('Rack Utilities', () => {
 	describe('validateRack', () => {
 		it('returns valid:true for valid rack', () => {
 			const rack: Rack = {
-				id: '123e4567-e89b-12d3-a456-426614174000',
 				name: 'Main Rack',
 				height: 42,
 				width: 19,
 				position: 0,
-				view: 'front',
+				desc_units: false,
+				form_factor: '4-post',
+				starting_unit: 1,
 				devices: []
 			};
 
@@ -118,12 +107,13 @@ describe('Rack Utilities', () => {
 
 		it('rejects height less than 1', () => {
 			const rack: Rack = {
-				id: '123e4567-e89b-12d3-a456-426614174000',
 				name: 'Main Rack',
 				height: 0,
 				width: 19,
 				position: 0,
-				view: 'front',
+				desc_units: false,
+				form_factor: '4-post',
+				starting_unit: 1,
 				devices: []
 			};
 
@@ -134,12 +124,13 @@ describe('Rack Utilities', () => {
 
 		it('rejects height greater than 100', () => {
 			const rack: Rack = {
-				id: '123e4567-e89b-12d3-a456-426614174000',
 				name: 'Main Rack',
 				height: 101,
 				width: 19,
 				position: 0,
-				view: 'front',
+				desc_units: false,
+				form_factor: '4-post',
+				starting_unit: 1,
 				devices: []
 			};
 
@@ -150,12 +141,13 @@ describe('Rack Utilities', () => {
 
 		it('rejects empty name', () => {
 			const rack: Rack = {
-				id: '123e4567-e89b-12d3-a456-426614174000',
 				name: '',
 				height: 42,
 				width: 19,
 				position: 0,
-				view: 'front',
+				desc_units: false,
+				form_factor: '4-post',
+				starting_unit: 1,
 				devices: []
 			};
 
@@ -166,12 +158,13 @@ describe('Rack Utilities', () => {
 
 		it('accepts width of 10', () => {
 			const rack: Rack = {
-				id: '123e4567-e89b-12d3-a456-426614174000',
 				name: 'Main Rack',
 				height: 42,
 				width: 10,
 				position: 0,
-				view: 'front',
+				desc_units: false,
+				form_factor: '4-post',
+				starting_unit: 1,
 				devices: []
 			};
 
@@ -181,12 +174,13 @@ describe('Rack Utilities', () => {
 
 		it('accepts width of 19', () => {
 			const rack: Rack = {
-				id: '123e4567-e89b-12d3-a456-426614174000',
 				name: 'Main Rack',
 				height: 42,
 				width: 19,
 				position: 0,
-				view: 'front',
+				desc_units: false,
+				form_factor: '4-post',
+				starting_unit: 1,
 				devices: []
 			};
 
@@ -195,13 +189,14 @@ describe('Rack Utilities', () => {
 		});
 
 		it('rejects invalid width', () => {
-			const rack: Rack = {
-				id: '123e4567-e89b-12d3-a456-426614174000',
+			const rack = {
 				name: 'Main Rack',
 				height: 42,
-				width: 23,
+				width: 23 as 10 | 19, // Force type for test
 				position: 0,
-				view: 'front',
+				desc_units: false,
+				form_factor: '4-post' as const,
+				starting_unit: 1,
 				devices: []
 			};
 
@@ -214,16 +209,17 @@ describe('Rack Utilities', () => {
 	describe('getOccupiedUs', () => {
 		it('returns empty Set for empty rack', () => {
 			const rack: Rack = {
-				id: 'rack-1',
 				name: 'Test Rack',
 				height: 42,
 				width: 19,
 				position: 0,
-				view: 'front',
+				desc_units: false,
+				form_factor: '4-post',
+				starting_unit: 1,
 				devices: []
 			};
 
-			const deviceLibrary: Device[] = [];
+			const deviceLibrary: DeviceType[] = [];
 			const occupied = getOccupiedUs(rack, deviceLibrary);
 			expect(occupied.size).toBe(0);
 		});
@@ -231,13 +227,14 @@ describe('Rack Utilities', () => {
 		it('returns correct Us for 1U device at position 5', () => {
 			const device = createTestDevice('device-1', 1);
 			const rack: Rack = {
-				id: 'rack-1',
 				name: 'Test Rack',
 				height: 42,
 				width: 19,
 				position: 0,
-				view: 'front',
-				devices: [{ libraryId: 'device-1', position: 5, face: 'front' }]
+				desc_units: false,
+				form_factor: '4-post',
+				starting_unit: 1,
+				devices: [{ device_type: 'device-1', position: 5, face: 'front' }]
 			};
 
 			const occupied = getOccupiedUs(rack, [device]);
@@ -248,13 +245,14 @@ describe('Rack Utilities', () => {
 		it('returns correct Us for 2U device at position 5 (5,6)', () => {
 			const device = createTestDevice('device-1', 2);
 			const rack: Rack = {
-				id: 'rack-1',
 				name: 'Test Rack',
 				height: 42,
 				width: 19,
 				position: 0,
-				view: 'front',
-				devices: [{ libraryId: 'device-1', position: 5, face: 'front' }]
+				desc_units: false,
+				form_factor: '4-post',
+				starting_unit: 1,
+				devices: [{ device_type: 'device-1', position: 5, face: 'front' }]
 			};
 
 			const occupied = getOccupiedUs(rack, [device]);
@@ -266,13 +264,14 @@ describe('Rack Utilities', () => {
 		it('returns correct Us for 4U device at position 10 (10,11,12,13)', () => {
 			const device = createTestDevice('device-1', 4);
 			const rack: Rack = {
-				id: 'rack-1',
 				name: 'Test Rack',
 				height: 42,
 				width: 19,
 				position: 0,
-				view: 'front',
-				devices: [{ libraryId: 'device-1', position: 10, face: 'front' }]
+				desc_units: false,
+				form_factor: '4-post',
+				starting_unit: 1,
+				devices: [{ device_type: 'device-1', position: 10, face: 'front' }]
 			};
 
 			const occupied = getOccupiedUs(rack, [device]);
@@ -287,15 +286,16 @@ describe('Rack Utilities', () => {
 			const device1 = createTestDevice('device-1', 2);
 			const device2 = createTestDevice('device-2', 1);
 			const rack: Rack = {
-				id: 'rack-1',
 				name: 'Test Rack',
 				height: 42,
 				width: 19,
 				position: 0,
-				view: 'front',
+				desc_units: false,
+				form_factor: '4-post',
+				starting_unit: 1,
 				devices: [
-					{ libraryId: 'device-1', position: 1, face: 'front' },
-					{ libraryId: 'device-2', position: 10, face: 'front' }
+					{ device_type: 'device-1', position: 1, face: 'front' },
+					{ device_type: 'device-2', position: 10, face: 'front' }
 				]
 			};
 
@@ -310,12 +310,13 @@ describe('Rack Utilities', () => {
 	describe('isUAvailable', () => {
 		it('returns true for empty rack', () => {
 			const rack: Rack = {
-				id: 'rack-1',
 				name: 'Test Rack',
 				height: 42,
 				width: 19,
 				position: 0,
-				view: 'front',
+				desc_units: false,
+				form_factor: '4-post',
+				starting_unit: 1,
 				devices: []
 			};
 
@@ -326,13 +327,14 @@ describe('Rack Utilities', () => {
 		it('returns false for occupied U', () => {
 			const device = createTestDevice('device-1', 2);
 			const rack: Rack = {
-				id: 'rack-1',
 				name: 'Test Rack',
 				height: 42,
 				width: 19,
 				position: 0,
-				view: 'front',
-				devices: [{ libraryId: 'device-1', position: 5, face: 'front' }]
+				desc_units: false,
+				form_factor: '4-post',
+				starting_unit: 1,
+				devices: [{ device_type: 'device-1', position: 5, face: 'front' }]
 			};
 
 			expect(isUAvailable(rack, [device], 5)).toBe(false);
@@ -342,13 +344,14 @@ describe('Rack Utilities', () => {
 		it('returns true for unoccupied U', () => {
 			const device = createTestDevice('device-1', 2);
 			const rack: Rack = {
-				id: 'rack-1',
 				name: 'Test Rack',
 				height: 42,
 				width: 19,
 				position: 0,
-				view: 'front',
-				devices: [{ libraryId: 'device-1', position: 5, face: 'front' }]
+				desc_units: false,
+				form_factor: '4-post',
+				starting_unit: 1,
+				devices: [{ device_type: 'device-1', position: 5, face: 'front' }]
 			};
 
 			expect(isUAvailable(rack, [device], 1)).toBe(true);
@@ -358,10 +361,10 @@ describe('Rack Utilities', () => {
 	});
 
 	describe('duplicateRack', () => {
-		it('creates new rack with different ID', () => {
-			const original = createMockRack({ id: 'rack-1' });
+		it('creates new rack as a copy', () => {
+			const original = createMockRack({ name: 'Original Rack' });
 			const copy = duplicateRack(original);
-			expect(copy.id).not.toBe(original.id);
+			expect(copy).not.toBe(original);
 		});
 
 		it('appends (Copy) to name', () => {
@@ -370,18 +373,18 @@ describe('Rack Utilities', () => {
 			expect(copy.name).toBe('Main Rack (Copy)');
 		});
 
-		it('preserves rack properties including view', () => {
-			const original = createMockRack({ height: 42, view: 'rear' });
+		it('preserves rack properties', () => {
+			const original = createMockRack({ height: 42, form_factor: '2-post' });
 			const copy = duplicateRack(original);
 			expect(copy.height).toBe(42);
-			expect(copy.view).toBe('rear');
+			expect(copy.form_factor).toBe('2-post');
 		});
 
 		it('copies all devices preserving positions and faces', () => {
 			const original = createMockRack({
 				devices: [
-					{ libraryId: 'lib-1', position: 1, face: 'front' },
-					{ libraryId: 'lib-2', position: 10, face: 'both' }
+					{ device_type: 'lib-1', position: 1, face: 'front' },
+					{ device_type: 'lib-2', position: 10, face: 'both' }
 				]
 			});
 			const copy = duplicateRack(original);

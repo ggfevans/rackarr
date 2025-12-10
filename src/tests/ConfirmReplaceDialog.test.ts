@@ -41,13 +41,14 @@ describe('ConfirmReplaceDialog', () => {
 	it('displays device count with correct pluralization (1 device)', () => {
 		const store = getLayoutStore();
 		store.addRack('Rack', 42);
-		const device = store.addDeviceToLibrary({
+		const RACK_ID = 'rack-0';
+		const device = store.addDeviceType({
 			name: 'Server',
-			height: 2,
+			u_height: 2,
 			category: 'server',
 			colour: '#4A90D9'
 		});
-		store.placeDevice(store.racks[0]!.id, device.id, 1);
+		store.placeDevice(RACK_ID, device.slug, 1);
 
 		render(ConfirmReplaceDialog, {
 			props: { open: true, onSaveFirst: vi.fn(), onReplace: vi.fn(), onCancel: vi.fn() }
@@ -59,14 +60,15 @@ describe('ConfirmReplaceDialog', () => {
 	it('displays device count with correct pluralization (3 devices)', () => {
 		const store = getLayoutStore();
 		store.addRack('Rack', 42);
+		const RACK_ID = 'rack-0';
 		for (let i = 0; i < 3; i++) {
-			const device = store.addDeviceToLibrary({
+			const device = store.addDeviceType({
 				name: `Device ${i}`,
-				height: 1,
+				u_height: 1,
 				category: 'server',
 				colour: '#4A90D9'
 			});
-			store.placeDevice(store.racks[0]!.id, device.id, i + 1);
+			store.placeDevice(RACK_ID, device.slug, i + 1);
 		}
 
 		render(ConfirmReplaceDialog, {

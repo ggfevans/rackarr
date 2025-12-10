@@ -16,9 +16,10 @@ describe('EditPanel Visual Hierarchy', () => {
 		it('drawer has Edit title when rack is selected', () => {
 			const layoutStore = getLayoutStore();
 			const selectionStore = getSelectionStore();
+			const RACK_ID = 'rack-0';
 
-			const rack = layoutStore.addRack('Main Server Rack', 42);
-			selectionStore.selectRack(rack!.id);
+			layoutStore.addRack('Main Server Rack', 42);
+			selectionStore.selectRack(RACK_ID);
 
 			render(EditPanel);
 
@@ -32,9 +33,10 @@ describe('EditPanel Visual Hierarchy', () => {
 		it('has form group for rack name editing', () => {
 			const layoutStore = getLayoutStore();
 			const selectionStore = getSelectionStore();
+			const RACK_ID = 'rack-0';
 
-			const rack = layoutStore.addRack('Test Rack', 42);
-			selectionStore.selectRack(rack!.id);
+			layoutStore.addRack('Test Rack', 42);
+			selectionStore.selectRack(RACK_ID);
 
 			const { container } = render(EditPanel);
 
@@ -46,9 +48,10 @@ describe('EditPanel Visual Hierarchy', () => {
 		it('has form inputs for Name and Height', () => {
 			const layoutStore = getLayoutStore();
 			const selectionStore = getSelectionStore();
+			const RACK_ID = 'rack-0';
 
-			const rack = layoutStore.addRack('Test Rack', 42);
-			selectionStore.selectRack(rack!.id);
+			layoutStore.addRack('Test Rack', 42);
+			selectionStore.selectRack(RACK_ID);
 
 			render(EditPanel);
 
@@ -59,9 +62,10 @@ describe('EditPanel Visual Hierarchy', () => {
 		it('has information section with stats', () => {
 			const layoutStore = getLayoutStore();
 			const selectionStore = getSelectionStore();
+			const RACK_ID = 'rack-0';
 
-			const rack = layoutStore.addRack('Test Rack', 42);
-			selectionStore.selectRack(rack!.id);
+			layoutStore.addRack('Test Rack', 42);
+			selectionStore.selectRack(RACK_ID);
 
 			const { container } = render(EditPanel);
 
@@ -76,9 +80,10 @@ describe('EditPanel Visual Hierarchy', () => {
 		it('has actions section with delete button', () => {
 			const layoutStore = getLayoutStore();
 			const selectionStore = getSelectionStore();
+			const RACK_ID = 'rack-0';
 
-			const rack = layoutStore.addRack('Test Rack', 42);
-			selectionStore.selectRack(rack!.id);
+			layoutStore.addRack('Test Rack', 42);
+			selectionStore.selectRack(RACK_ID);
 
 			const { container } = render(EditPanel);
 
@@ -96,9 +101,10 @@ describe('EditPanel Visual Hierarchy', () => {
 		it('shows preset buttons for common rack heights', () => {
 			const layoutStore = getLayoutStore();
 			const selectionStore = getSelectionStore();
+			const RACK_ID = 'rack-0';
 
-			const rack = layoutStore.addRack('Test Rack', 42);
-			selectionStore.selectRack(rack!.id);
+			layoutStore.addRack('Test Rack', 42);
+			selectionStore.selectRack(RACK_ID);
 
 			const { container } = render(EditPanel);
 
@@ -114,9 +120,10 @@ describe('EditPanel Visual Hierarchy', () => {
 		it('preset button shows active state when matching height', () => {
 			const layoutStore = getLayoutStore();
 			const selectionStore = getSelectionStore();
+			const RACK_ID = 'rack-0';
 
-			const rack = layoutStore.addRack('Test Rack', 42);
-			selectionStore.selectRack(rack!.id);
+			layoutStore.addRack('Test Rack', 42);
+			selectionStore.selectRack(RACK_ID);
 
 			const { container } = render(EditPanel);
 
@@ -129,9 +136,10 @@ describe('EditPanel Visual Hierarchy', () => {
 		it('24U preset is active when rack height is 24', () => {
 			const layoutStore = getLayoutStore();
 			const selectionStore = getSelectionStore();
+			const RACK_ID = 'rack-0';
 
-			const rack = layoutStore.addRack('Test Rack', 24);
-			selectionStore.selectRack(rack!.id);
+			layoutStore.addRack('Test Rack', 24);
+			selectionStore.selectRack(RACK_ID);
 
 			const { container } = render(EditPanel);
 
@@ -144,16 +152,17 @@ describe('EditPanel Visual Hierarchy', () => {
 		it('height input is disabled when rack has devices', () => {
 			const layoutStore = getLayoutStore();
 			const selectionStore = getSelectionStore();
+			const RACK_ID = 'rack-0';
 
-			const rack = layoutStore.addRack('Test Rack', 42);
-			const device = layoutStore.addDeviceToLibrary({
+			layoutStore.addRack('Test Rack', 42);
+			const device = layoutStore.addDeviceType({
 				name: 'Server',
-				height: 2,
+				u_height: 2,
 				category: 'server',
 				colour: '#4A90D9'
 			});
-			layoutStore.placeDevice(rack!.id, device.id, 1);
-			selectionStore.selectRack(rack!.id);
+			layoutStore.placeDevice(RACK_ID, device.slug, 1);
+			selectionStore.selectRack(RACK_ID);
 
 			render(EditPanel);
 
@@ -167,16 +176,17 @@ describe('EditPanel Visual Hierarchy', () => {
 		it('shows device name when device is selected', () => {
 			const layoutStore = getLayoutStore();
 			const selectionStore = getSelectionStore();
+			const RACK_ID = 'rack-0';
 
-			const rack = layoutStore.addRack('Test Rack', 42);
-			const device = layoutStore.addDeviceToLibrary({
+			layoutStore.addRack('Test Rack', 42);
+			const device = layoutStore.addDeviceType({
 				name: 'Dell PowerEdge R730',
-				height: 2,
+				u_height: 2,
 				category: 'server',
 				colour: '#2563eb'
 			});
-			layoutStore.placeDevice(rack!.id, device.id, 10);
-			selectionStore.selectDevice(rack!.id, 0, device.id);
+			layoutStore.placeDevice(RACK_ID, device.slug, 10);
+			selectionStore.selectDevice(RACK_ID, 0, device.slug);
 
 			render(EditPanel);
 
@@ -188,16 +198,17 @@ describe('EditPanel Visual Hierarchy', () => {
 		it('shows device properties in info section', () => {
 			const layoutStore = getLayoutStore();
 			const selectionStore = getSelectionStore();
+			const RACK_ID = 'rack-0';
 
-			const rack = layoutStore.addRack('Test Rack', 42);
-			const device = layoutStore.addDeviceToLibrary({
+			layoutStore.addRack('Test Rack', 42);
+			const device = layoutStore.addDeviceType({
 				name: 'Dell PowerEdge R730',
-				height: 2,
+				u_height: 2,
 				category: 'server',
 				colour: '#2563eb'
 			});
-			layoutStore.placeDevice(rack!.id, device.id, 10);
-			selectionStore.selectDevice(rack!.id, 0, device.id);
+			layoutStore.placeDevice(RACK_ID, device.slug, 10);
+			selectionStore.selectDevice(RACK_ID, 0, device.slug);
 
 			render(EditPanel);
 
@@ -210,16 +221,17 @@ describe('EditPanel Visual Hierarchy', () => {
 		it('has remove from rack button for device', () => {
 			const layoutStore = getLayoutStore();
 			const selectionStore = getSelectionStore();
+			const RACK_ID = 'rack-0';
 
-			const rack = layoutStore.addRack('Test Rack', 42);
-			const device = layoutStore.addDeviceToLibrary({
+			layoutStore.addRack('Test Rack', 42);
+			const device = layoutStore.addDeviceType({
 				name: 'Dell PowerEdge R730',
-				height: 2,
+				u_height: 2,
 				category: 'server',
 				colour: '#2563eb'
 			});
-			layoutStore.placeDevice(rack!.id, device.id, 10);
-			selectionStore.selectDevice(rack!.id, 0, device.id);
+			layoutStore.placeDevice(RACK_ID, device.slug, 10);
+			selectionStore.selectDevice(RACK_ID, 0, device.slug);
 
 			render(EditPanel);
 
@@ -233,9 +245,10 @@ describe('EditPanel Visual Hierarchy', () => {
 		it('delete button has danger styling', () => {
 			const layoutStore = getLayoutStore();
 			const selectionStore = getSelectionStore();
+			const RACK_ID = 'rack-0';
 
-			const rack = layoutStore.addRack('Test Rack', 42);
-			selectionStore.selectRack(rack!.id);
+			layoutStore.addRack('Test Rack', 42);
+			selectionStore.selectRack(RACK_ID);
 
 			const { container } = render(EditPanel);
 
@@ -247,9 +260,10 @@ describe('EditPanel Visual Hierarchy', () => {
 		it('info section has appropriate styling class', () => {
 			const layoutStore = getLayoutStore();
 			const selectionStore = getSelectionStore();
+			const RACK_ID = 'rack-0';
 
-			const rack = layoutStore.addRack('Test Rack', 42);
-			selectionStore.selectRack(rack!.id);
+			layoutStore.addRack('Test Rack', 42);
+			selectionStore.selectRack(RACK_ID);
 
 			const { container } = render(EditPanel);
 

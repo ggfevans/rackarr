@@ -1,30 +1,33 @@
 import { describe, it, expect, beforeEach } from 'vitest';
 import { render } from '@testing-library/svelte';
 import Rack from '$lib/components/Rack.svelte';
-import type { Rack as RackType, Device } from '$lib/types';
+import type { Rack as RackType, DeviceType } from '$lib/types';
 
 describe('Drop Zone Highlighting', () => {
 	let mockRack: RackType;
-	let mockDeviceLibrary: Device[];
+	let mockDeviceLibrary: DeviceType[];
 
 	beforeEach(() => {
 		mockRack = {
-			id: 'rack-1',
 			name: 'Test Rack',
 			height: 12,
 			width: 19,
 			position: 0,
 			devices: [],
-			view: 'front'
+			desc_units: false,
+			form_factor: '4-post',
+			starting_unit: 1
 		};
 
 		mockDeviceLibrary = [
 			{
-				id: 'device-1',
-				name: 'Test Server',
-				height: 2,
-				colour: '#4A90D9',
-				category: 'server'
+				slug: 'device-1',
+				model: 'Test Server',
+				u_height: 2,
+				rackarr: {
+					colour: '#4A90D9',
+					category: 'server'
+				}
 			}
 		];
 	});

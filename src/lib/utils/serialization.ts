@@ -1,13 +1,12 @@
 /**
- * v0.2 Layout Serialization and Factory Functions
+ * Layout Serialization and Factory Functions
  */
 
-import type { Layout, Rack } from '$lib/types/v02';
-import type { FormFactor } from '$lib/types';
+import type { Layout, Rack, FormFactor } from '$lib/types';
 import { getStarterLibrary } from '$lib/data/starterLibrary';
 
 /**
- * Create a new empty v0.2 layout
+ * Create a new empty layout
  * @param name - Layout name (default: "Racky McRackface")
  * @returns New Layout object with starter device type library
  */
@@ -44,7 +43,7 @@ function createDefaultRack(name: string): Rack {
 }
 
 /**
- * Create a v0.2 rack with the given parameters
+ * Create a rack with the given parameters
  * @param name - Rack name
  * @param height - Rack height in U
  * @param width - Rack width (10 or 19)

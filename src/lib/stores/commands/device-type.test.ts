@@ -5,7 +5,7 @@ import {
 	createDeleteDeviceTypeCommand,
 	type DeviceTypeCommandStore
 } from './device-type';
-import type { DeviceType, PlacedDevice } from '$lib/types/v02';
+import type { DeviceType, PlacedDevice } from '$lib/types';
 
 function createMockDeviceType(overrides: Partial<DeviceType> = {}): DeviceType {
 	return {

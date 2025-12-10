@@ -4,7 +4,7 @@
 
 import type {
 	Rack,
-	Device,
+	DeviceType,
 	ExportOptions,
 	ExportFormat,
 	DeviceCategory,
@@ -417,7 +417,7 @@ function createAirflowIndicator(
  */
 export function generateExportSVG(
 	racks: Rack[],
-	deviceLibrary: Device[],
+	deviceLibrary: DeviceType[],
 	options: ExportOptions,
 	images?: ImageStoreMap
 ): SVGElement {
@@ -434,13 +434,13 @@ export function generateExportSVG(
 	const isDualView = exportView === 'both';
 
 	// Get unique devices used in racks for legend
-	const usedDeviceIds = new Set<string>();
+	const usedDeviceSlugs = new Set<string>();
 	for (const rack of racks) {
 		for (const device of rack.devices) {
-			usedDeviceIds.add(device.libraryId);
+			usedDeviceSlugs.add(device.device_type);
 		}
 	}
-	const usedDevices = deviceLibrary.filter((d) => usedDeviceIds.has(d.id));
+	const usedDevices = deviceLibrary.filter((d) => usedDeviceSlugs.has(d.slug));
 
 	// Calculate dimensions
 	const maxRackHeight = Math.max(...racks.map((r) => r.height), 0);
@@ -607,15 +607,18 @@ export function generateExportSVG(
 		// Filter and render devices
 		const filteredDevices = filterDevicesByFace(rack.devices, faceFilter);
 		for (const placedDevice of filteredDevices) {
-			const device = deviceLibrary.find((d) => d.id === placedDevice.libraryId);
+			const device = deviceLibrary.find((d) => d.slug === placedDevice.device_type);
 			if (!device) continue;
+
+			// Device display name
+			const deviceDisplayName = device.model ?? device.slug;
 
 			// Device Y position matches Rack.svelte: includes RACK_PADDING + RAIL_WIDTH offset
 			const deviceY =
-				(rack.height - placedDevice.position - device.height + 1) * U_HEIGHT +
+				(rack.height - placedDevice.position - device.u_height + 1) * U_HEIGHT +
 				RACK_PADDING +
 				RAIL_WIDTH;
-			const deviceHeight = device.height * U_HEIGHT - 2;
+			const deviceHeight = device.u_height * U_HEIGHT - 2;
 			const deviceWidth = RACK_WIDTH - RAIL_WIDTH * 2 - 4;
 
 			// Always render device rect as background
@@ -624,14 +627,14 @@ export function generateExportSVG(
 			deviceRect.setAttribute('y', String(deviceY + 1));
 			deviceRect.setAttribute('width', String(deviceWidth));
 			deviceRect.setAttribute('height', String(deviceHeight));
-			deviceRect.setAttribute('fill', device.colour);
+			deviceRect.setAttribute('fill', device.rackarr.colour);
 			deviceRect.setAttribute('rx', '2');
 			deviceRect.setAttribute('ry', '2');
 			rackGroup.appendChild(deviceRect);
 
 			// Check if we should show an image
 			const face = faceFilter === 'rear' ? 'rear' : 'front';
-			const deviceImages = images?.get(device.id);
+			const deviceImages = images?.get(device.slug);
 			const deviceImage = deviceImages?.[face];
 			const showImage = displayMode === 'image' && deviceImage?.dataUrl;
 
@@ -647,7 +650,7 @@ export function generateExportSVG(
 				rackGroup.appendChild(imageEl);
 
 				// Clip the image to rounded corners
-				const clipId = `clip-${device.id}-${placedDevice.position}`;
+				const clipId = `clip-${device.slug}-${placedDevice.position}`;
 				const clipPath = document.createElementNS('http://www.w3.org/2000/svg', 'clipPath');
 				clipPath.setAttribute('id', clipId);
 				const clipRect = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
@@ -662,7 +665,7 @@ export function generateExportSVG(
 				imageEl.setAttribute('clip-path', `url(#${clipId})`);
 			} else {
 				// Category icon (only for devices tall enough and with a category)
-				if (deviceHeight >= 20 && device.category) {
+				if (deviceHeight >= 20 && device.rackarr.category) {
 					const iconSize = 12;
 					const iconX = RAIL_WIDTH + 6;
 					const iconY = deviceY + (deviceHeight - iconSize) / 2 + 1;
@@ -676,8 +679,12 @@ export function generateExportSVG(
 
 					// White icon with slight transparency for visibility on coloured backgrounds
 					const iconColor = 'rgba(255, 255, 255, 0.85)';
-					const iconBgColor = device.colour;
-					const iconElements = createCategoryIconElements(device.category, iconColor, iconBgColor);
+					const iconBgColor = device.rackarr.colour;
+					const iconElements = createCategoryIconElements(
+						device.rackarr.category,
+						iconColor,
+						iconBgColor
+					);
 					for (const el of iconElements) {
 						iconSvg.appendChild(el);
 					}
@@ -687,23 +694,23 @@ export function generateExportSVG(
 
 			// Device name (always shown unless image mode without labels)
 			// In image mode, name is still shown as overlay for accessibility
-			const deviceName = document.createElementNS('http://www.w3.org/2000/svg', 'text');
-			deviceName.setAttribute('x', String(RACK_WIDTH / 2));
-			deviceName.setAttribute('y', String(deviceY + deviceHeight / 2 + 1));
-			deviceName.setAttribute('fill', '#ffffff');
-			deviceName.setAttribute('font-size', '12');
-			deviceName.setAttribute('text-anchor', 'middle');
-			deviceName.setAttribute('dominant-baseline', 'middle');
-			deviceName.setAttribute('font-family', 'system-ui, sans-serif');
+			const deviceNameEl = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+			deviceNameEl.setAttribute('x', String(RACK_WIDTH / 2));
+			deviceNameEl.setAttribute('y', String(deviceY + deviceHeight / 2 + 1));
+			deviceNameEl.setAttribute('fill', '#ffffff');
+			deviceNameEl.setAttribute('font-size', '12');
+			deviceNameEl.setAttribute('text-anchor', 'middle');
+			deviceNameEl.setAttribute('dominant-baseline', 'middle');
+			deviceNameEl.setAttribute('font-family', 'system-ui, sans-serif');
 			if (showImage) {
 				// Add text shadow for visibility over images
-				deviceName.setAttribute(
+				deviceNameEl.setAttribute(
 					'style',
 					'text-shadow: 0 1px 2px rgba(0,0,0,0.8), 0 0 4px rgba(0,0,0,0.5);'
 				);
 			}
-			deviceName.textContent = placedDevice.name || device.name;
-			rackGroup.appendChild(deviceName);
+			deviceNameEl.textContent = placedDevice.name || deviceDisplayName;
+			rackGroup.appendChild(deviceNameEl);
 
 			// Airflow indicator (if airflowMode is enabled and device has airflow)
 			if (airflowMode && device.airflow) {
@@ -827,12 +834,13 @@ export function generateExportSVG(
 		// Legend items
 		usedDevices.forEach((device, i) => {
 			const itemY = LEGEND_PADDING + 8 + i * LEGEND_ITEM_HEIGHT;
+			const deviceDisplayName = device.model ?? device.slug;
 
 			const itemGroup = document.createElementNS('http://www.w3.org/2000/svg', 'g');
 			itemGroup.setAttribute('class', 'legend-item');
 
 			// Category icon (replaces colour swatch) or fallback to colour swatch
-			if (device.category) {
+			if (device.rackarr.category) {
 				const iconGroup = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
 				iconGroup.setAttribute('x', '0');
 				iconGroup.setAttribute('y', String(itemY));
@@ -840,7 +848,11 @@ export function generateExportSVG(
 				iconGroup.setAttribute('height', '16');
 				iconGroup.setAttribute('viewBox', '0 0 16 16');
 
-				const iconElements = createCategoryIconElements(device.category, textColor, bgColor);
+				const iconElements = createCategoryIconElements(
+					device.rackarr.category,
+					textColor,
+					bgColor
+				);
 				for (const el of iconElements) {
 					iconGroup.appendChild(el);
 				}
@@ -852,7 +864,7 @@ export function generateExportSVG(
 				swatch.setAttribute('y', String(itemY));
 				swatch.setAttribute('width', '16');
 				swatch.setAttribute('height', '16');
-				swatch.setAttribute('fill', device.colour);
+				swatch.setAttribute('fill', device.rackarr.colour);
 				swatch.setAttribute('rx', '2');
 				itemGroup.appendChild(swatch);
 			}
@@ -864,7 +876,7 @@ export function generateExportSVG(
 			nameText.setAttribute('fill', textColor);
 			nameText.setAttribute('font-size', '12');
 			nameText.setAttribute('font-family', 'system-ui, sans-serif');
-			nameText.textContent = `${device.name} (${device.height}U)`;
+			nameText.textContent = `${deviceDisplayName} (${device.u_height}U)`;
 			itemGroup.appendChild(nameText);
 
 			legendGroup.appendChild(itemGroup);

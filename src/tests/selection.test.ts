@@ -20,7 +20,7 @@ describe('Selection Store', () => {
 		it('selects by index, allowing multiple devices of same type to be distinguished', () => {
 			const store = getSelectionStore();
 
-			// Two devices with the same libraryId at different indices
+			// Two devices with the same device_type at different indices
 			// Select the first one (index 0)
 			store.selectDevice('rack-1', 0, 'device-type-a');
 

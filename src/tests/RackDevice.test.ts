@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, fireEvent } from '@testing-library/svelte';
 import RackDevice from '$lib/components/RackDevice.svelte';
-import type { Device } from '$lib/types';
+import type { DeviceType } from '$lib/types';
 import { getImageStore, resetImageStore } from '$lib/stores/images.svelte';
 import type { ImageData } from '$lib/types/images';
 
@@ -10,12 +10,11 @@ describe('RackDevice SVG Component', () => {
 	const RACK_WIDTH = 220;
 	const RAIL_WIDTH = 17;
 
-	const mockDevice: Device = {
-		id: 'device-1',
-		name: 'Test Server',
-		height: 1,
-		colour: '#4A90D9',
-		category: 'server'
+	const mockDevice: DeviceType = {
+		slug: 'device-1',
+		model: 'Test Server',
+		u_height: 1,
+		rackarr: { colour: '#4A90D9', category: 'server' }
 	};
 
 	const defaultProps = {
@@ -79,7 +78,7 @@ describe('RackDevice SVG Component', () => {
 		});
 
 		it('renders with correct height for 4U device', () => {
-			const device4U: Device = { ...mockDevice, height: 4 };
+			const device4U: DeviceType = { ...mockDevice, u_height: 4 };
 			const { container } = render(RackDevice, {
 				props: { ...defaultProps, device: device4U }
 			});
@@ -89,7 +88,7 @@ describe('RackDevice SVG Component', () => {
 		});
 
 		it('renders with correct height for 2U device', () => {
-			const device2U: Device = { ...mockDevice, height: 2 };
+			const device2U: DeviceType = { ...mockDevice, u_height: 2 };
 			const { container } = render(RackDevice, {
 				props: { ...defaultProps, device: device2U }
 			});
@@ -114,7 +113,10 @@ describe('RackDevice SVG Component', () => {
 		});
 
 		it('applies different colours for different devices', () => {
-			const redDevice: Device = { ...mockDevice, colour: '#DC143C' };
+			const redDevice: DeviceType = {
+				...mockDevice,
+				rackarr: { ...mockDevice.rackarr, colour: '#DC143C' }
+			};
 			const { container } = render(RackDevice, {
 				props: { ...defaultProps, device: redDevice }
 			});
@@ -140,7 +142,7 @@ describe('RackDevice SVG Component', () => {
 		});
 
 		it('displays category icon for multi-U devices', () => {
-			const device2U: Device = { ...mockDevice, height: 2 };
+			const device2U: DeviceType = { ...mockDevice, u_height: 2 };
 			const { container } = render(RackDevice, {
 				props: { ...defaultProps, device: device2U }
 			});
@@ -150,7 +152,7 @@ describe('RackDevice SVG Component', () => {
 		});
 
 		it('centers icon vertically by spanning full device height', () => {
-			const device2U: Device = { ...mockDevice, height: 2 };
+			const device2U: DeviceType = { ...mockDevice, u_height: 2 };
 			const { container } = render(RackDevice, {
 				props: { ...defaultProps, device: device2U }
 			});
@@ -209,7 +211,7 @@ describe('RackDevice SVG Component', () => {
 			expect(handleSelect).toHaveBeenCalledTimes(1);
 			expect(handleSelect).toHaveBeenCalledWith(
 				expect.objectContaining({
-					detail: { libraryId: 'device-1', position: 1 }
+					detail: { slug: 'device-1', position: 1 }
 				})
 			);
 		});
@@ -309,7 +311,7 @@ describe('RackDevice SVG Component', () => {
 
 		it('renders image when displayMode is image and device has image', () => {
 			const imageStore = getImageStore();
-			imageStore.setDeviceImage(mockDevice.id, 'front', mockImageData);
+			imageStore.setDeviceImage(mockDevice.slug, 'front', mockImageData);
 
 			const { container } = render(RackDevice, {
 				props: { ...defaultProps, displayMode: 'image', rackView: 'front' }
@@ -331,8 +333,8 @@ describe('RackDevice SVG Component', () => {
 
 		it('shows correct image for front view', () => {
 			const imageStore = getImageStore();
-			imageStore.setDeviceImage(mockDevice.id, 'front', mockImageData);
-			imageStore.setDeviceImage(mockDevice.id, 'rear', {
+			imageStore.setDeviceImage(mockDevice.slug, 'front', mockImageData);
+			imageStore.setDeviceImage(mockDevice.slug, 'rear', {
 				...mockImageData,
 				dataUrl: 'data:image/png;base64,cmVhcg=='
 			});
@@ -347,8 +349,8 @@ describe('RackDevice SVG Component', () => {
 
 		it('shows correct image for rear view', () => {
 			const imageStore = getImageStore();
-			imageStore.setDeviceImage(mockDevice.id, 'front', mockImageData);
-			imageStore.setDeviceImage(mockDevice.id, 'rear', {
+			imageStore.setDeviceImage(mockDevice.slug, 'front', mockImageData);
+			imageStore.setDeviceImage(mockDevice.slug, 'rear', {
 				...mockImageData,
 				dataUrl: 'data:image/png;base64,cmVhcg=='
 			});
@@ -363,7 +365,7 @@ describe('RackDevice SVG Component', () => {
 
 		it('image scales to fit device dimensions', () => {
 			const imageStore = getImageStore();
-			imageStore.setDeviceImage(mockDevice.id, 'front', mockImageData);
+			imageStore.setDeviceImage(mockDevice.slug, 'front', mockImageData);
 
 			const { container } = render(RackDevice, {
 				props: { ...defaultProps, displayMode: 'image', rackView: 'front' }
@@ -390,7 +392,7 @@ describe('RackDevice SVG Component', () => {
 
 		it('does not show label overlay when showLabelsOnImages is false', () => {
 			const imageStore = getImageStore();
-			imageStore.setDeviceImage(mockDevice.id, 'front', mockImageData);
+			imageStore.setDeviceImage(mockDevice.slug, 'front', mockImageData);
 
 			const { container } = render(RackDevice, {
 				props: {
@@ -409,7 +411,7 @@ describe('RackDevice SVG Component', () => {
 
 		it('shows label overlay when showLabelsOnImages is true in image mode', () => {
 			const imageStore = getImageStore();
-			imageStore.setDeviceImage(mockDevice.id, 'front', mockImageData);
+			imageStore.setDeviceImage(mockDevice.slug, 'front', mockImageData);
 
 			const { container } = render(RackDevice, {
 				props: {

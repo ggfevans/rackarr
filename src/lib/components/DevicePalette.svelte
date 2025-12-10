@@ -12,11 +12,11 @@
 	} from '$lib/utils/deviceFilters';
 	import { parseDeviceLibraryImport } from '$lib/utils/import';
 	import DevicePaletteItem from './DevicePaletteItem.svelte';
-	import type { Device } from '$lib/types';
+	import type { DeviceType } from '$lib/types';
 
 	interface Props {
 		onadddevice?: () => void;
-		ondeviceselect?: (event: CustomEvent<{ device: Device }>) => void;
+		ondeviceselect?: (event: CustomEvent<{ device: DeviceType }>) => void;
 	}
 
 	let { onadddevice, ondeviceselect }: Props = $props();
@@ -31,16 +31,16 @@
 	let fileInputRef: HTMLInputElement;
 
 	// Filtered and grouped devices
-	const filteredDevices = $derived(searchDevices(layoutStore.deviceLibrary, searchQuery));
+	const filteredDevices = $derived(searchDevices(layoutStore.device_types, searchQuery));
 	const groupedDevices = $derived(groupDevicesByCategory(filteredDevices));
-	const hasDevices = $derived(layoutStore.deviceLibrary.length > 0);
+	const hasDevices = $derived(layoutStore.device_types.length > 0);
 	const hasResults = $derived(filteredDevices.length > 0);
 
 	function handleAddDevice() {
 		onadddevice?.();
 	}
 
-	function handleDeviceSelect(event: CustomEvent<{ device: Device }>) {
+	function handleDeviceSelect(event: CustomEvent<{ device: DeviceType }>) {
 		ondeviceselect?.(event);
 	}
 
@@ -57,21 +57,15 @@
 		try {
 			const text = await file.text();
 
-			// Get existing device names for duplicate detection
-			const existingNames = layoutStore.deviceLibrary.map((d) => d.name);
+			// Get existing device slugs for duplicate detection
+			const existingSlugs = layoutStore.device_types.map((d) => d.slug);
 
-			// Parse and validate the import
-			const result = parseDeviceLibraryImport(text, existingNames);
+			// Parse and validate the import (returns DeviceType[])
+			const result = parseDeviceLibraryImport(text, existingSlugs);
 
 			// Add imported devices to library
-			for (const device of result.devices) {
-				layoutStore.addDeviceToLibrary({
-					name: device.name,
-					height: device.height,
-					category: device.category,
-					colour: device.colour,
-					notes: device.notes
-				});
+			for (const deviceType of result.devices) {
+				layoutStore.addDeviceTypeRaw(deviceType);
 			}
 
 			// Show success toast
@@ -118,7 +112,7 @@
 				<div class="category-group">
 					<h3 class="category-header">{getCategoryDisplayName(category)}</h3>
 					<div class="category-devices">
-						{#each devices as device (device.id)}
+						{#each devices as device (device.slug)}
 							<DevicePaletteItem {device} onselect={handleDeviceSelect} />
 						{/each}
 					</div>

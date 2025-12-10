@@ -4,7 +4,7 @@ import Rack from '$lib/components/Rack.svelte';
 import { resetLayoutStore, getLayoutStore } from '$lib/stores/layout.svelte';
 import { resetSelectionStore } from '$lib/stores/selection.svelte';
 import { resetUIStore } from '$lib/stores/ui.svelte';
-import type { Rack as RackType } from '$lib/types';
+import type { Rack as RackType, DeviceType } from '$lib/types';
 
 describe('Rack Visual Enhancements', () => {
 	let testRack: RackType;
@@ -17,8 +17,7 @@ describe('Rack Visual Enhancements', () => {
 
 		layoutStore = getLayoutStore();
 		const rack = layoutStore.addRack('Test Rack', 42);
-		// Ensure view is set for type compatibility
-		testRack = { ...rack!, view: rack!.view ?? 'front' } as unknown as RackType;
+		testRack = rack!;
 	});
 
 	describe('Alternating Row Shading', () => {
@@ -195,21 +194,20 @@ describe('Rack Visual Enhancements', () => {
 
 	describe('Device Selection', () => {
 		it('only the device at the selected index shows selection highlight, not all devices of same type', () => {
-			// Create two devices with the same libraryId (same device type)
-			const deviceType = {
-				id: 'device-type-1',
-				name: 'Test Server',
-				height: 1,
-				colour: '#4A90D9',
-				category: 'server' as const
+			// Create two devices with the same device_type (same device type)
+			const deviceType: DeviceType = {
+				slug: 'device-type-1',
+				model: 'Test Server',
+				u_height: 1,
+				rackarr: { colour: '#4A90D9', category: 'server' }
 			};
 
 			// Place two instances of the same device type in the rack
 			const rackWithDevices: RackType = {
 				...testRack,
 				devices: [
-					{ libraryId: 'device-type-1', position: 5, face: 'front' },
-					{ libraryId: 'device-type-1', position: 10, face: 'front' } // Same libraryId, different position
+					{ device_type: 'device-type-1', position: 5, face: 'front' },
+					{ device_type: 'device-type-1', position: 10, face: 'front' } // Same device_type, different position
 				]
 			};
 
@@ -235,19 +233,18 @@ describe('Rack Visual Enhancements', () => {
 		});
 
 		it('no devices are selected when selectedDeviceIndex is null', () => {
-			const deviceType = {
-				id: 'device-type-1',
-				name: 'Test Server',
-				height: 1,
-				colour: '#4A90D9',
-				category: 'server' as const
+			const deviceType: DeviceType = {
+				slug: 'device-type-1',
+				model: 'Test Server',
+				u_height: 1,
+				rackarr: { colour: '#4A90D9', category: 'server' }
 			};
 
 			const rackWithDevices: RackType = {
 				...testRack,
 				devices: [
-					{ libraryId: 'device-type-1', position: 5, face: 'front' },
-					{ libraryId: 'device-type-1', position: 10, face: 'front' }
+					{ device_type: 'device-type-1', position: 5, face: 'front' },
+					{ device_type: 'device-type-1', position: 10, face: 'front' }
 				]
 			};
 

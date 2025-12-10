@@ -3,7 +3,7 @@
  * Manages auto-save to sessionStorage for work-in-progress protection
  */
 
-import type { Layout } from '$lib/types/v02';
+import type { Layout } from '$lib/types';
 import { LayoutSchema } from '$lib/schemas';
 
 export const STORAGE_KEY = 'rackarr_session';

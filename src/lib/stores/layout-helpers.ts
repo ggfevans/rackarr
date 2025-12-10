@@ -1,12 +1,18 @@
 /**
- * v0.2 Layout Store Helpers
- * Helper functions for working with v0.2 types in the layout store
+ * Layout Store Helpers
+ * Helper functions for working with types in the layout store
  */
 
-import type { DeviceType, PlacedDevice, DeviceFace, Layout } from '$lib/types/v02';
-import type { DeviceCategory } from '$lib/types';
+import type {
+	DeviceType,
+	PlacedDevice,
+	DeviceFace,
+	Layout,
+	DeviceCategory,
+	Airflow,
+	WeightUnit
+} from '$lib/types';
 import { generateDeviceSlug } from '$lib/utils/slug';
-import type { Airflow, WeightUnit } from '$lib/types/v02';
 
 /**
  * Input data for creating a new device type
@@ -48,8 +54,11 @@ export function createDeviceType(data: CreateDeviceTypeInput): DeviceType {
 	if (data.manufacturer) {
 		deviceType.manufacturer = data.manufacturer;
 	}
+	// Use model if provided, otherwise fall back to name for display
 	if (data.model) {
 		deviceType.model = data.model;
+	} else if (data.name) {
+		deviceType.model = data.name;
 	}
 	if (data.is_full_depth !== undefined) {
 		deviceType.is_full_depth = data.is_full_depth;

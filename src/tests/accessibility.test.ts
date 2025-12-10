@@ -16,21 +16,21 @@ import IconPlus from '$lib/components/icons/IconPlus.svelte';
 
 // Test data
 const mockRack = {
-	id: 'rack-1',
 	name: 'Test Rack',
 	height: 12,
-	width: 19,
+	width: 19 as const,
 	position: 0,
-	view: 'front' as const,
+	desc_units: false,
+	form_factor: '4-post' as const,
+	starting_unit: 1,
 	devices: []
 };
 
 const mockDevice = {
-	id: 'device-1',
-	name: 'Test Server',
-	height: 2,
-	colour: '#4A90D9',
-	category: 'server' as const
+	slug: 'device-1',
+	model: 'Test Server',
+	u_height: 2,
+	rackarr: { colour: '#4A90D9', category: 'server' as const }
 };
 
 describe('Accessibility Tests', () => {

@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeEach } from 'vitest';
 import { getLayoutStore, resetLayoutStore } from '$lib/stores/layout.svelte';
-import type { Layout } from '$lib/types/v02';
+import type { Layout } from '$lib/types';
 
 describe('Layout Store (v0.2)', () => {
 	beforeEach(() => {
@@ -46,10 +46,10 @@ describe('Layout Store (v0.2)', () => {
 			expect(store.canAddRack).toBe(false);
 		});
 
-		it('compatibility: racks returns single rack in array', () => {
+		it('rack returns the single rack', () => {
 			const store = getLayoutStore();
-			expect(store.racks).toHaveLength(1);
-			expect(store.racks[0]!.name).toBe('Racky McRackface');
+			expect(store.rack).toBeDefined();
+			expect(store.rack.name).toBe('Racky McRackface');
 		});
 	});
 
@@ -153,7 +153,7 @@ describe('Layout Store (v0.2)', () => {
 			expect(rack!.height).toBe(42);
 			expect(rack!.width).toBe(19);
 			expect(rack!.devices).toEqual([]);
-			// v0.2 uses synthetic id for compatibility
+			// Single-rack mode uses fixed 'rack-0' id
 			expect(rack!.id).toBe('rack-0');
 		});
 
@@ -282,35 +282,6 @@ describe('Layout Store (v0.2)', () => {
 				colour: '#4A90D9'
 			});
 			expect(store.isDirty).toBe(true);
-		});
-	});
-
-	describe('addDeviceToLibrary (legacy compatibility)', () => {
-		it('generates slug and adds device', () => {
-			const store = getLayoutStore();
-			const initialCount = store.deviceLibrary.length;
-			const device = store.addDeviceToLibrary({
-				name: 'Test Server',
-				height: 2,
-				category: 'server',
-				colour: '#4A90D9'
-			});
-			// ID is now a slug
-			expect(device.id).toBe('test-server');
-			expect(store.deviceLibrary).toHaveLength(initialCount + 1);
-		});
-
-		it('preserves all provided properties', () => {
-			const store = getLayoutStore();
-			const device = store.addDeviceToLibrary({
-				name: 'Test Server',
-				height: 2,
-				category: 'server',
-				colour: '#FF0000',
-				notes: 'Test notes'
-			});
-			expect(device.colour).toBe('#FF0000');
-			expect(device.notes).toBe('Test notes');
 		});
 	});
 

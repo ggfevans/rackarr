@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { getAirflowDirection, hasAirflowConflict, findAirflowConflicts } from '$lib/utils/airflow';
-import type { Rack, Device, PlacedDevice } from '$lib/types';
+import type { Rack, DeviceType, PlacedDevice } from '$lib/types';
 
 describe('Airflow Utilities', () => {
 	describe('getAirflowDirection', () => {
@@ -78,28 +78,26 @@ describe('Airflow Utilities', () => {
 	});
 
 	describe('findAirflowConflicts', () => {
-		const createDevice = (id: string, height: number, airflow?: string): Device => ({
-			id,
-			name: `Device ${id}`,
-			height,
-			category: 'server',
-			colour: '#3b82f6',
-			airflow: airflow as Device['airflow']
+		const createDevice = (slug: string, u_height: number, airflow?: string): DeviceType => ({
+			slug,
+			model: `Device ${slug}`,
+			u_height,
+			airflow: airflow as DeviceType['airflow'],
+			rackarr: { category: 'server', colour: '#3b82f6' }
 		});
 
 		const createPlacedDevice = (
-			libraryId: string,
+			device_type: string,
 			position: number,
 			face: 'front' | 'rear' | 'both' = 'both'
 		): PlacedDevice => ({
-			libraryId,
+			device_type,
 			position,
 			face
 		});
 
 		it('returns empty array for empty rack', () => {
 			const rack: Rack = {
-				id: 'rack-1',
 				name: 'Test Rack',
 				height: 42,
 				width: 19,
@@ -107,8 +105,7 @@ describe('Airflow Utilities', () => {
 				desc_units: false,
 				starting_unit: 1,
 				position: 0,
-				devices: [],
-				view: 'front'
+				devices: []
 			};
 			const conflicts = findAirflowConflicts(rack, []);
 			expect(conflicts).toHaveLength(0);
@@ -117,7 +114,6 @@ describe('Airflow Utilities', () => {
 		it('returns empty array for single device', () => {
 			const device = createDevice('server-1', 2, 'front-to-rear');
 			const rack: Rack = {
-				id: 'rack-1',
 				name: 'Test Rack',
 				height: 42,
 				width: 19,
@@ -125,20 +121,18 @@ describe('Airflow Utilities', () => {
 				desc_units: false,
 				starting_unit: 1,
 				position: 0,
-				devices: [createPlacedDevice('server-1', 1)],
-				view: 'front'
+				devices: [createPlacedDevice('server-1', 1)]
 			};
 			const conflicts = findAirflowConflicts(rack, [device]);
 			expect(conflicts).toHaveLength(0);
 		});
 
 		it('detects conflict between adjacent devices', () => {
-			const devices: Device[] = [
+			const devices: DeviceType[] = [
 				createDevice('server-lower', 2, 'front-to-rear'), // Exhausts rear
 				createDevice('server-upper', 2, 'rear-to-front') // Intakes rear - CONFLICT!
 			];
 			const rack: Rack = {
-				id: 'rack-1',
 				name: 'Test Rack',
 				height: 42,
 				width: 19,
@@ -149,8 +143,7 @@ describe('Airflow Utilities', () => {
 				devices: [
 					createPlacedDevice('server-lower', 1), // U1-U2
 					createPlacedDevice('server-upper', 3) // U3-U4 (adjacent to lower)
-				],
-				view: 'front'
+				]
 			};
 			const conflicts = findAirflowConflicts(rack, devices);
 			expect(conflicts).toHaveLength(1);
@@ -162,12 +155,11 @@ describe('Airflow Utilities', () => {
 		});
 
 		it('returns empty array for non-adjacent devices', () => {
-			const devices: Device[] = [
+			const devices: DeviceType[] = [
 				createDevice('server-lower', 2, 'front-to-rear'),
 				createDevice('server-upper', 2, 'rear-to-front')
 			];
 			const rack: Rack = {
-				id: 'rack-1',
 				name: 'Test Rack',
 				height: 42,
 				width: 19,
@@ -178,20 +170,18 @@ describe('Airflow Utilities', () => {
 				devices: [
 					createPlacedDevice('server-lower', 1), // U1-U2
 					createPlacedDevice('server-upper', 5) // U5-U6 (gap at U3-U4)
-				],
-				view: 'front'
+				]
 			};
 			const conflicts = findAirflowConflicts(rack, devices);
 			expect(conflicts).toHaveLength(0);
 		});
 
 		it('returns empty array for devices with same airflow direction', () => {
-			const devices: Device[] = [
+			const devices: DeviceType[] = [
 				createDevice('server-1', 2, 'front-to-rear'),
 				createDevice('server-2', 2, 'front-to-rear')
 			];
 			const rack: Rack = {
-				id: 'rack-1',
 				name: 'Test Rack',
 				height: 42,
 				width: 19,
@@ -199,20 +189,18 @@ describe('Airflow Utilities', () => {
 				desc_units: false,
 				starting_unit: 1,
 				position: 0,
-				devices: [createPlacedDevice('server-1', 1), createPlacedDevice('server-2', 3)],
-				view: 'front'
+				devices: [createPlacedDevice('server-1', 1), createPlacedDevice('server-2', 3)]
 			};
 			const conflicts = findAirflowConflicts(rack, devices);
 			expect(conflicts).toHaveLength(0);
 		});
 
 		it('ignores conflicts when devices are on different faces', () => {
-			const devices: Device[] = [
+			const devices: DeviceType[] = [
 				createDevice('server-lower', 2, 'front-to-rear'),
 				createDevice('server-upper', 2, 'rear-to-front')
 			];
 			const rack: Rack = {
-				id: 'rack-1',
 				name: 'Test Rack',
 				height: 42,
 				width: 19,
@@ -223,20 +211,18 @@ describe('Airflow Utilities', () => {
 				devices: [
 					createPlacedDevice('server-lower', 1, 'front'), // Front only
 					createPlacedDevice('server-upper', 3, 'rear') // Rear only - no overlap
-				],
-				view: 'front'
+				]
 			};
 			const conflicts = findAirflowConflicts(rack, devices);
 			expect(conflicts).toHaveLength(0);
 		});
 
 		it('handles passive devices without conflicts', () => {
-			const devices: Device[] = [
+			const devices: DeviceType[] = [
 				createDevice('server-active', 2, 'front-to-rear'),
 				createDevice('passive-device', 1, 'passive')
 			];
 			const rack: Rack = {
-				id: 'rack-1',
 				name: 'Test Rack',
 				height: 42,
 				width: 19,
@@ -244,20 +230,18 @@ describe('Airflow Utilities', () => {
 				desc_units: false,
 				starting_unit: 1,
 				position: 0,
-				devices: [createPlacedDevice('server-active', 1), createPlacedDevice('passive-device', 3)],
-				view: 'front'
+				devices: [createPlacedDevice('server-active', 1), createPlacedDevice('passive-device', 3)]
 			};
 			const conflicts = findAirflowConflicts(rack, devices);
 			expect(conflicts).toHaveLength(0);
 		});
 
 		it('side-to-rear does not conflict with other devices', () => {
-			const devices: Device[] = [
+			const devices: DeviceType[] = [
 				createDevice('switch-side', 1, 'side-to-rear'),
 				createDevice('server-front-rear', 2, 'front-to-rear')
 			];
 			const rack: Rack = {
-				id: 'rack-1',
 				name: 'Test Rack',
 				height: 42,
 				width: 19,
@@ -265,8 +249,7 @@ describe('Airflow Utilities', () => {
 				desc_units: false,
 				starting_unit: 1,
 				position: 0,
-				devices: [createPlacedDevice('switch-side', 1), createPlacedDevice('server-front-rear', 2)],
-				view: 'front'
+				devices: [createPlacedDevice('switch-side', 1), createPlacedDevice('server-front-rear', 2)]
 			};
 			const conflicts = findAirflowConflicts(rack, devices);
 			// side-to-rear has same direction as front-to-rear (intake front, exhaust rear)

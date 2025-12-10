@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import type { Device, Rack } from '$lib/types';
+import type { DeviceType, Rack } from '$lib/types';
 import {
 	createRackDeviceDragData,
 	serializeDragData,
@@ -9,31 +9,30 @@ import {
 
 describe('DnD Within Rack', () => {
 	// Test device data
-	const testDevice: Device = {
-		id: 'device-1',
-		name: 'Test Server',
-		height: 2,
-		colour: '#4A90D9',
-		category: 'server'
+	const testDevice: DeviceType = {
+		slug: 'device-1',
+		model: 'Test Server',
+		u_height: 2,
+		rackarr: { colour: '#4A90D9', category: 'server' }
 	};
 
-	const testDevice2: Device = {
-		id: 'device-2',
-		name: 'Test Switch',
-		height: 1,
-		colour: '#7B68EE',
-		category: 'network'
+	const testDevice2: DeviceType = {
+		slug: 'device-2',
+		model: 'Test Switch',
+		u_height: 1,
+		rackarr: { colour: '#7B68EE', category: 'network' }
 	};
 
-	const deviceLibrary: Device[] = [testDevice, testDevice2];
+	const deviceLibrary: DeviceType[] = [testDevice, testDevice2];
 
 	const emptyRack: Rack = {
-		id: 'rack-1',
 		name: 'Test Rack',
 		height: 12,
 		width: 19,
 		position: 0,
-		view: 'front',
+		desc_units: false,
+		form_factor: '4-post',
+		starting_unit: 1,
 		devices: []
 	};
 
@@ -64,7 +63,7 @@ describe('DnD Within Rack', () => {
 			// Rack with device at U5-U6
 			const rackWithDevice: Rack = {
 				...emptyRack,
-				devices: [{ libraryId: 'device-1', position: 5, face: 'front' }]
+				devices: [{ device_type: 'device-1', position: 5, face: 'front' }]
 			};
 
 			// Without exclusion, dropping at U5 would be blocked
@@ -81,8 +80,8 @@ describe('DnD Within Rack', () => {
 			const rackWithDevices: Rack = {
 				...emptyRack,
 				devices: [
-					{ libraryId: 'device-1', position: 5, face: 'front' }, // Index 0: U5-U6
-					{ libraryId: 'device-2', position: 8, face: 'front' } // Index 1: U8
+					{ device_type: 'device-1', position: 5, face: 'front' }, // Index 0: U5-U6
+					{ device_type: 'device-2', position: 8, face: 'front' } // Index 1: U8
 				]
 			};
 
@@ -94,7 +93,7 @@ describe('DnD Within Rack', () => {
 		it('returns valid for same position (no-op move)', () => {
 			const rackWithDevice: Rack = {
 				...emptyRack,
-				devices: [{ libraryId: 'device-1', position: 5, face: 'front' }]
+				devices: [{ device_type: 'device-1', position: 5, face: 'front' }]
 			};
 
 			// Moving device back to its original position is valid
@@ -105,7 +104,7 @@ describe('DnD Within Rack', () => {
 		it('returns valid for new position without collision', () => {
 			const rackWithDevice: Rack = {
 				...emptyRack,
-				devices: [{ libraryId: 'device-1', position: 5, face: 'front' }]
+				devices: [{ device_type: 'device-1', position: 5, face: 'front' }]
 			};
 
 			// Moving device from U5 to U8 (empty space)
@@ -122,7 +121,7 @@ describe('DnD Within Rack', () => {
 
 			expect(deserialized).not.toBeNull();
 			expect(deserialized?.type).toBe('rack-device');
-			expect(deserialized?.device.id).toBe(testDevice.id);
+			expect(deserialized?.device.slug).toBe(testDevice.slug);
 			expect(deserialized?.sourceRackId).toBe('rack-1');
 			expect(deserialized?.sourceIndex).toBe(3);
 		});
@@ -130,16 +129,26 @@ describe('DnD Within Rack', () => {
 
 	describe('Keyboard movement logic', () => {
 		// These tests verify the movement logic that will be used for keyboard navigation
-		const deviceLibraryMultiple: Device[] = [
-			{ id: 'dev-1', name: 'Server 1', height: 2, colour: '#4A90D9', category: 'server' },
-			{ id: 'dev-2', name: 'Server 2', height: 2, colour: '#4A90D9', category: 'server' }
+		const deviceLibraryMultiple: DeviceType[] = [
+			{
+				slug: 'dev-1',
+				model: 'Server 1',
+				u_height: 2,
+				rackarr: { colour: '#4A90D9', category: 'server' }
+			},
+			{
+				slug: 'dev-2',
+				model: 'Server 2',
+				u_height: 2,
+				rackarr: { colour: '#4A90D9', category: 'server' }
+			}
 		];
 
 		it('moving up 1U from valid position is valid', () => {
 			// Device at U5, moving to U6
 			const rack: Rack = {
 				...emptyRack,
-				devices: [{ libraryId: 'dev-1', position: 5, face: 'front' }]
+				devices: [{ device_type: 'dev-1', position: 5, face: 'front' }]
 			};
 
 			const feedback = getDropFeedback(rack, deviceLibraryMultiple, 2, 6, 0);
@@ -150,7 +159,7 @@ describe('DnD Within Rack', () => {
 			// Device at U5, moving to U4
 			const rack: Rack = {
 				...emptyRack,
-				devices: [{ libraryId: 'dev-1', position: 5, face: 'front' }]
+				devices: [{ device_type: 'dev-1', position: 5, face: 'front' }]
 			};
 
 			const feedback = getDropFeedback(rack, deviceLibraryMultiple, 2, 4, 0);
@@ -161,7 +170,7 @@ describe('DnD Within Rack', () => {
 			// 2U device at U11, moving to U12 would go beyond rack (12U rack)
 			const rack: Rack = {
 				...emptyRack,
-				devices: [{ libraryId: 'dev-1', position: 11, face: 'front' }]
+				devices: [{ device_type: 'dev-1', position: 11, face: 'front' }]
 			};
 
 			// Device at U11-U12, moving to U12-U13 is invalid (beyond 12U)
@@ -173,7 +182,7 @@ describe('DnD Within Rack', () => {
 			// Device at U1, cannot move below
 			const rack: Rack = {
 				...emptyRack,
-				devices: [{ libraryId: 'dev-1', position: 1, face: 'front' }]
+				devices: [{ device_type: 'dev-1', position: 1, face: 'front' }]
 			};
 
 			const feedback = getDropFeedback(rack, deviceLibraryMultiple, 2, 0, 0);
@@ -185,8 +194,8 @@ describe('DnD Within Rack', () => {
 			const rack: Rack = {
 				...emptyRack,
 				devices: [
-					{ libraryId: 'dev-1', position: 3, face: 'front' },
-					{ libraryId: 'dev-2', position: 7, face: 'front' }
+					{ device_type: 'dev-1', position: 3, face: 'front' },
+					{ device_type: 'dev-2', position: 7, face: 'front' }
 				]
 			};
 
@@ -200,8 +209,8 @@ describe('DnD Within Rack', () => {
 			const rack: Rack = {
 				...emptyRack,
 				devices: [
-					{ libraryId: 'dev-1', position: 3, face: 'front' },
-					{ libraryId: 'dev-2', position: 7, face: 'front' }
+					{ device_type: 'dev-1', position: 3, face: 'front' },
+					{ device_type: 'dev-2', position: 7, face: 'front' }
 				]
 			};
 

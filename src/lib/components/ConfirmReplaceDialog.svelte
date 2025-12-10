@@ -13,8 +13,8 @@
 
 	const layoutStore = getLayoutStore();
 
-	const rackName = $derived(layoutStore.racks[0]?.name || 'Untitled Rack');
-	const deviceCount = $derived(layoutStore.racks[0]?.devices.length ?? 0);
+	const rackName = $derived(layoutStore.rack?.name || 'Untitled Rack');
+	const deviceCount = $derived(layoutStore.rack?.devices.length ?? 0);
 	const deviceWord = $derived(deviceCount === 1 ? 'device' : 'devices');
 	const message = $derived(
 		`"${rackName}" has ${deviceCount} ${deviceWord} placed. Save your layout first?`

@@ -3,7 +3,7 @@
  * Functions for device placement validation
  */
 
-import type { Device, DeviceFace, PlacedDevice, Rack } from '$lib/types';
+import type { DeviceType, DeviceFace, PlacedDevice, Rack } from '$lib/types';
 
 /**
  * Range of U positions occupied by a device
@@ -65,7 +65,7 @@ export function doFacesCollide(faceA: DeviceFace, faceB: DeviceFace): boolean {
  */
 export function canPlaceDevice(
 	rack: Rack,
-	deviceLibrary: Device[],
+	deviceLibrary: DeviceType[],
 	deviceHeight: number,
 	targetPosition: number,
 	excludeIndex?: number,
@@ -92,9 +92,9 @@ export function canPlaceDevice(
 		}
 
 		const placedDevice = rack.devices[i]!;
-		const device = deviceLibrary.find((d) => d.id === placedDevice.libraryId);
+		const device = deviceLibrary.find((d) => d.slug === placedDevice.device_type);
 		if (device) {
-			const existingRange = getDeviceURange(placedDevice.position, device.height);
+			const existingRange = getDeviceURange(placedDevice.position, device.u_height);
 			// Check both U range overlap AND face collision
 			if (
 				doRangesOverlap(newRange, existingRange) &&
@@ -120,7 +120,7 @@ export function canPlaceDevice(
  */
 export function findCollisions(
 	rack: Rack,
-	deviceLibrary: Device[],
+	deviceLibrary: DeviceType[],
 	newDeviceHeight: number,
 	newPosition: number,
 	excludeIndex?: number,
@@ -135,9 +135,9 @@ export function findCollisions(
 			return;
 		}
 
-		const device = deviceLibrary.find((d) => d.id === placedDevice.libraryId);
+		const device = deviceLibrary.find((d) => d.slug === placedDevice.device_type);
 		if (device) {
-			const existingRange = getDeviceURange(placedDevice.position, device.height);
+			const existingRange = getDeviceURange(placedDevice.position, device.u_height);
 			// Check both U range overlap AND face collision
 			if (
 				doRangesOverlap(newRange, existingRange) &&
@@ -161,7 +161,7 @@ export function findCollisions(
  */
 export function findValidDropPositions(
 	rack: Rack,
-	deviceLibrary: Device[],
+	deviceLibrary: DeviceType[],
 	deviceHeight: number,
 	targetFace: DeviceFace = 'front'
 ): number[] {
@@ -202,7 +202,7 @@ function yToUPosition(y: number, rackHeight: number, uHeight: number): number {
  */
 export function snapToNearestValidPosition(
 	rack: Rack,
-	deviceLibrary: Device[],
+	deviceLibrary: DeviceType[],
 	deviceHeight: number,
 	targetY: number,
 	uHeight: number

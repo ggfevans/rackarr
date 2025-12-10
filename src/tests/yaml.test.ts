@@ -10,7 +10,7 @@ import {
 	serializeLayoutToYaml,
 	parseLayoutYaml
 } from '$lib/utils/yaml';
-import type { Layout } from '$lib/types/v02';
+import type { Layout } from '$lib/types';
 
 describe('YAML Utilities', () => {
 	describe('js-yaml dependency', () => {

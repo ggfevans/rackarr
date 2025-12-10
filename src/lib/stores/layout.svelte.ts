@@ -1,11 +1,17 @@
 /**
- * Layout Store (v0.2)
+ * Layout Store
  * Central state management for the application using Svelte 5 runes
- * Uses v0.2 types with slug-based device identification
  */
 
-import type { FormFactor, DeviceCategory, Device } from '$lib/types';
-import type { Layout, Rack, DeviceType, PlacedDevice, DeviceFace, RackView } from '$lib/types/v02';
+import type {
+	FormFactor,
+	Layout,
+	Rack,
+	DeviceType,
+	PlacedDevice,
+	DeviceFace,
+	RackView
+} from '$lib/types';
 import { DEFAULT_DEVICE_FACE } from '$lib/types/constants';
 import { createLayout, createRack } from '$lib/utils/serialization';
 import {
@@ -65,36 +71,9 @@ const rack = $derived(layout.rack);
 const device_types = $derived(layout.device_types);
 const hasRack = $derived(layout.rack.devices !== undefined);
 
-// Compatibility getters - translate v0.2 format to legacy UI format
-// These are permanent adapters, not temporary code
-const racks = $derived([
-	{
-		...layout.rack,
-		id: 'rack-0', // Synthetic ID for compatibility
-		view: layout.rack.view ?? 'front', // Ensure view is always defined
-		// Map v0.2 devices to legacy PlacedDevice format
-		devices: layout.rack.devices.map((d) => ({
-			libraryId: d.device_type,
-			position: d.position,
-			face: d.face,
-			name: d.name
-		}))
-	}
-]);
-const deviceLibrary = $derived(
-	layout.device_types.map((dt) => ({
-		id: dt.slug,
-		name: dt.model ?? dt.slug,
-		height: dt.u_height,
-		category: dt.rackarr.category,
-		colour: dt.rackarr.colour,
-		notes: dt.comments,
-		airflow: dt.airflow
-	}))
-);
 // rackCount returns 0 until user has started (shows WelcomeScreen)
 const rackCount = $derived(hasStarted ? 1 : 0);
-const canAddRack = $derived(false); // No multi-rack in v0.2
+const canAddRack = $derived(false); // Single-rack mode
 
 /**
  * Reset the store to initial state (primarily for testing)
@@ -115,7 +94,7 @@ export function resetLayoutStore(clearStarted: boolean = true): void {
  */
 export function getLayoutStore() {
 	return {
-		// State getters (v0.2)
+		// State getters
 		get layout() {
 			return layout;
 		},
@@ -130,14 +109,6 @@ export function getLayoutStore() {
 		},
 		get hasRack() {
 			return hasRack;
-		},
-
-		// Compatibility getters - translate v0.2 format to legacy UI format
-		get racks() {
-			return racks;
-		},
-		get deviceLibrary() {
-			return deviceLibrary;
 		},
 		get rackCount() {
 			return rackCount;
@@ -159,18 +130,13 @@ export function getLayoutStore() {
 		updateRack,
 		updateRackView,
 		deleteRack,
-		reorderRacks, // No-op in v0.2
-		duplicateRack, // Not supported in v0.2
+		reorderRacks,
+		duplicateRack,
 
-		// Device type actions (v0.2 naming)
+		// Device type actions
 		addDeviceType,
 		updateDeviceType,
 		deleteDeviceType,
-
-		// Legacy device library actions - translate Device format to DeviceType
-		addDeviceToLibrary,
-		updateDeviceInLibrary,
-		deleteDeviceFromLibrary,
 
 		// Placement actions
 		placeDevice,
@@ -276,7 +242,7 @@ function loadLayout(layoutData: Layout): void {
  * @param form_factor - Rack form factor
  * @param desc_units - Whether units are numbered top-down
  * @param starting_unit - First U number
- * @returns The created rack object (with id for compatibility)
+ * @returns The created rack object with synthetic id
  */
 function addRack(
 	name: string,
@@ -306,7 +272,7 @@ function addRack(
 	hasStarted = true;
 	saveHasStarted(true);
 
-	// Return with synthetic id for compatibility
+	// Return with synthetic id (single-rack mode uses fixed 'rack-0')
 	return { ...newRack, id: 'rack-0' };
 }
 
@@ -410,83 +376,11 @@ function deleteDeviceType(slug: string): void {
 	deleteDeviceTypeRecorded(slug);
 }
 
-// Legacy device library actions - translate Device format to DeviceType format
-// These are permanent adapters used by UI components
-
-/**
- * Add a device to the library (legacy compatibility)
- * @deprecated Use addDeviceType instead
- */
-function addDeviceToLibrary(deviceData: {
-	name: string;
-	height: number;
-	category: DeviceCategory;
-	colour: string;
-	notes?: string;
-}): Device {
-	const deviceType = addDeviceType({
-		name: deviceData.name,
-		u_height: deviceData.height,
-		category: deviceData.category,
-		colour: deviceData.colour,
-		comments: deviceData.notes,
-		model: deviceData.name // Store name as model for lookup compatibility
-	});
-
-	// Return legacy format for compatibility
-	return {
-		id: deviceType.slug,
-		name: deviceType.model ?? deviceType.slug,
-		height: deviceType.u_height,
-		category: deviceType.rackarr.category,
-		colour: deviceType.rackarr.colour,
-		notes: deviceType.comments
-	};
-}
-
-/**
- * Update a device in the library (legacy compatibility)
- * @deprecated Use updateDeviceType instead
- */
-function updateDeviceInLibrary(id: string, updates: Partial<Device>): void {
-	const typeUpdates: Partial<DeviceType> = {};
-
-	if (updates.height !== undefined) {
-		typeUpdates.u_height = updates.height;
-	}
-	if (updates.notes !== undefined) {
-		typeUpdates.comments = updates.notes;
-	}
-	if (updates.airflow !== undefined) {
-		typeUpdates.airflow = updates.airflow;
-	}
-	if (updates.colour !== undefined || updates.category !== undefined) {
-		const existing = findDeviceType(layout.device_types, id);
-		if (existing) {
-			typeUpdates.rackarr = {
-				...existing.rackarr,
-				...(updates.colour !== undefined && { colour: updates.colour }),
-				...(updates.category !== undefined && { category: updates.category })
-			};
-		}
-	}
-
-	updateDeviceType(id, typeUpdates);
-}
-
-/**
- * Delete a device from the library (legacy compatibility)
- * @deprecated Use deleteDeviceType instead
- */
-function deleteDeviceFromLibrary(id: string): void {
-	deleteDeviceType(id);
-}
-
 /**
  * Place a device from the library into the rack
  * Uses undo/redo support via placeDeviceRecorded
  * @param _rackId - Target rack ID (ignored in v0.2)
- * @param deviceTypeSlug - Device type slug (or legacy libraryId)
+ * @param deviceTypeSlug - Device type slug
  * @param position - U position (bottom of device)
  * @param face - Optional face assignment (defaults to DEFAULT_DEVICE_FACE)
  * @returns true if placed successfully, false otherwise

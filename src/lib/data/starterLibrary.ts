@@ -3,8 +3,7 @@
  * Common device types pre-populated in new layouts
  */
 
-import type { DeviceType } from '$lib/types/v02';
-import type { DeviceCategory } from '$lib/types';
+import type { DeviceType, DeviceCategory } from '$lib/types';
 import { CATEGORY_COLOURS } from '$lib/types/constants';
 import { slugify } from '$lib/utils/slug';
 
@@ -73,7 +72,7 @@ export function getStarterLibrary(): DeviceType[] {
 	return STARTER_DEVICES.map((spec) => ({
 		slug: slugify(spec.name),
 		u_height: spec.u_height,
-		model: spec.name, // Store name as model for display compatibility
+		model: spec.name, // Store name as model for display
 		rackarr: {
 			colour: CATEGORY_COLOURS[spec.category],
 			category: spec.category

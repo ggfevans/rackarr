@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { calculateDropPosition, getDropFeedback, type DragData } from '$lib/utils/dragdrop';
-import type { Rack, Device } from '$lib/types';
+import type { Rack, DeviceType } from '$lib/types';
 
 describe('Drag and Drop Utilities', () => {
 	// Constants matching component implementation
@@ -62,25 +62,25 @@ describe('Drag and Drop Utilities', () => {
 	});
 
 	describe('getDropFeedback', () => {
-		const mockDevice: Device = {
-			id: 'device-1',
-			name: 'Test Server',
-			height: 2,
-			colour: '#4A90D9',
-			category: 'server'
+		const mockDevice: DeviceType = {
+			slug: 'device-1',
+			model: 'Test Server',
+			u_height: 2,
+			rackarr: { colour: '#4A90D9', category: 'server' }
 		};
 
 		const emptyRack: Rack = {
-			id: 'rack-1',
 			name: 'Test Rack',
 			height: 12,
 			width: 19,
 			position: 0,
-			view: 'front',
+			desc_units: false,
+			form_factor: '4-post',
+			starting_unit: 1,
 			devices: []
 		};
 
-		const deviceLibrary: Device[] = [mockDevice];
+		const deviceLibrary: DeviceType[] = [mockDevice];
 
 		it('returns "valid" for empty position in empty rack', () => {
 			const feedback = getDropFeedback(emptyRack, deviceLibrary, 2, 5);
@@ -111,7 +111,7 @@ describe('Drag and Drop Utilities', () => {
 		it('returns "blocked" for collision with existing device', () => {
 			const rackWithDevice: Rack = {
 				...emptyRack,
-				devices: [{ libraryId: 'device-1', position: 5, face: 'front' }] // Device at U5-U6
+				devices: [{ device_type: 'device-1', position: 5, face: 'front' }] // Device at U5-U6
 			};
 
 			// Trying to place at U5 (would collide)
@@ -122,7 +122,7 @@ describe('Drag and Drop Utilities', () => {
 		it('returns "blocked" for partial collision', () => {
 			const rackWithDevice: Rack = {
 				...emptyRack,
-				devices: [{ libraryId: 'device-1', position: 5, face: 'front' }] // Device at U5-U6
+				devices: [{ device_type: 'device-1', position: 5, face: 'front' }] // Device at U5-U6
 			};
 
 			// 2U device at position 4 would occupy U4-U5 (collides with U5)
@@ -133,7 +133,7 @@ describe('Drag and Drop Utilities', () => {
 		it('returns "valid" for position adjacent to existing device', () => {
 			const rackWithDevice: Rack = {
 				...emptyRack,
-				devices: [{ libraryId: 'device-1', position: 5, face: 'front' }] // Device at U5-U6
+				devices: [{ device_type: 'device-1', position: 5, face: 'front' }] // Device at U5-U6
 			};
 
 			// 2U device at position 7 would occupy U7-U8 (no collision)
@@ -156,11 +156,10 @@ describe('Drag and Drop Utilities', () => {
 			const dragData: DragData = {
 				type: 'palette',
 				device: {
-					id: 'device-1',
-					name: 'Test',
-					height: 1,
-					colour: '#000',
-					category: 'server'
+					slug: 'device-1',
+					model: 'Test',
+					u_height: 1,
+					rackarr: { colour: '#000', category: 'server' }
 				}
 			};
 
@@ -174,11 +173,10 @@ describe('Drag and Drop Utilities', () => {
 			const dragData: DragData = {
 				type: 'rack-device',
 				device: {
-					id: 'device-1',
-					name: 'Test',
-					height: 1,
-					colour: '#000',
-					category: 'server'
+					slug: 'device-1',
+					model: 'Test',
+					u_height: 1,
+					rackarr: { colour: '#000', category: 'server' }
 				},
 				sourceRackId: 'rack-1',
 				sourceIndex: 0

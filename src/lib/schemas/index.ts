@@ -60,9 +60,11 @@ export const FormFactorSchema = z.enum([
 ]);
 
 /**
- * Airflow direction enum
- * Simplified to 4 types for Rackarr v0.5.0
- * Legacy types (left-to-right, right-to-left, etc.) should be migrated to 'passive'
+ * Airflow direction enum (NetBox-compatible)
+ * - passive: No active cooling
+ * - front-to-rear: Standard server airflow
+ * - rear-to-front: Reverse airflow
+ * - side-to-rear: Side intake (e.g., network switches)
  */
 export const AirflowSchema = z.enum(['passive', 'front-to-rear', 'rear-to-front', 'side-to-rear']);
 
@@ -219,62 +221,3 @@ export type PlacedDeviceZod = z.infer<typeof PlacedDeviceSchema>;
 export type RackZod = z.infer<typeof RackSchema>;
 export type LayoutSettingsZod = z.infer<typeof LayoutSettingsSchema>;
 export type LayoutZod = z.infer<typeof LayoutSchema>;
-
-// ============================================================================
-// Backwards Compatibility Aliases (deprecated - use new names)
-// ============================================================================
-
-/** @deprecated Use SlugSchema instead */
-export const SlugSchemaV02 = SlugSchema;
-/** @deprecated Use DeviceCategorySchema instead */
-export const DeviceCategorySchemaV02 = DeviceCategorySchema;
-/** @deprecated Use FormFactorSchema instead */
-export const FormFactorSchemaV02 = FormFactorSchema;
-/** @deprecated Use AirflowSchema instead */
-export const AirflowSchemaV02 = AirflowSchema;
-/** @deprecated Use DeviceFaceSchema instead */
-export const DeviceFaceSchemaV02 = DeviceFaceSchema;
-/** @deprecated Use WeightUnitSchema instead */
-export const WeightUnitSchemaV02 = WeightUnitSchema;
-/** @deprecated Use DisplayModeSchema instead */
-export const DisplayModeSchemaV02 = DisplayModeSchema;
-/** @deprecated Use RackarrExtensionsSchema instead */
-export const RackarrExtensionsSchemaV02 = RackarrExtensionsSchema;
-/** @deprecated Use DeviceTypeSchema instead */
-export const DeviceTypeSchemaV02 = DeviceTypeSchema;
-/** @deprecated Use PlacedDeviceSchema instead */
-export const DeviceSchemaV02 = PlacedDeviceSchema;
-/** @deprecated Use RackSchema instead */
-export const RackSchemaV02 = RackSchema;
-/** @deprecated Use LayoutSettingsSchema instead */
-export const LayoutSettingsSchemaV02 = LayoutSettingsSchema;
-/** @deprecated Use LayoutSchema instead */
-export const LayoutSchemaV02 = LayoutSchema;
-
-// Type aliases for backwards compatibility
-/** @deprecated Use Slug instead */
-export type SlugV02 = Slug;
-/** @deprecated Use DeviceCategory instead */
-export type DeviceCategoryV02 = DeviceCategory;
-/** @deprecated Use FormFactor instead */
-export type FormFactorV02 = FormFactor;
-/** @deprecated Use Airflow instead */
-export type AirflowV02 = Airflow;
-/** @deprecated Use DeviceFace instead */
-export type DeviceFaceV02 = DeviceFace;
-/** @deprecated Use WeightUnit instead */
-export type WeightUnitV02 = WeightUnit;
-/** @deprecated Use DisplayMode instead */
-export type DisplayModeV02 = DisplayMode;
-/** @deprecated Use RackarrExtensions instead */
-export type RackarrExtensionsV02 = RackarrExtensions;
-/** @deprecated Use DeviceTypeZod instead */
-export type DeviceTypeZodV02 = DeviceTypeZod;
-/** @deprecated Use PlacedDeviceZod instead */
-export type DeviceZodV02 = PlacedDeviceZod;
-/** @deprecated Use RackZod instead */
-export type RackZodV02 = RackZod;
-/** @deprecated Use LayoutSettingsZod instead */
-export type LayoutSettingsZodV02 = LayoutSettingsZod;
-/** @deprecated Use LayoutZod instead */
-export type LayoutZodV02 = LayoutZod;

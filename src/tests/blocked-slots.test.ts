@@ -1,30 +1,30 @@
 import { describe, it, expect } from 'vitest';
 import { getBlockedSlots } from '$lib/utils/blocked-slots';
-import type { Rack, Device, RackView, DeviceFace } from '$lib/types';
+import type { Rack, DeviceType, DeviceFace } from '$lib/types';
 
 // Helper to create a test rack
 function createTestRack(overrides: Partial<Rack> = {}): Rack {
 	return {
-		id: 'rack-1',
 		name: 'Test Rack',
 		height: 12,
 		width: 19,
 		position: 0,
-		view: 'front' as RackView,
+		desc_units: false,
+		form_factor: '4-post',
+		starting_unit: 1,
 		devices: [],
 		...overrides
 	};
 }
 
 // Helper to create a test device type
-function createTestDevice(id: string, height: number, isFullDepth = true): Device {
+function createTestDevice(slug: string, u_height: number, isFullDepth = true): DeviceType {
 	return {
-		id,
-		name: `Device ${id}`,
-		height,
-		category: 'server',
-		colour: '#888888',
-		is_full_depth: isFullDepth
+		slug,
+		model: `Device ${slug}`,
+		u_height,
+		is_full_depth: isFullDepth,
+		rackarr: { category: 'server', colour: '#888888' }
 	};
 }
 
@@ -32,7 +32,7 @@ describe('getBlockedSlots', () => {
 	describe('Basic cases', () => {
 		it('returns empty array when rack has no devices', () => {
 			const rack = createTestRack({ devices: [] });
-			const deviceLibrary: Device[] = [];
+			const deviceLibrary: DeviceType[] = [];
 
 			const blocked = getBlockedSlots(rack, 'front', deviceLibrary);
 
@@ -42,8 +42,8 @@ describe('getBlockedSlots', () => {
 		it('returns empty array when all devices are on same face as view', () => {
 			const rack = createTestRack({
 				devices: [
-					{ libraryId: 'device-1', position: 1, face: 'front' as DeviceFace },
-					{ libraryId: 'device-2', position: 5, face: 'front' as DeviceFace }
+					{ device_type: 'device-1', position: 1, face: 'front' as DeviceFace },
+					{ device_type: 'device-2', position: 5, face: 'front' as DeviceFace }
 				]
 			});
 			const deviceLibrary = [
@@ -60,7 +60,7 @@ describe('getBlockedSlots', () => {
 	describe('Full-depth device blocking', () => {
 		it('returns blocked range for full-depth front device when checking rear view', () => {
 			const rack = createTestRack({
-				devices: [{ libraryId: 'server-1', position: 5, face: 'front' as DeviceFace }]
+				devices: [{ device_type: 'server-1', position: 5, face: 'front' as DeviceFace }]
 			});
 			const deviceLibrary = [createTestDevice('server-1', 2, true)]; // full-depth
 
@@ -72,7 +72,7 @@ describe('getBlockedSlots', () => {
 
 		it('returns blocked range for full-depth rear device when checking front view', () => {
 			const rack = createTestRack({
-				devices: [{ libraryId: 'server-1', position: 3, face: 'rear' as DeviceFace }]
+				devices: [{ device_type: 'server-1', position: 3, face: 'rear' as DeviceFace }]
 			});
 			const deviceLibrary = [createTestDevice('server-1', 3, true)]; // full-depth, 3U
 
@@ -87,8 +87,8 @@ describe('getBlockedSlots', () => {
 		it('does NOT return blocked range for half-depth devices', () => {
 			const rack = createTestRack({
 				devices: [
-					{ libraryId: 'switch-1', position: 1, face: 'front' as DeviceFace },
-					{ libraryId: 'patch-1', position: 5, face: 'rear' as DeviceFace }
+					{ device_type: 'switch-1', position: 1, face: 'front' as DeviceFace },
+					{ device_type: 'patch-1', position: 5, face: 'rear' as DeviceFace }
 				]
 			});
 			const deviceLibrary = [
@@ -108,7 +108,7 @@ describe('getBlockedSlots', () => {
 	describe('Both-face devices', () => {
 		it('returns blocked range for both-face devices on front view', () => {
 			const rack = createTestRack({
-				devices: [{ libraryId: 'ups-1', position: 1, face: 'both' as DeviceFace }]
+				devices: [{ device_type: 'ups-1', position: 1, face: 'both' as DeviceFace }]
 			});
 			const deviceLibrary = [createTestDevice('ups-1', 4, true)]; // full-depth, 4U
 
@@ -121,7 +121,7 @@ describe('getBlockedSlots', () => {
 
 		it('returns blocked range for both-face devices on rear view', () => {
 			const rack = createTestRack({
-				devices: [{ libraryId: 'ups-1', position: 10, face: 'both' as DeviceFace }]
+				devices: [{ device_type: 'ups-1', position: 10, face: 'both' as DeviceFace }]
 			});
 			const deviceLibrary = [createTestDevice('ups-1', 2, true)];
 
@@ -136,9 +136,9 @@ describe('getBlockedSlots', () => {
 		it('handles multiple devices with separate ranges', () => {
 			const rack = createTestRack({
 				devices: [
-					{ libraryId: 'server-1', position: 1, face: 'front' as DeviceFace },
-					{ libraryId: 'server-2', position: 6, face: 'front' as DeviceFace },
-					{ libraryId: 'switch-1', position: 10, face: 'front' as DeviceFace }
+					{ device_type: 'server-1', position: 1, face: 'front' as DeviceFace },
+					{ device_type: 'server-2', position: 6, face: 'front' as DeviceFace },
+					{ device_type: 'switch-1', position: 10, face: 'front' as DeviceFace }
 				]
 			});
 			const deviceLibrary = [
@@ -157,8 +157,8 @@ describe('getBlockedSlots', () => {
 		it('handles overlapping/adjacent ranges', () => {
 			const rack = createTestRack({
 				devices: [
-					{ libraryId: 'server-1', position: 1, face: 'front' as DeviceFace },
-					{ libraryId: 'server-2', position: 3, face: 'front' as DeviceFace } // adjacent
+					{ device_type: 'server-1', position: 1, face: 'front' as DeviceFace },
+					{ device_type: 'server-2', position: 3, face: 'front' as DeviceFace } // adjacent
 				]
 			});
 			const deviceLibrary = [
@@ -178,7 +178,7 @@ describe('getBlockedSlots', () => {
 	describe('U range calculations', () => {
 		it('correctly calculates U ranges for 1U device', () => {
 			const rack = createTestRack({
-				devices: [{ libraryId: 'switch-1', position: 7, face: 'front' as DeviceFace }]
+				devices: [{ device_type: 'switch-1', position: 7, face: 'front' as DeviceFace }]
 			});
 			const deviceLibrary = [createTestDevice('switch-1', 1, true)];
 
@@ -189,7 +189,7 @@ describe('getBlockedSlots', () => {
 
 		it('correctly calculates U ranges for large device', () => {
 			const rack = createTestRack({
-				devices: [{ libraryId: 'storage-1', position: 1, face: 'rear' as DeviceFace }]
+				devices: [{ device_type: 'storage-1', position: 1, face: 'rear' as DeviceFace }]
 			});
 			const deviceLibrary = [createTestDevice('storage-1', 10, true)]; // 10U device
 
@@ -203,8 +203,8 @@ describe('getBlockedSlots', () => {
 		it('skips devices without matching library entry', () => {
 			const rack = createTestRack({
 				devices: [
-					{ libraryId: 'unknown-device', position: 1, face: 'front' as DeviceFace },
-					{ libraryId: 'server-1', position: 5, face: 'front' as DeviceFace }
+					{ device_type: 'unknown-device', position: 1, face: 'front' as DeviceFace },
+					{ device_type: 'server-1', position: 5, face: 'front' as DeviceFace }
 				]
 			});
 			const deviceLibrary = [createTestDevice('server-1', 2, true)];
@@ -220,16 +220,15 @@ describe('getBlockedSlots', () => {
 	describe('Default is_full_depth behavior', () => {
 		it('treats undefined is_full_depth as true (full-depth)', () => {
 			const rack = createTestRack({
-				devices: [{ libraryId: 'device-1', position: 3, face: 'front' as DeviceFace }]
+				devices: [{ device_type: 'device-1', position: 3, face: 'front' as DeviceFace }]
 			});
 			// Device without is_full_depth property
-			const deviceLibrary: Device[] = [
+			const deviceLibrary: DeviceType[] = [
 				{
-					id: 'device-1',
-					name: 'Device 1',
-					height: 2,
-					category: 'server',
-					colour: '#888888'
+					slug: 'device-1',
+					model: 'Device 1',
+					u_height: 2,
+					rackarr: { category: 'server', colour: '#888888' }
 					// is_full_depth not specified
 				}
 			];

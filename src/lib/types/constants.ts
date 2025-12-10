@@ -126,11 +126,6 @@ export const MAX_IMAGE_SIZE_BYTES = MAX_IMAGE_SIZE_MB * 1024 * 1024;
 export const ARCHIVE_EXTENSION = '.rackarr.zip';
 
 /**
- * Legacy JSON file extension (for backwards compatibility)
- */
-export const LEGACY_JSON_EXTENSION = '.rackarr.json';
-
-/**
  * Layout filename inside the archive
  */
 export const LAYOUT_FILENAME = 'layout.json';

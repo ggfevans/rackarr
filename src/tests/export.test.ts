@@ -8,44 +8,44 @@ import {
 	downloadBlob,
 	generateExportFilename
 } from '$lib/utils/export';
-import type { Rack, Device, ExportOptions } from '$lib/types';
+import type { Rack, DeviceType, ExportOptions } from '$lib/types';
 
 describe('Export Utilities', () => {
-	const mockDeviceLibrary: Device[] = [
+	const mockDeviceLibrary: DeviceType[] = [
 		{
-			id: 'device-1',
-			name: 'Server 1',
-			height: 2,
-			colour: '#4A90D9',
-			category: 'server'
+			slug: 'device-1',
+			model: 'Server 1',
+			u_height: 2,
+			rackarr: { colour: '#4A90D9', category: 'server' }
 		},
 		{
-			id: 'device-2',
-			name: 'Switch',
-			height: 1,
-			colour: '#7B68EE',
-			category: 'network'
+			slug: 'device-2',
+			model: 'Switch',
+			u_height: 1,
+			rackarr: { colour: '#7B68EE', category: 'network' }
 		}
 	];
 
 	const mockRacks: Rack[] = [
 		{
-			id: 'rack-1',
 			name: 'Main Rack',
 			height: 42,
 			width: 19,
 			position: 0,
-			view: 'front',
-			devices: [{ libraryId: 'device-1', position: 1, face: 'front' }]
+			desc_units: false,
+			form_factor: '4-post',
+			starting_unit: 1,
+			devices: [{ device_type: 'device-1', position: 1, face: 'front' }]
 		},
 		{
-			id: 'rack-2',
 			name: 'Secondary Rack',
 			height: 24,
 			width: 19,
 			position: 1,
-			view: 'front',
-			devices: [{ libraryId: 'device-2', position: 5, face: 'front' }]
+			desc_units: false,
+			form_factor: '4-post',
+			starting_unit: 1,
+			devices: [{ device_type: 'device-2', position: 5, face: 'front' }]
 		}
 	];
 
@@ -226,13 +226,14 @@ describe('Export Utilities', () => {
 				// Create rack with rear-facing device
 				const rearRacks: Rack[] = [
 					{
-						id: 'rack-1',
 						name: 'Main Rack',
 						height: 42,
 						width: 19,
 						position: 0,
-						view: 'rear',
-						devices: [{ libraryId: 'device-1', position: 1, face: 'rear' }]
+						desc_units: false,
+						form_factor: '4-post',
+						starting_unit: 1,
+						devices: [{ device_type: 'device-1', position: 1, face: 'rear' }]
 					}
 				];
 				const options: ExportOptions = {
@@ -380,25 +381,25 @@ describe('Device Positioning in Export', () => {
 	const RAIL_WIDTH = 17;
 
 	it('positions devices at correct Y coordinate including rail offset', () => {
-		const devices: Device[] = [
+		const devices: DeviceType[] = [
 			{
-				id: 'device-1',
-				name: 'Test Server',
-				height: 2,
-				colour: '#4A90D9',
-				category: 'server'
+				slug: 'device-1',
+				model: 'Test Server',
+				u_height: 2,
+				rackarr: { colour: '#4A90D9', category: 'server' }
 			}
 		];
 
 		const racks: Rack[] = [
 			{
-				id: 'rack-1',
 				name: 'Test Rack',
 				height: 42,
 				width: 19,
 				position: 0,
-				view: 'front',
-				devices: [{ libraryId: 'device-1', position: 1, face: 'front' }]
+				desc_units: false,
+				form_factor: '4-post',
+				starting_unit: 1,
+				devices: [{ device_type: 'device-1', position: 1, face: 'front' }]
 			}
 		];
 
@@ -425,25 +426,25 @@ describe('Device Positioning in Export', () => {
 	});
 
 	it('positions device at top of rack correctly', () => {
-		const devices: Device[] = [
+		const devices: DeviceType[] = [
 			{
-				id: 'device-1',
-				name: 'Top Server',
-				height: 1,
-				colour: '#7B68EE',
-				category: 'server'
+				slug: 'device-1',
+				model: 'Top Server',
+				u_height: 1,
+				rackarr: { colour: '#7B68EE', category: 'server' }
 			}
 		];
 
 		const racks: Rack[] = [
 			{
-				id: 'rack-1',
 				name: 'Test Rack',
 				height: 42,
 				width: 19,
 				position: 0,
-				view: 'front',
-				devices: [{ libraryId: 'device-1', position: 42, face: 'front' }]
+				desc_units: false,
+				form_factor: '4-post',
+				starting_unit: 1,
+				devices: [{ device_type: 'device-1', position: 42, face: 'front' }]
 			}
 		];
 
@@ -473,27 +474,27 @@ describe('Export Legend', () => {
 	// For now, we test that legend content is included in SVG when enabled
 
 	it('legend includes unique devices', () => {
-		const devices: Device[] = [
+		const devices: DeviceType[] = [
 			{
-				id: 'device-1',
-				name: 'Server 1',
-				height: 2,
-				colour: '#4A90D9',
-				category: 'server'
+				slug: 'device-1',
+				model: 'Server 1',
+				u_height: 2,
+				rackarr: { colour: '#4A90D9', category: 'server' }
 			}
 		];
 
 		const racks: Rack[] = [
 			{
-				id: 'rack-1',
 				name: 'Rack',
 				height: 42,
 				width: 19,
 				position: 0,
-				view: 'front',
+				desc_units: false,
+				form_factor: '4-post',
+				starting_unit: 1,
 				devices: [
-					{ libraryId: 'device-1', position: 1, face: 'front' },
-					{ libraryId: 'device-1', position: 5, face: 'front' } // Same device twice
+					{ device_type: 'device-1', position: 1, face: 'front' },
+					{ device_type: 'device-1', position: 5, face: 'front' } // Same device twice
 				]
 			}
 		];
@@ -516,44 +517,42 @@ describe('Export Legend', () => {
 });
 
 describe('Dual-View Export', () => {
-	const mockDevices: Device[] = [
+	const mockDevices: DeviceType[] = [
 		{
-			id: 'front-server',
-			name: 'Front Server',
-			height: 2,
-			colour: '#4A90D9',
-			category: 'server',
-			is_full_depth: true
+			slug: 'front-server',
+			model: 'Front Server',
+			u_height: 2,
+			is_full_depth: true,
+			rackarr: { colour: '#4A90D9', category: 'server' }
 		},
 		{
-			id: 'rear-patch',
-			name: 'Rear Patch Panel',
-			height: 1,
-			colour: '#7B68EE',
-			category: 'network',
-			is_full_depth: false
+			slug: 'rear-patch',
+			model: 'Rear Patch Panel',
+			u_height: 1,
+			is_full_depth: false,
+			rackarr: { colour: '#7B68EE', category: 'network' }
 		},
 		{
-			id: 'both-ups',
-			name: 'UPS',
-			height: 4,
-			colour: '#22C55E',
-			category: 'power'
+			slug: 'both-ups',
+			model: 'UPS',
+			u_height: 4,
+			rackarr: { colour: '#22C55E', category: 'power' }
 		}
 	];
 
 	const mockRacks: Rack[] = [
 		{
-			id: 'rack-1',
 			name: 'Test Rack',
 			height: 12,
 			width: 19,
 			position: 0,
-			view: 'front',
+			desc_units: false,
+			form_factor: '4-post',
+			starting_unit: 1,
 			devices: [
-				{ libraryId: 'front-server', position: 1, face: 'front' },
-				{ libraryId: 'rear-patch', position: 5, face: 'rear' },
-				{ libraryId: 'both-ups', position: 8, face: 'both' }
+				{ device_type: 'front-server', position: 1, face: 'front' },
+				{ device_type: 'rear-patch', position: 5, face: 'rear' },
+				{ device_type: 'both-ups', position: 8, face: 'both' }
 			]
 		}
 	];

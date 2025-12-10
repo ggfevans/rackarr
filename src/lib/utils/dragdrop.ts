@@ -3,7 +3,7 @@
  * Handles drag data, position calculation, and drop validation
  */
 
-import type { Device, Rack } from '$lib/types';
+import type { DeviceType, Rack } from '$lib/types';
 import { canPlaceDevice } from './collision';
 
 /**
@@ -12,8 +12,8 @@ import { canPlaceDevice } from './collision';
 export interface DragData {
 	/** Type of drag operation */
 	type: 'palette' | 'rack-device';
-	/** Device being dragged */
-	device: Device;
+	/** Device type being dragged */
+	device: DeviceType;
 	/** Source rack ID (for rack-device type) */
 	sourceRackId?: string;
 	/** Source device index in rack (for rack-device type) */
@@ -71,7 +71,7 @@ export function calculateDropPosition(
  */
 export function getDropFeedback(
 	rack: Rack,
-	deviceLibrary: Device[],
+	deviceLibrary: DeviceType[],
 	deviceHeight: number,
 	targetU: number,
 	excludeIndex?: number
@@ -97,10 +97,10 @@ export function getDropFeedback(
 
 /**
  * Create drag data for palette item
- * @param device - Device being dragged
+ * @param device - DeviceType being dragged
  * @returns DragData for palette drag
  */
-export function createPaletteDragData(device: Device): DragData {
+export function createPaletteDragData(device: DeviceType): DragData {
 	return {
 		type: 'palette',
 		device
@@ -109,13 +109,13 @@ export function createPaletteDragData(device: Device): DragData {
 
 /**
  * Create drag data for rack device
- * @param device - Device being dragged
+ * @param device - DeviceType being dragged
  * @param rackId - Source rack ID
  * @param deviceIndex - Index of device in rack
  * @returns DragData for rack device drag
  */
 export function createRackDeviceDragData(
-	device: Device,
+	device: DeviceType,
 	rackId: string,
 	deviceIndex: number
 ): DragData {

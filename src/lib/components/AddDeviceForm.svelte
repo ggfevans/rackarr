@@ -100,6 +100,7 @@
 			cooling: 'Cooling',
 			shelf: 'Shelf',
 			blank: 'Blank Panel',
+			'cable-management': 'Cable Management',
 			other: 'Other'
 		};
 		return labels[cat];

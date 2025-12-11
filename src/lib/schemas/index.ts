@@ -45,6 +45,7 @@ export const DeviceCategorySchema = z.enum([
 	'cooling',
 	'shelf',
 	'blank',
+	'cable-management',
 	'other'
 ]);
 

@@ -57,6 +57,7 @@ export function getCategoryDisplayName(category: DeviceCategory): string {
 		cooling: 'Cooling',
 		shelf: 'Shelves',
 		blank: 'Blanks',
+		'cable-management': 'Cable Management',
 		other: 'Other'
 	};
 

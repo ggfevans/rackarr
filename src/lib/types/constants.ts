@@ -20,6 +20,7 @@ export const CATEGORY_COLOURS: Record<DeviceCategory, string> = {
 	cooling: '#00CED1',
 	shelf: '#8B4513',
 	blank: '#2F4F4F',
+	'cable-management': '#4682B4',
 	other: '#808080'
 } as const;
 
@@ -37,6 +38,7 @@ export const ALL_CATEGORIES: readonly DeviceCategory[] = [
 	'cooling',
 	'shelf',
 	'blank',
+	'cable-management',
 	'other'
 ] as const;
 

@@ -442,6 +442,7 @@ describe('Constants', () => {
 				'cooling',
 				'shelf',
 				'blank',
+				'cable-management',
 				'other'
 			];
 
@@ -449,6 +450,10 @@ describe('Constants', () => {
 				expect(CATEGORY_COLOURS[category]).toBeDefined();
 				expect(CATEGORY_COLOURS[category]).toMatch(/^#[0-9A-Fa-f]{6}$/);
 			});
+		});
+
+		it('returns correct colour for cable-management category (Steel Blue)', () => {
+			expect(CATEGORY_COLOURS['cable-management']).toBe('#4682B4');
 		});
 
 		it('returns correct colour for server category', () => {
@@ -465,8 +470,8 @@ describe('Constants', () => {
 	});
 
 	describe('ALL_CATEGORIES', () => {
-		it('contains all 11 categories', () => {
-			expect(ALL_CATEGORIES).toHaveLength(11);
+		it('contains all 12 categories', () => {
+			expect(ALL_CATEGORIES).toHaveLength(12);
 		});
 
 		it('includes all expected categories', () => {
@@ -480,6 +485,7 @@ describe('Constants', () => {
 			expect(ALL_CATEGORIES).toContain('cooling');
 			expect(ALL_CATEGORIES).toContain('shelf');
 			expect(ALL_CATEGORIES).toContain('blank');
+			expect(ALL_CATEGORIES).toContain('cable-management');
 			expect(ALL_CATEGORIES).toContain('other');
 		});
 
@@ -487,6 +493,12 @@ describe('Constants', () => {
 			const shelfIndex = ALL_CATEGORIES.indexOf('shelf');
 			const blankIndex = ALL_CATEGORIES.indexOf('blank');
 			expect(shelfIndex).toBeLessThan(blankIndex);
+		});
+
+		it('has cable-management category before other', () => {
+			const cableMgmtIndex = ALL_CATEGORIES.indexOf('cable-management');
+			const otherIndex = ALL_CATEGORIES.indexOf('other');
+			expect(cableMgmtIndex).toBeLessThan(otherIndex);
 		});
 	});
 

@@ -240,7 +240,7 @@ Other: 1U Generic, 2U Generic
 | **Shelf**       | 1U Shelf, 2U Shelf                                                |
 | **Cable Mgmt**  | 1U Brush Panel, 1U Cable Management                               |
 
-**Total: 26 items**
+**Total: 27 items**
 
 ---
 

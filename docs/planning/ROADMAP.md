@@ -85,24 +85,27 @@ Items requiring investigation and architecture design before implementation.
 
 ### Starter Library Rationalization
 
-**Status:** Research
+**Status:** Research Complete, Implementation Ready
 **Created:** 2025-12-11
 
-The current starter library has 26 generic device types ("1U Server", "2U NAS", etc.) that don't represent actual homelab gear. Before implementing device images, we need to rationalize the library to contain representative common homelab devices that have matching NetBox elevation images.
+The current starter library has 26 generic device types ("1U Server", "2U NAS", etc.) that need rationalization to better represent common homelab gear categories.
 
-- [ ] **Audit current starter library** — Document existing 26 device types and their categories
-- [ ] **Research common homelab gear** — What devices do homelabbers actually use?
-  - Reddit r/homelab, r/selfhosted surveys/posts
-  - Popular YouTube homelab builds
-  - NetBox library popularity (most contributed device types)
-- [ ] **Define target library** — Curated list of ~20-30 devices covering:
-  - Servers (Dell PowerEdge, HP ProLiant, Supermicro)
-  - NAS (Synology, QNAP)
-  - Networking (Ubiquiti, MikroTik, TP-Link)
-  - Power (APC UPS, CyberPower, PDUs)
-  - Patch panels, shelves, blanks
-- [ ] **Match to NetBox images** — Verify each target device has elevation images available
-- [ ] **Document final list** — Device specs, NetBox image paths, categories
+#### Research (Complete)
+
+- [x] **Audit current starter library** — Documented existing 26 device types and categories
+- [x] **Research common homelab gear** — r/homelab, ServeTheHome forums, homelab blogs (2024-2025)
+- [x] **Define target library** — Approved 26-item library with add/remove/rename changes
+- [x] **Document final list** — See `docs/planning/research/starter-library-rationalization.md`
+
+#### Implementation
+
+- [ ] **Update `starterLibrary.ts`** — Apply approved changes:
+  - Add: 8-Port Switch, 24-Port Switch, 48-Port Switch, 1U Storage, 1U Brush Panel, 1U Cable Management
+  - Remove: 4U Shelf, 1U Generic, 2U Generic, 0.5U Blanking Fan
+  - Rename: 1U Switch → 1U Router/Firewall, patch panels get port counts (24/48-Port)
+  - Merge: 1U Router + 1U Firewall → 1U Router/Firewall
+- [ ] **Update tests** — Ensure starter library tests reflect new device list
+- [ ] **Verify slug generation** — Confirm slugs work correctly for renamed devices
 
 > **Prerequisite for:** Device Image System implementation
 
@@ -110,7 +113,7 @@ The current starter library has 26 generic device types ("1U Server", "2U NAS", 
 
 ### Device Image System
 
-**Status:** Research (blocked on Starter Library Rationalization)
+**Status:** Research Complete, Implementation Ready
 **Created:** 2025-12-11
 
 The current image system has limitations:
@@ -121,69 +124,63 @@ The current image system has limitations:
 
 > **Note:** Implementation will be greenfield — no migration layers, version suffixes, or legacy compatibility code.
 
-#### Phase 1: Architecture Design
+#### Phase 1: Architecture Design (Complete)
 
 Research and document the two-level image storage system:
 
-- [ ] **Image inheritance model** — Device type images as defaults, placement-level overrides
+- [x] **Image inheritance model** — Device type images as defaults, placement-level overrides
   - Two separate stores: `deviceTypeImages` and `placementImages`
   - **Decision:** Add stable `id` field to PlacedDevice (survives reordering)
   - Key scheme: placement images keyed by `{slug}:{id}`
   - Fallback logic: placement image → device type image → colored rectangle
-  - Impact on archive format (`images/` folder structure)
 
-- [ ] **Storage format decisions**
-  - Should device type images live in `DeviceType` or remain separate?
-  - Archive structure for two-level images
+- [x] **Storage format decisions**
+  - Device type images remain in separate store (not embedded in DeviceType)
+  - Archive structure: `assets/device-types/{slug}/` and `assets/placements/{slug}/{id}/`
 
-- [ ] **UI/UX design**
-  - EditPanel: How to show "using default" vs "has override"?
-  - How to reset a placement back to device type default?
-  - Should device library show image thumbnails?
+- [x] **Image processing decisions**
+  - Bundled images: 400px max width, WebP format
+  - Originals stored in `assets-source/device-images/` (git-tracked, not bundled)
+  - Optimized stored in `src/lib/assets/device-images/` (Vite-bundled)
+  - User uploads: auto-resize to 400px max + WebP conversion
 
-#### Phase 2: Placement Image Overrides
+- [x] **Licensing** — CC0 1.0 (public domain), no attribution required
+
+> See `docs/planning/research/device-images.md` for full research documentation.
+
+#### Phase 2: Starter Library Default Images
+
+Bundle representative images for the 26 starter library device types:
+
+- [ ] **Download representative images from NetBox** — Front images for each device type
+  - Use representative gear images (e.g., Dell R630 image for "1U Server")
+  - See mapping table in `starter-library-rationalization.md`
+- [ ] **Process images** — Resize to 400px max width, convert to WebP
+- [ ] **Store originals** — `assets-source/device-images/{manufacturer}/{model}.front.png`
+- [ ] **Store optimized** — `src/lib/assets/device-images/{category}/{slug}.front.webp`
+- [ ] **Wire up to starter library** — Import images in `starterLibrary.ts`, set as defaults
+- [ ] **Add npm script** — `npm run process-images` to regenerate optimized from originals
+
+#### Phase 3: Placement Image Overrides
 
 Implementation of per-placement image overrides:
 
-- [ ] Refactor `ImageStore` to support placement-level keys
+- [ ] Add stable `id` field to PlacedDevice type
+- [ ] Refactor `ImageStore` to separate device type / placement stores
 - [ ] Add image upload UI to `EditPanel` for selected placed devices
+- [ ] Add "Using default" / "Custom image" indicator in EditPanel
 - [ ] Add "Reset to default" action for placement overrides
-- [ ] Update archive save/load for placement images
+- [ ] Update archive save/load for two-level image structure
 - [ ] Update `RackDevice` rendering to check placement → device type → fallback
 
-#### Phase 3: NetBox Device Library Integration
+#### Phase 4: NetBox On-Demand Fetch (Future)
 
-Research integration with [netbox-community/devicetype-library](https://github.com/netbox-community/devicetype-library):
+Optional future enhancement for fetching images on-demand:
 
-- [ ] **Evaluate elevation-images directory**
-  - What formats are available? (SVG, PNG, dimensions)
-  - How are images organized? (by manufacturer/model)
-  - Total size of full library vs curated subset
-
-- [ ] **Licensing research**
-  - NetBox devicetype-library license (Apache 2.0) — compatible with Rackarr?
-  - Attribution requirements if bundling or fetching images
-  - Any manufacturer trademark/copyright concerns with device images
-  - Do we need to display license notices to users?
-
-- [ ] **Integration approaches** — evaluate tradeoffs:
-      | Approach | Pros | Cons |
-      |----------|------|------|
-      | On-demand fetch | No bundle bloat, always current | Requires internet, latency |
-      | Curated bundle | Works offline, fast | Increases app size, stale |
-      | Hybrid | Best of both | More complex |
-      | External tool | Keep app simple | Extra step for users |
-
-- [ ] **Technical questions**
-  - CORS considerations for fetching from GitHub raw URLs
-  - Caching strategy for fetched images
-  - How to match user's device types to NetBox library entries
-  - Should we import full device type definitions or just images?
-
-- [ ] **Default image strategy**
-  - Which devices warrant bundled defaults? (top 20-30 homelab devices?)
-  - Target bundle size budget (e.g., <500KB compressed)
-  - Format optimization (WebP, compressed PNG, or SVG where available)
+- [ ] Implement search/browse UI for NetBox device library
+- [ ] Fetch from `raw.githubusercontent.com` (CORS-friendly)
+- [ ] Cache fetched images locally
+- [ ] Allow user to assign fetched image to device type or placement
 
 ---
 

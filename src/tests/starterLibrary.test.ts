@@ -5,9 +5,9 @@ import { createLayout } from '$lib/utils/serialization';
 
 describe('Starter Device Type Library', () => {
 	describe('getStarterLibrary', () => {
-		it('returns 26 device types', () => {
+		it('returns 27 device types', () => {
 			const deviceTypes = getStarterLibrary();
-			expect(deviceTypes).toHaveLength(26);
+			expect(deviceTypes).toHaveLength(27);
 		});
 
 		it('most categories have at least one starter device type', () => {
@@ -417,7 +417,7 @@ describe('Starter Device Type Library', () => {
 		it('new layout includes starter library', () => {
 			const layout = createLayout();
 
-			expect(layout.device_types.length).toBe(26);
+			expect(layout.device_types.length).toBe(27);
 			expect(layout.device_types[0]?.slug).toBeTruthy();
 		});
 

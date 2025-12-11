@@ -37,7 +37,7 @@ describe('DevicePalette Component', () => {
 
 			// Starter library includes common devices
 			expect(screen.getByText('1U Server')).toBeInTheDocument();
-			expect(screen.getByText('1U Switch')).toBeInTheDocument();
+			expect(screen.getByText('24-Port Switch')).toBeInTheDocument();
 		});
 	});
 

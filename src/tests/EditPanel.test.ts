@@ -219,8 +219,8 @@ describe('EditPanel Component', () => {
 			expect(deviceNames.length).toBeGreaterThan(0);
 			// Should show height
 			expect(screen.getByText('2U')).toBeInTheDocument();
-			// Should show category (capitalized)
-			expect(screen.getByText('Server')).toBeInTheDocument();
+			// Should show category (uses getCategoryDisplayName)
+			expect(screen.getByText('Servers')).toBeInTheDocument();
 			// Should show position
 			expect(screen.getByText('U5')).toBeInTheDocument();
 		});

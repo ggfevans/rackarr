@@ -9,6 +9,7 @@
 	import { getSelectionStore } from '$lib/stores/selection.svelte';
 	import { getUIStore } from '$lib/stores/ui.svelte';
 	import { getCanvasStore } from '$lib/stores/canvas.svelte';
+	import { getCategoryDisplayName } from '$lib/utils/deviceFilters';
 	import { COMMON_RACK_HEIGHTS } from '$lib/types/constants';
 	import type { Rack, DeviceType, PlacedDevice, DeviceFace, Airflow } from '$lib/types';
 
@@ -181,14 +182,6 @@
 		selectionStore.clearSelection();
 	}
 
-	// Format category name for display
-	function formatCategory(category: string): string {
-		return category
-			.split('-')
-			.map((word) => word.charAt(0).toUpperCase() + word.slice(1))
-			.join(' ');
-	}
-
 	// Airflow options for dropdown
 	const AIRFLOW_OPTIONS: { value: Airflow; label: string }[] = [
 		{ value: 'passive', label: 'Passive (no active cooling)' },
@@ -341,7 +334,7 @@
 				<div class="info-row">
 					<span class="info-label">Category</span>
 					<span class="info-value"
-						>{formatCategory(selectedDeviceInfo.device.rackarr.category)}</span
+						>{getCategoryDisplayName(selectedDeviceInfo.device.rackarr.category)}</span
 					>
 				</div>
 				<div class="info-row">

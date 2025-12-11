@@ -231,9 +231,9 @@
 
 		<!-- Category icon (vertically centered) -->
 		{#if deviceHeight >= 22}
-			<foreignObject x="4" y="0" width="14" height={deviceHeight} class="category-icon-wrapper">
+			<foreignObject x="8" y="0" width="16" height={deviceHeight} class="category-icon-wrapper">
 				<div class="icon-container">
-					<CategoryIcon category={device.rackarr.category} size={12} />
+					<CategoryIcon category={device.rackarr.category} size={14} />
 				</div>
 			</foreignObject>
 		{/if}

@@ -225,14 +225,17 @@ describe('DevicePaletteItem Component', () => {
 			expect(screen.getByText('2U')).toBeInTheDocument();
 		});
 
-		it('shows category indicator with device color', () => {
+		it('shows category icon with device color', () => {
 			const { container } = render(DevicePaletteItem, { props: { device: mockDevice } });
 
-			const indicator = container.querySelector('.category-indicator');
+			const indicator = container.querySelector('.category-icon-indicator');
 			expect(indicator).toBeInTheDocument();
-			// Browser converts hex to rgb, so check for either format
+			// Icon color is set via inline style
 			const style = indicator?.getAttribute('style') ?? '';
-			expect(style).toContain('background-color');
+			expect(style).toContain('color');
+			// Should contain a CategoryIcon (which renders an SVG)
+			const svg = indicator?.querySelector('svg');
+			expect(svg).toBeInTheDocument();
 		});
 	});
 

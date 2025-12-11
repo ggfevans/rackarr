@@ -6,6 +6,7 @@
 <script lang="ts">
 	import type { DeviceType } from '$lib/types';
 	import IconGrip from './icons/IconGrip.svelte';
+	import CategoryIcon from './CategoryIcon.svelte';
 	import { createPaletteDragData, serializeDragData } from '$lib/utils/dragdrop';
 
 	interface Props {
@@ -66,7 +67,9 @@
 	<span class="drag-handle" aria-hidden="true">
 		<IconGrip size={16} />
 	</span>
-	<span class="category-indicator" style="background-color: {device.rackarr.colour}"></span>
+	<span class="category-icon-indicator" style="color: {device.rackarr.colour}">
+		<CategoryIcon category={device.rackarr.category} size={16} />
+	</span>
 	<span class="device-name">{deviceName}</span>
 	<span class="device-height">{device.u_height}U</span>
 </div>
@@ -122,11 +125,10 @@
 		opacity: 1;
 	}
 
-	.category-indicator {
-		width: 4px;
-		height: 100%;
-		min-height: 24px;
-		border-radius: 2px;
+	.category-icon-indicator {
+		display: flex;
+		align-items: center;
+		justify-content: center;
 		flex-shrink: 0;
 	}
 

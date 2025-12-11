@@ -113,8 +113,8 @@ test.describe('Shelf Category', () => {
 		const shelfItem = page.locator('.device-palette-item:has-text("1U Shelf")');
 		await expect(shelfItem).toBeVisible();
 
-		// Should have an SVG icon
-		const icon = shelfItem.locator('svg');
+		// Should have a Lucide category icon (AlignEndHorizontal for shelf)
+		const icon = shelfItem.locator('.category-icon-indicator svg.lucide-icon');
 		await expect(icon).toBeVisible();
 	});
 

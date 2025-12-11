@@ -323,6 +323,7 @@ Features explicitly deferred with no priority assigned:
 
 | Feature                     | Notes                                       |
 | --------------------------- | ------------------------------------------- |
+| Device category icons       | Lucide icons for each category (lucide.dev) |
 | Custom device categories    | Allow user-defined categories               |
 | 3D visualization            | Three.js rack view                          |
 | Cloud sync / accounts       | User accounts, cloud storage                |

@@ -520,25 +520,99 @@ interface ExportOptions {
 
 ## 10. Category Colors
 
-| Category    | Color      | Hex     |
-| ----------- | ---------- | ------- |
-| server      | Blue       | #4A90D9 |
-| network     | Purple     | #7B68EE |
-| patch-panel | Slate      | #708090 |
-| power       | Red        | #DC143C |
-| storage     | Green      | #228B22 |
-| kvm         | Orange     | #FF8C00 |
-| av-media    | Purple     | #9932CC |
-| cooling     | Teal       | #00CED1 |
-| shelf       | Brown      | #8B4513 |
-| blank       | Dark Slate | #2F4F4F |
-| other       | Gray       | #808080 |
+| Category         | Color      | Hex     |
+| ---------------- | ---------- | ------- |
+| server           | Blue       | #4A90D9 |
+| network          | Purple     | #7B68EE |
+| patch-panel      | Slate      | #708090 |
+| power            | Red        | #DC143C |
+| storage          | Green      | #228B22 |
+| kvm              | Orange     | #FF8C00 |
+| av-media         | Purple     | #9932CC |
+| cooling          | Teal       | #00CED1 |
+| shelf            | Brown      | #8B4513 |
+| blank            | Dark Slate | #2F4F4F |
+| cable-management | Steel Blue | #4682B4 |
+| other            | Gray       | #808080 |
 
 ---
 
-## 11. Commands
+## 11. Starter Library
 
-### 11.1 Development
+### 11.1 Overview
+
+The starter library provides 26 pre-defined generic device types for common homelab equipment. These are automatically populated in new layouts, giving users immediate access to typical rack-mountable gear without needing to create custom device types.
+
+**Design Principles:**
+
+- **Generic naming** — Device types use descriptive names (e.g., "1U Server", "24-Port Switch"), not branded product names
+- **Representative images** — Bundled images show recognizable gear (e.g., Dell R630 image for "1U Server") for visual familiarity
+- **Category-based coloring** — Each device type inherits its color from its category
+- **Extensible** — Users can add custom device types alongside starter library entries
+
+### 11.2 Device Types (26 items)
+
+| Category             | Device Types                                                      |
+| -------------------- | ----------------------------------------------------------------- |
+| **Server**           | 1U Server, 2U Server, 4U Server                                   |
+| **Network**          | 8-Port Switch, 24-Port Switch, 48-Port Switch, 1U Router/Firewall |
+| **Patch Panel**      | 24-Port Patch Panel, 48-Port Patch Panel                          |
+| **Storage**          | 1U Storage, 2U Storage, 4U Storage                                |
+| **Power**            | 1U PDU, 2U UPS, 4U UPS                                            |
+| **KVM**              | 1U KVM, 1U Console Drawer                                         |
+| **AV/Media**         | 1U Receiver, 2U Amplifier                                         |
+| **Cooling**          | 1U Fan Panel                                                      |
+| **Blank**            | 0.5U Blank, 1U Blank, 2U Blank                                    |
+| **Shelf**            | 1U Shelf, 2U Shelf                                                |
+| **Cable Management** | 1U Brush Panel, 1U Cable Management                               |
+
+### 11.3 Implementation
+
+The starter library is defined in `src/lib/data/starterLibrary.ts`:
+
+```typescript
+interface StarterDeviceSpec {
+	name: string;
+	u_height: number;
+	category: DeviceCategory;
+}
+
+const STARTER_DEVICES: StarterDeviceSpec[] = [
+	{ name: '1U Server', u_height: 1, category: 'server' },
+	{ name: '8-Port Switch', u_height: 1, category: 'network' }
+	// ... etc
+];
+
+export function getStarterLibrary(): DeviceType[] {
+	return STARTER_DEVICES.map((spec) => ({
+		slug: slugify(spec.name),
+		u_height: spec.u_height,
+		model: spec.name,
+		rackarr: {
+			colour: CATEGORY_COLOURS[spec.category],
+			category: spec.category
+		}
+	}));
+}
+```
+
+### 11.4 Slug Generation
+
+Device slugs are generated from names using the `slugify()` utility:
+
+| Name                | Generated Slug        |
+| ------------------- | --------------------- |
+| 1U Server           | `1u-server`           |
+| 24-Port Switch      | `24-port-switch`      |
+| 1U Router/Firewall  | `1u-router-firewall`  |
+| 0.5U Blank          | `0-5u-blank`          |
+| 1U Cable Management | `1u-cable-management` |
+
+---
+
+## 12. Commands
+
+### 12.1 Development
 
 ```bash
 npm run dev          # Dev server (localhost:5173)
@@ -546,7 +620,7 @@ npm run build        # Production build
 npm run preview      # Preview build
 ```
 
-### 11.2 Testing
+### 12.2 Testing
 
 ```bash
 npm run test         # Unit tests (watch)
@@ -554,7 +628,7 @@ npm run test:run     # Unit tests (CI)
 npm run test:e2e     # E2E tests (Playwright)
 ```
 
-### 11.3 Quality
+### 12.3 Quality
 
 ```bash
 npm run lint         # ESLint
@@ -564,7 +638,7 @@ npm run check        # Svelte type check
 
 ---
 
-## 12. Deployment
+## 13. Deployment
 
 - **Platform:** GitHub Pages
 - **Trigger:** Push to `main` branch
@@ -573,7 +647,7 @@ npm run check        # Svelte type check
 
 ---
 
-## 13. Version History
+## 14. Version History
 
 | Version | Changes                                            |
 | ------- | -------------------------------------------------- |
@@ -587,11 +661,11 @@ npm run check        # Svelte type check
 
 ---
 
-## 14. Airflow Visualization (v0.4.9)
+## 15. Airflow Visualization (v0.4.9)
 
 Visual overlay for device airflow direction, helping identify thermal conflicts.
 
-### 14.1 Airflow Types
+### 15.1 Airflow Types
 
 | Type            | Description                         | Visual                      |
 | --------------- | ----------------------------------- | --------------------------- |
@@ -600,21 +674,21 @@ Visual overlay for device airflow direction, helping identify thermal conflicts.
 | `rear-to-front` | Reverse airflow (some network gear) | Red stripe front, blue rear |
 | `side-to-rear`  | Side intake (switches)              | Blue stripe front, red rear |
 
-### 14.2 Visual Design
+### 15.2 Visual Design
 
 - **Edge stripe** — 4px colored stripe on device edge (left=front view, right=rear view)
 - **Arrow indicator** — Small animated chevron next to stripe showing direction
 - **Colors** — Blue (#60a5fa) = intake, Red (#f87171) = exhaust, Gray (#9ca3af) = passive
 - **Conflict border** — Orange (#f59e0b) border on devices with airflow conflicts
 
-### 14.3 Conflict Detection
+### 15.3 Conflict Detection
 
 Conflicts detected when exhaust of one device feeds intake of adjacent device:
 
 - Front-to-rear device above rear-to-front device
 - Rear-to-front device above front-to-rear device
 
-### 14.4 UI Integration
+### 15.4 UI Integration
 
 - **Toggle** — `A` key or toolbar button toggles airflow visualization
 - **Export** — Airflow indicators included in image/PDF exports when enabled
@@ -623,7 +697,7 @@ Conflicts detected when exhaust of one device feeds intake of adjacent device:
 
 ---
 
-## 15. Out of Scope
+## 16. Out of Scope
 
 Features that will NOT be implemented:
 

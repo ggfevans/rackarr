@@ -71,15 +71,15 @@
 
 	const imageStore = getImageStore();
 
-	// Get the device image for the current view
-	const deviceImage = $derived.by(() => {
+	// Get the device image URL for the current view
+	const deviceImageUrl = $derived.by(() => {
 		if (displayMode !== 'image') return null;
 		const face = rackView === 'rear' ? 'rear' : 'front';
-		return imageStore.getDeviceImage(device.slug, face);
+		return imageStore.getImageUrl(device.slug, face);
 	});
 
 	// Should show image or fall back to label
-	const showImage = $derived(displayMode === 'image' && deviceImage?.dataUrl);
+	const showImage = $derived(displayMode === 'image' && deviceImageUrl);
 
 	// Track dragging state for visual feedback
 	let isDragging = $state(false);
@@ -202,7 +202,7 @@
 			y="0"
 			width={deviceWidth}
 			height={deviceHeight}
-			href={deviceImage?.dataUrl}
+			href={deviceImageUrl}
 			preserveAspectRatio="xMidYMid slice"
 		/>
 		<!-- Label overlay when showLabelsOnImages is true -->

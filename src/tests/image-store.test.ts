@@ -2,12 +2,21 @@ import { describe, it, expect, beforeEach } from 'vitest';
 import { getImageStore, resetImageStore } from '$lib/stores/images.svelte';
 import type { ImageData } from '$lib/types/images';
 
-// Helper to create mock ImageData
+// Helper to create mock ImageData (user upload)
 function createMockImageData(filename = 'test-front.png'): ImageData {
 	return {
 		blob: new Blob(['test'], { type: 'image/png' }),
 		dataUrl: 'data:image/png;base64,dGVzdA==',
 		filename
+	};
+}
+
+// Helper to create mock URL-based ImageData (bundled)
+function createMockUrlImageData(filename = 'test-front.webp'): ImageData {
+	return {
+		url: '/assets/device-images/test.webp',
+		filename,
+		isBundled: true
 	};
 }
 
@@ -271,6 +280,116 @@ describe('Image Store', () => {
 			const freshStore = getImageStore();
 			expect(freshStore.imageCount).toBe(0);
 			expect(freshStore.hasImage('device-1', 'front')).toBe(false);
+		});
+	});
+
+	describe('getImageUrl', () => {
+		it('returns dataUrl for user-uploaded images', () => {
+			const store = getImageStore();
+			const imageData = createMockImageData();
+			store.setDeviceImage('device-1', 'front', imageData);
+
+			const url = store.getImageUrl('device-1', 'front');
+			expect(url).toBe('data:image/png;base64,dGVzdA==');
+		});
+
+		it('returns url for bundled images', () => {
+			const store = getImageStore();
+			const imageData = createMockUrlImageData();
+			store.setDeviceImage('device-1', 'front', imageData);
+
+			const url = store.getImageUrl('device-1', 'front');
+			expect(url).toBe('/assets/device-images/test.webp');
+		});
+
+		it('returns undefined for non-existent device', () => {
+			const store = getImageStore();
+			expect(store.getImageUrl('non-existent', 'front')).toBeUndefined();
+		});
+
+		it('prefers url over dataUrl when both present', () => {
+			const store = getImageStore();
+			store.setDeviceImage('device-1', 'front', {
+				url: '/assets/preferred.webp',
+				dataUrl: 'data:image/png;base64,dGVzdA==',
+				filename: 'test.webp'
+			});
+
+			const url = store.getImageUrl('device-1', 'front');
+			expect(url).toBe('/assets/preferred.webp');
+		});
+	});
+
+	describe('loadBundledImages', () => {
+		it('loads bundled images into store', () => {
+			const store = getImageStore();
+			store.loadBundledImages();
+
+			// Should have images for bundled devices
+			expect(store.hasImage('1u-server', 'front')).toBe(true);
+			expect(store.hasImage('2u-server', 'front')).toBe(true);
+			expect(store.hasImage('4u-server', 'front')).toBe(true);
+		});
+
+		it('bundled images have URL and isBundled flag', () => {
+			const store = getImageStore();
+			store.loadBundledImages();
+
+			const image = store.getDeviceImage('1u-server', 'front');
+			expect(image).toBeDefined();
+			expect(image?.url).toBeDefined();
+			expect(image?.isBundled).toBe(true);
+		});
+
+		it('bundled images return valid URL from getImageUrl', () => {
+			const store = getImageStore();
+			store.loadBundledImages();
+
+			const url = store.getImageUrl('1u-server', 'front');
+			expect(url).toBeDefined();
+			expect(typeof url).toBe('string');
+		});
+	});
+
+	describe('getUserImages', () => {
+		it('returns only user-uploaded images', () => {
+			const store = getImageStore();
+
+			// Add a bundled image
+			store.setDeviceImage('bundled-device', 'front', createMockUrlImageData());
+
+			// Add a user-uploaded image
+			store.setDeviceImage('user-device', 'front', createMockImageData());
+
+			const userImages = store.getUserImages();
+
+			expect(userImages.has('user-device')).toBe(true);
+			expect(userImages.has('bundled-device')).toBe(false);
+		});
+
+		it('excludes bundled images after loadBundledImages', () => {
+			const store = getImageStore();
+			store.loadBundledImages();
+
+			// Add a user-uploaded image
+			store.setDeviceImage('my-custom-server', 'front', createMockImageData());
+
+			const userImages = store.getUserImages();
+
+			// Should have user image
+			expect(userImages.has('my-custom-server')).toBe(true);
+
+			// Should not have bundled images
+			expect(userImages.has('1u-server')).toBe(false);
+			expect(userImages.has('2u-server')).toBe(false);
+		});
+
+		it('returns empty map when only bundled images exist', () => {
+			const store = getImageStore();
+			store.loadBundledImages();
+
+			const userImages = store.getUserImages();
+			expect(userImages.size).toBe(0);
 		});
 	});
 });

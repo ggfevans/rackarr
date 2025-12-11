@@ -10,14 +10,24 @@ export type SupportedImageFormat = 'image/png' | 'image/jpeg' | 'image/webp';
 
 /**
  * Image data stored in memory during session
+ *
+ * Images can come from two sources:
+ * 1. User uploads: blob + dataUrl (base64)
+ * 2. Bundled images: url (Vite static asset URL)
+ *
+ * At least one of (blob + dataUrl) or url must be present.
  */
 export interface ImageData {
-	/** The image file as a Blob */
-	blob: Blob;
-	/** Data URL for displaying the image (base64 encoded) */
-	dataUrl: string;
+	/** The image file as a Blob (for user uploads) */
+	blob?: Blob;
+	/** Data URL for displaying the image (base64 encoded, for user uploads) */
+	dataUrl?: string;
+	/** Static asset URL (for bundled images) */
+	url?: string;
 	/** Generated filename for the image (e.g., "server-1u-front.png") */
 	filename: string;
+	/** Whether this is a bundled image (not saved to archives) */
+	isBundled?: boolean;
 }
 
 /**

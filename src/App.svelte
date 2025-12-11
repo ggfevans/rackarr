@@ -95,8 +95,8 @@
 
 	async function handleSave() {
 		try {
-			// Get images from image store for archive
-			const images = imageStore.getAllImages();
+			// Get user images (exclude bundled images) for archive
+			const images = imageStore.getUserImages();
 
 			// Get the filename for the toast message
 			const filename = generateArchiveFilename(layoutStore.layout);
@@ -353,6 +353,9 @@
 	onMount(() => {
 		// Apply theme from storage (already done in ui store init)
 		// Session restore will be implemented in a later phase
+
+		// Load bundled images for starter library devices
+		imageStore.loadBundledImages();
 	});
 </script>
 

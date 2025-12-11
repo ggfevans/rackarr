@@ -6,6 +6,7 @@
 
 import { SvelteMap } from 'svelte/reactivity';
 import type { ImageData, DeviceImageData, ImageStoreMap } from '$lib/types/images';
+import { getBundledImage, getBundledImageSlugs } from '$lib/data/bundledImages';
 
 // Module-level store instance (singleton pattern matching other stores)
 let imageStoreInstance: ReturnType<typeof createImageStore> | null = null;
@@ -91,6 +92,69 @@ function createImageStore() {
 		return !!images.get(deviceId)?.[face];
 	}
 
+	/**
+	 * Get the display URL for an image (url or dataUrl)
+	 */
+	function getImageUrl(deviceId: string, face: 'front' | 'rear'): string | undefined {
+		const imageData = images.get(deviceId)?.[face];
+		if (!imageData) return undefined;
+		return imageData.url ?? imageData.dataUrl;
+	}
+
+	/**
+	 * Load bundled images into the store
+	 * Called on app initialization to make bundled images available
+	 */
+	function loadBundledImages(): void {
+		const slugs = getBundledImageSlugs();
+
+		for (const slug of slugs) {
+			const frontUrl = getBundledImage(slug, 'front');
+			const rearUrl = getBundledImage(slug, 'rear');
+
+			if (frontUrl) {
+				setDeviceImage(slug, 'front', {
+					url: frontUrl,
+					filename: `${slug}.front.webp`,
+					isBundled: true
+				});
+			}
+
+			if (rearUrl) {
+				setDeviceImage(slug, 'rear', {
+					url: rearUrl,
+					filename: `${slug}.rear.webp`,
+					isBundled: true
+				});
+			}
+		}
+	}
+
+	/**
+	 * Get all user-uploaded images (excludes bundled images)
+	 * Use this for saving to archives
+	 */
+	function getUserImages(): ImageStoreMap {
+		const userImages = new SvelteMap<string, DeviceImageData>();
+
+		for (const [deviceId, deviceImages] of images) {
+			const filteredImages: DeviceImageData = {};
+
+			if (deviceImages.front && !deviceImages.front.isBundled) {
+				filteredImages.front = deviceImages.front;
+			}
+			if (deviceImages.rear && !deviceImages.rear.isBundled) {
+				filteredImages.rear = deviceImages.rear;
+			}
+
+			if (filteredImages.front || filteredImages.rear) {
+				userImages.set(deviceId, filteredImages);
+			}
+		}
+
+		return userImages;
+	}
+
 	return {
 		// Methods
 		setDeviceImage,
@@ -100,6 +164,9 @@ function createImageStore() {
 		clearAllImages,
 		getAllImages,
 		hasImage,
+		getImageUrl,
+		loadBundledImages,
+		getUserImages,
 
 		// Computed (as getter)
 		get imageCount() {

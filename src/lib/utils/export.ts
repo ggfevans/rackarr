@@ -636,7 +636,9 @@ export function generateExportSVG(
 			const face = faceFilter === 'rear' ? 'rear' : 'front';
 			const deviceImages = images?.get(device.slug);
 			const deviceImage = deviceImages?.[face];
-			const showImage = displayMode === 'image' && deviceImage?.dataUrl;
+			// Support both URL-based (bundled) and dataUrl-based (user upload) images
+			const imageUrl = deviceImage?.url ?? deviceImage?.dataUrl;
+			const showImage = displayMode === 'image' && imageUrl;
 
 			if (showImage) {
 				// Render device image
@@ -645,7 +647,7 @@ export function generateExportSVG(
 				imageEl.setAttribute('y', String(deviceY + 1));
 				imageEl.setAttribute('width', String(deviceWidth));
 				imageEl.setAttribute('height', String(deviceHeight));
-				imageEl.setAttribute('href', deviceImage.dataUrl);
+				imageEl.setAttribute('href', imageUrl);
 				imageEl.setAttribute('preserveAspectRatio', 'xMidYMid slice');
 				rackGroup.appendChild(imageEl);
 

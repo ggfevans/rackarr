@@ -74,12 +74,13 @@ export async function createFolderArchive(layout: Layout, images: ImageStoreMap)
 			const deviceFolder = assetsFolder.folder(deviceSlug);
 			if (!deviceFolder) continue;
 
-			if (deviceImages.front) {
+			// Only save images that have blobs (user uploads, not bundled images)
+			if (deviceImages.front?.blob) {
 				const ext = getImageExtension(deviceImages.front.blob.type);
 				deviceFolder.file(`front.${ext}`, deviceImages.front.blob);
 			}
 
-			if (deviceImages.rear) {
+			if (deviceImages.rear?.blob) {
 				const ext = getImageExtension(deviceImages.rear.blob.type);
 				deviceFolder.file(`rear.${ext}`, deviceImages.rear.blob);
 			}

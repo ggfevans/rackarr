@@ -23,19 +23,64 @@ Single source of truth for version planning.
 
 ---
 
-## Outstanding issues (to be addressed before any additional featurework)
+## Outstanding Issues
 
-# Guidance:
+> **Process:** For each issue, create a branch, write a spec with test cases, implement using TDD.
+> Mark with `[x]` only when complete.
 
-For each of these, we should create a new branch. Then we will write a spec and subsequent prompt plan and todo list in detail to ensure clarity and completeness. We will then, using that output, create test cases to meet the spec and then source code to satisfy the tests.
+---
 
-# Issue list
+### Issue 1: Device Image Rendering Bugs
 
-Work through each top level heading one by one, mark with x only once complete.
+**Priority:** High (breaks basic functionality)
+**Introduced:** v0.5.0 (bundled images feature)
 
-[] front / rear / full-depth mounting logic needs audit - [] 0.5 blank item specifically has weird placement behaviour - when placed on rear with a rear mounting or even full depth setting it is still able to move to overlap with front mounted devices and when moved with arrow keys it seems to jump to specific slots. compared to a 1u blank it moves differently which implies there is a logic break there that is unexpected - [] we should be able to permit mounting on front and rear: with a front mounted device, the rear area for that same slot should be mountable and a device placed there should be assumed to be a rear mounted device (should we prompt the user for this?)
+| Sub-issue                        | Description                                                     | Likely Cause                                                                                                                                         |
+| -------------------------------- | --------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **1.1 Devices not clickable**    | In image mode, clicking devices with images doesn't select them | The `<image>` SVG element or its container may be intercepting click events. Check `pointer-events` CSS and event propagation in `RackDevice.svelte` |
+| **1.2 Images clipped by rack**   | Device images appear cut off, possibly by rack boundaries       | Z-index or SVG stacking issue. The `<image>` element may be rendered behind the rack frame. Check SVG element order and `overflow` settings          |
+| **1.3 8-port switch scaling**    | Image scaled too large, network ports look oversized            | Either source image has wrong aspect ratio, or `preserveAspectRatio` setting is incorrect. Check source image dimensions vs device height            |
+| **1.4 Redundant label checkbox** | Toolbar shows unnecessary "label" checkbox in image mode        | UI logic error - checkbox should only appear when relevant. Review `Toolbar.svelte` display mode toggle logic                                        |
 
-[] device library improvements - [] device category for KVM should be all caps "KVM" not "Kvm"
+**Files to investigate:**
+
+- `src/lib/components/RackDevice.svelte` (lines 74-82, 196-207)
+- `src/lib/components/Toolbar.svelte`
+- `src/lib/assets/device-images/network/8-port-switch.front.webp`
+
+---
+
+### Issue 2: Front/Rear Mounting Logic
+
+**Priority:** Medium (confusing UX but workarounds exist)
+
+| Sub-issue                        | Description                                                                                                                                                 | Expected Behavior                                                                                                                                    |
+| -------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **2.1 0.5U blank placement bug** | 0.5U blank with rear/full-depth mounting can overlap front-mounted devices. Arrow key movement jumps to unexpected slots (different from 1U blank behavior) | All devices should follow consistent placement rules. 0.5U devices should respect mounting constraints and move in 0.5U increments                   |
+| **2.2 Front+rear slot sharing**  | Cannot mount a rear device in a slot that has a front-mounted device                                                                                        | Front-mounted devices should leave rear area available. Rear-mounted devices should be placeable behind front-mounted devices in the same U position |
+
+**Context:** The mounting logic treats slots as fully occupied regardless of `form_factor`. A front-only device (`front`) should only block front mounting, leaving rear mountable.
+
+**Files to investigate:**
+
+- `src/lib/stores/layout.svelte.ts` (collision detection)
+- `src/lib/utils/rack.ts` (placement validation)
+- Device type definitions in `starterLibrary.ts` (form_factor values)
+
+---
+
+### Issue 3: Device Library Polish
+
+**Priority:** Low (cosmetic)
+
+| Sub-issue                  | Description                                 | Fix                                                                                                                                   |
+| -------------------------- | ------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------- |
+| **3.1 KVM capitalization** | Category displays as "Kvm" instead of "KVM" | Update category display formatting to handle acronyms. Either special-case "kvm" → "KVM" or store display names separately from slugs |
+
+**Files to investigate:**
+
+- `src/lib/components/DevicePalette.svelte` (category display)
+- `src/lib/types/index.ts` (DeviceCategory type)
 
 ---
 
@@ -112,11 +157,11 @@ Two-level image system with device type defaults and placement-level overrides.
 
 Bundle ~15 active device images (servers, switches, storage, UPS):
 
-- [ ] Create directory structure and processing script
-- [ ] Download representative images from NetBox
-- [ ] Process to 400px max WebP
-- [ ] Create bundled image manifest (`src/lib/data/bundledImages.ts`)
-- [ ] Load bundled images on app initialization
+- [x] Create directory structure and processing script
+- [x] Download representative images from NetBox
+- [x] Process to 400px max WebP
+- [x] Create bundled image manifest (`src/lib/data/bundledImages.ts`)
+- [x] Load bundled images on app initialization
 
 #### Phase 3: Placement Image Overrides (Planned)
 

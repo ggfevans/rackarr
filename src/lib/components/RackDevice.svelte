@@ -381,4 +381,8 @@
 	.airflow-overlay {
 		pointer-events: none;
 	}
+
+	.device-image {
+		pointer-events: none;
+	}
 </style>

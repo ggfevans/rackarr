@@ -267,6 +267,142 @@ describe('EditPanel Component', () => {
 		});
 	});
 
+	describe('Power device properties', () => {
+		it('does not show power section for non-power devices', () => {
+			const layoutStore = getLayoutStore();
+			const selectionStore = getSelectionStore();
+			const RACK_ID = 'rack-0';
+
+			layoutStore.addRack('My Rack', 24);
+			const device = layoutStore.addDeviceType({
+				name: 'Test Server',
+				u_height: 2,
+				category: 'server',
+				colour: '#4A90D9'
+			});
+			layoutStore.placeDevice(RACK_ID, device.slug, 1);
+			selectionStore.selectDevice(RACK_ID, 0, device.slug);
+
+			render(EditPanel);
+
+			expect(screen.queryByText(/outlets/i)).not.toBeInTheDocument();
+			expect(screen.queryByText(/va rating/i)).not.toBeInTheDocument();
+		});
+
+		it('shows power section for power devices with outlet_count', () => {
+			const layoutStore = getLayoutStore();
+			const selectionStore = getSelectionStore();
+			const RACK_ID = 'rack-0';
+
+			layoutStore.addRack('My Rack', 24);
+			// Manually add a power device type with outlet_count
+			const deviceType = {
+				slug: 'test-pdu',
+				u_height: 1,
+				model: 'Test PDU',
+				outlet_count: 8,
+				rackarr: {
+					colour: '#F5A623',
+					category: 'power' as const
+				}
+			};
+			layoutStore.layout.device_types.push(deviceType);
+			layoutStore.placeDevice(RACK_ID, deviceType.slug, 1);
+			selectionStore.selectDevice(RACK_ID, 0, deviceType.slug);
+
+			render(EditPanel);
+
+			expect(screen.getByText(/outlets/i)).toBeInTheDocument();
+			expect(screen.getByText('8')).toBeInTheDocument();
+		});
+
+		it('shows power section for power devices with va_rating', () => {
+			const layoutStore = getLayoutStore();
+			const selectionStore = getSelectionStore();
+			const RACK_ID = 'rack-0';
+
+			layoutStore.addRack('My Rack', 24);
+			// Manually add a power device type with va_rating
+			const deviceType = {
+				slug: 'test-ups',
+				u_height: 2,
+				model: 'Test UPS',
+				outlet_count: 6,
+				va_rating: 1500,
+				rackarr: {
+					colour: '#F5A623',
+					category: 'power' as const
+				}
+			};
+			layoutStore.layout.device_types.push(deviceType);
+			layoutStore.placeDevice(RACK_ID, deviceType.slug, 1);
+			selectionStore.selectDevice(RACK_ID, 0, deviceType.slug);
+
+			render(EditPanel);
+
+			expect(screen.getByText(/va rating/i)).toBeInTheDocument();
+			expect(screen.getByText('1500')).toBeInTheDocument();
+		});
+
+		it('shows both outlet_count and va_rating when present', () => {
+			const layoutStore = getLayoutStore();
+			const selectionStore = getSelectionStore();
+			const RACK_ID = 'rack-0';
+
+			layoutStore.addRack('My Rack', 24);
+			const deviceType = {
+				slug: 'full-ups',
+				u_height: 4,
+				model: 'Full UPS',
+				outlet_count: 8,
+				va_rating: 3000,
+				rackarr: {
+					colour: '#F5A623',
+					category: 'power' as const
+				}
+			};
+			layoutStore.layout.device_types.push(deviceType);
+			layoutStore.placeDevice(RACK_ID, deviceType.slug, 1);
+			selectionStore.selectDevice(RACK_ID, 0, deviceType.slug);
+
+			render(EditPanel);
+
+			expect(screen.getByText(/outlets/i)).toBeInTheDocument();
+			expect(screen.getByText('8')).toBeInTheDocument();
+			expect(screen.getByText(/va rating/i)).toBeInTheDocument();
+			expect(screen.getByText('3000')).toBeInTheDocument();
+		});
+
+		it('does not show undefined for missing power values', () => {
+			const layoutStore = getLayoutStore();
+			const selectionStore = getSelectionStore();
+			const RACK_ID = 'rack-0';
+
+			layoutStore.addRack('My Rack', 24);
+			// Power device without outlet_count or va_rating
+			const deviceType = {
+				slug: 'basic-power',
+				u_height: 1,
+				model: 'Basic Power',
+				rackarr: {
+					colour: '#F5A623',
+					category: 'power' as const
+				}
+			};
+			layoutStore.layout.device_types.push(deviceType);
+			layoutStore.placeDevice(RACK_ID, deviceType.slug, 1);
+			selectionStore.selectDevice(RACK_ID, 0, deviceType.slug);
+
+			render(EditPanel);
+
+			// Should not display "undefined" anywhere
+			expect(screen.queryByText('undefined')).not.toBeInTheDocument();
+			// Should not show outlet or VA labels if no values
+			expect(screen.queryByText(/outlets/i)).not.toBeInTheDocument();
+			expect(screen.queryByText(/va rating/i)).not.toBeInTheDocument();
+		});
+	});
+
 	describe('Device face assignment', () => {
 		it('shows face selector when device selected', () => {
 			const layoutStore = getLayoutStore();

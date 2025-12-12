@@ -402,6 +402,24 @@
 				</select>
 			</div>
 
+			<!-- Power device properties -->
+			{#if selectedDeviceInfo.device.rackarr.category === 'power' && (selectedDeviceInfo.device.outlet_count || selectedDeviceInfo.device.va_rating)}
+				<div class="info-section">
+					{#if selectedDeviceInfo.device.outlet_count}
+						<div class="info-row">
+							<span class="info-label">Outlets</span>
+							<span class="info-value">{selectedDeviceInfo.device.outlet_count}</span>
+						</div>
+					{/if}
+					{#if selectedDeviceInfo.device.va_rating}
+						<div class="info-row">
+							<span class="info-label">VA Rating</span>
+							<span class="info-value">{selectedDeviceInfo.device.va_rating}</span>
+						</div>
+					{/if}
+				</div>
+			{/if}
+
 			{#if selectedDeviceInfo.device.comments}
 				<div class="notes-section">
 					<span class="info-label">Notes</span>

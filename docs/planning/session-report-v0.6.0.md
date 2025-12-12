@@ -2,13 +2,13 @@
 
 **Date:** 2025-12-12
 **Branch:** `feature/v0.6.0-brand-packs-export`
-**Status:** Phases 1-4 complete, Phase 5 pending
+**Status:** Phases 1-4 complete, Phase 5 in progress (Prompt 5.1 complete)
 
 ## Summary
 
-Successfully implemented the core v0.6.0 features: power device properties, collapsible sections UI, DevicePalette refactor, and brand starter packs (Ubiquiti, Mikrotik). The codebase is stable with 1676 passing tests.
+Successfully implemented the core v0.6.0 features: power device properties, collapsible sections UI, DevicePalette refactor, and brand starter packs (Ubiquiti, Mikrotik). Started Phase 5 with export filename improvements. The codebase is stable with 1683 passing tests.
 
-## Commits (9 total)
+## Commits (10 total)
 
 | Commit    | Description                                                            |
 | --------- | ---------------------------------------------------------------------- |
@@ -21,6 +21,7 @@ Successfully implemented the core v0.6.0 features: power device properties, coll
 | `ccf2f59` | feat(DevicePalette): refactor to use CollapsibleSection for Generic    |
 | `fe285e5` | feat(DevicePalette): add section infrastructure for brand packs        |
 | `7f0b751` | feat(brandPacks): add Ubiquiti and Mikrotik device packs               |
+| `a57eed2` | feat(export): improve filename convention with view and date           |
 
 ## Phase Completion
 
@@ -65,18 +66,29 @@ Successfully implemented the core v0.6.0 features: power device properties, coll
 - DevicePalette integration with brand sections
 - Brand sections collapsed by default
 
-### Phase 5: Export Improvements (Not Started)
+### Phase 5: Export Improvements (In Progress)
 
-Remaining prompts:
+**Prompt 5.1: File Naming Convention ✅**
 
-- 5.1: File naming convention
+- Updated `generateExportFilename()` with pattern: `{layout-name}-{view}-{YYYY-MM-DD}.{ext}`
+- Added view parameter (front/rear/both) for image exports
+- CSV exports omit view: `{layout-name}-{YYYY-MM-DD}.csv`
+- Slugifies layout name (lowercase, hyphens, no special chars)
+- Added `csv` to ExportFormat type
+- Updated all call sites in App.svelte
+
+**Remaining prompts:**
+
 - 5.2: CSV export format
-- 5.3: Export preview component
-- 5.4: Export quality improvements
+- 5.3: Export thumbnail preview
+- 5.4: Export margin fixes
+- 5.5: Dual-view export layout
+- 5.6: Export border/text rendering
+- 5.7: Final export integration
 
 ## Test Results
 
-- **Total Tests:** 1676 passing
+- **Total Tests:** 1683 passing
 - **New Tests Added:** ~60 tests for new features
 - **Pre-commit hooks:** All passing (lint + test)
 

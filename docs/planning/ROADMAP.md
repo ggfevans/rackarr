@@ -69,6 +69,14 @@ Based on existing starter library research (2025-12-11), we already have an appr
 - Could import/convert on demand
 - **Defer until after brand starter packs prove the model**
 
+### Performance Consideration: On-Demand Loading
+
+If bundled brand packs cause performance issues (app size, load time), consider:
+
+- **On-demand download** — User clicks "Download Ubiquiti Pack" → fetches from CDN
+- **Data bundled, images lazy-loaded** — Device definitions included, images fetched on first view
+- **Trigger:** Revisit if total bundle exceeds ~2MB or load time exceeds 3s on slow connections
+
 ---
 
 ## Current Library Status (Reference)
@@ -119,11 +127,16 @@ Based on existing starter library research (2025-12-11), we already have an appr
 
 **Current state**: Basic 1U PDU, 2U UPS, 4U UPS in library
 
-**Potential enhancements**:
+**Initial scope (v0.7)**:
 
-- Outlet count property
-- VA/Watt ratings display
-- Runtime calculations (advanced)
+- `outlet_count` — Number of outlets (e.g., 8, 12, 16)
+- `va_rating` — VA capacity (e.g., 1500, 3000)
+
+**Future considerations**:
+
+- `watt_rating` — Often derived from VA, could auto-calculate
+- `outlet_type` — NEMA 5-15, C13, C19 (enum or string)
+- `runtime_minutes` — Runtime at load (requires load calculation system)
 - Brand-specific models: APC Smart-UPS, CyberPower, Tripp Lite, Eaton
 
 **Representative models from research**:
@@ -231,25 +244,25 @@ When launching publicly, emphasise:
 
 ### Next Release (v0.6?)
 
-- [ ] Curated Ubiquiti starter pack (15-20 devices)
-- [ ] Curated Mikrotik starter pack (15-20 devices)
+- [ ] **[R-01]** Curated Ubiquiti starter pack (15-20 devices)
+- [ ] **[R-02]** Curated Mikrotik starter pack (15-20 devices)
 
 ### Following Release (v0.7?)
 
-- [ ] Export UX overhaul (PNG/SVG quality + design review)
-- [ ] CSV export format
-- [ ] UPS/PDU property enhancements
+- [ ] **[R-03]** Export UX overhaul (PNG/SVG quality + design review)
+- [ ] **[R-04]** CSV export format
+- [ ] **[R-05]** UPS/PDU property enhancements
 
 ### Backlog / Research
 
-- [ ] NetBox device-type library browser/import
-- [ ] NAS/Storage visual fidelity (drive bays)
-- [ ] Chassis/enclosure category
-- [ ] Multiple racks
-- [ ] Wishlist/planned state
-- [ ] Community device contribution workflow
-- [ ] NetBox export format
-- [ ] Runtime/power calculations
+- [ ] **[R-06]** NetBox device-type library browser/import
+- [ ] **[R-07]** NAS/Storage visual fidelity (drive bays)
+- [ ] **[R-08]** Chassis/enclosure category
+- [ ] **[R-09]** Multiple racks
+- [ ] **[R-10]** Wishlist/planned state
+- [ ] **[R-11]** Community device contribution workflow
+- [ ] **[R-12]** NetBox export format
+- [ ] **[R-13]** Runtime/power calculations
 
 ---
 
@@ -289,7 +302,7 @@ C. **Railway/Fly.io**
 
 **Recommendation**: Option A (Cloudflare + Linode) for long-term flexibility
 
-**Infrastructure TODO**:
+**Infrastructure TODO** **[R-14]**:
 
 - [ ] Provision Linode VPS (Nanode or Shared 1GB)
 - [ ] Set up Cloudflare proxy for VPS
@@ -299,7 +312,7 @@ C. **Railway/Fly.io**
 
 ---
 
-#### Phase 3: Placement Image Overrides (Planned)
+#### Phase 3: Placement Image Overrides (Planned) **[R-15]**
 
 Per-placement image overrides with stable IDs:
 
@@ -369,7 +382,7 @@ Visual overlay for device airflow direction with conflict detection:
 
 The following responsive improvements are planned for implementation before v1.0:
 
-### Tab-Based Mobile Layout (<768px)
+### Tab-Based Mobile Layout (<768px) **[R-16]**
 
 For phone screens, switch to a tab-based interface:
 
@@ -379,7 +392,7 @@ For phone screens, switch to a tab-based interface:
 - Edit panel becomes full-screen overlay
 - Canvas takes full width when active
 
-### Bottom Sheet Patterns
+### Bottom Sheet Patterns **[R-17]**
 
 Mobile-friendly UI patterns:
 
@@ -388,7 +401,7 @@ Mobile-friendly UI patterns:
 - Two-tap device placement: tap device → tap rack slot
 - Gesture-based interactions
 
-### Min-Width Warning
+### Min-Width Warning **[R-18]**
 
 For unsupported narrow viewports:
 
@@ -402,7 +415,7 @@ For unsupported narrow viewports:
 
 Priority order for future development:
 
-### 1. Mobile & PWA
+### 1. Mobile & PWA **[R-19]**
 
 - Full mobile phone support (create/edit layouts)
 - Two-tap device placement (tap library → tap rack)
@@ -432,7 +445,7 @@ Priority order for future development:
 
 ---
 
-### 4. Cable Routing
+### 4. Cable Routing **[R-20]**
 
 - Visual cable path representation
 - Port/connection definitions on devices
@@ -440,7 +453,7 @@ Priority order for future development:
 
 ---
 
-### 5. Weight/Load Calculations
+### 5. Weight/Load Calculations **[R-21]**
 
 - Device weight metadata
 - Per-U load calculations
@@ -448,11 +461,11 @@ Priority order for future development:
 
 ---
 
-### 6. Basic Power Consumption
+### 6. Basic Power Consumption **[R-22]**
 
 - Basic device power requirements (# of plugs on PDU, device powered y/n)
 
-### 7. Basic Network connectivity requirements
+### 7. Basic Network connectivity requirements **[R-23]**
 
 - Basic device network requirements (# of ports on patch panel, device networked y/n)
 
@@ -462,26 +475,21 @@ Priority order for future development:
 
 Features explicitly deferred with no priority assigned:
 
-| Feature                     | Notes                                       |
-| --------------------------- | ------------------------------------------- |
-| Custom device categories    | Allow user-defined categories               |
-| 3D visualization            | Three.js rack view                          |
-| Cloud sync / accounts       | User accounts, cloud storage                |
-| Collaborative editing       | Real-time multi-user                        |
-| Tablet-optimised layout     | Enhanced tablet experience                  |
-| Device templates/presets    | Common device configurations                |
-| Import from CSV/spreadsheet | Bulk device import                          |
-| NetBox device type import   | Import from community library               |
-| Export both rack views      | Front + rear in single export               |
-| Device library export       | Save library to file                        |
-| 0U vertical PDU support     | Rail-mounted PDUs (left/right rails)        |
-| Screen reader improvements  | Live region announcements for state changes |
-| Rack Power management       | - Device power draw metadata                |
-
-                              - Total rack power calculation
-                              - PDU capacity planning                        |
-
-for future planning:
+| ID       | Feature                     | Notes                                                       |
+| -------- | --------------------------- | ----------------------------------------------------------- |
+| **R-24** | Custom device categories    | Allow user-defined categories                               |
+| **R-25** | 3D visualization            | Three.js rack view                                          |
+| **R-26** | Cloud sync / accounts       | User accounts, cloud storage                                |
+| **R-27** | Collaborative editing       | Real-time multi-user                                        |
+| **R-28** | Tablet-optimised layout     | Enhanced tablet experience                                  |
+| **R-29** | Device templates/presets    | Common device configurations                                |
+| **R-30** | Import from CSV/spreadsheet | Bulk device import                                          |
+| **R-31** | NetBox device type import   | Import from community library                               |
+| **R-32** | Export both rack views      | Front + rear in single export                               |
+| **R-33** | Device library export       | Save library to file                                        |
+| **R-34** | 0U vertical PDU support     | Rail-mounted PDUs (left/right rails)                        |
+| **R-35** | Screen reader improvements  | Live region announcements for state changes                 |
+| **R-36** | Rack Power management       | Device power draw, total calculation, PDU capacity planning |
 
 ---
 
@@ -562,6 +570,7 @@ Backlog → Future Roadmap → Planned (current) → Released
 | 2025-12-11 | Device Image System: spec complete, Phase 4 deferred               |
 | 2025-12-12 | Issue 2 (Front/Rear Mounting Logic) fixed: depth-aware collision   |
 | 2025-12-12 | Issue 3.1 (KVM capitalization) fixed: getCategoryDisplayName()     |
+| 2025-12-12 | Added [R-##] identifiers to all incomplete roadmap items           |
 
 ---
 

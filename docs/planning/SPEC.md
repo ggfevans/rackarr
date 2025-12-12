@@ -1,6 +1,6 @@
 # Rackarr Technical Specification
 
-**Version:** 0.5.0
+**Version:** 0.6.0-draft
 **Updated:** 2025-12-12
 **Status:** Active
 
@@ -124,6 +124,9 @@ interface DeviceType {
 	weight?: number;
 	weight_unit?: WeightUnit;
 	comments?: string;
+	// Power device properties (category: 'power')
+	outlet_count?: number; // Number of outlets (e.g., 8, 12, 16)
+	va_rating?: number; // VA capacity (e.g., 1500, 3000)
 	rackarr: {
 		colour: string; // Hex (#RRGGBB)
 		category: DeviceCategory;
@@ -309,13 +312,19 @@ settings:
 
 ### 5.2 UI Panels
 
-| Component              | Purpose                   |
-| ---------------------- | ------------------------- |
-| `Toolbar.svelte`       | Top action bar            |
-| `Sidebar.svelte`       | Fixed left device library |
-| `DevicePalette.svelte` | Device list with search   |
-| `EditPanel.svelte`     | Property editor (right)   |
-| `HelpPanel.svelte`     | Keyboard shortcuts        |
+| Component              | Purpose                                          |
+| ---------------------- | ------------------------------------------------ |
+| `Toolbar.svelte`       | Top action bar                                   |
+| `Sidebar.svelte`       | Fixed left device library                        |
+| `DevicePalette.svelte` | Device list with collapsible sections and search |
+| `EditPanel.svelte`     | Property editor (right)                          |
+| `HelpPanel.svelte`     | Keyboard shortcuts                               |
+
+**DevicePalette Sections:**
+
+- Collapsible sections for Generic, Ubiquiti, Mikrotik (see Section 11.6)
+- Global search spans all sections
+- Section headers show device counts
 
 ### 5.3 Forms & Dialogs
 
@@ -489,11 +498,38 @@ The toolbar adapts to viewport width with two distinct modes:
 | SVG    | Vector, scalable        |
 | PDF    | Print-ready, multi-page |
 
-### 8.2 Export Options
+### 8.2 Data Export
+
+| Format | Features                              |
+| ------ | ------------------------------------- |
+| CSV    | Spreadsheet-compatible inventory list |
+
+**CSV Columns:**
+
+| Column       | Description                     |
+| ------------ | ------------------------------- |
+| Position     | U position in rack (1-indexed)  |
+| Name         | Custom instance name (or empty) |
+| Model        | Device type model/display name  |
+| Manufacturer | Manufacturer name (or empty)    |
+| U_Height     | Device height in rack units     |
+| Category     | Device category                 |
+| Face         | Mounting face (front/rear/both) |
+
+**Example CSV output:**
+
+```csv
+Position,Name,Model,Manufacturer,U_Height,Category,Face
+42,Web Server 1,PowerEdge R650,Dell,1,server,front
+40,Core Switch,USW-Pro-48-PoE,Ubiquiti,1,network,front
+38,,1U Blank,,1,blank,front
+```
+
+### 8.3 Export Options
 
 ```typescript
 interface ExportOptions {
-	format: 'png' | 'jpeg' | 'svg' | 'pdf';
+	format: 'png' | 'jpeg' | 'svg' | 'pdf' | 'csv';
 	scope: 'all' | 'selected';
 	background: 'dark' | 'light' | 'transparent';
 	exportView: 'front' | 'rear' | 'both';
@@ -503,6 +539,50 @@ interface ExportOptions {
 	includeLegend: boolean;
 }
 ```
+
+### 8.4 File Naming Convention
+
+Exported files use a consistent naming pattern:
+
+```
+{layout-name}-{view}-{YYYY-MM-DD}.{ext}
+```
+
+| Component   | Description           | Example                 |
+| ----------- | --------------------- | ----------------------- |
+| layout-name | Slugified layout name | `my-homelab`            |
+| view        | Export view           | `front`, `rear`, `both` |
+| YYYY-MM-DD  | Export date           | `2025-12-12`            |
+| ext         | File extension        | `png`, `pdf`, `csv`     |
+
+**Examples:**
+
+- `my-homelab-front-2025-12-12.png`
+- `my-homelab-both-2025-12-12.pdf`
+- `my-homelab-2025-12-12.csv` (CSV has no view)
+
+### 8.5 Export Dialog
+
+The export dialog includes:
+
+| Feature               | Description                                      |
+| --------------------- | ------------------------------------------------ |
+| Format selector       | Dropdown for PNG/JPEG/SVG/PDF/CSV                |
+| Options panel         | Format-specific options (background, view, etc.) |
+| **Thumbnail preview** | Small preview of export output before download   |
+| Export button         | Triggers download with generated filename        |
+
+### 8.6 Export Quality Requirements
+
+Image exports must meet these quality standards:
+
+| Requirement          | Specification                                                   |
+| -------------------- | --------------------------------------------------------------- |
+| **Margins**          | Consistent padding around rack (min 20px)                       |
+| **Dual-view layout** | Front and rear views side-by-side with equal spacing            |
+| **Borders/lines**    | Crisp rack rails and device borders, no anti-aliasing artifacts |
+| **Text rendering**   | Sharp labels, correct font sizing, proper alignment             |
+| **Canvas match**     | Export output must match on-screen canvas appearance            |
 
 ---
 
@@ -679,6 +759,75 @@ Passive/generic items display as category-colored rectangles (no bundled images)
 
 See Section 16 for full Device Image System documentation.
 
+### 11.6 Brand Starter Packs
+
+In addition to the generic starter library, brand-specific device packs provide curated collections of popular manufacturer equipment.
+
+#### 11.6.1 Organization
+
+Brand packs are organized as **collapsible sections** in the device palette:
+
+| Section  | Default State | Contents                |
+| -------- | ------------- | ----------------------- |
+| Generic  | Expanded      | 26 generic device types |
+| Ubiquiti | Collapsed     | 15-20 Ubiquiti devices  |
+| Mikrotik | Collapsed     | 15-20 Mikrotik devices  |
+
+**Behavior:**
+
+- Each section header shows device count: "Ubiquiti (18)"
+- Click section header to expand/collapse
+- Search spans ALL sections (including collapsed)
+- Search results auto-expand relevant section
+- Multiple sections can be expanded simultaneously
+
+#### 11.6.2 Brand Pack Data Model
+
+Brand pack devices use the standard `DeviceType` interface with:
+
+- `manufacturer` field populated (e.g., "Ubiquiti", "Mikrotik")
+- `model` field contains product name (e.g., "USW-Pro-24-PoE")
+- `slug` generated from model name (e.g., "usw-pro-24-poe")
+- Category and properties assigned per device
+
+#### 11.6.3 Ubiquiti Starter Pack
+
+| Device          | Category  | U-Height | Full Depth | Airflow       |
+| --------------- | --------- | -------- | ---------- | ------------- |
+| USW-Pro-24      | `network` | 1U       | Yes        | side-to-rear  |
+| USW-Pro-48      | `network` | 1U       | Yes        | side-to-rear  |
+| USW-Pro-24-PoE  | `network` | 1U       | Yes        | side-to-rear  |
+| USW-Pro-48-PoE  | `network` | 1U       | Yes        | side-to-rear  |
+| USW-Aggregation | `network` | 1U       | Yes        | side-to-rear  |
+| UDM-Pro         | `network` | 1U       | Yes        | front-to-rear |
+| UDM-SE          | `network` | 1U       | Yes        | front-to-rear |
+| UNVR            | `storage` | 1U       | Yes        | front-to-rear |
+| UNVR-Pro        | `storage` | 2U       | Yes        | front-to-rear |
+| USP-PDU-Pro     | `power`   | 1U       | No         | passive       |
+
+> **Note:** Additional devices may be added during implementation. Cloud Key Gen2+ excluded (not rack-mountable without kit).
+
+#### 11.6.4 Mikrotik Starter Pack
+
+| Device             | Category  | U-Height | Full Depth | Airflow       |
+| ------------------ | --------- | -------- | ---------- | ------------- |
+| CRS326-24G-2S+     | `network` | 1U       | Yes        | side-to-rear  |
+| CRS328-24P-4S+     | `network` | 1U       | Yes        | side-to-rear  |
+| CRS309-1G-8S+      | `network` | 1U       | Yes        | side-to-rear  |
+| CCR2004-1G-12S+2XS | `network` | 1U       | Yes        | front-to-rear |
+| RB5009UG+S+IN      | `network` | 1U       | Yes        | front-to-rear |
+
+> **Note:** Additional netPower series devices may be added during implementation.
+
+#### 11.6.5 Bundling
+
+Brand packs are **bundled with the application**:
+
+- Device definitions included in app bundle
+- Images (best-effort from NetBox library) included as WebP
+- No network requests required — fully offline capable
+- Fallback to category-colored rectangles for missing images
+
 ---
 
 ## 12. Commands
@@ -720,15 +869,16 @@ npm run check        # Svelte type check
 
 ## 14. Version History
 
-| Version | Changes                                            |
-| ------- | -------------------------------------------------- |
-| 0.5.0   | Type system consolidation, legacy comments cleanup |
-| 0.4.9   | Airflow visualization, selection bug fix           |
-| 0.4.8   | Design token audit, CSS cleanup                    |
-| 0.4.0   | Breaking: removed legacy format support            |
-| 0.3.x   | Undo/redo, YAML archive, device images             |
-| 0.2.x   | Single-rack mode, fixed sidebar                    |
-| 0.1.x   | Initial release                                    |
+| Version | Changes                                                                      |
+| ------- | ---------------------------------------------------------------------------- |
+| 0.6.0   | Brand starter packs, export UX overhaul, CSV export, power device properties |
+| 0.5.0   | Type system consolidation, legacy comments cleanup                           |
+| 0.4.9   | Airflow visualization, selection bug fix                                     |
+| 0.4.8   | Design token audit, CSS cleanup                                              |
+| 0.4.0   | Breaking: removed legacy format support                                      |
+| 0.3.x   | Undo/redo, YAML archive, device images                                       |
+| 0.2.x   | Single-rack mode, fixed sidebar                                              |
+| 0.1.x   | Initial release                                                              |
 
 ---
 

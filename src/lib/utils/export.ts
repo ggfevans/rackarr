@@ -1104,17 +1104,37 @@ export function downloadBlob(blob: Blob, filename: string): void {
 
 /**
  * Generate a sanitized filename for export
+ * Pattern: {layout-name}-{view}-{YYYY-MM-DD}.{ext}
+ * For CSV (view=null): {layout-name}-{YYYY-MM-DD}.{ext}
+ *
+ * @param layoutName - The layout name to include in filename
+ * @param view - The export view ('front', 'rear', 'both') or null for data exports like CSV
+ * @param format - The export format extension
  */
-export function generateExportFilename(layoutName: string, format: ExportFormat): string {
-	if (!layoutName || layoutName.trim() === '') {
-		return `rackarr-export.${format}`;
-	}
-
-	// Sanitize the layout name for filename
-	const sanitized = layoutName
+export function generateExportFilename(
+	layoutName: string,
+	view: 'front' | 'rear' | 'both' | null,
+	format: ExportFormat
+): string {
+	// Slugify the layout name: lowercase, hyphens, no special chars
+	const slugified = layoutName
 		.toLowerCase()
 		.replace(/[^a-z0-9]+/g, '-')
 		.replace(/^-+|-+$/g, '');
 
-	return `${sanitized || 'rackarr-export'}.${format}`;
+	const baseName = slugified || 'rackarr-export';
+
+	// Format date as YYYY-MM-DD
+	const now = new Date();
+	const year = now.getFullYear();
+	const month = String(now.getMonth() + 1).padStart(2, '0');
+	const day = String(now.getDate()).padStart(2, '0');
+	const dateStr = `${year}-${month}-${day}`;
+
+	// Build filename: include view for image exports, omit for CSV
+	if (view) {
+		return `${baseName}-${view}-${dateStr}.${format}`;
+	}
+
+	return `${baseName}-${dateStr}.${format}`;
 }

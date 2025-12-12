@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import {
 	generateExportSVG,
 	exportAsSVG,
@@ -350,26 +350,85 @@ describe('Export Utilities', () => {
 	});
 
 	describe('generateExportFilename', () => {
-		it('generates filename with layout name and format', () => {
-			const filename = generateExportFilename('My Layout', 'png');
-			expect(filename).toBe('my-layout.png');
+		// Mock date for consistent test results
+		beforeEach(() => {
+			vi.useFakeTimers();
+			vi.setSystemTime(new Date('2025-12-12'));
 		});
 
-		it('sanitizes layout name for filename', () => {
-			const filename = generateExportFilename('Layout: Test/File', 'svg');
-			expect(filename).toBe('layout-test-file.svg');
+		afterEach(() => {
+			vi.useRealTimers();
+		});
+
+		it('generates filename with layout name, view, date and format', () => {
+			const filename = generateExportFilename('My Layout', 'front', 'png');
+			expect(filename).toBe('my-layout-front-2025-12-12.png');
+		});
+
+		it('includes view for image exports', () => {
+			expect(generateExportFilename('My Homelab', 'front', 'png')).toBe(
+				'my-homelab-front-2025-12-12.png'
+			);
+			expect(generateExportFilename('My Homelab', 'rear', 'jpeg')).toBe(
+				'my-homelab-rear-2025-12-12.jpeg'
+			);
+			expect(generateExportFilename('My Homelab', 'both', 'svg')).toBe(
+				'my-homelab-both-2025-12-12.svg'
+			);
+		});
+
+		it('omits view for CSV export (null view)', () => {
+			const filename = generateExportFilename('My Rack', null, 'csv');
+			expect(filename).toBe('my-rack-2025-12-12.csv');
+		});
+
+		it('slugifies layout name', () => {
+			expect(generateExportFilename('My Homelab', 'front', 'png')).toBe(
+				'my-homelab-front-2025-12-12.png'
+			);
+		});
+
+		it('removes special characters from layout name', () => {
+			expect(generateExportFilename('Server Rack #1', 'both', 'pdf')).toBe(
+				'server-rack-1-both-2025-12-12.pdf'
+			);
+			expect(generateExportFilename('Layout: Test/File', 'front', 'svg')).toBe(
+				'layout-test-file-front-2025-12-12.svg'
+			);
 		});
 
 		it('handles empty layout name', () => {
-			const filename = generateExportFilename('', 'jpeg');
-			expect(filename).toBe('rackarr-export.jpeg');
+			const filename = generateExportFilename('', 'front', 'jpeg');
+			expect(filename).toBe('rackarr-export-front-2025-12-12.jpeg');
 		});
 
-		it('works with different formats', () => {
-			expect(generateExportFilename('Test', 'png')).toBe('test.png');
-			expect(generateExportFilename('Test', 'jpeg')).toBe('test.jpeg');
-			expect(generateExportFilename('Test', 'svg')).toBe('test.svg');
-			expect(generateExportFilename('Test', 'pdf')).toBe('test.pdf');
+		it('handles whitespace-only layout name', () => {
+			const filename = generateExportFilename('   ', 'rear', 'png');
+			expect(filename).toBe('rackarr-export-rear-2025-12-12.png');
+		});
+
+		it('formats date as YYYY-MM-DD', () => {
+			const filename = generateExportFilename('Test', 'front', 'png');
+			expect(filename).toMatch(/-\d{4}-\d{2}-\d{2}\.png$/);
+		});
+
+		it('works with all image formats', () => {
+			expect(generateExportFilename('Test', 'front', 'png')).toBe('test-front-2025-12-12.png');
+			expect(generateExportFilename('Test', 'front', 'jpeg')).toBe('test-front-2025-12-12.jpeg');
+			expect(generateExportFilename('Test', 'front', 'svg')).toBe('test-front-2025-12-12.svg');
+			expect(generateExportFilename('Test', 'front', 'pdf')).toBe('test-front-2025-12-12.pdf');
+		});
+
+		it('handles consecutive special characters', () => {
+			expect(generateExportFilename('Test---Name', 'front', 'png')).toBe(
+				'test-name-front-2025-12-12.png'
+			);
+		});
+
+		it('handles leading/trailing special characters', () => {
+			expect(generateExportFilename('---Test---', 'front', 'png')).toBe(
+				'test-front-2025-12-12.png'
+			);
 		});
 	});
 });

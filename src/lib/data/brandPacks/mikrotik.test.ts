@@ -69,7 +69,7 @@ describe('Mikrotik Brand Pack', () => {
 
 		it('handles special characters in model names correctly', () => {
 			// Model names with + should have slugs with '-plus'
-			const devicesWithPlus = mikrotikDevices.filter((d) => d.model.includes('+'));
+			const devicesWithPlus = mikrotikDevices.filter((d) => d.model?.includes('+'));
 			for (const device of devicesWithPlus) {
 				expect(device.slug).toContain('-plus');
 				expect(device.slug).not.toContain('+');

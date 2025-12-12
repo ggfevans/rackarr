@@ -193,26 +193,43 @@
 			const svg = generateExportSVG(racksToExport, layoutStore.device_types, exportOptions, images);
 
 			// Export based on selected format
+			const exportViewOrDefault = options.exportView ?? 'both';
 			if (options.format === 'svg') {
 				const svgString = exportAsSVG(svg);
 				const blob = new Blob([svgString], { type: 'image/svg+xml' });
-				const filename = generateExportFilename(layoutStore.layout.name, options.format);
+				const filename = generateExportFilename(
+					layoutStore.layout.name,
+					exportViewOrDefault,
+					options.format
+				);
 				downloadBlob(blob, filename);
 				toastStore.showToast('SVG exported successfully', 'success');
 			} else if (options.format === 'png') {
 				const imageBlob = await exportAsPNG(svg);
-				const filename = generateExportFilename(layoutStore.layout.name, options.format);
+				const filename = generateExportFilename(
+					layoutStore.layout.name,
+					exportViewOrDefault,
+					options.format
+				);
 				downloadBlob(imageBlob, filename);
 				toastStore.showToast('PNG exported successfully', 'success');
 			} else if (options.format === 'jpeg') {
 				const imageBlob = await exportAsJPEG(svg);
-				const filename = generateExportFilename(layoutStore.layout.name, options.format);
+				const filename = generateExportFilename(
+					layoutStore.layout.name,
+					exportViewOrDefault,
+					options.format
+				);
 				downloadBlob(imageBlob, filename);
 				toastStore.showToast('JPEG exported successfully', 'success');
 			} else if (options.format === 'pdf') {
 				const svgString = exportAsSVG(svg);
 				const pdfBlob = await exportAsPDF(svgString, options.background);
-				const filename = generateExportFilename(layoutStore.layout.name, options.format);
+				const filename = generateExportFilename(
+					layoutStore.layout.name,
+					exportViewOrDefault,
+					options.format
+				);
 				downloadBlob(pdfBlob, filename);
 				toastStore.showToast('PDF exported successfully', 'success');
 			}

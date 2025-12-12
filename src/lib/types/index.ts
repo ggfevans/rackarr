@@ -223,7 +223,7 @@ export interface CreateRackData {
 /**
  * Export format options
  */
-export type ExportFormat = 'png' | 'jpeg' | 'svg' | 'pdf';
+export type ExportFormat = 'png' | 'jpeg' | 'svg' | 'pdf' | 'csv';
 
 /**
  * Export scope options

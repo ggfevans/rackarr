@@ -1,821 +1,487 @@
-# Device Image System - Implementation Prompts
+# PROMPT-PLAN.md — Issue 2: Front/Rear Mounting Logic
 
-**Created:** 2025-12-11
-**Status:** Ready for Implementation
-
-This document contains step-by-step prompts for implementing the Device Image System (Phases 2 & 3).
-
----
-
-## Commit Strategy
-
-**Pre-commit hooks run:**
-
-- `lint-staged` (ESLint + Prettier)
-- `npm run test:run` (all unit tests)
-
-Each prompt section ends with a **COMMIT CHECKPOINT**. Commit after each checkpoint passes the pre-commit hooks. This ensures:
-
-- Incremental, reviewable progress
-- Tests pass at every commit
-- Easy bisect if issues arise
-
-**Commit message format:**
-
-```
-feat(images): <short description>
-
-<details if needed>
-```
+**Created:** 2025-12-12
+**Scope:** Issue 2.1 (0.5U movement) + Issue 2.2 (front+rear slot sharing)
+**User Decision:** Half-depth is opt-in (`is_full_depth=true` by default)
 
 ---
 
 ## Overview
 
-| Phase   | Description                    | Prompts | Commits |
-| ------- | ------------------------------ | ------- | ------- |
-| Phase 2 | Bundled Starter Library Images | 1-4     | 4       |
-| Phase 3 | Placement Image Overrides      | 5-12    | 8       |
+This prompt plan fixes the front/rear mounting logic bugs:
 
-**Total: 12 commits** (each prompt = 1 commit)
+- **2.1:** Arrow key movement increments by ±1 instead of ±device.u_height
+- **2.2:** Cannot mount rear device when front device exists at same U position
 
-**Prerequisites:**
-
-- Starter library rationalization complete (26 device types)
-- Lucide icons implemented
-- Research documents reviewed (`docs/planning/research/device-images.md`)
+**Root Cause:** The layout store has duplicate inline collision logic that bypasses the correct face-aware utilities in `collision.ts`.
 
 ---
 
-## Phase 2: Bundled Starter Library Images
+## Files to Modify
 
-### Prompt 1: Directory Structure and Processing Script
+| File                                        | Changes                                          |
+| ------------------------------------------- | ------------------------------------------------ |
+| `src/lib/utils/collision.ts`                | Add depth parameters to `doFacesCollide()`       |
+| `src/lib/stores/layout.svelte.ts`           | Replace inline collision with `canPlaceDevice()` |
+| `src/lib/components/KeyboardHandler.svelte` | Fix movement increment, use `canPlaceDevice()`   |
+| `src/lib/data/starterLibrary.ts`            | Add `is_full_depth: false` to half-depth devices |
+| `src/tests/collision.test.ts`               | Add depth-aware collision tests                  |
+| `docs/planning/SPEC.md`                     | Document collision rules                         |
+| `docs/planning/ROADMAP.md`                  | Mark issues complete                             |
+
+---
+
+## Prompts
+
+Execute these prompts sequentially. Each builds on the previous.
+
+---
+
+### Prompt 1: Add depth-aware collision tests (TDD)
+
+```text
+We're fixing Issue 2 (Front/Rear Mounting Logic) in Rackarr. Start with TDD by writing tests first.
+
+**Context:**
+- `src/lib/utils/collision.ts` has `doFacesCollide(faceA, faceB)` that checks if faces collide
+- It currently ignores `is_full_depth` property, which means:
+  - Two half-depth devices on opposite faces should NOT collide
+  - A full-depth device should collide with ANY device at the same U position
+
+**Task:** Add tests to `src/tests/collision.test.ts` for depth-aware collision.
+
+**Test cases to add:**
+
+1. `doFacesCollide()` with depth parameters:
+   - front + front (any depth) → true
+   - rear + rear (any depth) → true
+   - front(half) + rear(half) → false (NEW BEHAVIOR)
+   - front(full) + rear(any) → true
+   - front(any) + rear(full) → true
+   - both + any → true
+
+2. `canPlaceDevice()` with depth awareness:
+   - Place half-depth rear device when half-depth front device exists at same U → should succeed
+   - Place half-depth rear device when full-depth front device exists at same U → should fail
+
+Run the tests with `npm run test:run -- collision`. They should FAIL because the implementation doesn't exist yet.
+```
+
+---
+
+### Prompt 2: Implement depth-aware collision logic
 
 ````text
-Create the directory structure and image processing script for bundled device images.
+Now implement the depth-aware collision logic to make the tests from Prompt 1 pass.
 
-## Context
-We're implementing Phase 2 of the Device Image System - bundling default images for ~15 active starter library devices. Images will be sourced from NetBox Device Type Library (CC0 licensed), processed to 400px max width WebP format.
+**File:** `src/lib/utils/collision.ts`
 
-## Requirements
+**Changes:**
 
-1. Create directory structure:
-   - `assets-source/device-images/` - Original images (git-tracked, not bundled)
-   - `src/lib/assets/device-images/` - Optimized images (Vite-bundled)
-   - Add `.gitkeep` files to track empty directories
-
-2. Create `scripts/process-images.ts`:
-   - Read PNG/JPEG/WebP files from `assets-source/device-images/`
-   - Resize to 400px max width (preserve aspect ratio, skip if smaller)
-   - Convert to WebP format
-   - Output to `src/lib/assets/device-images/` preserving subdirectory structure
-   - Log processing results
-
-3. Add npm script: `"process-images": "tsx scripts/process-images.ts"`
-
-4. Add `sharp` as a dev dependency for image processing
-
-## TDD
-- No automated tests needed for build script
-- Manual verification: run script with sample image, verify output dimensions and format
-
-## Files to create/modify
-- `assets-source/device-images/.gitkeep` (new)
-- `src/lib/assets/device-images/.gitkeep` (new)
-- `scripts/process-images.ts` (new)
-- `package.json` (add script and sharp dependency)
-
-## COMMIT CHECKPOINT
-```bash
-# Verify
-npm install  # Install sharp
-npm run process-images  # Should complete (no images yet, but no errors)
-
-# Commit
-git add -A
-git commit -m "feat(images): add directory structure and processing script"
-````
-
-````
-
----
-
-### Prompt 2: Download and Process NetBox Images
-
-```text
-Download representative device images from NetBox Device Type Library and process them.
-
-## Context
-We need ~15 representative images for active starter library devices. Images are CC0 licensed from https://github.com/netbox-community/devicetype-library/tree/master/elevation-images
-
-## Devices to get images for (front view only initially)
-
-| Starter Device | NetBox Source Image | Category |
-|----------------|---------------------|----------|
-| 1U Server | Dell/dell-poweredge-r630.front.png | server |
-| 2U Server | Dell/dell-poweredge-r730xd.front.png | server |
-| 4U Server | Supermicro/supermicro-ssg-6049p-e1cr36h.front.png | server |
-| 8-Port Switch | Ubiquiti/ubiquiti-unifi-switch-8.front.png | network |
-| 24-Port Switch | Ubiquiti/ubiquiti-unifi-switch-24-pro.front.png | network |
-| 48-Port Switch | Ubiquiti/ubiquiti-unifi-switch-48-pro.front.png | network |
-| 1U Router/Firewall | Ubiquiti/ubiquiti-udm-pro.front.png | network |
-| 1U Storage | Synology/synology-rs819.front.png | storage |
-| 2U Storage | Synology/synology-rs1221-plus.front.png | storage |
-| 4U Storage | (use Synology RS3621xs+ or similar) | storage |
-| 2U UPS | APC/apc-smt1500rmi2uc.front.png | power |
-| 4U UPS | APC/apc-srt5krmxli.front.png | power |
-| 1U Console Drawer | (generic KVM drawer if available) | kvm |
-
-## Steps
-
-1. Download images from NetBox repo to `assets-source/device-images/{category}/`
-   - Use curl or wget with raw.githubusercontent.com URLs
-   - Naming: `{slug}.front.png` (e.g., `1u-server.front.png`)
-
-2. Run `npm run process-images` to generate optimized versions
-
-3. Verify output in `src/lib/assets/device-images/`
-
-## Notes
-- If a specific image isn't available, skip it (device will use colored rectangle)
-- Focus on front images first; rear images can be added later
-- Total bundle size target: <500KB
-
-## COMMIT CHECKPOINT
-```bash
-# Verify
-npm run process-images  # Should process all images
-ls -la src/lib/assets/device-images/  # Verify WebP files exist
-du -sh src/lib/assets/device-images/  # Check total size <500KB
-
-# Commit
-git add -A
-git commit -m "feat(images): add bundled device images from NetBox"
-````
-
-````
-
----
-
-### Prompt 3: Create Bundled Image Manifest
-
-```text
-Create a bundled image manifest that maps device slugs to their bundled images.
-
-## Context
-We have processed WebP images in `src/lib/assets/device-images/`. Now we need a TypeScript module that imports these images and provides a lookup function.
-
-## Requirements
-
-1. Create `src/lib/data/bundledImages.ts`:
-   - Import images using Vite's static asset imports
-   - Export a `getBundledImage(slug: string, face: 'front' | 'rear'): string | undefined` function
-   - Return the image URL or undefined if no bundled image exists
-
-2. Use Vite's `import.meta.url` pattern for asset imports:
+1. Update `doFacesCollide()` signature to accept optional depth parameters:
    ```typescript
-   const images: Record<string, { front?: string; rear?: string }> = {
-     '1u-server': {
-       front: new URL('../assets/device-images/server/1u-server.front.webp', import.meta.url).href,
-     },
-     // ... more devices
-   };
+   export function doFacesCollide(
+     faceA: DeviceFace,
+     faceB: DeviceFace,
+     isFullDepthA: boolean = true,
+     isFullDepthB: boolean = true
+   ): boolean
 ````
 
-3. Only include devices that have actual image files
+2. Update logic:
+   - If either face is 'both' → return true
+   - If same face → return true
+   - If opposite faces AND either is full-depth → return true
+   - If opposite faces AND both are half-depth → return false
 
-## TDD
+3. Update `canPlaceDevice()` to:
+   - Look up the `is_full_depth` property for both the new device and existing devices
+   - Pass depth info to `doFacesCollide()`
+   - Note: `canPlaceDevice` receives `deviceHeight` but not the full DeviceType. Add a new optional parameter `isFullDepth: boolean = true` to pass this info.
 
-Write tests first in `src/tests/bundledImages.test.ts`:
+4. Update `findCollisions()` similarly if needed.
 
-- Test `getBundledImage('1u-server', 'front')` returns a string URL
-- Test `getBundledImage('nonexistent', 'front')` returns undefined
-- Test `getBundledImage('1u-server', 'rear')` returns undefined if no rear image
-
-## Files to create
-
-- `src/lib/data/bundledImages.ts`
-- `src/tests/bundledImages.test.ts`
-
-## COMMIT CHECKPOINT
-
-```bash
-# Verify
-npm run test:run  # Tests should pass (including new bundledImages tests)
-
-# Commit
-git add -A
-git commit -m "feat(images): create bundled image manifest with lookup function"
-```
+Run `npm run test:run -- collision` to verify all tests pass.
 
 ````
 
 ---
 
-### Prompt 4: Load Bundled Images into Image Store
+### Prompt 3: Add layout store placement tests (TDD)
 
 ```text
-Integrate bundled images into the image store so they're available on app initialization.
+Add tests to verify that the layout store's placement functions respect face and depth.
 
-## Context
-We have bundled images in `bundledImages.ts`. Now we need to load them into the image store on app startup so they appear when users view starter library devices in image mode.
+**File:** `src/tests/layout-store.test.ts` (create if doesn't exist, or add to existing)
 
-## Requirements
+**Test cases:**
 
-1. Add `loadBundledImages()` function to `src/lib/stores/images.svelte.ts`:
-   - Import `getBundledImage` from `bundledImages.ts`
-   - For each device that has a bundled image, fetch it and store as device type image
-   - Convert URL to blob/dataUrl format expected by the store
-   - Mark bundled images specially (optional: add `isBundled` flag to prevent re-saving)
+1. `placeDeviceRecorded()` face awareness:
+   - Place front device at U5
+   - Place rear device at U5 with half-depth device type → should succeed
+   - Verify both devices exist at position 5
 
-2. Call `loadBundledImages()` during app initialization:
-   - Update `src/App.svelte` or create an init module
-   - Load before first render so images are available immediately
+2. `placeDeviceRecorded()` full-depth blocking:
+   - Place full-depth front device at U5
+   - Place rear device at U5 → should fail
 
-3. Handle the URL → ImageData conversion:
-   - Bundled images are URLs, but the store expects `{ blob, dataUrl, filename }`
-   - Fetch the image, create blob, generate dataUrl
-   - Or: extend image store to support URL-only images (simpler)
+3. `moveDeviceRecorded()` face awareness:
+   - Place front device at U5, rear device at U3
+   - Move rear device to U5 → should succeed (they don't collide)
 
-## Design Decision
-Consider adding a simpler path: allow image store to accept URLs directly for bundled images, falling back to blob storage for user uploads. This avoids fetching bundled images at runtime.
+These tests will FAIL because layout.svelte.ts uses inline collision logic that ignores face.
 
-## TDD
-Extend `src/tests/image-store.test.ts`:
-- Test that after `loadBundledImages()`, store has images for bundled devices
-- Test that `getDeviceImage('1u-server', 'front')` returns image data
-
-## Files to modify
-- `src/lib/stores/images.svelte.ts`
-- `src/App.svelte` (or new init module)
-- `src/tests/image-store.test.ts`
-
-## COMMIT CHECKPOINT
-```bash
-# Verify
-npm run test:run  # All tests pass
-npm run dev  # Manual: create new rack, switch to image mode, verify images show
-
-# Commit
-git add -A
-git commit -m "feat(images): load bundled images on app initialization"
+Run `npm run test:run -- layout` to confirm failures.
 ````
-
-**Phase 2 Complete!** Starter library devices now have default images.
 
 ---
 
-## Phase 3: Placement Image Overrides
-
-### Prompt 5: Add `id` Field to PlacedDevice Type
+### Prompt 4: Fix layout store collision logic
 
 ````text
-Add a stable `id` field to the PlacedDevice type for placement-level image overrides.
+Fix the layout store to use the collision utilities instead of inline logic.
 
-## Context
-Currently PlacedDevice is identified by its index in the rack.devices array. We need a stable UUID that survives reordering for placement-level image overrides.
+**File:** `src/lib/stores/layout.svelte.ts`
 
-## Requirements
+**Changes:**
 
-1. Update `src/lib/types/index.ts`:
+1. Add import at top:
    ```typescript
-   interface PlacedDevice {
-     id: string;  // UUID for stable reference
-     device_type: string;
-     name?: string;
-     position: number;
-     face: DeviceFace;
+   import { canPlaceDevice } from '$lib/utils/collision';
+````
+
+2. In `placeDeviceRecorded()` (around line 829-842):
+   - Remove the entire for-loop that does inline collision checking
+   - Replace with:
+
+   ```typescript
+   const isFullDepth = deviceType.is_full_depth !== false;
+   if (
+   	!canPlaceDevice(
+   		layout.rack,
+   		layout.device_types,
+   		deviceType.u_height,
+   		position,
+   		undefined,
+   		face,
+   		isFullDepth
+   	)
+   ) {
+   	return false;
    }
-````
+   ```
 
-2. Update `src/lib/schemas/index.ts`:
-   - Add `id: z.string().uuid()` to PlacedDeviceSchema
-   - Make it optional for backward compatibility: `id: z.string().uuid().optional()`
-
-3. Update YAML example in comments if present
-
-## TDD
-
-Write tests first:
-
-- Test PlacedDevice with valid UUID passes schema validation
-- Test PlacedDevice without id passes (backward compat)
-- Test PlacedDevice with invalid id fails validation
-
-## Files to modify
-
-- `src/lib/types/index.ts`
-- `src/lib/schemas/index.ts`
-- `src/tests/schemas.test.ts` (add id validation tests)
-
-## COMMIT CHECKPOINT
-
-```bash
-# Verify
-npm run test:run  # Schema tests pass
-npm run check  # TypeScript compiles
-
-# Commit
-git add -A
-git commit -m "feat(images): add id field to PlacedDevice type and schema"
-```
-
-````
-
----
-
-### Prompt 6: Generate UUID on Device Placement
-
-```text
-Generate a UUID when placing a device in the rack.
-
-## Context
-PlacedDevice now has an `id` field. We need to generate UUIDs when devices are placed.
-
-## Requirements
-
-1. Update `src/lib/stores/layout.svelte.ts`:
-   - In `placeDeviceRaw()` or wherever PlacedDevice objects are created
-   - Generate UUID using `crypto.randomUUID()`
-   - Ensure ID is included when creating PlacedDevice
-
-2. Update `src/lib/stores/layout-helpers.ts`:
-   - Update `createDevice()` helper to generate ID if not provided
-   - Allow passing an existing ID (for undo/redo restoration)
-
-3. Ensure ID survives:
-   - Move operations (ID should not change)
-   - Undo/redo (restore same ID)
-
-## TDD
-Write tests first:
-- Test that `placeDevice()` generates a UUID
-- Test that placed device has valid UUID format
-- Test that moving a device preserves its ID
-- Test that undo/redo preserves device IDs
-
-## Files to modify
-- `src/lib/stores/layout.svelte.ts`
-- `src/lib/stores/layout-helpers.ts`
-- `src/tests/layout-store.test.ts` (add ID generation tests)
-
-## COMMIT CHECKPOINT
-```bash
-# Verify
-npm run test:run  # All tests pass including new UUID tests
-npm run dev  # Manual: place device, inspect in console, verify id exists
-
-# Commit
-git add -A
-git commit -m "feat(images): generate UUID on device placement"
-````
-
-````
-
----
-
-### Prompt 7: Refactor Image Store for Two-Level Storage
-
-```text
-Refactor the image store to support device type images AND placement-level image overrides.
-
-## Context
-Current store has single map keyed by device slug. We need two maps: one for device type defaults, one for placement overrides.
-
-## Requirements
-
-1. Update `src/lib/stores/images.svelte.ts`:
-
+3. In `moveDeviceRecorded()` (around line 877-893):
+   - Remove the for-loop collision check
+   - Replace with:
    ```typescript
-   // Two separate stores
-   const deviceTypeImages = new SvelteMap<string, DeviceImageData>();
-   const placementImages = new SvelteMap<string, DeviceImageData>();
-
-   // Device type level API
-   setDeviceTypeImage(slug: string, face: 'front' | 'rear', data: ImageData): void
-   getDeviceTypeImage(slug: string, face: 'front' | 'rear'): ImageData | undefined
-   removeDeviceTypeImage(slug: string, face: 'front' | 'rear'): void
-
-   // Placement level API
-   setPlacementImage(placementId: string, face: 'front' | 'rear', data: ImageData): void
-   getPlacementImage(placementId: string, face: 'front' | 'rear'): ImageData | undefined
-   removePlacementImage(placementId: string, face: 'front' | 'rear'): void
-   clearPlacementImages(): void  // Called when loading new layout
-
-   // Combined lookup with fallback
-   getImageForPlacement(slug: string, placementId: string, face: 'front' | 'rear'): ImageData | undefined
-````
-
-2. Fallback logic in `getImageForPlacement`:
-   - Check placementImages first (by placementId)
-   - Fall back to deviceTypeImages (by slug)
-   - Return undefined if neither exists
-
-3. Keep backward compatibility:
-   - Existing `setDeviceImage` → `setDeviceTypeImage`
-   - Existing `getDeviceImage` → `getDeviceTypeImage`
-
-## TDD
-
-Write comprehensive tests:
-
-- Test setDeviceTypeImage/getDeviceTypeImage
-- Test setPlacementImage/getPlacementImage
-- Test getImageForPlacement returns placement override when exists
-- Test getImageForPlacement falls back to device type
-- Test getImageForPlacement returns undefined when no image
-- Test removePlacementImage clears override
-
-## Files to modify
-
-- `src/lib/stores/images.svelte.ts`
-- `src/lib/types/images.ts` (if needed)
-- `src/tests/image-store.test.ts` (major update)
-
-## COMMIT CHECKPOINT
-
-```bash
-# Verify
-npm run test:run  # All image store tests pass
-
-# Commit
-git add -A
-git commit -m "feat(images): refactor image store for two-level storage"
-```
-
-````
-
----
-
-### Prompt 8: Update Archive Format for Two-Level Images
-
-```text
-Update the archive save/load to handle device type images and placement override images separately.
-
-## Context
-Archive currently saves to `assets/{slug}/`. We need `assets/device-types/{slug}/` and `assets/placements/{id}/`.
-
-## Requirements
-
-1. Update `src/lib/utils/archive.ts`:
-
-   **Save (`createFolderArchive`):**
-   - Accept both deviceTypeImages and placementImages as parameters
-   - Save device type images to `assets/device-types/{slug}/front.webp`
-   - Save placement images to `assets/placements/{id}/front.webp`
-
-   **Load (`extractFolderArchive`):**
-   - Check for new format first (`assets/device-types/`, `assets/placements/`)
-   - Fall back to old format (`assets/{slug}/`) for backward compatibility
-   - Return separate maps for device type and placement images
-
-2. Update function signatures:
-   ```typescript
-   export async function createFolderArchive(
-     layout: Layout,
-     deviceTypeImages: ImageStoreMap,
-     placementImages: ImageStoreMap
-   ): Promise<Blob>
-
-   export async function extractFolderArchive(blob: Blob): Promise<{
-     layout: Layout;
-     deviceTypeImages: ImageStoreMap;
-     placementImages: ImageStoreMap;
-   }>
-````
-
-3. Update callers in App.svelte
-
-## TDD
-
-Write tests:
-
-- Test saving archive with device type images creates correct structure
-- Test saving archive with placement images creates correct structure
-- Test loading new format archive extracts both image types
-- Test loading old format archive (backward compat) extracts to device type images
-
-## Files to modify
-
-- `src/lib/utils/archive.ts`
-- `src/App.svelte` (update save/load calls)
-- `src/tests/archive.test.ts` (add two-level tests)
-
-## COMMIT CHECKPOINT
-
-```bash
-# Verify
-npm run test:run  # Archive tests pass
-npm run dev  # Manual: save layout with images, reload, verify images persist
-
-# Commit
-git add -A
-git commit -m "feat(images): update archive format for two-level image storage"
-```
-
-````
-
----
-
-### Prompt 9: Update RackDevice to Use Placement ID for Image Lookup
-
-```text
-Update RackDevice component to look up images using the placement ID for proper fallback behavior.
-
-## Context
-RackDevice currently looks up images by device slug only. It needs to use the new `getImageForPlacement()` function with the placement ID.
-
-## Requirements
-
-1. Update `src/lib/components/RackDevice.svelte`:
-   - Add `placementId: string` prop
-   - Update image lookup:
-     ```typescript
-     const deviceImage = $derived.by(() => {
-       if (displayMode !== 'image') return null;
-       const face = rackView === 'rear' ? 'rear' : 'front';
-       return imageStore.getImageForPlacement(device.slug, placementId, face);
-     });
-     ```
-
-2. Update `src/lib/components/Rack.svelte`:
-   - Pass `placementId={placedDevice.id}` to RackDevice
-
-## TDD
-Write/update tests:
-- Test RackDevice receives and uses placementId prop
-- E2E: Test device with placement override shows override image
-- E2E: Test device without override shows device type image
-
-## Files to modify
-- `src/lib/components/RackDevice.svelte`
-- `src/lib/components/Rack.svelte`
-- `src/tests/RackDevice.test.ts` (if exists)
-- `e2e/device-images.spec.ts` (add placement override test)
-
-## COMMIT CHECKPOINT
-```bash
-# Verify
-npm run test:run  # Unit tests pass
-npm run check  # TypeScript compiles
-
-# Commit
-git add -A
-git commit -m "feat(images): update RackDevice to use placement ID for image lookup"
-````
-
-````
-
----
-
-### Prompt 10: Add Image Override UI to EditPanel
-
-```text
-Add UI to EditPanel for uploading placement-level image overrides.
-
-## Context
-When a device is selected, users should be able to upload a custom image for that specific placement, overriding the device type default.
-
-## Requirements
-
-1. Update `src/lib/components/EditPanel.svelte`:
-
-   **When device is selected, add image section:**
-   - Show current image (placement override or device type default)
-   - Show status: "Using default image" or "Custom image"
-   - ImageUpload component for uploading new image
-   - "Reset to default" button when placement override exists
-
-2. Wire up handlers:
-   ```typescript
-   function handlePlacementImageUpload(imageData: ImageData, face: 'front' | 'rear') {
-     const placementId = selectedDeviceInfo.placedDevice.id;
-     imageStore.setPlacementImage(placementId, face, imageData);
+   const isFullDepth = deviceType.is_full_depth !== false;
+   if (
+   	!canPlaceDevice(
+   		layout.rack,
+   		layout.device_types,
+   		deviceType.u_height,
+   		newPosition,
+   		deviceIndex,
+   		device.face,
+   		isFullDepth
+   	)
+   ) {
+   	return false;
    }
+   ```
 
-   function handleResetToDefault(face: 'front' | 'rear') {
-     const placementId = selectedDeviceInfo.placedDevice.id;
-     imageStore.removePlacementImage(placementId, face);
-   }
-````
+Note: You'll need to update the `canPlaceDevice()` signature in collision.ts to accept the `isFullDepth` parameter for the NEW device being placed.
 
-3. Show image preview in EditPanel (thumbnail of current image)
-
-## TDD
-
-- E2E test: Select device → upload image → verify image appears on device
-- E2E test: Upload override → click "Reset to default" → verify default returns
-- E2E test: Upload override → save archive → reload → verify override persists
-
-## Files to modify
-
-- `src/lib/components/EditPanel.svelte`
-- `e2e/device-images.spec.ts` (add EditPanel image tests)
-
-## COMMIT CHECKPOINT
-
-```bash
-# Verify
-npm run test:run  # Unit tests pass
-npm run check  # TypeScript compiles
-npm run dev  # Manual: select device, upload image, verify in rack
-
-# Commit
-git add -A
-git commit -m "feat(images): add image override UI to EditPanel"
-```
+Run `npm run test:run` to verify all tests pass.
 
 ````
 
 ---
 
-### Prompt 11: Auto-Process User Uploads
+### Prompt 5: Add 0.5U movement tests (TDD)
 
 ```text
-Auto-process user-uploaded images: resize to 400px max width and convert to WebP.
+Add tests for arrow key movement with 0.5U devices.
 
-## Context
-To keep archives consistent and lean, user uploads should be processed the same way bundled images are.
+**File:** `src/tests/keyboard-handler.test.ts` (create or add to existing component tests)
 
-## Requirements
+Since KeyboardHandler is a Svelte component, we may need integration tests or to test the movement logic separately.
 
-1. Update `src/lib/utils/imageUpload.ts`:
+**Alternative approach:** Add tests to `src/tests/layout-store.test.ts` for the movement increment behavior:
 
-   **Add processing function:**
-   ```typescript
-   async function processImage(blob: Blob): Promise<Blob> {
-     // Create image element
-     const img = await createImageBitmap(blob);
+1. Test 0.5U device movement:
+   - Place 0.5U device at position 1
+   - Call moveDeviceRecorded with newPosition 1.5 → should succeed
+   - Verify device.position === 1.5
 
-     // Calculate new dimensions (400px max width)
-     const maxWidth = 400;
-     let { width, height } = img;
-     if (width > maxWidth) {
-       height = (height / width) * maxWidth;
-       width = maxWidth;
-     }
+2. Test movement respects face:
+   - Place front device at U5
+   - Place rear device at U3
+   - Move rear device to U5 → should succeed
 
-     // Draw to canvas
-     const canvas = document.createElement('canvas');
-     canvas.width = width;
-     canvas.height = height;
-     const ctx = canvas.getContext('2d')!;
-     ctx.drawImage(img, 0, 0, width, height);
+For KeyboardHandler specifically, consider E2E tests in Playwright:
+- Place 0.5U device
+- Press arrow up
+- Verify device moved to 1.5, not 2
 
-     // Convert to WebP blob
-     return new Promise((resolve) => {
-       canvas.toBlob((blob) => resolve(blob!), 'image/webp', 0.9);
-     });
-   }
+Run tests to see which fail (the logic is currently hardcoded to ±1 increments).
 ````
-
-2. Integrate into `fileToImageData()`:
-   - Process the file blob before creating ImageData
-   - Update filename to .webp extension
-
-3. Skip processing for images already under 400px width
-
-## TDD
-
-Write tests:
-
-- Test image >400px is resized to 400px width
-- Test image <400px is not resized
-- Test output format is WebP
-- Test aspect ratio is preserved
-
-## Files to modify
-
-- `src/lib/utils/imageUpload.ts`
-- `src/tests/imageUpload.test.ts` (add processing tests)
-
-## COMMIT CHECKPOINT
-
-```bash
-# Verify
-npm run test:run  # Image upload processing tests pass
-
-# Commit
-git add -A
-git commit -m "feat(images): auto-process user uploads (resize + WebP)"
-```
-
-**Phase 3 Complete!** Full two-level image system is now functional.
 
 ---
 
-### Prompt 12: E2E Tests and Final Polish
+### Prompt 6: Fix KeyboardHandler movement logic
 
 ````text
-Add comprehensive E2E tests and ensure the full image workflow is tested.
+Fix the arrow key movement in KeyboardHandler to use device height as increment and respect face.
 
-## Requirements
+**File:** `src/lib/components/KeyboardHandler.svelte`
 
-1. Create/update `e2e/device-images.spec.ts`:
-   - Test bundled images appear on new layout in image mode
-   - Test custom device type image upload via AddDeviceForm
-   - Test placement override upload via EditPanel
-   - Test "Reset to default" restores device type image
-   - Test archive save/load round-trip preserves all images
+**Changes:**
 
-2. Verify full workflow manually:
-   - New rack → add starter device → switch to image mode → see bundled image
-   - Upload custom image for device type → all instances show new image
-   - Upload placement override → only that instance shows override
-   - Save → reload → all images persist correctly
-
-## COMMIT CHECKPOINT
-```bash
-# Verify
-npm run test:run  # All unit tests pass
-npm run test:e2e  # All E2E tests pass
-
-# Commit
-git add -A
-git commit -m "test(images): add comprehensive E2E tests for image system"
+1. Add import at top:
+   ```typescript
+   import { canPlaceDevice } from '$lib/utils/collision';
 ````
 
-**Implementation Complete!**
+2. In `moveSelectedDevice()` function (around line 242):
+
+   Change:
+
+   ```typescript
+   let newPosition = placedDevice.position + direction;
+   ```
+
+   To:
+
+   ```typescript
+   const moveIncrement = device.u_height;
+   let newPosition = placedDevice.position + direction * moveIncrement;
+   ```
+
+3. Replace the inline collision check (lines 247-259) with canPlaceDevice:
+
+   ```typescript
+   const isFullDepth = device.is_full_depth !== false;
+   const isValid = canPlaceDevice(
+   	rack,
+   	layoutStore.device_types,
+   	device.u_height,
+   	newPosition,
+   	selectionStore.selectedDeviceIndex!,
+   	placedDevice.face,
+   	isFullDepth
+   );
+
+   if (isValid) {
+   	layoutStore.moveDevice(
+   		selectionStore.selectedRackId!,
+   		selectionStore.selectedDeviceIndex!,
+   		newPosition
+   	);
+   	return;
+   }
+   ```
+
+4. Update the leapfrog while-loop increment (line 272):
+   ```typescript
+   newPosition += direction * moveIncrement;
+   ```
+
+Run `npm run test:run` and `npm run test:e2e` to verify.
+
+````
+
+---
+
+### Prompt 7: Update starter library with depth properties
+
+```text
+Add `is_full_depth` property to starter library devices.
+
+**File:** `src/lib/data/starterLibrary.ts`
+
+**Changes:**
+
+1. Update `StarterDeviceSpec` interface:
+   ```typescript
+   interface StarterDeviceSpec {
+     name: string;
+     u_height: number;
+     category: DeviceCategory;
+     is_full_depth?: boolean;  // Add this
+   }
+````
+
+2. Add `is_full_depth: false` to these devices (they don't occupy full rack depth):
+   - Blank panels: '0.5U Blank', '1U Blank', '2U Blank'
+   - Shelves: '1U Shelf', '2U Shelf'
+   - Cable management: '1U Brush Panel', '1U Cable Management'
+   - Patch panels: '24-Port Patch Panel', '48-Port Patch Panel'
+
+3. Update `getStarterLibrary()` to include `is_full_depth` in output:
+   ```typescript
+   export function getStarterLibrary(): DeviceType[] {
+   	return STARTER_DEVICES.map((spec) => ({
+   		slug: slugify(spec.name),
+   		u_height: spec.u_height,
+   		model: spec.name,
+   		is_full_depth: spec.is_full_depth, // Add this (undefined = true default)
+   		rackarr: {
+   			colour: CATEGORY_COLOURS[spec.category],
+   			category: spec.category
+   		}
+   	}));
+   }
+   ```
+
+Run `npm run test:run` to verify starter library tests still pass.
+
+````
+
+---
+
+### Prompt 8: Update ROADMAP.md and run final tests
+
+```text
+Update the ROADMAP.md to mark completed issues and run final verification.
+
+**File:** `docs/planning/ROADMAP.md`
+
+**Changes:**
+
+1. Mark Issue 1 as complete (all sub-issues fixed):
+   - Add `[x]` markers or move to a "Resolved" section
+
+2. Mark Issue 3.1 as complete (KVM capitalization fixed)
+
+3. Mark Issue 2 as complete (after this implementation)
+
+**Verification:**
+
+Run the full test suite:
+```bash
+npm run test:run
+npm run test:e2e
+npm run lint
+npm run check
+````
+
+**Manual verification checklist:**
+
+1. Start dev server: `npm run dev`
+2. Create a new layout
+3. Place a 1U Blank (half-depth) at U10 on front
+4. Switch to rear view
+5. Place a 1U Blank at U10 on rear → should succeed
+6. Place a 0.5U Blank at U5
+7. Select it and press arrow up → should move to U5.5, not U6
+8. Verify no console errors
+
+````
+
+---
+
+### Prompt 9: Integration cleanup and edge case handling
+
+```text
+Final cleanup and edge case verification.
+
+**Tasks:**
+
+1. Verify schema allows 0.5 increments for position:
+   - Check `src/lib/schemas/layout.ts` for position validation
+   - Ensure positions like 1.5, 2.5 are valid
+
+2. Check undo/redo still works:
+   - Place device, undo, redo
+   - Move device with arrow keys, undo, redo
+   - Verify face is preserved through undo/redo
+
+3. Check drag-and-drop still works:
+   - `src/lib/utils/dragdrop.ts` already uses `canPlaceDevice()`
+   - Verify it passes depth info correctly
+
+4. Run the build:
+   ```bash
+   npm run build
+````
+
+5. If any issues found, fix them and re-run tests.
+
+The implementation is complete when:
+
+- All unit tests pass
+- All E2E tests pass
+- Lint and type check pass
+- Build succeeds
+- Manual verification passes
+
+````
+
+---
+
+### Prompt 10: Update SPEC.md documentation
+
+```text
+Update the technical specification to document the new collision and movement behavior.
+
+**File:** `docs/planning/SPEC.md`
+
+**Changes:**
+
+1. In **Section 3.6 Constraints**, add a new row:
+   | Arrow key movement | Increment equals device u_height |
+
+2. Add a new **Section 3.7 Collision Detection** (or add to existing section):
+
+   ```markdown
+   ### 3.7 Collision Detection
+
+   Two devices collide if BOTH conditions are true:
+   1. Their U ranges overlap (position to position + u_height - 1)
+   2. Their faces collide
+
+   **Face Collision Rules:**
+
+   | Face A | Face B | Either Full-Depth? | Collision? |
+   |--------|--------|-------------------|------------|
+   | front  | front  | any               | YES        |
+   | rear   | rear   | any               | YES        |
+   | both   | any    | any               | YES        |
+   | front  | rear   | YES               | YES        |
+   | front  | rear   | NO (both half)    | NO         |
+
+   **Defaults:**
+   - `is_full_depth` defaults to `true` when not specified
+   - Half-depth devices (blanks, shelves, patch panels, cable management) are explicitly marked `is_full_depth: false`
+````
+
+3. In **Section 11.2 Device Types**, add a note:
+
+   > Devices marked with `is_full_depth: false`: Blanks, Shelves, Patch Panels, Cable Management
+
+4. Verify the version number is updated if making a release.
+
+Commit message: "docs(spec): add collision detection and movement rules"
 
 ```
 
 ---
 
-## Execution Order
+## Collision Logic Reference
 
-```
-
-Phase 2: Bundled Images (4 commits)
-├── Prompt 1: Directory structure + processing script
-├── Prompt 2: Download + process NetBox images
-├── Prompt 3: Bundled image manifest
-└── Prompt 4: Load bundled images on init
-
-Phase 3: Placement Overrides (8 commits)
-├── Prompt 5: Add id field to PlacedDevice type
-├── Prompt 6: Generate UUID on placement
-├── Prompt 7: Refactor image store for two-level
-├── Prompt 8: Update archive format
-├── Prompt 9: Update RackDevice for placement lookup
-├── Prompt 10: EditPanel image override UI
-├── Prompt 11: Auto-process user uploads
-└── Prompt 12: E2E tests and final polish
-
-```
-
-**Total: 12 commits**
-
-**Parallelization:** Prompts 5-6 (PlacedDevice id) can be done in parallel with 1-4 (bundled images) if desired, then merged before Prompt 7.
+| Device A Face | Device A Depth | Device B Face | Device B Depth | Collide? |
+|---------------|----------------|---------------|----------------|----------|
+| front | full | front | any | YES |
+| front | full | rear | any | YES |
+| front | half | front | any | YES |
+| front | half | rear | full | YES |
+| front | half | rear | half | **NO** |
+| rear | full | rear | any | YES |
+| both | any | any | any | YES |
 
 ---
 
-## Commit Summary
-
-| # | Prompt | Commit Message |
-|---|--------|----------------|
-| 1 | 1 | `feat(images): add directory structure and processing script` |
-| 2 | 2 | `feat(images): add bundled device images from NetBox` |
-| 3 | 3 | `feat(images): create bundled image manifest with lookup function` |
-| 4 | 4 | `feat(images): load bundled images on app initialization` |
-| 5 | 5 | `feat(images): add id field to PlacedDevice type and schema` |
-| 6 | 6 | `feat(images): generate UUID on device placement` |
-| 7 | 7 | `feat(images): refactor image store for two-level storage` |
-| 8 | 8 | `feat(images): update archive format for two-level image storage` |
-| 9 | 9 | `feat(images): update RackDevice to use placement ID for image lookup` |
-| 10 | 10 | `feat(images): add image override UI to EditPanel` |
-| 11 | 11 | `feat(images): auto-process user uploads (resize + WebP)` |
-| 12 | 12 | `test(images): add comprehensive E2E tests for image system` |
-
----
-
-## Pre-commit Hook Verification
-
-Each commit will automatically run:
-1. `lint-staged` - ESLint + Prettier on changed files
-2. `npm run test:run` - All unit tests
-
-If either fails, the commit is blocked. Fix issues before retrying.
-
----
-
-## Testing Checkpoints
-
-| Prompt | Manual Verification |
-|--------|---------------------|
-| 1 | `npm run process-images` completes without errors |
-| 2 | WebP files exist in `src/lib/assets/device-images/`, size <500KB |
-| 3 | `getBundledImage('1u-server', 'front')` returns URL in tests |
-| 4 | New rack in image mode shows device images |
-| 5 | Schema validates PlacedDevice with/without id |
-| 6 | Placed devices have UUID (check console/debugger) |
-| 7 | Two-level store tests all pass |
-| 8 | Save/load archive preserves both image types |
-| 9 | Placement override shows instead of device type default |
-| 10 | EditPanel image upload works, "Reset to default" works |
-| 11 | Large uploaded images are resized to 400px max |
-| 12 | All E2E tests pass |
-
----
-
-_Generated from implementation plan. See SPEC.md Section 16 for specification._
+_This plan was generated on 2025-12-12._
 ```

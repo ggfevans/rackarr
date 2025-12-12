@@ -2,6 +2,7 @@ import { describe, it, expect } from 'vitest';
 import {
 	getDeviceURange,
 	doRangesOverlap,
+	doFacesCollide,
 	canPlaceDevice,
 	findCollisions,
 	findValidDropPositions,
@@ -246,22 +247,22 @@ describe('Collision Detection', () => {
 
 describe('Face Independence', () => {
 	describe('canPlaceDevice with face parameter', () => {
-		it('allows placing device on rear when front is occupied at same position', () => {
-			// Device mounted on front at position 5
-			const device = createTestDevice('device-1', 2);
+		it('allows placing half-depth device on rear when half-depth front is occupied at same position', () => {
+			// Half-depth device mounted on front at position 5
+			const device = createTestDevice('device-1', 2, { is_full_depth: false });
 			const rack = createTestRack(42, [{ device_type: 'device-1', position: 5, face: 'front' }]);
 
-			// Should be able to place a 2U device on rear at same position
-			expect(canPlaceDevice(rack, [device], 2, 5, undefined, 'rear')).toBe(true);
+			// Should be able to place a 2U half-depth device on rear at same position
+			expect(canPlaceDevice(rack, [device], 2, 5, undefined, 'rear', false)).toBe(true);
 		});
 
-		it('allows placing device on front when rear is occupied at same position', () => {
-			// Device mounted on rear at position 5
-			const device = createTestDevice('device-1', 2);
+		it('allows placing half-depth device on front when half-depth rear is occupied at same position', () => {
+			// Half-depth device mounted on rear at position 5
+			const device = createTestDevice('device-1', 2, { is_full_depth: false });
 			const rack = createTestRack(42, [{ device_type: 'device-1', position: 5, face: 'rear' }]);
 
-			// Should be able to place a 2U device on front at same position
-			expect(canPlaceDevice(rack, [device], 2, 5, undefined, 'front')).toBe(true);
+			// Should be able to place a 2U half-depth device on front at same position
+			expect(canPlaceDevice(rack, [device], 2, 5, undefined, 'front', false)).toBe(true);
 		});
 
 		it('blocks placement on same face at overlapping position', () => {
@@ -313,12 +314,12 @@ describe('Face Independence', () => {
 	});
 
 	describe('findCollisions with face awareness', () => {
-		it('does not report collision when devices are on different faces', () => {
-			const device = createTestDevice('device-1', 2);
+		it('does not report collision when half-depth devices are on different faces', () => {
+			const device = createTestDevice('device-1', 2, { is_full_depth: false });
 			const rack = createTestRack(42, [{ device_type: 'device-1', position: 5, face: 'front' }]);
 
-			// Checking for collisions on rear should find none
-			const collisions = findCollisions(rack, [device], 2, 5, undefined, 'rear');
+			// Checking for collisions on rear with half-depth device should find none
+			const collisions = findCollisions(rack, [device], 2, 5, undefined, 'rear', false);
 			expect(collisions).toEqual([]);
 		});
 
@@ -330,21 +331,141 @@ describe('Face Independence', () => {
 			const collisions = findCollisions(rack, [device], 2, 5, undefined, 'front');
 			expect(collisions).toHaveLength(1);
 		});
+
+		it('reports collision when full-depth devices are on different faces', () => {
+			const device = createTestDevice('device-1', 2); // default full-depth
+			const rack = createTestRack(42, [{ device_type: 'device-1', position: 5, face: 'front' }]);
+
+			// Checking for collisions on rear with full-depth should find collision
+			const collisions = findCollisions(rack, [device], 2, 5, undefined, 'rear', true);
+			expect(collisions).toHaveLength(1);
+		});
 	});
 
 	describe('findValidDropPositions with face awareness', () => {
-		it('returns all positions when placing on opposite face', () => {
-			const device = createTestDevice('device-1', 2);
-			// Front is fully occupied from position 1-10
+		it('returns all positions when placing half-depth on opposite face of half-depth devices', () => {
+			const device = createTestDevice('device-1', 2, { is_full_depth: false });
+			// Front is fully occupied from position 1-10 with half-depth devices
 			const placedDevices = [];
 			for (let i = 1; i <= 9; i += 2) {
 				placedDevices.push({ device_type: 'device-1', position: i, face: 'front' as DeviceFace });
 			}
 			const rack = createTestRack(10, placedDevices);
 
-			// Rear should have all positions available
-			const positions = findValidDropPositions(rack, [device], 2, 'rear');
+			// Rear should have all positions available for half-depth devices
+			const positions = findValidDropPositions(rack, [device], 2, 'rear', false);
 			expect(positions).toEqual([1, 2, 3, 4, 5, 6, 7, 8, 9]);
+		});
+	});
+});
+
+describe('Depth-Aware Collision Detection', () => {
+	describe('doFacesCollide with depth parameters', () => {
+		// Same face always collides regardless of depth
+		it('returns true for front + front (any depth)', () => {
+			expect(doFacesCollide('front', 'front', true, true)).toBe(true);
+			expect(doFacesCollide('front', 'front', false, false)).toBe(true);
+			expect(doFacesCollide('front', 'front', true, false)).toBe(true);
+		});
+
+		it('returns true for rear + rear (any depth)', () => {
+			expect(doFacesCollide('rear', 'rear', true, true)).toBe(true);
+			expect(doFacesCollide('rear', 'rear', false, false)).toBe(true);
+			expect(doFacesCollide('rear', 'rear', true, false)).toBe(true);
+		});
+
+		// 'both' face always collides
+		it('returns true for both + any face (any depth)', () => {
+			expect(doFacesCollide('both', 'front', true, true)).toBe(true);
+			expect(doFacesCollide('both', 'rear', false, false)).toBe(true);
+			expect(doFacesCollide('front', 'both', true, false)).toBe(true);
+			expect(doFacesCollide('rear', 'both', false, true)).toBe(true);
+			expect(doFacesCollide('both', 'both', true, true)).toBe(true);
+		});
+
+		// Opposite faces: collision depends on depth
+		it('returns false for front(half) + rear(half) - NEW BEHAVIOR', () => {
+			// Two half-depth devices on opposite faces do NOT collide
+			expect(doFacesCollide('front', 'rear', false, false)).toBe(false);
+			expect(doFacesCollide('rear', 'front', false, false)).toBe(false);
+		});
+
+		it('returns true for front(full) + rear(any)', () => {
+			// Full-depth device on front blocks rear
+			expect(doFacesCollide('front', 'rear', true, true)).toBe(true);
+			expect(doFacesCollide('front', 'rear', true, false)).toBe(true);
+		});
+
+		it('returns true for front(any) + rear(full)', () => {
+			// Full-depth device on rear blocks front
+			expect(doFacesCollide('front', 'rear', false, true)).toBe(true);
+			expect(doFacesCollide('front', 'rear', true, true)).toBe(true);
+		});
+
+		// Default behavior (no depth params) should assume full-depth
+		it('defaults to full-depth when depth params not provided', () => {
+			// Calling with 2 params should behave as if both are full-depth
+			expect(doFacesCollide('front', 'rear')).toBe(true);
+			expect(doFacesCollide('rear', 'front')).toBe(true);
+		});
+	});
+
+	describe('canPlaceDevice with depth awareness', () => {
+		it('allows placing half-depth rear device when half-depth front device exists at same U', () => {
+			// Half-depth device on front at position 5
+			const halfDepthDevice = createTestDevice('half-depth', 2, { is_full_depth: false });
+			const rack = createTestRack(42, [{ device_type: 'half-depth', position: 5, face: 'front' }]);
+
+			// Should be able to place another half-depth device on rear at same position
+			// Note: Need to pass isFullDepth=false for the new device
+			expect(canPlaceDevice(rack, [halfDepthDevice], 2, 5, undefined, 'rear', false)).toBe(true);
+		});
+
+		it('blocks placing half-depth rear device when full-depth front device exists at same U', () => {
+			// Full-depth device on front at position 5
+			const fullDepthDevice = createTestDevice('full-depth', 2, { is_full_depth: true });
+			const rack = createTestRack(42, [{ device_type: 'full-depth', position: 5, face: 'front' }]);
+
+			// Should NOT be able to place on rear at same position (full-depth blocks it)
+			expect(canPlaceDevice(rack, [fullDepthDevice], 2, 5, undefined, 'rear', false)).toBe(false);
+		});
+
+		it('blocks placing full-depth rear device when half-depth front device exists at same U', () => {
+			// Half-depth device on front at position 5
+			const halfDepthDevice = createTestDevice('half-depth', 2, { is_full_depth: false });
+			const rack = createTestRack(42, [{ device_type: 'half-depth', position: 5, face: 'front' }]);
+
+			// Should NOT be able to place full-depth on rear at same position
+			expect(canPlaceDevice(rack, [halfDepthDevice], 2, 5, undefined, 'rear', true)).toBe(false);
+		});
+
+		it('allows placing half-depth front device when half-depth rear device exists at same U', () => {
+			// Half-depth device on rear at position 5
+			const halfDepthDevice = createTestDevice('half-depth', 2, { is_full_depth: false });
+			const rack = createTestRack(42, [{ device_type: 'half-depth', position: 5, face: 'rear' }]);
+
+			// Should be able to place another half-depth device on front at same position
+			expect(canPlaceDevice(rack, [halfDepthDevice], 2, 5, undefined, 'front', false)).toBe(true);
+		});
+
+		it('defaults to full-depth when isFullDepth param not provided', () => {
+			// Half-depth device on front at position 5
+			const halfDepthDevice = createTestDevice('half-depth', 2, { is_full_depth: false });
+			const rack = createTestRack(42, [{ device_type: 'half-depth', position: 5, face: 'front' }]);
+
+			// Without isFullDepth param, should default to full-depth (true) and block
+			expect(canPlaceDevice(rack, [halfDepthDevice], 2, 5, undefined, 'rear')).toBe(false);
+		});
+
+		it('handles undefined is_full_depth on existing device as full-depth', () => {
+			// Device without explicit is_full_depth (defaults to true/full-depth)
+			const defaultDevice = createTestDevice('default-device', 2);
+			const rack = createTestRack(42, [
+				{ device_type: 'default-device', position: 5, face: 'front' }
+			]);
+
+			// Should block rear placement because default is full-depth
+			expect(canPlaceDevice(rack, [defaultDevice], 2, 5, undefined, 'rear', false)).toBe(false);
 		});
 	});
 });

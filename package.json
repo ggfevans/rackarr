@@ -34,6 +34,7 @@
 		"@sveltejs/vite-plugin-svelte": "^6.2.1",
 		"@testing-library/jest-dom": "^6.6.3",
 		"@testing-library/svelte": "^5.2.6",
+		"@testing-library/user-event": "^14.6.1",
 		"@types/js-yaml": "^4.0.9",
 		"@types/node": "^24.10.3",
 		"eslint": "^9.39.1",
@@ -64,6 +65,7 @@
 	},
 	"dependencies": {
 		"@lucide/svelte": "^0.559.0",
+		"bits-ui": "^2.14.4",
 		"js-yaml": "^4.1.1",
 		"jspdf": "^3.0.4",
 		"jszip": "^3.10.1",

@@ -395,14 +395,16 @@ describe('Layout Store (v0.2)', () => {
 			expect(store.layout.rack.devices[0]!.face).toBe('both');
 		});
 
-		it('places device with specified rear face', () => {
+		it('places half-depth device with specified rear face', () => {
 			const store = getLayoutStore();
 			store.addRack('Test Rack', 42);
+			// Half-depth device can be explicitly placed on rear
 			const deviceType = store.addDeviceType({
-				name: 'Test',
-				u_height: 2,
-				category: 'server',
-				colour: '#4A90D9'
+				name: 'Rear Panel',
+				u_height: 1,
+				category: 'patch-panel',
+				colour: '#4A90D9',
+				is_full_depth: false
 			});
 			store.placeDevice('rack-0', deviceType.slug, 5, 'rear');
 			expect(store.layout.rack.devices[0]!.face).toBe('rear');
@@ -1239,11 +1241,12 @@ describe('Layout Store (v0.2)', () => {
 			expect(store.layout.rack.devices[0]!.face).toBe('both');
 		});
 
-		it('explicit face parameter overrides depth-based default', () => {
+		it('full-depth device ignores explicit face and uses both', () => {
 			const store = getLayoutStore();
 			store.addRack('Test Rack', 42);
 
-			// Full-depth device but explicitly placed on front only
+			// Full-depth devices physically occupy both front and rear
+			// Even if 'front' is passed (e.g., from RackDualView drop), it should be 'both'
 			const deviceType = store.addDeviceType({
 				name: 'Full Depth Server',
 				u_height: 2,
@@ -1253,7 +1256,26 @@ describe('Layout Store (v0.2)', () => {
 			});
 
 			store.placeDevice('rack-0', deviceType.slug, 5, 'front');
-			expect(store.layout.rack.devices[0]!.face).toBe('front');
+			// Full-depth devices ALWAYS use 'both' regardless of passed face
+			expect(store.layout.rack.devices[0]!.face).toBe('both');
+		});
+
+		it('half-depth device respects explicit face parameter', () => {
+			const store = getLayoutStore();
+			store.addRack('Test Rack', 42);
+
+			// Half-depth devices can be front-mounted or rear-mounted
+			const deviceType = store.addDeviceType({
+				name: 'Patch Panel',
+				u_height: 1,
+				category: 'patch-panel',
+				colour: '#7B68EE',
+				is_full_depth: false
+			});
+
+			// Explicitly place on rear
+			store.placeDevice('rack-0', deviceType.slug, 5, 'rear');
+			expect(store.layout.rack.devices[0]!.face).toBe('rear');
 		});
 	});
 });

@@ -836,11 +836,11 @@ function placeDeviceRecorded(deviceTypeSlug: string, position: number, face?: De
 		}
 	}
 
-	// Determine face based on device depth if not explicitly specified
-	// Full-depth devices default to 'both' (visible front and rear)
-	// Half-depth devices default to 'front'
+	// Determine face based on device depth
+	// Full-depth devices ALWAYS use 'both' (they physically occupy front and rear)
+	// Half-depth devices use the specified face, or default to 'front'
 	const isFullDepth = deviceType.is_full_depth !== false;
-	const effectiveFace: DeviceFace = face ?? (isFullDepth ? 'both' : DEFAULT_DEVICE_FACE);
+	const effectiveFace: DeviceFace = isFullDepth ? 'both' : (face ?? DEFAULT_DEVICE_FACE);
 
 	if (
 		!canPlaceDevice(

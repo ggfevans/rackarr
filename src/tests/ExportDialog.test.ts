@@ -1,9 +1,18 @@
 import { describe, it, expect, vi } from 'vitest';
 import { render, screen, fireEvent } from '@testing-library/svelte';
 import ExportDialog from '$lib/components/ExportDialog.svelte';
-import type { Rack } from '$lib/types';
+import type { Rack, DeviceType } from '$lib/types';
 
 describe('ExportDialog', () => {
+	const mockDeviceTypes: DeviceType[] = [
+		{
+			slug: 'test-server',
+			model: 'Test Server',
+			u_height: 2,
+			rackarr: { colour: '#4A90D9', category: 'server' }
+		}
+	];
+
 	const mockRacks: Rack[] = [
 		{
 			name: 'Rack 1',
@@ -30,7 +39,7 @@ describe('ExportDialog', () => {
 	describe('Dialog Visibility', () => {
 		it('renders when open=true', () => {
 			render(ExportDialog, {
-				props: { open: true, racks: mockRacks, selectedRackId: null }
+				props: { open: true, racks: mockRacks, deviceTypes: mockDeviceTypes, selectedRackId: null }
 			});
 
 			expect(screen.getByRole('dialog')).toBeInTheDocument();
@@ -40,7 +49,7 @@ describe('ExportDialog', () => {
 
 		it('hidden when open=false', () => {
 			render(ExportDialog, {
-				props: { open: false, racks: mockRacks, selectedRackId: null }
+				props: { open: false, racks: mockRacks, deviceTypes: mockDeviceTypes, selectedRackId: null }
 			});
 
 			expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
@@ -50,7 +59,7 @@ describe('ExportDialog', () => {
 	describe('Format Options', () => {
 		it('shows format options including PDF', () => {
 			render(ExportDialog, {
-				props: { open: true, racks: mockRacks, selectedRackId: null }
+				props: { open: true, racks: mockRacks, deviceTypes: mockDeviceTypes, selectedRackId: null }
 			});
 
 			const formatSelect = screen.getByLabelText(/format/i);
@@ -65,7 +74,7 @@ describe('ExportDialog', () => {
 
 		it('defaults to PNG format', () => {
 			render(ExportDialog, {
-				props: { open: true, racks: mockRacks, selectedRackId: null }
+				props: { open: true, racks: mockRacks, deviceTypes: mockDeviceTypes, selectedRackId: null }
 			});
 
 			const formatSelect = screen.getByLabelText(/format/i) as HTMLSelectElement;
@@ -74,7 +83,7 @@ describe('ExportDialog', () => {
 
 		it('can select PDF format', async () => {
 			render(ExportDialog, {
-				props: { open: true, racks: mockRacks, selectedRackId: null }
+				props: { open: true, racks: mockRacks, deviceTypes: mockDeviceTypes, selectedRackId: null }
 			});
 
 			const formatSelect = screen.getByLabelText(/format/i) as HTMLSelectElement;
@@ -86,7 +95,7 @@ describe('ExportDialog', () => {
 	describe('Include Options', () => {
 		it('shows include legend checkbox (default unchecked)', () => {
 			render(ExportDialog, {
-				props: { open: true, racks: mockRacks, selectedRackId: null }
+				props: { open: true, racks: mockRacks, deviceTypes: mockDeviceTypes, selectedRackId: null }
 			});
 
 			const checkbox = screen.getByLabelText(/include legend/i) as HTMLInputElement;
@@ -98,7 +107,7 @@ describe('ExportDialog', () => {
 	describe('Background Options', () => {
 		it('shows background dropdown with dark, light options', () => {
 			render(ExportDialog, {
-				props: { open: true, racks: mockRacks, selectedRackId: null }
+				props: { open: true, racks: mockRacks, deviceTypes: mockDeviceTypes, selectedRackId: null }
 			});
 
 			const bgSelect = screen.getByLabelText(/^background$/i);
@@ -109,7 +118,7 @@ describe('ExportDialog', () => {
 
 		it('transparent checkbox shown for PNG and SVG formats', async () => {
 			render(ExportDialog, {
-				props: { open: true, racks: mockRacks, selectedRackId: null }
+				props: { open: true, racks: mockRacks, deviceTypes: mockDeviceTypes, selectedRackId: null }
 			});
 
 			// Default is PNG - transparent checkbox should be visible
@@ -132,7 +141,7 @@ describe('ExportDialog', () => {
 
 		it('transparent checkbox defaults to unchecked', () => {
 			render(ExportDialog, {
-				props: { open: true, racks: mockRacks, selectedRackId: null }
+				props: { open: true, racks: mockRacks, deviceTypes: mockDeviceTypes, selectedRackId: null }
 			});
 
 			const transparentCheckbox = screen.getByLabelText(
@@ -150,6 +159,7 @@ describe('ExportDialog', () => {
 				props: {
 					open: true,
 					racks: mockRacks,
+					deviceTypes: mockDeviceTypes,
 					selectedRackId: null,
 					onexport: (e: CustomEvent) => onExport(e.detail)
 				}
@@ -177,6 +187,7 @@ describe('ExportDialog', () => {
 				props: {
 					open: true,
 					racks: mockRacks,
+					deviceTypes: mockDeviceTypes,
 					selectedRackId: 'rack-1',
 					onexport: (e: CustomEvent) => onExport(e.detail)
 				}
@@ -217,6 +228,7 @@ describe('ExportDialog', () => {
 				props: {
 					open: true,
 					racks: mockRacks,
+					deviceTypes: mockDeviceTypes,
 					selectedRackId: null,
 					oncancel: onCancel
 				}
@@ -235,6 +247,7 @@ describe('ExportDialog', () => {
 				props: {
 					open: true,
 					racks: mockRacks,
+					deviceTypes: mockDeviceTypes,
 					selectedRackId: null,
 					oncancel: onCancel
 				}
@@ -249,7 +262,7 @@ describe('ExportDialog', () => {
 	describe('Export disabled state', () => {
 		it('export button disabled when no racks', () => {
 			render(ExportDialog, {
-				props: { open: true, racks: [], selectedRackId: null }
+				props: { open: true, racks: [], deviceTypes: mockDeviceTypes, selectedRackId: null }
 			});
 
 			const exportButton = screen.getByRole('button', { name: /^export$/i });
@@ -258,7 +271,7 @@ describe('ExportDialog', () => {
 
 		it('export button enabled when racks exist', () => {
 			render(ExportDialog, {
-				props: { open: true, racks: mockRacks, selectedRackId: null }
+				props: { open: true, racks: mockRacks, deviceTypes: mockDeviceTypes, selectedRackId: null }
 			});
 
 			const exportButton = screen.getByRole('button', { name: /^export$/i });

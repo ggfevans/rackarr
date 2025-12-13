@@ -445,6 +445,9 @@
 	<ExportDialog
 		open={exportDialogOpen}
 		racks={layoutStore.rack ? [layoutStore.rack] : []}
+		deviceTypes={layoutStore.device_types}
+		images={imageStore.getAllImages()}
+		displayMode={uiStore.displayMode}
 		selectedRackId={selectionStore.isRackSelected ? selectionStore.selectedId : null}
 		onexport={(e) => handleExportSubmit(e.detail)}
 		oncancel={handleExportCancel}

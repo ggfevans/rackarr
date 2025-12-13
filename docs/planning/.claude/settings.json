@@ -1,5 +1,10 @@
 {
 	"permissions": {
-		"allow": ["webfetch(github.com)"]
+		"allow": [
+			"webfetch(github.com)",
+			"Read(~/code/rackarr)",
+			"Update(~/code/rackarr)",
+			"Edit(~/code/rackarr)"
+		]
 	}
 }

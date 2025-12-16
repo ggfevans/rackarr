@@ -91,7 +91,7 @@ export function meetsUIComponentContrast(foreground: string, background: string)
  * These match the values in tokens.css.
  */
 export const tokenColors = {
-	// Neutrals
+	// Neutrals (kept for rack background)
 	'neutral-50': '#fafafa',
 	'neutral-100': '#f4f4f5',
 	'neutral-200': '#e4e4e7',
@@ -102,56 +102,105 @@ export const tokenColors = {
 	'neutral-700': '#3f3f46',
 	'neutral-800': '#27272a',
 	'neutral-900': '#18181b',
-	'neutral-950': '#09090b',
-
-	// Blue (Primary)
-	'blue-500': '#3b82f6',
-	'blue-600': '#2563eb',
-	'blue-700': '#1d4ed8',
-
-	// Red (Error)
-	'red-500': '#ef4444',
-	'red-600': '#dc2626',
-
-	// Green (Success)
-	'green-500': '#22c55e',
-	'green-600': '#16a34a',
-
-	// Amber (Warning)
-	'amber-500': '#f59e0b',
-	'amber-600': '#d97706'
+	'neutral-950': '#09090b'
 } as const;
 
 /**
- * Dark theme semantic colors.
+ * Dracula primitive color values for contrast testing.
+ * Official palette: https://draculatheme.com/spec
  */
-export const darkThemeColors = {
-	bg: tokenColors['neutral-950'],
-	surface: tokenColors['neutral-900'],
-	surfaceRaised: tokenColors['neutral-800'],
-	text: tokenColors['neutral-50'],
-	textMuted: tokenColors['neutral-400'],
-	textDisabled: tokenColors['neutral-600'],
-	selection: tokenColors['blue-500'],
-	focusRing: tokenColors['blue-500'],
-	error: tokenColors['red-500'],
-	success: tokenColors['green-500'],
-	warning: tokenColors['amber-500']
-};
+export const draculaColors = {
+	// Backgrounds
+	bgDarkest: '#191A21',
+	bgDarker: '#21222C',
+	bg: '#282A36',
+	bgLight: '#343746',
+	bgLighter: '#424450',
+	selection: '#44475A',
+
+	// Text
+	foreground: '#F8F8F2',
+	comment: '#6272A4',
+
+	// Accents
+	purple: '#BD93F9',
+	pink: '#FF79C6',
+	cyan: '#8BE9FD',
+	green: '#50FA7B',
+	orange: '#FFB86C',
+	red: '#FF5555',
+	yellow: '#F1FA8C'
+} as const;
 
 /**
- * Light theme semantic colors.
+ * Alucard primitive color values for contrast testing.
+ * Official Dracula light mode palette.
+ */
+export const alucardColors = {
+	// Backgrounds
+	bgDarkest: '#BCBAB3',
+	bgDarker: '#CECCC0',
+	bg: '#FFFBEB',
+	bgLight: '#DEDCCF',
+	bgLighter: '#ECE9DF',
+	selection: '#CFCFDE',
+	floating: '#EFEDDC',
+
+	// Text
+	foreground: '#1F1F1F',
+	comment: '#6C664B',
+
+	// Accents
+	purple: '#644AC9',
+	pink: '#A3144D',
+	cyan: '#036A96',
+	green: '#14710A',
+	orange: '#A34D14',
+	red: '#CB3A2A',
+	yellow: '#846E15'
+} as const;
+
+/**
+ * Dark theme semantic colors (Dracula).
+ * BRAND.md v0.6.0: Selection/focus uses pink, muted text improved contrast.
+ */
+export const darkThemeColors = {
+	bg: draculaColors.bg,
+	surface: draculaColors.bgLight,
+	surfaceRaised: draculaColors.bgLighter,
+	text: draculaColors.foreground,
+	textMuted: '#9A9A9A', // BRAND.md v0.6.0: improved contrast (5.1:1)
+	textDisabled: draculaColors.comment,
+	selection: draculaColors.pink, // BRAND.md v0.6.0: pink (not purple)
+	focusRing: draculaColors.pink, // BRAND.md v0.6.0: pink (not purple)
+	primary: draculaColors.cyan,
+	error: draculaColors.red,
+	success: draculaColors.green,
+	warning: draculaColors.orange,
+	border: draculaColors.selection
+} as const;
+
+/**
+ * Light theme semantic colors (Alucard).
+ * BRAND.md v0.6.0: Selection/focus uses pink.
  */
 export const lightThemeColors = {
-	bg: tokenColors['neutral-50'],
-	surface: '#ffffff',
-	surfaceRaised: tokenColors['neutral-100'],
-	text: tokenColors['neutral-950'],
-	textMuted: tokenColors['neutral-600'],
-	textDisabled: tokenColors['neutral-400'],
-	selection: tokenColors['blue-600'],
-	focusRing: tokenColors['blue-600'],
-	error: tokenColors['red-600'],
-	success: tokenColors['green-600'],
-	warning: tokenColors['amber-600']
-};
+	bg: alucardColors.bg,
+	surface: alucardColors.bgLight,
+	surfaceRaised: alucardColors.bgLighter,
+	text: alucardColors.foreground,
+	textMuted: alucardColors.comment, // Light theme already has good contrast (6.8:1)
+	textDisabled: alucardColors.comment,
+	selection: alucardColors.pink, // BRAND.md v0.6.0: pink (not purple)
+	focusRing: alucardColors.pink, // BRAND.md v0.6.0: pink (not purple)
+	primary: alucardColors.cyan,
+	error: alucardColors.red,
+	success: alucardColors.green,
+	warning: alucardColors.orange,
+	border: alucardColors.bgLight
+} as const;
+
+/**
+ * Rack background color (stays dark in both themes).
+ */
+export const RACK_BG = tokenColors['neutral-900'];

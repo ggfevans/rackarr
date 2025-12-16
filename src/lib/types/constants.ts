@@ -7,21 +7,27 @@ import type { DeviceCategory, RackView, DeviceFace } from './index';
 
 /**
  * Default colours for each device category
- * From spec Section 18.2
+ * From BRAND.md v0.6.0 - Muted Dracula palette for WCAG AA compliance
+ *
+ * Active categories: Muted Dracula variants (desaturated/darkened for readability)
+ * Passive categories: Dracula neutral colours for reduced visual noise
  */
 export const CATEGORY_COLOURS: Record<DeviceCategory, string> = {
-	server: '#4A90D9',
-	network: '#7B68EE',
-	'patch-panel': '#708090',
-	power: '#DC143C',
-	storage: '#228B22',
-	kvm: '#FF8C00',
-	'av-media': '#9932CC',
-	cooling: '#00CED1',
-	shelf: '#8B4513',
-	blank: '#2F4F4F',
-	'cable-management': '#4682B4',
-	other: '#808080'
+	// Active categories - Muted Dracula (WCAG AA compliant)
+	server: '#4A7A8A', // muted cyan (4.8:1)
+	network: '#7B6BA8', // muted purple (4.6:1)
+	storage: '#3D7A4A', // muted green (5.2:1)
+	power: '#A84A4A', // muted red (5.1:1)
+	kvm: '#A87A4A', // muted orange (4.5:1)
+	'av-media': '#A85A7A', // muted pink (4.7:1)
+	cooling: '#8A8A4A', // muted yellow (4.6:1)
+
+	// Passive categories - Dracula neutrals (unchanged)
+	shelf: '#6272A4', // comment - utility
+	blank: '#44475A', // selection - fades into background
+	'cable-management': '#6272A4', // comment - utility
+	'patch-panel': '#6272A4', // comment - passive infrastructure
+	other: '#6272A4' // comment - generic fallback
 } as const;
 
 /**

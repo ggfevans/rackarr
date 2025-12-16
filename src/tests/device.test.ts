@@ -63,12 +63,12 @@ describe('Device Utilities', () => {
 	});
 
 	describe('getDefaultColour', () => {
-		it('returns #4A90D9 for server', () => {
-			expect(getDefaultColour('server')).toBe('#4A90D9');
+		it('returns muted cyan for server', () => {
+			expect(getDefaultColour('server')).toBe('#4A7A8A');
 		});
 
-		it('returns #7B68EE for network', () => {
-			expect(getDefaultColour('network')).toBe('#7B68EE');
+		it('returns muted purple for network', () => {
+			expect(getDefaultColour('network')).toBe('#7B6BA8');
 		});
 
 		it('returns correct colour for each category', () => {

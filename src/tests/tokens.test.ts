@@ -46,6 +46,85 @@ describe('Design Token System', () => {
 		});
 	});
 
+	describe('Primitives - Dracula Colors', () => {
+		it('defines Dracula background tokens', () => {
+			// Background scale (dark to light)
+			expect(tokensCSS).toContain('--dracula-bg-darkest:');
+			expect(tokensCSS).toContain('--dracula-bg-darker:');
+			expect(tokensCSS).toContain('--dracula-bg:');
+			expect(tokensCSS).toContain('--dracula-bg-light:');
+			expect(tokensCSS).toContain('--dracula-bg-lighter:');
+			expect(tokensCSS).toContain('--dracula-selection:');
+		});
+
+		it('defines Dracula text tokens', () => {
+			expect(tokensCSS).toContain('--dracula-foreground:');
+			expect(tokensCSS).toContain('--dracula-comment:');
+		});
+
+		it('defines Dracula accent tokens', () => {
+			expect(tokensCSS).toContain('--dracula-purple:');
+			expect(tokensCSS).toContain('--dracula-pink:');
+			expect(tokensCSS).toContain('--dracula-cyan:');
+			expect(tokensCSS).toContain('--dracula-green:');
+			expect(tokensCSS).toContain('--dracula-orange:');
+			expect(tokensCSS).toContain('--dracula-red:');
+			expect(tokensCSS).toContain('--dracula-yellow:');
+		});
+
+		it('defines correct Dracula hex values', () => {
+			// Verify exact official Dracula palette values (lowercase per prettier)
+			expect(tokensCSS).toContain('#282a36'); // bg
+			expect(tokensCSS).toContain('#f8f8f2'); // foreground
+			expect(tokensCSS).toContain('#44475a'); // selection
+			expect(tokensCSS).toContain('#6272a4'); // comment
+			expect(tokensCSS).toContain('#bd93f9'); // purple
+			expect(tokensCSS).toContain('#ff79c6'); // pink
+			expect(tokensCSS).toContain('#8be9fd'); // cyan
+			expect(tokensCSS).toContain('#50fa7b'); // green
+			expect(tokensCSS).toContain('#ffb86c'); // orange
+			expect(tokensCSS).toContain('#ff5555'); // red
+			expect(tokensCSS).toContain('#f1fa8c'); // yellow
+		});
+	});
+
+	describe('Primitives - Alucard Colors (Light Mode)', () => {
+		it('defines Alucard background tokens in light mode section', () => {
+			// Alucard backgrounds are defined in the [data-theme='light'] section
+			expect(tokensCSS).toContain('--alucard-bg-darkest:');
+			expect(tokensCSS).toContain('--alucard-bg-darker:');
+			expect(tokensCSS).toContain('--alucard-bg:');
+			expect(tokensCSS).toContain('--alucard-bg-light:');
+			expect(tokensCSS).toContain('--alucard-bg-lighter:');
+			expect(tokensCSS).toContain('--alucard-selection:');
+		});
+
+		it('defines Alucard text tokens', () => {
+			expect(tokensCSS).toContain('--alucard-foreground:');
+			expect(tokensCSS).toContain('--alucard-comment:');
+		});
+
+		it('defines Alucard accent tokens', () => {
+			expect(tokensCSS).toContain('--alucard-purple:');
+			expect(tokensCSS).toContain('--alucard-pink:');
+			expect(tokensCSS).toContain('--alucard-cyan:');
+			expect(tokensCSS).toContain('--alucard-green:');
+			expect(tokensCSS).toContain('--alucard-orange:');
+			expect(tokensCSS).toContain('--alucard-red:');
+			expect(tokensCSS).toContain('--alucard-yellow:');
+		});
+
+		it('defines correct Alucard hex values', () => {
+			// Verify key Alucard palette values (lowercase per prettier)
+			expect(tokensCSS).toContain('#fffbeb'); // bg (warm cream)
+			expect(tokensCSS).toContain('#1f1f1f'); // foreground
+			expect(tokensCSS).toContain('#644ac9'); // purple (darkened)
+			expect(tokensCSS).toContain('#036a96'); // cyan (darkened)
+			expect(tokensCSS).toContain('#14710a'); // green (darkened)
+			expect(tokensCSS).toContain('#cb3a2a'); // red (darkened)
+		});
+	});
+
 	describe('Primitives - Typography', () => {
 		it('defines font size scale', () => {
 			const sizes = ['2xs', 'xs', 'sm', 'base', 'md', 'lg', 'xl', '2xl'];
@@ -136,16 +215,21 @@ describe('Design Token System', () => {
 	});
 
 	describe('Theme Support', () => {
-		it('has dark theme defaults in :root', () => {
-			// Dark theme is the default in :root
+		it('has dark theme defaults in :root using Dracula primitives', () => {
+			// Dark theme is the default in :root, using Dracula primitives
 			expect(tokensCSS).toContain(':root {');
-			expect(tokensCSS).toContain('--colour-bg: var(--neutral-950)');
+			expect(tokensCSS).toContain('--colour-bg: var(--dracula-bg)');
+			expect(tokensCSS).toContain('--colour-text: var(--dracula-foreground)');
+			// Selection uses pink (not purple) to avoid conflict with network device colour
+			expect(tokensCSS).toContain('--colour-selection: var(--dracula-pink)');
 		});
 
-		it('has light theme overrides', () => {
+		it('has light theme overrides using Alucard primitives', () => {
 			expect(tokensCSS).toMatch(/\[data-theme='light'\]/);
-			// Verify light theme overrides background
+			// Verify light theme defines Alucard primitives
 			expect(tokensCSS).toContain("[data-theme='light']");
+			expect(tokensCSS).toContain('--alucard-bg:');
+			expect(tokensCSS).toContain('--alucard-foreground:');
 		});
 	});
 });

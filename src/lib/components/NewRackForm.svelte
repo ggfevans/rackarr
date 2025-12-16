@@ -235,7 +235,7 @@
 	.form-group input:focus {
 		outline: none;
 		border-color: var(--colour-selection);
-		box-shadow: 0 0 0 2px var(--colour-selection-bg, rgba(74, 144, 217, 0.2));
+		box-shadow: var(--glow-pink-sm);
 	}
 
 	.form-group input.error {

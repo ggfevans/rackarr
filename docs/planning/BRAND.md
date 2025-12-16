@@ -60,10 +60,10 @@ Rackarr uses a **three-tier colour hierarchy**:
 | Token                    | Hex       | Contrast | Usage                            |
 | ------------------------ | --------- | -------- | -------------------------------- |
 | `--colour-text`          | `#F8F8F2` | 11.6:1   | Primary text                     |
-| `--colour-text-muted`    | `#8A8A9A` | 5.2:1    | Secondary text (WCAG AA)         |
+| `--colour-text-muted`    | `#9A9A9A` | 5.1:1    | Secondary text (WCAG AA)         |
 | `--colour-text-disabled` | `#6272A4` | 3.3:1    | Disabled only (exempt from WCAG) |
 
-**Note:** Original Dracula comment (`#6272A4`) fails WCAG AA at 3.3:1. Use `#8A8A9A` for muted text that must be readable.
+**Note:** Original Dracula comment (`#6272A4`) fails WCAG AA at 3.3:1. Use `#9A9A9A` for muted text that must be readable.
 
 ### Accent Colours (Small UI Only)
 
@@ -426,7 +426,7 @@ Is the coloured area > 100px²?
 - Added muted device colour palette for WCAG AA compliance
 - Changed selection/focus from purple to pink (resolves network conflict)
 - Added strict colour usage hierarchy
-- Improved muted text contrast (`#8A8A9A` instead of `#6272A4`)
+- Improved muted text contrast (`#9A9A9A` instead of `#6272A4`)
 - Added z-index layer tokens
 - Added colour decision tree
 

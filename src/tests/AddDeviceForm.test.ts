@@ -74,9 +74,9 @@ describe('AddDeviceForm Component', () => {
 		it('colour defaults to category colour', async () => {
 			render(AddDeviceForm, { props: { open: true } });
 
-			// Default category is 'server', which has colour #4A90D9
+			// Default category is 'server', which has muted cyan colour #4A7A8A
 			const colourInput = screen.getByLabelText(/^colour$/i) as HTMLInputElement;
-			expect(colourInput.value.toLowerCase()).toBe('#4a90d9');
+			expect(colourInput.value.toLowerCase()).toBe('#4a7a8a');
 		});
 
 		it('colour updates when category changes', async () => {
@@ -86,8 +86,8 @@ describe('AddDeviceForm Component', () => {
 			await fireEvent.change(categorySelect, { target: { value: 'network' } });
 
 			const colourInput = screen.getByLabelText(/^colour$/i) as HTMLInputElement;
-			// Network colour is #7B68EE
-			expect(colourInput.value.toLowerCase()).toBe('#7b68ee');
+			// Network colour is muted purple #7B6BA8
+			expect(colourInput.value.toLowerCase()).toBe('#7b6ba8');
 		});
 	});
 
@@ -162,7 +162,7 @@ describe('AddDeviceForm Component', () => {
 			expect(callArg.name).toBe('My Server');
 			expect(callArg.height).toBe(2);
 			expect(callArg.category).toBe('server');
-			expect(callArg.colour.toLowerCase()).toBe('#4a90d9');
+			expect(callArg.colour.toLowerCase()).toBe('#4a7a8a'); // muted cyan
 			expect(callArg.notes).toBe('Test notes');
 			expect(callArg.airflow).toBe('passive');
 		});

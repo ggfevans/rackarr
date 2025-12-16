@@ -626,7 +626,7 @@
 	}
 
 	.display-name-input:focus {
-		box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2);
+		box-shadow: var(--glow-pink-sm);
 	}
 
 	.notes-section {
@@ -664,7 +664,7 @@
 	}
 
 	.btn-danger:hover {
-		background: var(--red-700);
+		background: var(--colour-error-hover);
 	}
 
 	.face-selector {

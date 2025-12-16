@@ -34,6 +34,32 @@
 	--neutral-900: #18181b;
 	--neutral-950: #09090b;
 
+	/* --------------------------------------------------------------------------
+	   DRACULA THEME PRIMITIVES
+	   Official Dracula color palette: https://draculatheme.com/spec
+	   -------------------------------------------------------------------------- */
+
+	/* Dracula Backgrounds */
+	--dracula-bg-darkest: #191a21;
+	--dracula-bg-darker: #21222c;
+	--dracula-bg: #282a36;
+	--dracula-bg-light: #343746;
+	--dracula-bg-lighter: #424450;
+	--dracula-selection: #44475a;
+
+	/* Dracula Text */
+	--dracula-foreground: #f8f8f2;
+	--dracula-comment: #6272a4;
+
+	/* Dracula Accents */
+	--dracula-purple: #bd93f9;
+	--dracula-pink: #ff79c6;
+	--dracula-cyan: #8be9fd;
+	--dracula-green: #50fa7b;
+	--dracula-orange: #ffb86c;
+	--dracula-red: #ff5555;
+	--dracula-yellow: #f1fa8c;
+
 	/* Color Palette - Blue (Primary) */
 	--blue-50: #eff6ff;
 	--blue-100: #dbeafe;
@@ -63,13 +89,13 @@
 	--amber-500: #f59e0b;
 	--amber-600: #d97706;
 
-	/* Font Families */
-	--font-family:
-		ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto,
-		'Helvetica Neue', Arial, 'Noto Sans', sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji',
-		'Segoe UI Symbol', 'Noto Color Emoji';
-	--font-family-mono:
-		ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, 'Liberation Mono', monospace;
+	/* Typography - Font Families (Dracula Brand) */
+	--font-mono: 'JetBrains Mono', ui-monospace, 'SF Mono', Consolas, monospace;
+	--font-sans: 'Inter', ui-sans-serif, system-ui, -apple-system, sans-serif;
+
+	/* Legacy aliases for backwards compatibility */
+	--font-family: var(--font-sans);
+	--font-family-mono: var(--font-mono);
 
 	/* Typography Scale */
 	--font-size-2xs: 0.625rem; /* 10px */
@@ -114,50 +140,76 @@
 }
 
 /* ============================================================
-   LAYER 2: SEMANTIC TOKENS (Dark Theme Default)
+   LAYER 2: SEMANTIC TOKENS — Dark Theme (Dracula)
+   Maps primitives to UI purposes
    ============================================================ */
 
 :root {
 	/* Backgrounds */
-	--colour-bg: var(--neutral-950);
-	--colour-surface: var(--neutral-900);
-	--colour-surface-raised: var(--neutral-800);
-	--colour-surface-hover: var(--neutral-800);
-	--colour-surface-active: var(--neutral-700);
+	--colour-bg: var(--dracula-bg);
+	--colour-bg-darker: var(--dracula-bg-darker);
+	--colour-surface: var(--dracula-bg-light);
+	--colour-surface-raised: var(--dracula-bg-lighter);
+	--colour-surface-hover: var(--dracula-bg-lighter);
+	--colour-surface-active: var(--dracula-selection);
+
+	/* Overlays */
+	--colour-backdrop: rgba(0, 0, 0, 0.6);
+	--colour-dialog-bg: var(--dracula-bg-darker);
 
 	/* Text */
-	--colour-text: var(--neutral-50);
-	--colour-text-muted: var(--neutral-400);
-	--colour-text-disabled: var(--neutral-600);
+	--colour-text: var(--dracula-foreground);
+	--colour-text-muted: #9a9a9a; /* BRAND.md v0.6.0: improved contrast (5.1:1) */
+	--colour-text-disabled: var(--dracula-comment);
 
 	/* Borders */
-	--colour-border: var(--neutral-800);
-	--colour-border-hover: var(--neutral-700);
-	--colour-border-focus: var(--blue-500);
+	--colour-border: var(--dracula-selection);
+	--colour-border-hover: var(--dracula-comment);
+	--colour-border-focus: var(--dracula-pink); /* BRAND.md v0.6.0: pink for focus */
 
-	/* Interactive */
-	--colour-primary: var(--blue-600);
-	--colour-selection: var(--blue-500);
-	--colour-selection-hover: var(--blue-600);
-	--colour-focus-ring: var(--blue-500);
+	/* Interactive/Brand */
+	--colour-primary: var(--dracula-cyan);
+	--colour-selection: var(--dracula-pink); /* BRAND.md v0.6.0: pink (not purple) */
+	--colour-selection-hover: var(--dracula-pink);
+	--colour-focus-ring: var(--dracula-pink); /* BRAND.md v0.6.0: pink for focus */
 
-	/* Semantic Colors */
-	--colour-success: var(--green-500);
-	--colour-warning: var(--amber-500);
-	--colour-error: var(--red-500);
+	/* Feedback States */
+	--colour-success: var(--dracula-green);
+	--colour-warning: var(--dracula-orange);
+	--colour-error: var(--dracula-red);
+	--colour-info: var(--dracula-cyan);
 
 	/* Drag and Drop */
-	--colour-dnd-valid: var(--green-500);
-	--colour-dnd-valid-bg: rgba(34, 197, 94, 0.1);
-	--colour-dnd-invalid: var(--red-500);
-	--colour-dnd-invalid-bg: rgba(239, 68, 68, 0.1);
-	--colour-dnd-dragging: var(--blue-500);
+	--colour-dnd-valid: var(--dracula-green);
+	--colour-dnd-valid-bg: rgba(80, 250, 123, 0.1);
+	--colour-dnd-invalid: var(--dracula-red);
+	--colour-dnd-invalid-bg: rgba(255, 85, 85, 0.1);
+	--colour-dnd-dragging: var(--dracula-cyan);
 
 	/* Airflow Visualization */
-	--colour-airflow-intake: var(--blue-400);
-	--colour-airflow-exhaust: var(--red-400);
-	--colour-airflow-passive: var(--neutral-400);
-	--colour-airflow-conflict: var(--amber-500);
+	--colour-airflow-intake: var(--dracula-cyan);
+	--colour-airflow-exhaust: var(--dracula-red);
+	--colour-airflow-passive: var(--dracula-comment);
+	--colour-airflow-conflict: var(--dracula-orange);
+
+	/* Glow Effects - Dracula style neon glows */
+	--glow-cyan-sm: 0 0 12px rgba(139, 233, 253, 0.3);
+	--glow-cyan-md: 0 0 20px rgba(139, 233, 253, 0.3);
+	--glow-cyan-lg: 0 0 30px rgba(139, 233, 253, 0.3);
+
+	--glow-purple-sm: 0 0 12px rgba(189, 147, 249, 0.3);
+	--glow-purple-md: 0 0 20px rgba(189, 147, 249, 0.3);
+	--glow-purple-lg: 0 0 30px rgba(189, 147, 249, 0.3);
+
+	/* Pink glow for selection/focus (BRAND.md v0.6.0) */
+	--glow-pink-sm: 0 0 12px rgba(255, 121, 198, 0.3);
+	--glow-pink-md: 0 0 20px rgba(255, 121, 198, 0.3);
+
+	--glow-green-sm: 0 0 12px rgba(46, 204, 113, 0.3);
+
+	/* Focus ring with glow (BRAND.md v0.6.0: pink) */
+	--focus-ring-glow:
+		0 0 0 2px var(--colour-bg), 0 0 0 4px var(--colour-focus-ring), var(--glow-pink-sm);
 }
 
 /* ============================================================
@@ -166,21 +218,21 @@
 
 :root {
 	/* Canvas */
-	--canvas-bg: var(--neutral-950);
+	--canvas-bg: var(--dracula-bg-darkest);
 
 	/* Rack - these tokens are NOT overridden in light mode (racks stay dark) */
 	--rack-u-height: 17.78px; /* 1U height in scaled pixels */
 	--rack-width: 482.6px; /* 19" rack width */
 	--rack-rail-width: 30px;
 	--rack-padding: 16px;
-	--rack-bg: var(--neutral-900);
-	--rack-rail: var(--neutral-700);
-	--rack-interior: var(--neutral-800);
+	--rack-bg: var(--dracula-bg-darker);
+	--rack-rail: var(--dracula-bg-lighter);
+	--rack-interior: var(--dracula-bg);
 	--rack-slot: rgba(255, 255, 255, 0.02);
 	--rack-slot-alt: rgba(255, 255, 255, 0.04);
-	--rack-grid: var(--neutral-800);
-	--rack-text: var(--neutral-400); /* U label text - stays light on dark rack */
-	--rack-text-highlight: var(--neutral-200); /* Highlighted U labels (multiples of 5) */
+	--rack-grid: var(--dracula-bg-light);
+	--rack-text: var(--dracula-comment); /* U label text */
+	--rack-text-highlight: var(--dracula-foreground); /* Highlighted U labels (multiples of 5) */
 
 	/* Blocked Slots (dual-view mode) - diagonal stripe pattern */
 	--colour-blocked-stripe: rgba(239, 68, 68, 0.35); /* Red stripe for visibility */
@@ -188,15 +240,17 @@
 
 	/* Toolbar */
 	--toolbar-height: 56px;
-	--toolbar-bg: var(--neutral-900);
-	--toolbar-border: var(--neutral-800);
+	--toolbar-bg: var(--dracula-bg-darker);
+	--toolbar-border: var(--dracula-bg-light);
 
 	/* Drawer */
 	--drawer-width: 320px;
-	--drawer-bg: var(--neutral-900);
+	--drawer-bg: var(--dracula-bg-darker);
 
 	/* Sidebar (fixed) */
 	--sidebar-width: 280px;
+	--colour-sidebar-bg: var(--dracula-bg-darker);
+	--colour-surface-secondary: var(--dracula-bg-light);
 
 	/* Z-Index Layers */
 	--z-sidebar: 10;
@@ -206,14 +260,14 @@
 	--z-toast: 300;
 
 	/* Form Inputs */
-	--input-bg: var(--neutral-800);
-	--input-border: var(--neutral-700);
-	--input-placeholder: var(--neutral-500);
+	--input-bg: var(--dracula-bg-light);
+	--input-border: var(--dracula-selection);
+	--input-placeholder: var(--dracula-comment);
 
 	/* Buttons */
-	--button-bg: var(--neutral-800);
-	--button-bg-hover: var(--neutral-700);
-	--button-border: var(--neutral-700);
+	--button-bg: var(--dracula-bg-light);
+	--button-bg-hover: var(--dracula-bg-lighter);
+	--button-border: var(--dracula-selection);
 
 	/* Device */
 	--device-font-size: var(--font-size-xs);
@@ -222,16 +276,19 @@
 	--device-ghost-opacity: 0.5;
 
 	/* Toast */
-	--toast-bg: var(--neutral-800);
-	--toast-border: var(--neutral-700);
+	--toast-bg: var(--dracula-bg-light);
+	--toast-border: var(--dracula-selection);
 	--toast-radius: var(--radius-md);
 
-	/* Logo - Brand colours (unchanged between themes) */
-	--logo-frame: var(--neutral-700);
-	--logo-interior: var(--neutral-800);
-	--logo-device-1: var(--blue-500);
-	--logo-device-2: #50c878; /* Emerald green */
-	--logo-device-3: #9b59b6; /* Purple */
+	/* Logo - Brand colours */
+	--logo-frame: var(--dracula-selection);
+	--logo-interior: var(--dracula-bg-light);
+	--logo-device-1: var(--dracula-cyan);
+	--logo-device-2: var(--dracula-green);
+	--logo-device-3: var(--dracula-purple);
+
+	/* Danger button hover state */
+	--colour-error-hover: #cc4444;
 }
 
 /* ============================================================
@@ -239,81 +296,138 @@
    ============================================================ */
 
 [data-theme='light'] {
+	/* --------------------------------------------------------------------------
+	   ALUCARD THEME PRIMITIVES
+	   Official Dracula light mode: https://draculatheme.com/spec
+	   -------------------------------------------------------------------------- */
+
+	/* Alucard Backgrounds - warm cream tones */
+	--alucard-bg-darkest: #bcbab3;
+	--alucard-bg-darker: #ceccc0;
+	--alucard-bg: #fffbeb;
+	--alucard-bg-light: #dedccf;
+	--alucard-bg-lighter: #ece9df;
+	--alucard-selection: #cfcfde;
+	--alucard-floating: #efeddc;
+
+	/* Alucard Text */
+	--alucard-foreground: #1f1f1f;
+	--alucard-comment: #6c664b;
+
+	/* Alucard Accents - darker for light background contrast */
+	--alucard-purple: #644ac9;
+	--alucard-pink: #a3144d;
+	--alucard-cyan: #036a96;
+	--alucard-green: #14710a;
+	--alucard-orange: #a34d14;
+	--alucard-red: #cb3a2a;
+	--alucard-yellow: #846e15;
+
+	/* --------------------------------------------------------------------------
+	   SEMANTIC TOKEN OVERRIDES — Light Theme (Alucard)
+	   -------------------------------------------------------------------------- */
+
 	/* Backgrounds */
-	--colour-bg: var(--neutral-50);
-	--colour-surface: #ffffff;
-	--colour-surface-raised: var(--neutral-100);
-	--colour-surface-hover: var(--neutral-100);
-	--colour-surface-active: var(--neutral-200);
+	--colour-bg: var(--alucard-bg);
+	--colour-bg-darker: var(--alucard-bg-darker);
+	--colour-surface: var(--alucard-bg-light);
+	--colour-surface-raised: var(--alucard-bg-lighter);
+	--colour-surface-hover: var(--alucard-bg-lighter);
+	--colour-surface-active: var(--alucard-selection);
+
+	/* Overlays */
+	--colour-backdrop: rgba(0, 0, 0, 0.4);
+	--colour-dialog-bg: var(--alucard-floating);
 
 	/* Text */
-	--colour-text: var(--neutral-950);
-	--colour-text-muted: var(--neutral-600);
-	--colour-text-disabled: var(--neutral-400);
+	--colour-text: var(--alucard-foreground);
+	--colour-text-muted: var(--alucard-comment);
+	--colour-text-disabled: var(--alucard-comment);
 
 	/* Borders */
-	--colour-border: var(--neutral-200);
-	--colour-border-hover: var(--neutral-300);
-	--colour-border-focus: var(--blue-500);
+	--colour-border: var(--alucard-bg-light);
+	--colour-border-hover: var(--alucard-comment);
+	--colour-border-focus: var(--alucard-pink); /* BRAND.md v0.6.0: pink for focus */
 
-	/* Interactive */
-	--colour-primary: var(--blue-600);
-	--colour-selection: var(--blue-600);
-	--colour-selection-hover: var(--blue-700);
-	--colour-focus-ring: var(--blue-600);
+	/* Interactive/Brand */
+	--colour-primary: var(--alucard-cyan);
+	--colour-selection: var(--alucard-pink); /* BRAND.md v0.6.0: pink (not purple) */
+	--colour-selection-hover: var(--alucard-pink);
+	--colour-focus-ring: var(--alucard-pink); /* BRAND.md v0.6.0: pink for focus */
 
-	/* Semantic Colors */
-	--colour-success: var(--green-600);
-	--colour-warning: var(--amber-600);
-	--colour-error: var(--red-600);
+	/* Feedback States */
+	--colour-success: var(--alucard-green);
+	--colour-warning: var(--alucard-orange);
+	--colour-error: var(--alucard-red);
+	--colour-info: var(--alucard-cyan);
 
 	/* Drag and Drop */
-	--colour-dnd-valid: var(--green-600);
-	--colour-dnd-valid-bg: rgba(22, 163, 74, 0.1);
-	--colour-dnd-invalid: var(--red-600);
-	--colour-dnd-invalid-bg: rgba(220, 38, 38, 0.1);
-	--colour-dnd-dragging: var(--blue-600);
+	--colour-dnd-valid: var(--alucard-green);
+	--colour-dnd-valid-bg: rgba(20, 113, 10, 0.1);
+	--colour-dnd-invalid: var(--alucard-red);
+	--colour-dnd-invalid-bg: rgba(203, 58, 42, 0.1);
+	--colour-dnd-dragging: var(--alucard-cyan);
 
 	/* Airflow Visualization */
-	--colour-airflow-intake: var(--blue-500);
-	--colour-airflow-exhaust: var(--red-500);
-	--colour-airflow-passive: var(--neutral-500);
-	--colour-airflow-conflict: var(--amber-600);
+	--colour-airflow-intake: var(--alucard-cyan);
+	--colour-airflow-exhaust: var(--alucard-red);
+	--colour-airflow-passive: var(--alucard-comment);
+	--colour-airflow-conflict: var(--alucard-orange);
+
+	/* Softer glows for light backgrounds */
+	--glow-cyan-sm: 0 0 8px rgba(3, 106, 150, 0.2);
+	--glow-cyan-md: 0 0 16px rgba(3, 106, 150, 0.2);
+	--glow-cyan-lg: 0 0 24px rgba(3, 106, 150, 0.2);
+
+	--glow-purple-sm: 0 0 8px rgba(100, 74, 201, 0.2);
+	--glow-purple-md: 0 0 16px rgba(100, 74, 201, 0.2);
+	--glow-purple-lg: 0 0 24px rgba(100, 74, 201, 0.2);
+
+	/* Pink glow for selection/focus (BRAND.md v0.6.0) */
+	--glow-pink-sm: 0 0 8px rgba(163, 20, 77, 0.2);
+	--glow-pink-md: 0 0 16px rgba(163, 20, 77, 0.2);
+
+	--glow-green-sm: 0 0 8px rgba(20, 113, 10, 0.2);
 
 	/* Component Overrides */
 	/* NOTE: Rack tokens intentionally NOT overridden - racks stay dark in all themes */
 
 	/* Blocked Slots - slightly lighter for light theme (rack stays dark) */
-	--colour-blocked-stripe: rgba(220, 38, 38, 0.3);
-	--colour-blocked-bg: rgba(220, 38, 38, 0.06);
+	--colour-blocked-stripe: rgba(203, 58, 42, 0.3);
+	--colour-blocked-bg: rgba(203, 58, 42, 0.06);
 
-	--toolbar-bg: #ffffff;
-	--toolbar-border: var(--neutral-200);
+	--toolbar-bg: var(--alucard-floating);
+	--toolbar-border: var(--alucard-bg-light);
 
-	--drawer-bg: #ffffff;
+	--drawer-bg: var(--alucard-floating);
 
-	--toast-bg: #ffffff;
-	--toast-border: var(--neutral-200);
+	--colour-sidebar-bg: var(--alucard-floating);
+	--colour-surface-secondary: var(--alucard-bg-light);
+
+	--toast-bg: var(--alucard-floating);
+	--toast-border: var(--alucard-bg-light);
+
+	--colour-error-hover: #b33030;
 
 	/* NOTE: Logo tokens intentionally NOT overridden - brand colours stay consistent */
 
-	/* Canvas - slight grey instead of pure white */
-	--canvas-bg: var(--neutral-100);
+	/* Canvas - warm cream background */
+	--canvas-bg: var(--alucard-bg-lighter);
 
 	/* Form Inputs */
-	--input-bg: #ffffff;
-	--input-border: var(--neutral-300);
-	--input-placeholder: var(--neutral-400);
+	--input-bg: var(--alucard-floating);
+	--input-border: var(--alucard-bg-light);
+	--input-placeholder: var(--alucard-comment);
 
 	/* Buttons */
-	--button-bg: var(--neutral-100);
-	--button-bg-hover: var(--neutral-200);
-	--button-border: var(--neutral-300);
+	--button-bg: var(--alucard-bg-lighter);
+	--button-bg-hover: var(--alucard-bg-light);
+	--button-border: var(--alucard-bg-light);
 
-	/* Lighter shadows for light theme */
-	--shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.08);
-	--shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.12), 0 2px 4px -2px rgb(0 0 0 / 0.08);
-	--shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.15), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+	/* Softer shadows for light backgrounds */
+	--shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.08);
+	--shadow-md: 0 4px 6px rgba(0, 0, 0, 0.1);
+	--shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.1);
 }
 
 /* ============================================================

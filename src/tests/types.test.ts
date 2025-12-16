@@ -452,20 +452,20 @@ describe('Constants', () => {
 			});
 		});
 
-		it('returns correct colour for cable-management category (Steel Blue)', () => {
-			expect(CATEGORY_COLOURS['cable-management']).toBe('#4682B4');
+		it('returns correct colour for cable-management category (Dracula comment)', () => {
+			expect(CATEGORY_COLOURS['cable-management']).toBe('#6272A4');
 		});
 
-		it('returns correct colour for server category', () => {
-			expect(CATEGORY_COLOURS.server).toBe('#4A90D9');
+		it('returns correct colour for server category (muted cyan)', () => {
+			expect(CATEGORY_COLOURS.server).toBe('#4A7A8A');
 		});
 
-		it('returns correct colour for network category', () => {
-			expect(CATEGORY_COLOURS.network).toBe('#7B68EE');
+		it('returns correct colour for network category (muted purple)', () => {
+			expect(CATEGORY_COLOURS.network).toBe('#7B6BA8');
 		});
 
-		it('returns correct colour for shelf category', () => {
-			expect(CATEGORY_COLOURS.shelf).toBe('#8B4513');
+		it('returns correct colour for shelf category (Dracula comment)', () => {
+			expect(CATEGORY_COLOURS.shelf).toBe('#6272A4');
 		});
 	});
 

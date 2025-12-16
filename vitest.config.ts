@@ -17,8 +17,15 @@ export default defineConfig({
 		globals: true,
 		setupFiles: ['src/tests/setup.ts'],
 		coverage: {
+			provider: 'v8',
 			reporter: ['text', 'json', 'html'],
-			exclude: ['node_modules/', 'src/tests/']
+			exclude: ['node_modules/', 'src/tests/'],
+			thresholds: {
+				statements: 75,
+				branches: 70,
+				functions: 75,
+				lines: 75
+			}
 		},
 		alias: {
 			// Ensure Svelte uses the browser build in tests

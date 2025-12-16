@@ -3,7 +3,7 @@
  */
 
 import { describe, it, expect } from 'vitest';
-import { mikrotikDevices } from './mikrotik';
+import { mikrotikDevices } from '$lib/data/brandPacks/mikrotik';
 
 describe('Mikrotik Brand Pack', () => {
 	describe('Device Count', () => {

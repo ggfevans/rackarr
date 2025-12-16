@@ -5,17 +5,8 @@ import {
 	createRemoveDeviceCommand,
 	createUpdateDeviceFaceCommand,
 	type DeviceCommandStore
-} from './device';
-import type { PlacedDevice } from '$lib/types';
-
-function createMockDevice(overrides: Partial<PlacedDevice> = {}): PlacedDevice {
-	return {
-		device_type: 'test-device',
-		position: 10,
-		face: 'front',
-		...overrides
-	};
-}
+} from '$lib/stores/commands/device';
+import { createTestDevice } from './factories';
 
 function createMockStore(): DeviceCommandStore & {
 	placeDeviceRaw: ReturnType<typeof vi.fn>;
@@ -39,7 +30,7 @@ describe('Device Commands', () => {
 	describe('createPlaceDeviceCommand', () => {
 		it('creates command with correct type and description', () => {
 			const store = createMockStore();
-			const device = createMockDevice();
+			const device = createTestDevice();
 
 			const command = createPlaceDeviceCommand(device, store, 'PowerEdge R740');
 
@@ -50,7 +41,7 @@ describe('Device Commands', () => {
 
 		it('uses default device name when not provided', () => {
 			const store = createMockStore();
-			const device = createMockDevice();
+			const device = createTestDevice();
 
 			const command = createPlaceDeviceCommand(device, store);
 
@@ -59,7 +50,7 @@ describe('Device Commands', () => {
 
 		it('execute calls placeDeviceRaw', () => {
 			const store = createMockStore();
-			const device = createMockDevice();
+			const device = createTestDevice();
 
 			const command = createPlaceDeviceCommand(device, store);
 			command.execute();
@@ -71,7 +62,7 @@ describe('Device Commands', () => {
 		it('undo calls removeDeviceAtIndexRaw with placed index', () => {
 			const store = createMockStore();
 			store.placeDeviceRaw.mockReturnValue(5);
-			const device = createMockDevice();
+			const device = createTestDevice();
 
 			const command = createPlaceDeviceCommand(device, store);
 			command.execute();
@@ -83,7 +74,7 @@ describe('Device Commands', () => {
 
 		it('undo does nothing if execute was not called', () => {
 			const store = createMockStore();
-			const device = createMockDevice();
+			const device = createTestDevice();
 
 			const command = createPlaceDeviceCommand(device, store);
 			command.undo();
@@ -136,7 +127,7 @@ describe('Device Commands', () => {
 	describe('createRemoveDeviceCommand', () => {
 		it('creates command with correct type and description', () => {
 			const store = createMockStore();
-			const device = createMockDevice();
+			const device = createTestDevice();
 
 			const command = createRemoveDeviceCommand(0, device, store, 'Switch');
 
@@ -147,7 +138,7 @@ describe('Device Commands', () => {
 
 		it('uses default device name when not provided', () => {
 			const store = createMockStore();
-			const device = createMockDevice();
+			const device = createTestDevice();
 
 			const command = createRemoveDeviceCommand(0, device, store);
 
@@ -156,7 +147,7 @@ describe('Device Commands', () => {
 
 		it('execute calls removeDeviceAtIndexRaw', () => {
 			const store = createMockStore();
-			const device = createMockDevice();
+			const device = createTestDevice();
 
 			const command = createRemoveDeviceCommand(3, device, store);
 			command.execute();
@@ -167,7 +158,7 @@ describe('Device Commands', () => {
 
 		it('undo calls placeDeviceRaw with device copy', () => {
 			const store = createMockStore();
-			const device = createMockDevice({ position: 15, device_type: 'my-device' });
+			const device = createTestDevice({ position: 15, device_type: 'my-device' });
 
 			const command = createRemoveDeviceCommand(0, device, store);
 			command.execute();
@@ -181,7 +172,7 @@ describe('Device Commands', () => {
 
 		it('stores copy of device to avoid mutation issues', () => {
 			const store = createMockStore();
-			const device = createMockDevice({ position: 15 });
+			const device = createTestDevice({ position: 15 });
 
 			const command = createRemoveDeviceCommand(0, device, store);
 

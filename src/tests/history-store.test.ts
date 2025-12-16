@@ -1,16 +1,6 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { getHistoryStore, resetHistoryStore, MAX_HISTORY_DEPTH } from './history.svelte';
-import type { Command } from './commands/types';
-
-function createMockCommand(description: string): Command {
-	return {
-		type: 'PLACE_DEVICE',
-		description,
-		timestamp: Date.now(),
-		execute: vi.fn(),
-		undo: vi.fn()
-	};
-}
+import { describe, it, expect, beforeEach } from 'vitest';
+import { getHistoryStore, resetHistoryStore, MAX_HISTORY_DEPTH } from '$lib/stores/history.svelte';
+import { createMockCommand } from './factories';
 
 describe('History Store', () => {
 	beforeEach(() => {
@@ -66,7 +56,7 @@ describe('History Store', () => {
 			expect(store.historyLength).toBe(MAX_HISTORY_DEPTH);
 
 			// The first command should be "Command 1" (Command 0 was dropped)
-			expect(store.undoDescription).toBe('Undo: Command 50');
+			expect(store.undoDescription).toBe(`Undo: Command ${MAX_HISTORY_DEPTH}`);
 		});
 	});
 

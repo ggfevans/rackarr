@@ -1,28 +1,6 @@
 import { describe, it, expect, beforeEach } from 'vitest';
-import { getLayoutStore, resetLayoutStore } from './layout.svelte';
-import type { DeviceType, PlacedDevice } from '$lib/types';
-
-function createTestDeviceType(overrides: Partial<DeviceType> = {}): DeviceType {
-	return {
-		slug: 'test-device',
-		u_height: 2,
-		model: 'Test Device',
-		rackarr: {
-			category: 'server',
-			colour: '#336699'
-		},
-		...overrides
-	};
-}
-
-function createTestDevice(overrides: Partial<PlacedDevice> = {}): PlacedDevice {
-	return {
-		device_type: 'test-device',
-		position: 10,
-		face: 'front',
-		...overrides
-	};
-}
+import { getLayoutStore, resetLayoutStore } from '$lib/stores/layout.svelte';
+import { createTestDeviceType, createTestDevice } from './factories';
 
 describe('Layout Store - Raw Actions', () => {
 	beforeEach(() => {

@@ -3,7 +3,7 @@
  */
 
 import { describe, it, expect } from 'vitest';
-import { ubiquitiDevices } from './ubiquiti';
+import { ubiquitiDevices } from '$lib/data/brandPacks/ubiquiti';
 
 describe('Ubiquiti Brand Pack', () => {
 	describe('Device Count', () => {

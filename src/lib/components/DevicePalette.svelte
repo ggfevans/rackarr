@@ -134,6 +134,7 @@
 			placeholder="Search devices..."
 			bind:value={searchQuery}
 			aria-label="Search devices"
+			data-testid="search-devices"
 		/>
 	</div>
 
@@ -206,11 +207,12 @@
 				type="button"
 				onclick={handleImportClick}
 				aria-label="Import device library"
+				data-testid="btn-import-devices"
 			>
 				<span class="import-icon">↓</span>
 				Import
 			</button>
-			<button class="add-device-button" type="button" onclick={handleAddDevice}>
+			<button class="add-device-button" type="button" onclick={handleAddDevice} data-testid="btn-add-device">
 				<span class="add-icon">+</span>
 				Add Device
 			</button>

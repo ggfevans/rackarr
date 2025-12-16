@@ -140,6 +140,7 @@
 				aria-controls="toolbar-drawer"
 				aria-label={drawerOpen ? 'Close menu' : 'Open menu'}
 				onclick={toggleDrawer}
+				data-testid="btn-hamburger-menu"
 			>
 				<LogoLockup size={36} {partyMode} />
 				<span class="hamburger-icon" aria-hidden="true">
@@ -161,6 +162,7 @@
 				class:primary={!hasRacks}
 				aria-label="New Rack"
 				onclick={onnewrack}
+				data-testid="btn-new-rack"
 			>
 				<IconPlus size={16} />
 				<span>New Rack</span>
@@ -168,7 +170,7 @@
 		</Tooltip>
 
 		<Tooltip text="Load Layout" shortcut="Ctrl+O" position="bottom">
-			<button class="toolbar-action-btn" aria-label="Load Layout" onclick={onload}>
+			<button class="toolbar-action-btn" aria-label="Load Layout" onclick={onload} data-testid="btn-load-layout">
 				<IconLoad size={16} />
 				<span>Load Layout</span>
 			</button>
@@ -177,14 +179,14 @@
 		<div class="separator" aria-hidden="true"></div>
 
 		<Tooltip text="Save Layout" shortcut="Ctrl+S" position="bottom">
-			<button class="toolbar-action-btn" aria-label="Save" onclick={onsave}>
+			<button class="toolbar-action-btn" aria-label="Save" onclick={onsave} data-testid="btn-save">
 				<IconSave size={16} />
 				<span>Save</span>
 			</button>
 		</Tooltip>
 
 		<Tooltip text="Export Image" shortcut="Ctrl+E" position="bottom">
-			<button class="toolbar-action-btn" aria-label="Export" onclick={onexport}>
+			<button class="toolbar-action-btn" aria-label="Export" onclick={onexport} data-testid="btn-export">
 				<IconExport size={16} />
 				<span>Export</span>
 			</button>
@@ -197,6 +199,7 @@
 				class="toolbar-action-btn"
 				aria-label="Display Mode: {displayModeLabel}"
 				onclick={ontoggledisplaymode}
+				data-testid="btn-toggle-display-mode"
 			>
 				{#if displayMode === 'label'}
 					<IconLabel size={16} />
@@ -217,6 +220,7 @@
 				aria-label="Toggle Airflow View"
 				aria-pressed={airflowMode}
 				onclick={ontoggleairflowmode}
+				data-testid="btn-toggle-airflow"
 			>
 				<IconWind size={16} />
 				<span>Airflow</span>
@@ -231,6 +235,7 @@
 				aria-label={layoutStore.undoDescription ?? 'Undo'}
 				disabled={!layoutStore.canUndo}
 				onclick={handleUndo}
+				data-testid="btn-undo"
 			>
 				<IconUndo size={16} />
 				<span>Undo</span>
@@ -243,6 +248,7 @@
 				aria-label={layoutStore.redoDescription ?? 'Redo'}
 				disabled={!layoutStore.canRedo}
 				onclick={handleRedo}
+				data-testid="btn-redo"
 			>
 				<IconRedo size={16} />
 				<span>Redo</span>
@@ -257,6 +263,7 @@
 				aria-label="Delete"
 				disabled={!hasSelection}
 				onclick={ondelete}
+				data-testid="btn-delete"
 			>
 				<IconTrash size={16} />
 				<span>Delete</span>
@@ -264,7 +271,7 @@
 		</Tooltip>
 
 		<Tooltip text="Reset View" shortcut="F" position="bottom">
-			<button class="toolbar-action-btn" aria-label="Reset View" onclick={onfitall}>
+			<button class="toolbar-action-btn" aria-label="Reset View" onclick={onfitall} data-testid="btn-reset-view">
 				<IconFitAll size={16} />
 				<span>Reset View</span>
 			</button>
@@ -273,7 +280,7 @@
 		<div class="separator" aria-hidden="true"></div>
 
 		<Tooltip text="Help & Shortcuts" shortcut="?" position="bottom">
-			<button class="toolbar-action-btn" aria-label="Help" onclick={onhelp}>
+			<button class="toolbar-action-btn" aria-label="Help" onclick={onhelp} data-testid="btn-help">
 				<IconHelp size={16} />
 				<span>Help</span>
 			</button>
@@ -287,6 +294,7 @@
 				class="toolbar-action-btn theme-toggle-btn"
 				aria-label="Toggle Theme"
 				onclick={ontoggletheme}
+				data-testid="btn-toggle-theme"
 			>
 				{#if theme === 'dark'}
 					<IconSun size={16} />

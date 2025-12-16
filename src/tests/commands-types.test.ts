@@ -1,5 +1,5 @@
 import { describe, it, expect, vi } from 'vitest';
-import type { Command, CommandType, BatchCommand } from './types';
+import type { Command, CommandType, BatchCommand } from '$lib/stores/commands/types';
 
 describe('Command Types', () => {
 	describe('Command interface', () => {

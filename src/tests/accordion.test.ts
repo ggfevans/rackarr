@@ -1,7 +1,7 @@
 import { describe, it, expect, beforeEach } from 'vitest';
 import { render, screen } from '@testing-library/svelte';
 import userEvent from '@testing-library/user-event';
-import TestAccordion from './TestAccordion.svelte';
+import TestAccordion from './helpers/TestAccordion.svelte';
 
 describe('Accordion Component', () => {
 	beforeEach(() => {

@@ -4,29 +4,9 @@ import {
 	createUpdateDeviceTypeCommand,
 	createDeleteDeviceTypeCommand,
 	type DeviceTypeCommandStore
-} from './device-type';
+} from '$lib/stores/commands/device-type';
 import type { DeviceType, PlacedDevice } from '$lib/types';
-
-function createMockDeviceType(overrides: Partial<DeviceType> = {}): DeviceType {
-	return {
-		slug: 'test-device',
-		u_height: 2,
-		rackarr: {
-			category: 'server',
-			colour: '#336699'
-		},
-		...overrides
-	};
-}
-
-function createMockDevice(overrides: Partial<PlacedDevice> = {}): PlacedDevice {
-	return {
-		device_type: 'test-device',
-		position: 10,
-		face: 'front',
-		...overrides
-	};
-}
+import { createTestDeviceType, createTestDevice } from './factories';
 
 function createMockStore(): DeviceTypeCommandStore & {
 	addDeviceTypeRaw: ReturnType<typeof vi.fn>;
@@ -50,7 +30,7 @@ describe('Device Type Commands', () => {
 	describe('createAddDeviceTypeCommand', () => {
 		it('creates command with correct type and description', () => {
 			const store = createMockStore();
-			const deviceType = createMockDeviceType({ model: 'PowerEdge R740' });
+			const deviceType = createTestDeviceType({ model: 'PowerEdge R740' });
 
 			const command = createAddDeviceTypeCommand(deviceType, store);
 
@@ -61,7 +41,12 @@ describe('Device Type Commands', () => {
 
 		it('uses slug when model is not provided', () => {
 			const store = createMockStore();
-			const deviceType = createMockDeviceType({ slug: 'my-server' });
+			// Create minimal device type without model to test slug fallback
+			const deviceType: DeviceType = {
+				slug: 'my-server',
+				u_height: 1,
+				rackarr: { category: 'server', colour: '#336699' }
+			};
 
 			const command = createAddDeviceTypeCommand(deviceType, store);
 
@@ -70,7 +55,7 @@ describe('Device Type Commands', () => {
 
 		it('execute calls addDeviceTypeRaw with device type', () => {
 			const store = createMockStore();
-			const deviceType = createMockDeviceType();
+			const deviceType = createTestDeviceType();
 
 			const command = createAddDeviceTypeCommand(deviceType, store);
 			command.execute();
@@ -81,7 +66,7 @@ describe('Device Type Commands', () => {
 
 		it('undo calls removeDeviceTypeRaw with slug', () => {
 			const store = createMockStore();
-			const deviceType = createMockDeviceType({ slug: 'server-1' });
+			const deviceType = createTestDeviceType({ slug: 'server-1' });
 
 			const command = createAddDeviceTypeCommand(deviceType, store);
 			command.execute();
@@ -134,7 +119,7 @@ describe('Device Type Commands', () => {
 	describe('createDeleteDeviceTypeCommand', () => {
 		it('creates command with correct type and description', () => {
 			const store = createMockStore();
-			const deviceType = createMockDeviceType({ model: 'Dell Server' });
+			const deviceType = createTestDeviceType({ model: 'Dell Server' });
 
 			const command = createDeleteDeviceTypeCommand(deviceType, [], store);
 
@@ -145,7 +130,12 @@ describe('Device Type Commands', () => {
 
 		it('uses slug when model is not provided', () => {
 			const store = createMockStore();
-			const deviceType = createMockDeviceType({ slug: 'rack-server' });
+			// Create minimal device type without model to test slug fallback
+			const deviceType: DeviceType = {
+				slug: 'rack-server',
+				u_height: 1,
+				rackarr: { category: 'server', colour: '#336699' }
+			};
 
 			const command = createDeleteDeviceTypeCommand(deviceType, [], store);
 
@@ -154,7 +144,7 @@ describe('Device Type Commands', () => {
 
 		it('execute calls removeDeviceTypeRaw', () => {
 			const store = createMockStore();
-			const deviceType = createMockDeviceType({ slug: 'test-slug' });
+			const deviceType = createTestDeviceType({ slug: 'test-slug' });
 
 			const command = createDeleteDeviceTypeCommand(deviceType, [], store);
 			command.execute();
@@ -165,7 +155,7 @@ describe('Device Type Commands', () => {
 
 		it('undo restores device type', () => {
 			const store = createMockStore();
-			const deviceType = createMockDeviceType();
+			const deviceType = createTestDeviceType();
 
 			const command = createDeleteDeviceTypeCommand(deviceType, [], store);
 			command.execute();
@@ -177,10 +167,10 @@ describe('Device Type Commands', () => {
 
 		it('undo restores placed devices', () => {
 			const store = createMockStore();
-			const deviceType = createMockDeviceType({ slug: 'server-type' });
+			const deviceType = createTestDeviceType({ slug: 'server-type' });
 			const placedDevices: PlacedDevice[] = [
-				createMockDevice({ device_type: 'server-type', position: 5 }),
-				createMockDevice({ device_type: 'server-type', position: 10 })
+				createTestDevice({ device_type: 'server-type', position: 5 }),
+				createTestDevice({ device_type: 'server-type', position: 10 })
 			];
 
 			const command = createDeleteDeviceTypeCommand(deviceType, placedDevices, store);
@@ -198,8 +188,8 @@ describe('Device Type Commands', () => {
 
 		it('stores copies of placed devices to avoid mutation', () => {
 			const store = createMockStore();
-			const deviceType = createMockDeviceType();
-			const placedDevices: PlacedDevice[] = [createMockDevice({ position: 5 })];
+			const deviceType = createTestDeviceType();
+			const placedDevices: PlacedDevice[] = [createTestDevice({ position: 5 })];
 
 			const command = createDeleteDeviceTypeCommand(deviceType, placedDevices, store);
 

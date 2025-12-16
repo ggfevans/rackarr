@@ -5,33 +5,11 @@ import {
 	createClearRackCommand,
 	type RackCommandStore,
 	type RackSettings
-} from './rack';
+} from '$lib/stores/commands/rack';
 import type { Rack, PlacedDevice } from '$lib/types';
+import { createTestRack, createTestDevice } from './factories';
 
-function createMockRack(overrides: Partial<Rack> = {}): Rack {
-	return {
-		name: 'Main Rack',
-		height: 42,
-		width: 19,
-		desc_units: false,
-		form_factor: '4-post-cabinet',
-		starting_unit: 1,
-		position: 0,
-		devices: [],
-		...overrides
-	};
-}
-
-function createMockDevice(overrides: Partial<PlacedDevice> = {}): PlacedDevice {
-	return {
-		device_type: 'test-device',
-		position: 10,
-		face: 'front',
-		...overrides
-	};
-}
-
-function createMockStore(rack: Rack = createMockRack()): RackCommandStore & {
+function createMockStore(rack: Rack = createTestRack()): RackCommandStore & {
 	updateRackRaw: ReturnType<typeof vi.fn>;
 	replaceRackRaw: ReturnType<typeof vi.fn>;
 	clearRackDevicesRaw: ReturnType<typeof vi.fn>;
@@ -90,8 +68,8 @@ describe('Rack Commands', () => {
 	describe('createReplaceRackCommand', () => {
 		it('creates command with correct type and description', () => {
 			const store = createMockStore();
-			const oldRack = createMockRack({ name: 'Old' });
-			const newRack = createMockRack({ name: 'New' });
+			const oldRack = createTestRack({ name: 'Old' });
+			const newRack = createTestRack({ name: 'New' });
 
 			const command = createReplaceRackCommand(oldRack, newRack, store);
 
@@ -102,8 +80,8 @@ describe('Rack Commands', () => {
 
 		it('execute calls replaceRackRaw with new rack', () => {
 			const store = createMockStore();
-			const oldRack = createMockRack({ name: 'Old' });
-			const newRack = createMockRack({ name: 'New', height: 48 });
+			const oldRack = createTestRack({ name: 'Old' });
+			const newRack = createTestRack({ name: 'New', height: 48 });
 
 			const command = createReplaceRackCommand(oldRack, newRack, store);
 			command.execute();
@@ -116,8 +94,8 @@ describe('Rack Commands', () => {
 
 		it('undo calls replaceRackRaw with old rack', () => {
 			const store = createMockStore();
-			const oldRack = createMockRack({ name: 'Old', height: 42 });
-			const newRack = createMockRack({ name: 'New', height: 48 });
+			const oldRack = createTestRack({ name: 'Old', height: 42 });
+			const newRack = createTestRack({ name: 'New', height: 48 });
 
 			const command = createReplaceRackCommand(oldRack, newRack, store);
 			command.execute();
@@ -131,11 +109,11 @@ describe('Rack Commands', () => {
 
 		it('deep copies racks to avoid mutation issues', () => {
 			const store = createMockStore();
-			const oldRack = createMockRack({
-				devices: [createMockDevice({ position: 5 })]
+			const oldRack = createTestRack({
+				devices: [createTestDevice({ position: 5 })]
 			});
-			const newRack = createMockRack({
-				devices: [createMockDevice({ position: 10 })]
+			const newRack = createTestRack({
+				devices: [createTestDevice({ position: 10 })]
 			});
 
 			const command = createReplaceRackCommand(oldRack, newRack, store);
@@ -166,7 +144,7 @@ describe('Rack Commands', () => {
 	describe('createClearRackCommand', () => {
 		it('creates command with correct type and description for single device', () => {
 			const store = createMockStore();
-			const devices = [createMockDevice()];
+			const devices = [createTestDevice()];
 
 			const command = createClearRackCommand(devices, store);
 
@@ -176,7 +154,7 @@ describe('Rack Commands', () => {
 
 		it('creates command with correct description for multiple devices', () => {
 			const store = createMockStore();
-			const devices = [createMockDevice(), createMockDevice(), createMockDevice()];
+			const devices = [createTestDevice(), createTestDevice(), createTestDevice()];
 
 			const command = createClearRackCommand(devices, store);
 
@@ -194,7 +172,7 @@ describe('Rack Commands', () => {
 
 		it('execute calls clearRackDevicesRaw', () => {
 			const store = createMockStore();
-			const devices = [createMockDevice()];
+			const devices = [createTestDevice()];
 
 			const command = createClearRackCommand(devices, store);
 			command.execute();
@@ -205,8 +183,8 @@ describe('Rack Commands', () => {
 		it('undo calls restoreRackDevicesRaw with device copies', () => {
 			const store = createMockStore();
 			const devices = [
-				createMockDevice({ position: 5, device_type: 'device-a' }),
-				createMockDevice({ position: 10, device_type: 'device-b' })
+				createTestDevice({ position: 5, device_type: 'device-a' }),
+				createTestDevice({ position: 10, device_type: 'device-b' })
 			];
 
 			const command = createClearRackCommand(devices, store);
@@ -222,7 +200,7 @@ describe('Rack Commands', () => {
 
 		it('stores copies of devices to avoid mutation issues', () => {
 			const store = createMockStore();
-			const devices = [createMockDevice({ position: 5 })];
+			const devices = [createTestDevice({ position: 5 })];
 
 			const command = createClearRackCommand(devices, store);
 

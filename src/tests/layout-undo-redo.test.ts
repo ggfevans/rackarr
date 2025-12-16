@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeEach } from 'vitest';
-import { getLayoutStore, resetLayoutStore } from './layout.svelte';
-import { resetHistoryStore } from './history.svelte';
+import { getLayoutStore, resetLayoutStore } from '$lib/stores/layout.svelte';
+import { resetHistoryStore } from '$lib/stores/history.svelte';
 
 describe('Layout Store - Undo/Redo Integration', () => {
 	let initialDeviceTypeCount: number;

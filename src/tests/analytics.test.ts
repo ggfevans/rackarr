@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { initAnalytics, trackEvent, isAnalyticsEnabled, analytics } from './analytics';
+import { initAnalytics, trackEvent, isAnalyticsEnabled, analytics } from '$lib/utils/analytics';
 
 describe('analytics', () => {
 	beforeEach(() => {

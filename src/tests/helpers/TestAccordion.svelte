@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { Accordion } from './index.js';
+	import { Accordion } from '$lib/components/ui/Accordion/index.js';
 
 	interface Section {
 		id: string;

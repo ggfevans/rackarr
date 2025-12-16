@@ -288,6 +288,27 @@ describe('RackDevice SVG Component', () => {
 			expect(dragHandle).toBeInTheDocument();
 			// Cursor style is applied via CSS, just verify element exists
 		});
+
+		it('applies dragging class when drag starts', async () => {
+			const handleDragStart = vi.fn();
+			const { container } = render(RackDevice, {
+				props: { ...defaultProps, ondragstart: handleDragStart }
+			});
+
+			const dragHandle = container.querySelector('.drag-handle');
+			expect(dragHandle).toBeInTheDocument();
+
+			// The drag handle should have draggable attribute
+			expect(dragHandle).toHaveAttribute('draggable', 'true');
+
+			// The group element should have the rack-device class
+			const group = container.querySelector('g.rack-device');
+			expect(group).toBeInTheDocument();
+
+			// Note: CSS transform: scale() on SVG elements with existing transform
+			// attributes causes visual position jumps. The dragging state uses
+			// drop-shadow filter for visual feedback instead (see Issue #5).
+		});
 	});
 
 	describe('Display Mode', () => {

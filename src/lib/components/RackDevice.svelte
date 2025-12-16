@@ -258,18 +258,18 @@
 
 <style>
 	.rack-device {
-		/* Enable GPU-accelerated transforms for smooth animations */
-		will-change: transform, filter;
-		transition:
-			transform var(--anim-drag-settle, 0.15s) ease-out,
-			filter var(--anim-drag-settle, 0.15s) ease-out;
+		/* Enable GPU-accelerated filter animations */
+		will-change: filter;
+		transition: filter var(--anim-drag-settle, 0.15s) ease-out;
 	}
 
 	.rack-device.dragging {
 		opacity: 0.7;
-		/* Scale up slightly and add drop shadow on drag */
-		transform: scale(1.02);
-		transform-origin: center center;
+		/* Drop shadow provides visual feedback during drag.
+		   Note: CSS transform: scale() is NOT used here because SVG <g> elements
+		   with existing transform="translate()" attributes will have their
+		   CSS transform-origin calculated incorrectly, causing a visual position
+		   jump when dragging starts. See Issue #5. */
 		filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.4));
 	}
 

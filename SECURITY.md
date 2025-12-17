@@ -40,7 +40,7 @@ Code generated with AI assistance undergoes the same security review process as 
 When using Rackarr:
 
 - Review exported files before sharing, as they may contain infrastructure details
-- Be cautious about loading `.rackarr.json` files from untrusted sources
+- Be cautious about loading `.rackarr.zip` files from untrusted sources
 - Keep your browser updated to ensure latest security patches
 
 ## Dependency Security

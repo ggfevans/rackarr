@@ -1,10 +1,17 @@
 # Rackarr
 
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+[![Version](https://img.shields.io/badge/version-0.5.8-blue.svg)](https://github.com/Rackarr/Rackarr/releases)
+[![Demo](https://img.shields.io/badge/demo-app.rackarr.com-green.svg)](https://app.rackarr.com/)
+
 **Rack Layout Designer for Homelabbers**
 
 A browser-based visual tool for planning and documenting server rack layouts. Design your homelab rack configurations with an intuitive drag-and-drop interface, then export them for documentation.
 
-**[Live Demo](https://app.rackarr.com/)**
+<!-- TODO: Add hero screenshot/GIF here -->
+<!-- ![Rackarr Screenshot](docs/images/hero.png) -->
+
+**[Try the Live Demo →](https://app.rackarr.com/)**
 
 ## Features
 
@@ -68,6 +75,8 @@ Access the app at `http://localhost:8080`
 
 | Key                    | Action                          |
 | ---------------------- | ------------------------------- |
+| `Ctrl/Cmd + Z`         | Undo                            |
+| `Ctrl/Cmd + Shift + Z` | Redo                            |
 | `Ctrl/Cmd + S`         | Save layout                     |
 | `Ctrl/Cmd + O`         | Load layout                     |
 | `Ctrl/Cmd + E`         | Export dialog                   |
@@ -76,7 +85,7 @@ Access the app at `http://localhost:8080`
 | `I`                    | Toggle label/image display      |
 | `F`                    | Fit rack to viewport            |
 | `Escape`               | Clear selection / Close dialogs |
-| `?`                    | Show help                       |
+| `?`                    | Show About & shortcuts          |
 
 ## Tech Stack
 
@@ -115,7 +124,12 @@ my-layout.rackarr.zip
     └── device-abc-rear.jpg
 ```
 
-Legacy `.rackarr.json` files are also supported for backwards compatibility.
+## Documentation
+
+- **[Architecture Overview](docs/ARCHITECTURE.md)** — High-level design and entry points
+- **[Technical Specification](docs/reference/SPEC.md)** — Complete technical specification
+- **[Testing Guide](docs/guides/TESTING.md)** — Testing patterns and commands
+- **[Accessibility](docs/guides/ACCESSIBILITY.md)** — A11y compliance checklist
 
 ## Contributing
 

@@ -15,6 +15,8 @@ export default defineConfig(() => ({
 	define: {
 		// Inject version at build time
 		__APP_VERSION__: JSON.stringify(pkg.version),
+		// Environment indicator (development, production, or empty for local detection)
+		__BUILD_ENV__: JSON.stringify(process.env.VITE_ENV || ''),
 		// Umami analytics configuration
 		__UMAMI_ENABLED__: JSON.stringify(process.env.VITE_UMAMI_ENABLED === 'true'),
 		__UMAMI_SCRIPT_URL__: JSON.stringify(process.env.VITE_UMAMI_SCRIPT_URL || ''),

@@ -5,6 +5,8 @@
   Showcase mode: slow rainbow wave for About/Help display
 -->
 <script lang="ts">
+	import EnvironmentBadge from './EnvironmentBadge.svelte';
+
 	interface Props {
 		size?: number;
 		celebrate?: boolean;
@@ -200,6 +202,9 @@
 	>
 		<text x="0" y="38">Rackarr</text>
 	</svg>
+
+	<!-- Environment indicator badge (DEV/LOCAL) -->
+	<EnvironmentBadge />
 </div>
 
 <style>

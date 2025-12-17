@@ -417,10 +417,11 @@
 		<!-- Rail mounting holes (3 per U on each rail) - rendered first so labels appear on top -->
 		{#each Array(rack.height).fill(null) as _hole, i (i)}
 			{@const baseY = i * U_HEIGHT + RACK_PADDING + RAIL_WIDTH + 4}
+			{@const holeX = RACK_WIDTH - RAIL_WIDTH / 2 - 1.5}
 			<!-- Right rail holes only - left rail has labels -->
-			<circle cx={RACK_WIDTH - RAIL_WIDTH / 2} cy={baseY} r="1.8" class="rack-hole" />
-			<circle cx={RACK_WIDTH - RAIL_WIDTH / 2} cy={baseY + 7} r="1.8" class="rack-hole" />
-			<circle cx={RACK_WIDTH - RAIL_WIDTH / 2} cy={baseY + 14} r="1.8" class="rack-hole" />
+			<rect x={holeX} y={baseY - 2} width="3" height="4" rx="0.5" class="rack-hole" />
+			<rect x={holeX} y={baseY + 5} width="3" height="4" rx="0.5" class="rack-hole" />
+			<rect x={holeX} y={baseY + 12} width="3" height="4" rx="0.5" class="rack-hole" />
 		{/each}
 
 		<!-- U labels (always on left rail) -->

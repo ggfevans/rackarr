@@ -534,5 +534,120 @@ settings:
 			expect(result.images.get('my-server')?.front?.blob).toBeInstanceOf(Blob);
 			expect(result.images.get('my-server')?.rear?.blob).toBeInstanceOf(Blob);
 		});
+
+		describe('graceful image loading failure handling', () => {
+			it('returns failedImages array when blob conversion fails', async () => {
+				const layout = createTestLayout();
+				layout.device_types = [
+					{
+						slug: 'test-device',
+						model: 'Test Device',
+						manufacturer: 'Test',
+						u_height: 2,
+						is_full_depth: true,
+						rackarr: { colour: '#666666', category: 'server' }
+					}
+				];
+				layout.rack.devices = [
+					{
+						device_type: 'test-device',
+						position: 1,
+						face: 'front'
+					}
+				];
+
+				// Create archive with valid image
+				const images: ImageStoreMap = new SvelteMap();
+				const testImage = await createTestImage('test-content');
+				images.set('test-device', { front: testImage });
+
+				const blob = await createFolderArchive(layout, images);
+				const result = await extractFolderArchive(blob);
+
+				// Should have failedImages property (empty array for successful load)
+				expect(result).toHaveProperty('failedImages');
+				expect(Array.isArray(result.failedImages)).toBe(true);
+			});
+
+			it('continues loading other images when one fails', async () => {
+				const layout = createTestLayout();
+				layout.device_types = [
+					{
+						slug: 'device-a',
+						model: 'Device A',
+						manufacturer: 'Test',
+						u_height: 1,
+						is_full_depth: true,
+						rackarr: { colour: '#666666', category: 'server' }
+					},
+					{
+						slug: 'device-b',
+						model: 'Device B',
+						manufacturer: 'Test',
+						u_height: 1,
+						is_full_depth: true,
+						rackarr: { colour: '#666666', category: 'server' }
+					}
+				];
+
+				// Create archive with two devices
+				const images: ImageStoreMap = new SvelteMap();
+				const imageA = await createTestImage('content-a');
+				const imageB = await createTestImage('content-b');
+				images.set('device-a', { front: imageA });
+				images.set('device-b', { front: imageB });
+
+				const blob = await createFolderArchive(layout, images);
+				const result = await extractFolderArchive(blob);
+
+				// Both images should be loaded when no failures
+				expect(result.images.has('device-a')).toBe(true);
+				expect(result.images.has('device-b')).toBe(true);
+				expect(result.failedImages).toHaveLength(0);
+			});
+
+			it('does not throw when image blob is corrupted', async () => {
+				const zip = new JSZip();
+				const folder = zip.folder('test-layout');
+
+				// Add valid YAML with proper rackarr structure
+				const yamlContent = `version: "0.2.0"
+name: Test Layout
+rack:
+  name: Test Rack
+  height: 42
+  width: 19
+  desc_units: false
+  form_factor: 4-post-cabinet
+  starting_unit: 1
+  position: 0
+  devices: []
+device_types:
+  - slug: corrupt-device
+    model: Corrupt Device
+    manufacturer: Test
+    u_height: 1
+    is_full_depth: true
+    rackarr:
+      colour: "#666666"
+      category: server
+settings:
+  display_mode: label
+  show_labels_on_images: true`;
+				folder?.file('test-layout.yaml', yamlContent);
+
+				// Add "image" that's actually empty/corrupted data
+				const assetsFolder = folder?.folder('assets');
+				const deviceFolder = assetsFolder?.folder('corrupt-device');
+				deviceFolder?.file('front.png', new Blob([], { type: 'image/png' }));
+
+				const blob = await zip.generateAsync({ type: 'blob' });
+
+				// Should NOT throw - should gracefully handle
+				const result = await extractFolderArchive(blob);
+				expect(result.layout).toBeDefined();
+				expect(result.images).toBeDefined();
+			});
+		});
 	});
 });

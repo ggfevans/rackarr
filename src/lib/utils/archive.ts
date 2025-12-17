@@ -93,11 +93,11 @@ export async function createFolderArchive(layout: Layout, images: ImageStoreMap)
 
 /**
  * Extract a folder-based ZIP archive
- * Returns layout and images map
+ * Returns layout, images map, and list of any images that failed to load
  */
 export async function extractFolderArchive(
 	blob: Blob
-): Promise<{ layout: Layout; images: ImageStoreMap }> {
+): Promise<{ layout: Layout; images: ImageStoreMap; failedImages: string[] }> {
 	const zip = await JSZip.loadAsync(blob);
 
 	// Find the YAML file (should be [name]/[name].yaml)
@@ -125,6 +125,7 @@ export async function extractFolderArchive(
 
 	// Extract images from assets folder
 	const images: ImageStoreMap = new Map();
+	const failedImages: string[] = [];
 	const assetsPrefix = `${folderName}/assets/`;
 
 	const imageFiles = Object.keys(zip.files).filter(
@@ -157,33 +158,55 @@ export async function extractFolderArchive(
 
 		if (!imageFile) continue;
 
-		const imageBlob = await imageFile.async('blob');
-		const dataUrl = await blobToDataUrl(imageBlob);
+		try {
+			const imageBlob = await imageFile.async('blob');
+			const dataUrl = await blobToDataUrl(imageBlob);
 
-		const imageData: ImageData = {
-			blob: imageBlob,
-			dataUrl,
-			filename
-		};
+			// Graceful degradation: skip images that fail to convert
+			if (!dataUrl) {
+				console.warn(`Failed to load image: ${imagePath}`);
+				failedImages.push(imagePath);
+				continue;
+			}
 
-		const existing = images.get(deviceSlug) ?? {};
-		images.set(deviceSlug, {
-			...existing,
-			[face]: imageData
-		});
+			const imageData: ImageData = {
+				blob: imageBlob,
+				dataUrl,
+				filename
+			};
+
+			const existing = images.get(deviceSlug) ?? {};
+			images.set(deviceSlug, {
+				...existing,
+				[face]: imageData
+			});
+		} catch (error) {
+			// Catch any unexpected errors during blob extraction
+			console.warn(`Failed to extract image: ${imagePath}`, error);
+			failedImages.push(imagePath);
+		}
 	}
 
-	return { layout, images };
+	return { layout, images, failedImages };
 }
 
 /**
  * Convert a Blob to a data URL
+ * Returns null on failure for graceful degradation
  */
-function blobToDataUrl(blob: Blob): Promise<string> {
-	return new Promise((resolve, reject) => {
+function blobToDataUrl(blob: Blob): Promise<string | null> {
+	return new Promise((resolve) => {
 		const reader = new FileReader();
-		reader.onload = () => resolve(reader.result as string);
-		reader.onerror = () => reject(new Error('Failed to read blob'));
+		reader.onload = () => {
+			// Type-safe result handling
+			if (typeof reader.result === 'string') {
+				resolve(reader.result);
+			} else {
+				// Unexpected result type (ArrayBuffer when using readAsDataURL is unusual)
+				resolve(null);
+			}
+		};
+		reader.onerror = () => resolve(null); // Graceful failure instead of reject
 		reader.readAsDataURL(blob);
 	});
 }

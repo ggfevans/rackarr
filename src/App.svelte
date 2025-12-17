@@ -177,7 +177,7 @@
 			}
 
 			// Load folder archive (.rackarr.zip)
-			const { layout, images } = await extractFolderArchive(file);
+			const { layout, images, failedImages } = await extractFolderArchive(file);
 
 			// Clear and restore images from archive
 			imageStore.clearAllImages();
@@ -201,7 +201,16 @@
 				canvasStore.fitAll(layoutStore.rack ? [layoutStore.rack] : []);
 			});
 
-			toastStore.showToast('Layout loaded successfully', 'success');
+			// Show appropriate toast based on image loading results
+			if (failedImages.length > 0) {
+				const count = failedImages.length;
+				toastStore.showToast(
+					`Layout loaded with ${count} image${count > 1 ? 's' : ''} that couldn't be read`,
+					'warning'
+				);
+			} else {
+				toastStore.showToast('Layout loaded successfully', 'success');
+			}
 
 			// Track load event
 			const deviceCount = layoutStore.rack?.devices.length ?? 0;

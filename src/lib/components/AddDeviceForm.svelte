@@ -151,7 +151,7 @@
 	}
 </script>
 
-<Dialog {open} title="Add Device" onclose={handleCancel}>
+<Dialog {open} title="Add Device" width="480px" onclose={handleCancel}>
 	<!-- svelte-ignore a11y_no_noninteractive_element_interactions -->
 	<form class="add-device-form" onsubmit={(e) => e.preventDefault()} onkeydown={handleKeyDown}>
 		<div class="form-group">
@@ -251,7 +251,7 @@
 		</div>
 
 		<!-- Image uploads (v0.1.0) -->
-		<div class="form-row">
+		<div class="form-row form-row-symmetric">
 			<ImageUpload
 				face="front"
 				currentImage={frontImage}
@@ -296,6 +296,10 @@
 		display: grid;
 		grid-template-columns: 1fr 2fr;
 		gap: var(--space-4);
+	}
+
+	.form-row-symmetric {
+		grid-template-columns: 1fr 1fr;
 	}
 
 	.form-group input[type='text'],

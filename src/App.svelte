@@ -45,6 +45,9 @@
 	import type { ExportOptions } from '$lib/types';
 	import { analytics } from '$lib/utils/analytics';
 
+	// Build-time environment constant from vite.config.ts
+	declare const __BUILD_ENV__: string;
+
 	const layoutStore = getLayoutStore();
 	const selectionStore = getSelectionStore();
 	const uiStore = getUIStore();
@@ -448,6 +451,22 @@
 
 		// Load bundled images for starter library devices
 		imageStore.loadBundledImages();
+
+		// Set window title with environment prefix in non-production environments
+		const buildEnv = typeof __BUILD_ENV__ !== 'undefined' ? __BUILD_ENV__ : '';
+		const isLocalhost =
+			window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+
+		let envPrefix = '';
+		if (isLocalhost) {
+			envPrefix = 'LOCAL - ';
+		} else if (buildEnv === 'development') {
+			envPrefix = 'DEV - ';
+		}
+
+		if (envPrefix) {
+			document.title = `${envPrefix}${document.title}`;
+		}
 	});
 </script>
 

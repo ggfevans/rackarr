@@ -46,3 +46,7 @@ jobs:
           push: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
+          build-args: |
+            VITE_UMAMI_ENABLED=true
+            VITE_UMAMI_WEBSITE_ID=${{ secrets.UMAMI_PROD_WEBSITE_ID }}
+            VITE_UMAMI_SCRIPT_URL=https://analytics.rackarr.com/script.js

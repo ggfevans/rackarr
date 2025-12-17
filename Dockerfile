@@ -1,6 +1,12 @@
 # Build stage
 FROM node:22-alpine AS build
 WORKDIR /app
+
+# Umami analytics configuration (passed as build args)
+ARG VITE_UMAMI_ENABLED=false
+ARG VITE_UMAMI_WEBSITE_ID
+ARG VITE_UMAMI_SCRIPT_URL
+
 COPY package*.json ./
 RUN npm install --ignore-scripts
 COPY . .

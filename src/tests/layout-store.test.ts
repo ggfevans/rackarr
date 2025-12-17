@@ -1,6 +1,7 @@
 import { describe, it, expect, beforeEach } from 'vitest';
 import { getLayoutStore, resetLayoutStore } from '$lib/stores/layout.svelte';
 import type { Layout } from '$lib/types';
+import { VERSION } from '$lib/version';
 
 describe('Layout Store (v0.2)', () => {
 	beforeEach(() => {
@@ -9,10 +10,10 @@ describe('Layout Store (v0.2)', () => {
 	});
 
 	describe('initial state', () => {
-		it('initializes with a v0.2 layout', () => {
+		it('initializes with correct app version', () => {
 			const store = getLayoutStore();
 			expect(store.layout.name).toBe('Racky McRackface');
-			expect(store.layout.version).toBe('0.2.0');
+			expect(store.layout.version).toBe(VERSION);
 			// v0.2 has a single rack, not an array
 			expect(store.layout.rack).toBeDefined();
 			expect(store.layout.rack.devices).toEqual([]);

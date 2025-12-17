@@ -90,11 +90,19 @@
 	// Rail width (matches Rack.svelte)
 	const RAIL_WIDTH = 17;
 
+	// Image overflow: how far device images extend past rack rails (Issue #9)
+	// Real equipment extends past the rails; this creates realistic front-mounting appearance
+	const IMAGE_OVERFLOW = 8;
+
 	// Position calculation (SVG y-coordinate, origin at top)
 	// y = (rackHeight - position - device.u_height + 1) * uHeight
 	const yPosition = $derived((rackHeight - position - device.u_height + 1) * uHeight);
 	const deviceHeight = $derived(device.u_height * uHeight);
 	const deviceWidth = $derived(rackWidth - RAIL_WIDTH * 2);
+
+	// Image dimensions extend past device rect for realistic appearance
+	const imageX = $derived(showImage ? -IMAGE_OVERFLOW : 0);
+	const imageWidth = $derived(showImage ? deviceWidth + IMAGE_OVERFLOW * 2 : deviceWidth);
 
 	// Aria label for accessibility
 	const ariaLabel = $derived(
@@ -178,12 +186,12 @@
 
 	<!-- Device content: Image or Label -->
 	{#if showImage}
-		<!-- Device image -->
+		<!-- Device image: extends past rack rails for realistic front-mounting appearance -->
 		<image
 			class="device-image"
-			x="0"
+			x={imageX}
 			y="0"
-			width={deviceWidth}
+			width={imageWidth}
 			height={deviceHeight}
 			href={deviceImageUrl}
 			preserveAspectRatio="xMidYMid slice"

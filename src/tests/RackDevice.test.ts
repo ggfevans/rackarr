@@ -9,6 +9,7 @@ describe('RackDevice SVG Component', () => {
 	const U_HEIGHT = 22;
 	const RACK_WIDTH = 220;
 	const RAIL_WIDTH = 17;
+	const IMAGE_OVERFLOW = 8; // Images extend past rails for realistic appearance
 
 	const mockDevice: DeviceType = {
 		slug: 'device-1',
@@ -386,7 +387,7 @@ describe('RackDevice SVG Component', () => {
 			expect(image?.getAttribute('href')).toBe('data:image/png;base64,cmVhcg==');
 		});
 
-		it('image scales to fit device dimensions', () => {
+		it('image scales to fit device dimensions with overflow', () => {
 			const imageStore = getImageStore();
 			imageStore.setDeviceImage(mockDevice.slug, 'front', mockImageData);
 
@@ -395,10 +396,13 @@ describe('RackDevice SVG Component', () => {
 			});
 
 			const image = container.querySelector('.device-image');
-			const expectedWidth = RACK_WIDTH - RAIL_WIDTH * 2;
+			// Image extends past rack rails by IMAGE_OVERFLOW on each side
+			const expectedWidth = RACK_WIDTH - RAIL_WIDTH * 2 + IMAGE_OVERFLOW * 2;
 			const expectedHeight = U_HEIGHT;
 			expect(image?.getAttribute('width')).toBe(String(expectedWidth));
 			expect(image?.getAttribute('height')).toBe(String(expectedHeight));
+			// Image is positioned at negative x to extend past left rail
+			expect(image?.getAttribute('x')).toBe(String(-IMAGE_OVERFLOW));
 		});
 	});
 

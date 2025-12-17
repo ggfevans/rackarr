@@ -398,4 +398,283 @@ describe('KeyboardHandler Component', () => {
 			expect(onToggleAirflowMode).toHaveBeenCalledTimes(1);
 		});
 	});
+
+	describe('Undo/Redo Shortcuts', () => {
+		it('Ctrl+Z triggers undo when history available', async () => {
+			const layoutStore = getLayoutStore();
+
+			// Create initial state and make a change to enable undo
+			layoutStore.addRack('Test Rack', 42);
+			const deviceType = layoutStore.addDeviceType({
+				name: 'Test Server',
+				u_height: 1,
+				category: 'server',
+				colour: CATEGORY_COLOURS.server
+			});
+			layoutStore.placeDevice('rack-0', deviceType.slug, 5);
+
+			expect(layoutStore.canUndo).toBe(true);
+
+			render(KeyboardHandler);
+
+			await fireEvent.keyDown(window, { key: 'z', ctrlKey: true });
+
+			// After undo, device should be removed
+			expect(layoutStore.rack!.devices.length).toBe(0);
+		});
+
+		it('Cmd+Z triggers undo (Mac)', async () => {
+			const layoutStore = getLayoutStore();
+
+			layoutStore.addRack('Test Rack', 42);
+			const deviceType = layoutStore.addDeviceType({
+				name: 'Test Server',
+				u_height: 1,
+				category: 'server',
+				colour: CATEGORY_COLOURS.server
+			});
+			layoutStore.placeDevice('rack-0', deviceType.slug, 5);
+
+			expect(layoutStore.canUndo).toBe(true);
+
+			render(KeyboardHandler);
+
+			await fireEvent.keyDown(window, { key: 'z', metaKey: true });
+
+			expect(layoutStore.rack!.devices.length).toBe(0);
+		});
+
+		it('Ctrl+Shift+Z triggers redo when history available', async () => {
+			const layoutStore = getLayoutStore();
+
+			layoutStore.addRack('Test Rack', 42);
+			const deviceType = layoutStore.addDeviceType({
+				name: 'Test Server',
+				u_height: 1,
+				category: 'server',
+				colour: CATEGORY_COLOURS.server
+			});
+			layoutStore.placeDevice('rack-0', deviceType.slug, 5);
+			layoutStore.undo(); // Undo the placement
+
+			expect(layoutStore.canRedo).toBe(true);
+
+			render(KeyboardHandler);
+
+			await fireEvent.keyDown(window, { key: 'z', ctrlKey: true, shiftKey: true });
+
+			// After redo, device should be back
+			expect(layoutStore.rack!.devices.length).toBe(1);
+		});
+
+		it('Ctrl+Y triggers redo', async () => {
+			const layoutStore = getLayoutStore();
+
+			layoutStore.addRack('Test Rack', 42);
+			const deviceType = layoutStore.addDeviceType({
+				name: 'Test Server',
+				u_height: 1,
+				category: 'server',
+				colour: CATEGORY_COLOURS.server
+			});
+			layoutStore.placeDevice('rack-0', deviceType.slug, 5);
+			layoutStore.undo();
+
+			expect(layoutStore.canRedo).toBe(true);
+
+			render(KeyboardHandler);
+
+			await fireEvent.keyDown(window, { key: 'y', ctrlKey: true });
+
+			expect(layoutStore.rack!.devices.length).toBe(1);
+		});
+
+		it('Cmd+Shift+Z triggers redo (Mac)', async () => {
+			const layoutStore = getLayoutStore();
+
+			layoutStore.addRack('Test Rack', 42);
+			const deviceType = layoutStore.addDeviceType({
+				name: 'Test Server',
+				u_height: 1,
+				category: 'server',
+				colour: CATEGORY_COLOURS.server
+			});
+			layoutStore.placeDevice('rack-0', deviceType.slug, 5);
+			layoutStore.undo();
+
+			render(KeyboardHandler);
+
+			await fireEvent.keyDown(window, { key: 'z', metaKey: true, shiftKey: true });
+
+			expect(layoutStore.rack!.devices.length).toBe(1);
+		});
+
+		it('does nothing when undo is not available', async () => {
+			const layoutStore = getLayoutStore();
+
+			// Fresh store reset already puts us in a state with no history
+			// The default state has a rack but no undoable actions
+			// Let's clear history to ensure clean state
+			layoutStore.clearHistory?.();
+
+			render(KeyboardHandler);
+
+			// Should not throw even when canUndo is false
+			await fireEvent.keyDown(window, { key: 'z', ctrlKey: true });
+
+			// No error thrown means the test passes
+		});
+
+		it('does nothing when redo is not available', async () => {
+			const layoutStore = getLayoutStore();
+
+			// Fresh state with no redo history
+			layoutStore.addRack('Test Rack', 42);
+			expect(layoutStore.canRedo).toBe(false);
+
+			render(KeyboardHandler);
+
+			// Should not throw
+			await fireEvent.keyDown(window, { key: 'y', ctrlKey: true });
+
+			expect(layoutStore.rackCount).toBe(1);
+		});
+	});
+
+	describe('Delete Shortcuts', () => {
+		it('Delete key triggers delete callback', async () => {
+			const onDelete = vi.fn();
+
+			render(KeyboardHandler, { props: { ondelete: onDelete } });
+
+			await fireEvent.keyDown(window, { key: 'Delete' });
+
+			expect(onDelete).toHaveBeenCalledTimes(1);
+		});
+
+		it('Backspace key triggers delete callback', async () => {
+			const onDelete = vi.fn();
+
+			render(KeyboardHandler, { props: { ondelete: onDelete } });
+
+			await fireEvent.keyDown(window, { key: 'Backspace' });
+
+			expect(onDelete).toHaveBeenCalledTimes(1);
+		});
+
+		it('Delete does nothing without callback', async () => {
+			// Should not throw when no callback provided
+			render(KeyboardHandler);
+
+			await fireEvent.keyDown(window, { key: 'Delete' });
+
+			// Test passes if no error thrown
+		});
+	});
+
+	describe('Help Shortcut', () => {
+		it('? key triggers help callback', async () => {
+			const onHelp = vi.fn();
+
+			render(KeyboardHandler, { props: { onhelp: onHelp } });
+
+			await fireEvent.keyDown(window, { key: '?' });
+
+			expect(onHelp).toHaveBeenCalledTimes(1);
+		});
+
+		it('? does nothing without callback', async () => {
+			render(KeyboardHandler);
+
+			// Should not throw
+			await fireEvent.keyDown(window, { key: '?' });
+		});
+	});
+
+	describe('Event Prevention', () => {
+		it('prevents default for handled shortcuts', async () => {
+			const onSave = vi.fn();
+			render(KeyboardHandler, { props: { onsave: onSave } });
+
+			const event = new KeyboardEvent('keydown', {
+				key: 's',
+				ctrlKey: true,
+				bubbles: true,
+				cancelable: true
+			});
+
+			const preventDefaultSpy = vi.spyOn(event, 'preventDefault');
+			window.dispatchEvent(event);
+
+			expect(preventDefaultSpy).toHaveBeenCalled();
+		});
+
+		it('does not prevent default for unhandled keys', async () => {
+			render(KeyboardHandler);
+
+			const event = new KeyboardEvent('keydown', {
+				key: 'x', // Not a shortcut key
+				bubbles: true,
+				cancelable: true
+			});
+
+			const preventDefaultSpy = vi.spyOn(event, 'preventDefault');
+			window.dispatchEvent(event);
+
+			expect(preventDefaultSpy).not.toHaveBeenCalled();
+		});
+	});
+
+	describe('Multi-U Device Movement', () => {
+		it('moves 2U device by 2U increments', async () => {
+			const layoutStore = getLayoutStore();
+			const selectionStore = getSelectionStore();
+
+			layoutStore.addRack('Test Rack', 42);
+			const deviceType = layoutStore.addDeviceType({
+				name: '2U Server',
+				u_height: 2,
+				category: 'server',
+				colour: CATEGORY_COLOURS.server
+			});
+			layoutStore.placeDevice('rack-0', deviceType.slug, 10);
+			selectionStore.selectDevice('rack-0', 0, deviceType.slug);
+
+			render(KeyboardHandler);
+
+			const initialPosition = layoutStore.rack!.devices[0]!.position;
+			await fireEvent.keyDown(window, { key: 'ArrowUp' });
+
+			// 2U device should move by 2U
+			expect(layoutStore.rack!.devices[0]!.position).toBe(initialPosition + 2);
+		});
+
+		it('leapfrogs over blocking devices', async () => {
+			const layoutStore = getLayoutStore();
+			const selectionStore = getSelectionStore();
+
+			layoutStore.addRack('Test Rack', 42);
+			const serverType = layoutStore.addDeviceType({
+				name: 'Server',
+				u_height: 1,
+				category: 'server',
+				colour: CATEGORY_COLOURS.server
+			});
+
+			// Place a device at position 5
+			layoutStore.placeDevice('rack-0', serverType.slug, 5);
+			// Place another device at position 6 (blocking)
+			layoutStore.placeDevice('rack-0', serverType.slug, 6);
+
+			// Select the first device (at position 5)
+			selectionStore.selectDevice('rack-0', 0, serverType.slug);
+
+			render(KeyboardHandler);
+
+			await fireEvent.keyDown(window, { key: 'ArrowUp' });
+
+			// Should leapfrog over the blocking device at 6, land at 7
+			expect(layoutStore.rack!.devices[0]!.position).toBe(7);
+		});
+	});
 });

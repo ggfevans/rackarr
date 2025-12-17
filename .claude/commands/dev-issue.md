@@ -1,23 +1,53 @@
-# Issue Development Workflow
+# Issue Development Workflow v2
 
 Pick up the next ready issue, assess it, and either complete it or document blockers.
+Designed for autonomous operation with subagent delegation.
 
-## Pre-flight
+---
 
-1. **Load project context:**
-   - Read `docs/reference/SPEC.md` — authoritative technical reference
-   - Read `docs/ARCHITECTURE.md` — entry points and patterns
+## Permissions Granted
 
-2. **Check for prior work:**
-   - Search memory: `mem-search` skill with issue keywords
-   - Check WIP branches: `git branch -a | grep -E "(fix|feat|chore)/"`
+You have **explicit permission** to perform the following WITHOUT asking:
 
-## Issue Selection
+| Action | Scope |
+|--------|-------|
+| Create/switch git branches | Any branch matching `(fix\|feat\|chore\|refactor\|test\|docs)/<number>-*` |
+| Edit files | All files in `src/`, `docs/`, test files |
+| Run commands | `npm test`, `npm run build`, `npm run lint`, `gh` CLI |
+| Git operations | add, commit, push (to non-main branches), fetch, pull |
+| Create PRs | Via `gh pr create` |
+| Merge PRs | Via `gh pr merge --squash` after checks pass |
+| Comment on issues | Via `gh issue comment` |
 
-Find the next issue (ready, highest priority, smallest size):
+**STOP and ask only for:**
+- Force push to any branch
+- Any operation on `main` branch directly
+- Deleting branches not created in this session
+- Genuine ambiguity requiring human judgment
 
+---
+
+## Phase 1: Pre-flight (Parallel)
+
+Launch these operations **in parallel** using the Task tool:
+
+### 1a. Context Loading (Task: Explore agent, background)
+```
+Prompt: "Read docs/reference/SPEC.md and docs/ARCHITECTURE.md.
+Summarize: (1) key architectural patterns, (2) file organization,
+(3) testing conventions. Keep summary under 500 words."
+```
+
+### 1b. WIP Branch Check (Bash)
 ```bash
-gh issue list -R Rackarr/Rackarr --state open --label ready --json number,title,labels \
+git fetch origin --prune
+git branch -a | grep -E "(fix|feat|chore|refactor|test|docs)/" || echo "No WIP branches"
+```
+
+### 1c. Issue Fetch (Bash)
+```bash
+gh issue list -R Rackarr/Rackarr --state open --label ready \
+  --json number,title,labels,body \
   --jq 'sort_by(
     (.labels | map(.name) | if any(test("priority:urgent")) then 0
       elif any(test("priority:high")) then 1
@@ -26,172 +56,341 @@ gh issue list -R Rackarr/Rackarr --state open --label ready --json number,title,
     (.labels | map(.name) | if any(test("size:small")) then 0
       elif any(test("size:medium")) then 1
       else 2 end)
-  ) | .[0]'
+  ) | .[0:3]'  # Fetch top 3 for assessment
 ```
 
-If no issues match, report "No ready issues available" and stop.
+**If no issues:** Write to progress file, report "No ready issues available", and stop.
 
-## Assessment Phase
+---
 
-1. **Read the issue** — `gh issue view <number>`
-2. **Identify affected files** — from description or by searching codebase
-3. **Read related code** — understand current implementation
-4. **Check acceptance criteria** — must have clear requirements
+## Phase 2: Issue Assessment
 
-### Decision Point
-
-**If requirements are clear:** Continue to Implementation
-
-**If ambiguous or needs investigation:**
-- Conduct brief investigation (max 10 minutes)
-- Comment findings:
-  ```bash
-  gh issue comment <number> --body "## Investigation Notes
-
-  [findings]
-
-  **Recommendation:** Ready to implement | Needs clarification on X | Blocked by Y"
-  ```
-- If blocked, stop and report. Otherwise continue.
-
-## Implementation Phase
-
-### 1. Create Branch
-
+### 2a. Select Issue
+From the fetched issues, pick the first one. Read full details:
 ```bash
-# Format: <type>/<issue-number>-<short-description>
-# Types: fix, feat, chore, refactor, test, docs
-git checkout -b fix/42-blob-handling-crash
+gh issue view <number> --json number,title,body,labels,comments
 ```
 
-### 2. TDD Workflow
+### 2b. Determine Complexity
+
+**Simple Issue** (proceed directly to implementation):
+- Has `size:small` label AND
+- Acceptance criteria are explicit AND
+- Affects ≤3 files (estimate from description)
+
+**Complex Issue** (requires planning):
+- Has `size:medium` or `size:large` label OR
+- Has `type:feature` or architectural scope OR
+- Acceptance criteria need interpretation OR
+- Affects >3 files or multiple subsystems
+
+### 2c. For Complex Issues: Use Plan Agent
+
+Launch Task with `subagent_type: Plan`:
+```
+Prompt: "Design implementation for Issue #<number>: <title>
+
+<paste issue body>
+
+Consider:
+1. Which files need changes
+2. What tests to write (TDD)
+3. Any architectural decisions
+4. Risk areas
+
+Output a numbered implementation plan."
+```
+
+Review the plan. If reasonable, proceed. If concerns, note them and continue (don't block on minor issues).
+
+### 2d. Identify Affected Files (Task: Explore agent)
+
+For issues where affected files aren't obvious:
+```
+Prompt: "Find files related to: <feature/component from issue>.
+Search for: imports, type definitions, component usages, test files.
+Return file paths with brief relevance notes."
+```
+
+---
+
+## Phase 3: Implementation
+
+### 3a. Create Branch
+```bash
+# Ensure clean state
+git checkout main
+git pull origin main
+
+# Create branch: <type>/<issue-number>-<short-description>
+git checkout -b fix/42-short-description
+```
+
+### 3b. Update Progress File
+```bash
+cat >> .claude/session-progress.md << 'EOF'
+
+## Issue #<number>: <title>
+**Started:** $(date -Iseconds)
+**Branch:** `<branch-name>`
+**Status:** In Progress
+
+### Acceptance Criteria
+- [ ] Criterion 1
+- [ ] Criterion 2
+EOF
+```
+
+### 3c. TDD Workflow
 
 For each acceptance criterion:
 
 1. **Write failing test first**
    ```bash
-   # Run specific test file while developing
-   npm run test -- src/tests/MyComponent.test.ts
+   npm run test -- src/tests/<TestFile>.test.ts --reporter=verbose
    ```
 
 2. **Implement minimum code to pass**
+   - Use Read tool to understand existing code
+   - Use Edit tool for changes
+   - Follow Svelte 5 patterns (see Quick Reference below)
 
-3. **Refactor if needed** (while green)
+3. **Verify test passes**
+   ```bash
+   npm run test:run
+   ```
 
-4. **Repeat** for each criterion
+4. **Mark criterion complete in progress file**
 
-### 3. Commit
+### 3d. Pre-Commit Verification
 
-Pre-commit hooks will automatically:
-- Run `lint-staged` (eslint --fix, prettier --write on staged files)
-- Run full test suite (`npm run test:run`)
+Before committing, run full verification:
+```bash
+npm run lint && npm run test:run && npm run build
+```
 
-**If commit fails:** Fix the failing tests, then retry.
+**If failures occur:** See Error Recovery section.
 
+### 3e. Commit
 ```bash
 git add -A
-git commit -m "<type>: <description>
+git commit -m "$(cat <<'EOF'
+<type>: <description>
 
 Fixes #<number>
 
 🤖 Generated with [Claude Code](https://claude.com/claude-code)
 
-Co-Authored-By: Claude Opus 4.5 <noreply@anthropic.com>"
+Co-Authored-By: Claude Opus 4.5 <noreply@anthropic.com>
+EOF
+)"
 ```
 
-### 4. Push and Create PR
-
+### 3f. Push and Create PR
 ```bash
 git push -u origin <branch-name>
 
-gh pr create --title "<type>: <description>" --body "## Summary
-<brief description>
+gh pr create --title "<type>: <description> (Issue #<number>)" --body "$(cat <<'EOF'
+## Summary
+<1-3 bullets describing changes>
 
-## Test plan
-- [x] Tests added/updated
-- [x] All tests pass
-- [x] Build succeeds
+## Changes
+- `file1.ts`: <what changed>
+- `file2.svelte`: <what changed>
+
+## Test Plan
+- [x] Unit tests added/updated
+- [x] All tests pass (`npm run test:run`)
+- [x] Build succeeds (`npm run build`)
+- [x] Lint passes (`npm run lint`)
 
 Closes #<number>
 
-🤖 Generated with [Claude Code](https://claude.com/claude-code)"
+🤖 Generated with [Claude Code](https://claude.com/claude-code)
+EOF
+)"
 ```
 
-### 5. Merge
+### 3g. Merge (Auto)
 
+Wait for CI checks, then merge:
+```bash
+# Check PR status
+gh pr checks --watch
+
+# Merge when checks pass
+gh pr merge --squash --delete-branch --auto
+```
+
+If `--auto` not available:
 ```bash
 gh pr merge --squash --delete-branch
 ```
 
-Issue auto-closes from "Closes #N" in PR body.
+### 3h. Update Progress File
+```bash
+# Update status
+sed -i 's/Status:** In Progress/Status:** Completed/' .claude/session-progress.md
 
-## Handling Blockers
+# Add completion note
+cat >> .claude/session-progress.md << 'EOF'
+**Completed:** $(date -Iseconds)
+**PR:** <pr-url>
+EOF
+```
 
-If blocked during implementation:
+---
 
-1. **Commit WIP** (if any progress):
-   ```bash
-   git add -A
-   git commit -m "wip: partial progress on #<number>" --no-verify
-   git push -u origin <branch-name>
-   ```
+## Phase 4: Continue or Stop
 
-2. **Comment on issue:**
-   ```bash
-   gh issue comment <number> --body "## Progress Update
+### Check for More Issues
+```bash
+gh issue list -R Rackarr/Rackarr --state open --label ready --json number | jq 'length'
+```
 
-   **Status:** Blocked
+### Decision
 
-   **Completed:**
-   - [x] Item 1
+**If more issues exist AND in autonomous mode:**
+- Return to Phase 1 immediately
+- Do NOT pause for confirmation
 
-   **Blocker:**
-   <description>
+**If no more issues:**
+- Write final summary to progress file
+- Report completion
 
-   **Next steps:**
-   <what needs to happen>
+**Stopping conditions (ONLY these stop the loop):**
+1. No ready issues remaining
+2. Blocker hit (after error recovery attempts)
+3. User interruption
 
-   **Branch:** \`<branch-name>\` (WIP)"
-   ```
+---
 
-3. **Report blocker** and stop
+## Error Recovery
 
-## Svelte 5 Requirements
+### Test Failures
+
+**Attempt 1:** Read test output carefully, fix obvious issues.
+
+**Attempt 2:**
+- Re-read the test file and implementation
+- Check for Svelte 5 reactivity issues (see Quick Reference)
+- Check for async timing issues
+
+**Attempt 3:** Launch Task with Plan agent:
+```
+Prompt: "Tests are failing after 2 fix attempts.
+
+Test output: <paste>
+
+Implementation: <paste relevant code>
+
+Analyze the mismatch and suggest a fix."
+```
+
+**After 3 failures:** Proceed to Blocker Handling.
+
+### Lint/Build Failures
+
+Usually auto-fixable:
+```bash
+npm run lint -- --fix
+```
+
+If not auto-fixable, read the error and fix manually. These rarely need multiple attempts.
+
+---
+
+## Blocker Handling
+
+If genuinely blocked:
+
+### 1. Commit WIP
+```bash
+git add -A
+git commit -m "wip: partial progress on #<number>" --no-verify
+git push -u origin <branch-name>
+```
+
+### 2. Comment on Issue
+```bash
+gh issue comment <number> --body "$(cat <<'EOF'
+## Progress Update
+
+**Status:** Blocked
+
+**Completed:**
+- [x] Item 1
+- [x] Item 2
+
+**Blocker:**
+<clear description of what's blocking>
+
+**Attempted:**
+<what was tried>
+
+**Next Steps:**
+<what needs to happen to unblock>
+
+**Branch:** `<branch-name>` (WIP)
+EOF
+)"
+```
+
+### 3. Update Progress File
+```bash
+cat >> .claude/session-progress.md << 'EOF'
+
+**Status:** BLOCKED
+**Blocker:** <description>
+**Branch:** `<branch-name>` (WIP)
+EOF
+```
+
+### 4. Stop
+Do not continue to next issue. Report blocker and stop.
+
+---
+
+## Quick Reference
+
+### Svelte 5 Runes (Required)
 
 ```svelte
 <!-- ✅ CORRECT -->
 let count = $state(0);
 let doubled = $derived(count * 2);
+let items = $state<Item[]>([]);
 
-<!-- ❌ WRONG: Svelte 4 patterns -->
+<!-- ❌ WRONG: Svelte 4 -->
 import { writable } from 'svelte/store';
 $: doubled = count * 2;
 ```
 
-**Reactivity — never mutate directly:**
-```typescript
-// ✅ Triggers update
-layout.device_types = [...layout.device_types, newType];
+### Reactivity (Critical)
 
-// ❌ Bypasses reactivity
-layout.device_types.push(newType);
+```typescript
+// ✅ Triggers reactivity
+items = [...items, newItem];
+object = { ...object, key: newValue };
+
+// ❌ Silent failure - no update
+items.push(newItem);
+object.key = newValue;
 ```
 
-## Testing Patterns
+### Testing Patterns
 
-**File location:** `src/tests/<Name>.test.ts`
-
-**Use factories:**
 ```typescript
+// Use factories
 import { createTestDevice, createTestRack } from './factories';
+
+// Prefer test IDs
+screen.getByTestId('btn-save');
+
+// File location: src/tests/<Name>.test.ts
 ```
 
-**Prefer test IDs:**
-```typescript
-screen.getByTestId('btn-save')
-```
-
-## Type-Specific Checklists
+### Type-Specific Checklists
 
 **bug:**
 - [ ] Reproduce first
@@ -199,26 +398,52 @@ screen.getByTestId('btn-save')
 - [ ] Fix and verify
 - [ ] Check for similar patterns elsewhere
 
-**area:testing:**
-- [ ] Follow existing patterns
-- [ ] Use factories
-- [ ] Test happy path + edge cases
+**feature:**
+- [ ] Understand acceptance criteria
+- [ ] Plan approach (if complex)
+- [ ] TDD implementation
+- [ ] Update docs if needed
 
 **area:ui:**
-- [ ] Test keyboard navigation
-- [ ] Verify dark/light theme
-- [ ] Use design tokens (not hardcoded values)
+- [ ] Keyboard navigation works
+- [ ] Dark/light theme correct
+- [ ] Uses design tokens (not hardcoded)
 
-## Output
+---
 
-After completing or blocking:
+## Output Format
+
+After each issue (completed or blocked):
 
 ```
 ## Issue #<number>: <title>
 
-**Status:** Completed | Blocked | Needs Clarification
+**Status:** ✅ Completed | ❌ Blocked
 **Branch:** `<branch-name>`
-**PR:** <url>
+**PR:** <url> (if created)
+**Duration:** <time>
 
-**Summary:** <what was done>
+**Summary:**
+<what was done>
+
+**Files Changed:**
+- `file1.ts`: <change summary>
+- `file2.svelte`: <change summary>
+```
+
+After session ends:
+
+```
+## Session Summary
+
+**Issues Completed:** N
+**Issues Blocked:** M
+**Total Time:** X
+
+**Completed:**
+1. #42: Title - PR #123
+2. #43: Title - PR #124
+
+**Blocked:**
+1. #44: Title - <blocker reason>
 ```

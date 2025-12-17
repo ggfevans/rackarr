@@ -456,11 +456,9 @@
 	}
 
 	.form-group label {
-		font-size: var(--font-size-sm);
-		font-weight: 600;
-		color: var(--colour-text-muted);
-		text-transform: uppercase;
-		letter-spacing: 0.5px;
+		font-size: var(--font-size-base);
+		font-weight: var(--font-weight-medium);
+		color: var(--colour-text);
 	}
 
 	.form-group input {
@@ -675,11 +673,9 @@
 	}
 
 	.face-selector legend {
-		font-size: var(--font-size-sm);
-		font-weight: 600;
-		color: var(--colour-text-muted);
-		text-transform: uppercase;
-		letter-spacing: 0.5px;
+		font-size: var(--font-size-base);
+		font-weight: var(--font-weight-medium);
+		color: var(--colour-text);
 		padding: 0 4px;
 	}
 

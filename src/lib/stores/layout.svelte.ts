@@ -829,7 +829,8 @@ function placeDeviceRecorded(deviceTypeSlug: string, position: number, face?: De
 		const brandDevice = findBrandDevice(deviceTypeSlug);
 		if (brandDevice) {
 			// Import brand device into the layout's device_types
-			layout.device_types.push(brandDevice);
+			// Use spread to create new array reference for Svelte 5 reactivity
+			layout.device_types = [...layout.device_types, brandDevice];
 			deviceType = brandDevice;
 		} else {
 			// Not found in library or brand packs

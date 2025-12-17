@@ -1183,6 +1183,24 @@ describe('Layout Store (v0.2)', () => {
 			// Half-depth devices should default to 'front' face
 			expect(store.layout.rack.devices[0]!.face).toBe('front');
 		});
+
+		it('auto-import creates new array reference for Svelte reactivity', () => {
+			const store = getLayoutStore();
+			store.addRack('Test Rack', 42);
+
+			// Capture the original array reference
+			const originalDeviceTypes = store.device_types;
+
+			// Place a brand device that will trigger auto-import
+			store.placeDevice('rack-0', 'usw-pro-24', 5);
+
+			// The device_types array should be a NEW reference (not mutated in place)
+			// This is required for Svelte 5 reactivity to trigger UI updates
+			expect(store.device_types).not.toBe(originalDeviceTypes);
+
+			// But should still contain all original items plus the new one
+			expect(store.device_types.length).toBe(originalDeviceTypes.length + 1);
+		});
 	});
 
 	describe('placeDevice face defaults based on depth', () => {

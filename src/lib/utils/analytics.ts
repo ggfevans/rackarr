@@ -46,7 +46,7 @@ export function isAnalyticsEnabled(): boolean {
 
 /**
  * Initialize analytics - call once on app startup
- * Listens for umami:loaded event to ensure script is ready
+ * Dynamically loads the Umami script if enabled and configured
  */
 export function initAnalytics(): void {
 	if (isInitialized) return;
@@ -54,20 +54,24 @@ export function initAnalytics(): void {
 
 	// Check if enabled via build-time constant
 	isEnabled = typeof __UMAMI_ENABLED__ !== 'undefined' && __UMAMI_ENABLED__;
+	if (!isEnabled) return;
 
-	if (!isEnabled) {
-		return;
-	}
+	// Skip in development
+	const host = location.hostname;
+	if (host === 'localhost' || host === '127.0.0.1') return;
 
-	// Wait for Umami script to load
-	window.addEventListener('umami:loaded', () => {
-		identifySession();
-	});
+	// Validate configuration
+	const scriptUrl = typeof __UMAMI_SCRIPT_URL__ !== 'undefined' ? __UMAMI_SCRIPT_URL__ : '';
+	const websiteId = typeof __UMAMI_WEBSITE_ID__ !== 'undefined' ? __UMAMI_WEBSITE_ID__ : '';
+	if (!scriptUrl || !websiteId) return;
 
-	// Check if already loaded (script might load before this runs)
-	if (window.umami) {
-		identifySession();
-	}
+	// Dynamically load Umami script
+	const script = document.createElement('script');
+	script.defer = true;
+	script.src = scriptUrl;
+	script.dataset.websiteId = websiteId;
+	script.onload = () => identifySession();
+	document.head.appendChild(script);
 }
 
 /**
@@ -125,8 +129,7 @@ export const analytics = {
 	// Device operations
 	trackDevicePlace: (category: string) => trackEvent('device:place', { category }),
 
-	trackCustomDeviceCreate: (category: string) =>
-		trackEvent('device:create_custom', { category }),
+	trackCustomDeviceCreate: (category: string) => trackEvent('device:create_custom', { category }),
 
 	// Feature usage
 	trackDisplayModeToggle: (mode: 'label' | 'image' | 'image-label') =>

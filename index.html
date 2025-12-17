@@ -15,25 +15,6 @@
 				}
 			})();
 		</script>
-		<!-- Umami Analytics - configured via environment variables -->
-		<script>
-			(function() {
-				// Skip if disabled via config or in development
-				if (!__UMAMI_ENABLED__) return;
-				var host = location.hostname;
-				if (host === 'localhost' || host === '127.0.0.1') return;
-				if (!__UMAMI_SCRIPT_URL__ || !__UMAMI_WEBSITE_ID__) return;
-
-				var script = document.createElement('script');
-				script.defer = true;
-				script.src = __UMAMI_SCRIPT_URL__;
-				script.dataset.websiteId = __UMAMI_WEBSITE_ID__;
-				script.onload = function() {
-					window.dispatchEvent(new CustomEvent('umami:loaded'));
-				};
-				document.head.appendChild(script);
-			})();
-		</script>
 	</head>
 	<body>
 		<div id="app"></div>

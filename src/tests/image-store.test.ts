@@ -392,4 +392,52 @@ describe('Image Store', () => {
 			expect(userImages.size).toBe(0);
 		});
 	});
+
+	describe('bundled images after clear (Issue #3)', () => {
+		it('loses bundled images after clearAllImages without reload', () => {
+			const store = getImageStore();
+
+			// Load bundled images (simulates app mount)
+			store.loadBundledImages();
+			expect(store.hasImage('1u-server', 'front')).toBe(true);
+
+			// Clear all (simulates file load)
+			store.clearAllImages();
+
+			// Bundled images are gone!
+			expect(store.hasImage('1u-server', 'front')).toBe(false);
+		});
+
+		it('restores bundled images after clearAllImages + loadBundledImages', () => {
+			const store = getImageStore();
+
+			// Load bundled images (simulates app mount)
+			store.loadBundledImages();
+			expect(store.hasImage('1u-server', 'front')).toBe(true);
+
+			// Clear all (simulates file load)
+			store.clearAllImages();
+
+			// Reload bundled images (the fix!)
+			store.loadBundledImages();
+
+			// Bundled images are restored
+			expect(store.hasImage('1u-server', 'front')).toBe(true);
+		});
+
+		it('preserves user images when reloading bundled images', () => {
+			const store = getImageStore();
+
+			// Simulate file load with user images
+			store.clearAllImages();
+			store.setDeviceImage('my-custom-device', 'front', createMockImageData('custom.png'));
+
+			// Reload bundled images
+			store.loadBundledImages();
+
+			// Both user and bundled images should exist
+			expect(store.hasImage('my-custom-device', 'front')).toBe(true);
+			expect(store.hasImage('1u-server', 'front')).toBe(true);
+		});
+	});
 });

@@ -3,16 +3,18 @@
  * Tests for v0.2 folder-based ZIP archives
  */
 
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, beforeEach } from 'vitest';
 import JSZip from 'jszip';
+import { SvelteMap } from 'svelte/reactivity';
 import {
 	createFolderArchive,
 	extractFolderArchive,
 	getImageExtension,
 	getMimeType
 } from '$lib/utils/archive';
+import { getImageStore, resetImageStore } from '$lib/stores/images.svelte';
 import type { Layout } from '$lib/types';
-import type { ImageStoreMap, ImageData } from '$lib/types/images';
+import type { ImageStoreMap, ImageData, DeviceImageData } from '$lib/types/images';
 
 describe('Folder Archive Utilities', () => {
 	const createTestLayout = (): Layout => ({
@@ -451,6 +453,86 @@ settings:
 			expect(result.images.get('device-b')?.front).toBeDefined();
 			expect(result.images.get('device-b')?.rear).toBeDefined();
 			expect(result.images.get('device-c')?.rear).toBeDefined();
+		});
+	});
+
+	describe('Integration with Image Store', () => {
+		beforeEach(() => {
+			resetImageStore();
+		});
+
+		it('works with SvelteMap from getUserImages()', async () => {
+			const layout = createTestLayout();
+			layout.name = 'Test';
+
+			// Simulate the real flow: store sets images, then getUserImages is called
+			const store = getImageStore();
+			const frontImage = await createTestImage('user-front');
+			store.setDeviceImage('my-device', 'front', frontImage);
+
+			// getUserImages returns a SvelteMap, not a regular Map
+			const userImages = store.getUserImages();
+
+			// This should work - SvelteMap extends Map
+			const blob = await createFolderArchive(layout, userImages);
+			const zip = await JSZip.loadAsync(blob);
+
+			// Verify the image is in the archive
+			const frontFile = zip.file('test/assets/my-device/front.png');
+			expect(frontFile).not.toBeNull();
+		});
+
+		it('correctly excludes bundled images from archive', async () => {
+			const layout = createTestLayout();
+			layout.name = 'Test';
+
+			const store = getImageStore();
+
+			// Add a bundled image (should NOT be saved)
+			store.setDeviceImage('bundled-device', 'front', {
+				url: '/assets/bundled.webp',
+				filename: 'bundled.webp',
+				isBundled: true
+			});
+
+			// Add a user image (should be saved)
+			const userImage = await createTestImage('user-content');
+			store.setDeviceImage('user-device', 'front', userImage);
+
+			const userImages = store.getUserImages();
+			const blob = await createFolderArchive(layout, userImages);
+			const zip = await JSZip.loadAsync(blob);
+
+			// User image should exist
+			const userFile = zip.file('test/assets/user-device/front.png');
+			expect(userFile).not.toBeNull();
+
+			// Bundled image should NOT exist
+			const bundledFile = zip.file('test/assets/bundled-device/front.webp');
+			expect(bundledFile).toBeNull();
+		});
+
+		it('round-trips user images through save and load', async () => {
+			const layout = createTestLayout();
+			layout.name = 'Test';
+
+			const store = getImageStore();
+			const frontImage = await createTestImage('original-content');
+			const rearImage = await createTestImage('rear-content');
+			store.setDeviceImage('my-server', 'front', frontImage);
+			store.setDeviceImage('my-server', 'rear', rearImage);
+
+			// Save
+			const userImages = store.getUserImages();
+			const blob = await createFolderArchive(layout, userImages);
+
+			// Load
+			const result = await extractFolderArchive(blob);
+
+			// Verify images were restored
+			expect(result.images.has('my-server')).toBe(true);
+			expect(result.images.get('my-server')?.front?.blob).toBeInstanceOf(Blob);
+			expect(result.images.get('my-server')?.rear?.blob).toBeInstanceOf(Blob);
 		});
 	});
 });

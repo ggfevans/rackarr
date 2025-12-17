@@ -189,6 +189,8 @@
 					imageStore.setDeviceImage(deviceSlug, 'rear', deviceImages.rear);
 				}
 			}
+			// Reload bundled images (they were cleared above but not saved in archives)
+			imageStore.loadBundledImages();
 
 			layoutStore.loadLayout(layout);
 			layoutStore.markClean();

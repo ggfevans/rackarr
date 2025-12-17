@@ -11,7 +11,10 @@ import type {
 	ExportBackground
 } from '$lib/types';
 import type { ImageStoreMap } from '$lib/types/images';
-import { jsPDF } from 'jspdf';
+
+// Note: jsPDF is imported dynamically in exportAsPDF() to avoid loading
+// the large jsPDF + html2canvas bundle (~200KB) on app startup.
+// See issue #68 for details.
 
 // Constants matching Rack.svelte dimensions
 const U_HEIGHT = 22;
@@ -800,6 +803,9 @@ export async function exportAsJPEG(
  * Export SVG string as PDF blob (US Letter size, centered)
  */
 export async function exportAsPDF(svgString: string, background: ExportBackground): Promise<Blob> {
+	// Dynamically import jsPDF to avoid loading it (and html2canvas) on app startup
+	const { jsPDF } = await import('jspdf');
+
 	// Parse SVG to get dimensions
 	const parser = new DOMParser();
 	const svgDoc = parser.parseFromString(svgString, 'image/svg+xml');

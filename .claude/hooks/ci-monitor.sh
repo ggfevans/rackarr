@@ -1,6 +1,7 @@
 #!/bin/bash
 # CI Monitor Hook - Waits for GitHub Actions after push to main
 # Blocks Claude on CI failure with diagnostic info for auto-investigation
+# Version: 1.0.0
 
 set -e
 

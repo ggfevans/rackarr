@@ -5,6 +5,8 @@ on:
     types: [published]
   workflow_dispatch:
 
+permissions: {} # No GitHub API access needed - runs shell commands on self-hosted runner
+
 jobs:
   deploy:
     runs-on: self-hosted

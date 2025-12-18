@@ -4,6 +4,8 @@ on:
   issues:
     types: [opened]
 
+permissions: {} # Uses PAT for project access, not GITHUB_TOKEN
+
 jobs:
   add-to-project:
     runs-on: ubuntu-latest

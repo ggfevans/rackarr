@@ -138,7 +138,7 @@ describe('heartbeat tracking', () => {
 
 		const mockTrack = vi.fn();
 		const sessionStart = Date.now();
-		let lastActivity = Date.now();
+		const lastActivity = Date.now(); // Never updated - simulates idle user
 
 		const heartbeatCallback = () => {
 			const now = Date.now();

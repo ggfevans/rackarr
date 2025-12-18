@@ -4,7 +4,7 @@
  */
 
 import { describe, it, expect } from 'vitest';
-import { render, screen } from '@testing-library/svelte';
+import { render } from '@testing-library/svelte';
 import CategoryIcon from '$lib/components/CategoryIcon.svelte';
 import type { DeviceCategory } from '$lib/types';
 

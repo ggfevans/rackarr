@@ -4,7 +4,7 @@
  */
 
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
-import { render, screen, waitFor } from '@testing-library/svelte';
+import { render, screen } from '@testing-library/svelte';
 import { tick } from 'svelte';
 import ToastContainer from '$lib/components/ToastContainer.svelte';
 import { resetToastStore, getToastStore } from '$lib/stores/toast.svelte';

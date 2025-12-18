@@ -9,9 +9,6 @@ jobs:
   deploy:
     runs-on: self-hosted
     steps:
-      - name: Pull latest image
-        run: docker pull ghcr.io/rackarr/rackarr:latest
-
       - name: Deploy container
         run: |
           cd ~/rackarr-app

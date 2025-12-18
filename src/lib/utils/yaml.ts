@@ -4,8 +4,8 @@
  */
 
 import yaml from 'js-yaml';
-import type { Layout, Rack } from '$lib/types';
-import { LayoutSchema } from '$lib/schemas';
+import type { Layout } from '$lib/types';
+import { LayoutSchema, type LayoutZod } from '$lib/schemas';
 
 /**
  * Serialize object to YAML string
@@ -47,6 +47,20 @@ export function serializeLayoutToYaml(layout: Layout): string {
 }
 
 /**
+ * Convert Zod-validated layout to runtime Layout type
+ * Adds runtime defaults (e.g., rack.view)
+ */
+function toRuntimeLayout(parsed: LayoutZod): Layout {
+	return {
+		...parsed,
+		rack: {
+			...parsed.rack,
+			view: 'front'
+		}
+	};
+}
+
+/**
  * Parse YAML string to layout
  * Validates against schema and adds runtime defaults
  */
@@ -54,7 +68,7 @@ export function parseLayoutYaml(yamlString: string): Layout {
 	// Parse YAML (may throw on invalid syntax)
 	const parsed = parseYaml(yamlString);
 
-	// Validate against schema
+	// Validate against schema - result.data is typed as LayoutZod
 	const result = LayoutSchema.safeParse(parsed);
 
 	if (!result.success) {
@@ -69,9 +83,6 @@ export function parseLayoutYaml(yamlString: string): Layout {
 		throw new Error(`Invalid layout: ${errors}`);
 	}
 
-	// Add runtime defaults
-	const layout = result.data as Layout;
-	(layout.rack as Rack).view = 'front';
-
-	return layout;
+	// Convert to runtime Layout type with defaults
+	return toRuntimeLayout(result.data);
 }

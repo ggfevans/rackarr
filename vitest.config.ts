@@ -12,7 +12,7 @@ export default defineConfig({
 		__APP_VERSION__: JSON.stringify(pkg.version)
 	},
 	test: {
-		environment: 'jsdom',
+		environment: 'happy-dom',
 		include: ['src/**/*.{test,spec}.{js,ts}'],
 		globals: true,
 		setupFiles: ['src/tests/setup.ts'],

@@ -25,13 +25,15 @@ describe('ColourSwatch', () => {
 		it('applies colour as background-color', () => {
 			render(ColourSwatch, { props: { colour: '#ff5500' } });
 			const swatch = document.querySelector('.colour-swatch') as HTMLElement;
-			expect(swatch?.style.backgroundColor).toBe('rgb(255, 85, 0)');
+			// happy-dom keeps hex, jsdom converts to rgb
+			expect(['#ff5500', 'rgb(255, 85, 0)']).toContain(swatch?.style.backgroundColor);
 		});
 
 		it('supports hex colour format', () => {
 			render(ColourSwatch, { props: { colour: '#123456' } });
 			const swatch = document.querySelector('.colour-swatch') as HTMLElement;
-			expect(swatch?.style.backgroundColor).toBe('rgb(18, 52, 86)');
+			// happy-dom keeps hex, jsdom converts to rgb
+			expect(['#123456', 'rgb(18, 52, 86)']).toContain(swatch?.style.backgroundColor);
 		});
 
 		it('supports rgb colour format', () => {

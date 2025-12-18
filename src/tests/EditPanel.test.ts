@@ -468,7 +468,8 @@ describe('ColourSwatch Component', () => {
 	it('applies the correct colour', () => {
 		const { container } = render(ColourSwatch, { props: { colour: '#4A90D9' } });
 		const swatch = container.querySelector('.colour-swatch') as HTMLElement;
-		expect(swatch.style.backgroundColor).toBe('rgb(74, 144, 217)');
+		// happy-dom keeps hex, jsdom converts to rgb
+		expect(['#4A90D9', 'rgb(74, 144, 217)']).toContain(swatch.style.backgroundColor);
 	});
 
 	it('uses default size when not specified', () => {

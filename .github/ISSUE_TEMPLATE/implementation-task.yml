@@ -1,6 +1,7 @@
 name: Implementation Task
 description: Internal task with full implementation details (maintainers only)
 labels: ["ready"]
+type: Task
 body:
   - type: markdown
     attributes:

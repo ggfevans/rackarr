@@ -15,3 +15,7 @@ export { default as IconLogo } from './IconLogo.svelte';
 export { default as IconUndo } from './IconUndo.svelte';
 export { default as IconRedo } from './IconRedo.svelte';
 export { default as IconMenu } from './IconMenu.svelte';
+export { default as IconShare } from './IconShare.svelte';
+export { default as IconCopy } from './IconCopy.svelte';
+export { default as IconDownload } from './IconDownload.svelte';
+export { default as IconQRCode } from './IconQRCode.svelte';

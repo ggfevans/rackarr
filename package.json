@@ -37,6 +37,7 @@
 		"@testing-library/user-event": "^14.6.1",
 		"@types/js-yaml": "^4.0.9",
 		"@types/node": "^24.10.3",
+		"@types/pako": "^2.0.4",
 		"@types/umami-browser": "^2.18.0",
 		"@vitest/coverage-v8": "^3.2.4",
 		"eslint": "^9.39.1",
@@ -68,7 +69,9 @@
 		"js-yaml": "^4.1.1",
 		"jspdf": "^3.0.4",
 		"jszip": "^3.10.1",
+		"pako": "^2.1.0",
 		"panzoom": "^9.4.3",
+		"qrcode": "^1.5.4",
 		"simple-icons": "^16.2.0",
 		"zod": "^4.1.13"
 	}

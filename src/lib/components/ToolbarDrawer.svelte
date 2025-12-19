@@ -8,6 +8,7 @@
 		IconSave,
 		IconLoad,
 		IconExport,
+		IconShare,
 		IconTrash,
 		IconFitAll,
 		IconHelp,
@@ -24,6 +25,7 @@
 		canUndo?: boolean;
 		canRedo?: boolean;
 		hasSelection?: boolean;
+		hasRacks?: boolean;
 		undoDescription?: string;
 		redoDescription?: string;
 		onclose?: () => void;
@@ -31,6 +33,7 @@
 		onsave?: () => void;
 		onload?: () => void;
 		onexport?: () => void;
+		onshare?: () => void;
 		ondelete?: () => void;
 		onfitall?: () => void;
 		ontoggledisplaymode?: () => void;
@@ -45,6 +48,7 @@
 		canUndo = false,
 		canRedo = false,
 		hasSelection = false,
+		hasRacks = false,
 		undoDescription = 'Undo',
 		redoDescription = 'Redo',
 		onclose,
@@ -52,6 +56,7 @@
 		onsave,
 		onload,
 		onexport,
+		onshare,
 		ondelete,
 		onfitall,
 		ontoggledisplaymode,
@@ -142,6 +147,15 @@
 				<IconExport size={18} />
 				<span>Export</span>
 				<kbd class="drawer-shortcut">Ctrl+E</kbd>
+			</button>
+			<button
+				class="drawer-item"
+				aria-label="Share"
+				onclick={() => handleAction(onshare)}
+				disabled={!hasRacks}
+			>
+				<IconShare size={18} />
+				<span>Share</span>
 			</button>
 		</section>
 

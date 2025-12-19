@@ -17,7 +17,9 @@
 	import ToastContainer from '$lib/components/ToastContainer.svelte';
 	import KeyboardHandler from '$lib/components/KeyboardHandler.svelte';
 	import ExportDialog from '$lib/components/ExportDialog.svelte';
+	import ShareDialog from '$lib/components/ShareDialog.svelte';
 	import HelpPanel from '$lib/components/HelpPanel.svelte';
+	import { getShareParam, clearShareParam, decodeLayout } from '$lib/utils/share';
 	import { getLayoutStore } from '$lib/stores/layout.svelte';
 	import { getSelectionStore } from '$lib/stores/selection.svelte';
 	import { getUIStore } from '$lib/stores/ui.svelte';
@@ -60,6 +62,7 @@
 	let addDeviceFormOpen = $state(false);
 	let confirmDeleteOpen = $state(false);
 	let exportDialogOpen = $state(false);
+	let shareDialogOpen = $state(false);
 	let helpPanelOpen = $state(false);
 	let deleteTarget: { type: 'rack' | 'device'; name: string } | null = $state(null);
 	let showReplaceDialog = $state(false);
@@ -97,8 +100,30 @@
 	}
 
 	// Auto-open new rack dialog when no racks exist (first-load experience)
+	// Also handles loading shared layouts from URL params
 	// Uses onMount to run once on initial load, not reactively
 	onMount(() => {
+		// Check for shared layout in URL
+		const shareParam = getShareParam();
+		if (shareParam) {
+			const sharedLayout = decodeLayout(shareParam);
+			if (sharedLayout) {
+				layoutStore.loadLayout(sharedLayout);
+				layoutStore.markClean();
+				clearShareParam();
+				toastStore.showToast('Shared layout loaded', 'success');
+
+				// Reset view to center the loaded rack after DOM updates
+				requestAnimationFrame(() => {
+					canvasStore.fitAll(layoutStore.rack ? [layoutStore.rack] : []);
+				});
+				return; // Don't show new rack dialog
+			} else {
+				clearShareParam();
+				toastStore.showToast('Invalid share link', 'error');
+			}
+		}
+
 		if (layoutStore.rackCount === 0) {
 			newRackFormOpen = true;
 		}
@@ -326,6 +351,22 @@
 		exportDialogOpen = false;
 	}
 
+	function handleShare() {
+		if (!layoutStore.hasRack) {
+			toastStore.showToast('No rack to share', 'warning');
+			return;
+		}
+		shareDialogOpen = true;
+
+		// Track share event
+		const deviceCount = layoutStore.rack?.devices.length ?? 0;
+		analytics.trackShare(deviceCount);
+	}
+
+	function handleShareClose() {
+		shareDialogOpen = false;
+	}
+
 	function handleDelete() {
 		if (selectionStore.isRackSelected && selectionStore.selectedId) {
 			// Single-rack mode
@@ -486,6 +527,7 @@
 		onsave={handleSave}
 		onload={handleLoad}
 		onexport={handleExport}
+		onshare={handleShare}
 		ondelete={handleDelete}
 		onfitall={handleFitAll}
 		ontoggletheme={handleToggleTheme}
@@ -545,6 +587,8 @@
 		onexport={(e) => handleExportSubmit(e.detail)}
 		oncancel={handleExportCancel}
 	/>
+
+	<ShareDialog open={shareDialogOpen} layout={layoutStore.layout} onclose={handleShareClose} />
 
 	<HelpPanel open={helpPanelOpen} onclose={handleHelpClose} />
 

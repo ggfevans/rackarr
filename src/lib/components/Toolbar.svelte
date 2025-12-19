@@ -11,6 +11,7 @@
 		IconSave,
 		IconLoad,
 		IconExport,
+		IconShare,
 		IconTrash,
 		IconFitAll,
 		IconSun,
@@ -35,6 +36,7 @@
 		onsave?: () => void;
 		onload?: () => void;
 		onexport?: () => void;
+		onshare?: () => void;
 		ondelete?: () => void;
 		onfitall?: () => void;
 		ontoggletheme?: () => void;
@@ -52,6 +54,7 @@
 		onsave,
 		onload,
 		onexport,
+		onshare,
 		ondelete,
 		onfitall,
 		ontoggletheme,
@@ -204,6 +207,19 @@
 			</button>
 		</Tooltip>
 
+		<Tooltip text="Share Layout" position="bottom">
+			<button
+				class="toolbar-action-btn"
+				aria-label="Share"
+				disabled={!hasRacks}
+				onclick={onshare}
+				data-testid="btn-share"
+			>
+				<IconShare size={16} />
+				<span>Share</span>
+			</button>
+		</Tooltip>
+
 		<div class="separator" aria-hidden="true"></div>
 
 		<Tooltip text="Display Mode: {displayModeLabel}" shortcut="I" position="bottom">
@@ -309,6 +325,7 @@
 	canUndo={layoutStore.canUndo}
 	canRedo={layoutStore.canRedo}
 	{hasSelection}
+	{hasRacks}
 	undoDescription={layoutStore.undoDescription ?? 'Undo'}
 	redoDescription={layoutStore.redoDescription ?? 'Redo'}
 	onclose={closeDrawer}
@@ -316,6 +333,7 @@
 	{onsave}
 	{onload}
 	{onexport}
+	{onshare}
 	{ondelete}
 	{onfitall}
 	{ontoggledisplaymode}

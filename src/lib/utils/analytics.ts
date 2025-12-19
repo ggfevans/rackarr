@@ -8,6 +8,7 @@ export interface AnalyticsEvents {
 	// File operations
 	'file:save': { device_count: number };
 	'file:load': { device_count: number };
+	'file:share': { device_count: number };
 
 	// Export operations
 	'export:image': { format: 'png' | 'jpeg' | 'svg'; view: 'front' | 'rear' | 'both' };
@@ -177,6 +178,8 @@ export const analytics = {
 	trackSave: (deviceCount: number) => trackEvent('file:save', { device_count: deviceCount }),
 
 	trackLoad: (deviceCount: number) => trackEvent('file:load', { device_count: deviceCount }),
+
+	trackShare: (deviceCount: number) => trackEvent('file:share', { device_count: deviceCount }),
 
 	// Export operations
 	trackExportImage: (format: 'png' | 'jpeg' | 'svg', view: 'front' | 'rear' | 'both') =>

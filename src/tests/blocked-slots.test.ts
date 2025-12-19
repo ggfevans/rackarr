@@ -24,7 +24,8 @@ function createTestDevice(slug: string, u_height: number, isFullDepth = true): D
 		model: `Device ${slug}`,
 		u_height,
 		is_full_depth: isFullDepth,
-		rackarr: { category: 'server', colour: '#888888' }
+		category: 'server',
+		colour: '#888888'
 	};
 }
 
@@ -220,7 +221,9 @@ describe('getBlockedSlots', () => {
 	describe('Default is_full_depth behavior', () => {
 		it('treats undefined is_full_depth as true (full-depth)', () => {
 			const rack = createTestRack({
-				devices: [{ device_type: 'device-1', position: 3, face: 'front' as DeviceFace }]
+				devices: [
+					{ id: 'bs-test-1', device_type: 'device-1', position: 3, face: 'front' as DeviceFace }
+				]
 			});
 			// Device without is_full_depth property
 			const deviceLibrary: DeviceType[] = [
@@ -228,7 +231,8 @@ describe('getBlockedSlots', () => {
 					slug: 'device-1',
 					model: 'Device 1',
 					u_height: 2,
-					rackarr: { category: 'server', colour: '#888888' }
+					category: 'server',
+					colour: '#888888'
 					// is_full_depth not specified
 				}
 			];

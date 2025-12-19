@@ -16,13 +16,15 @@ describe('Export Utilities', () => {
 			slug: 'device-1',
 			model: 'Server 1',
 			u_height: 2,
-			rackarr: { colour: '#4A90D9', category: 'server' }
+			colour: '#4A90D9',
+			category: 'server'
 		},
 		{
 			slug: 'device-2',
 			model: 'Switch',
 			u_height: 1,
-			rackarr: { colour: '#7B68EE', category: 'network' }
+			colour: '#7B68EE',
+			category: 'network'
 		}
 	];
 
@@ -35,7 +37,7 @@ describe('Export Utilities', () => {
 			desc_units: false,
 			form_factor: '4-post',
 			starting_unit: 1,
-			devices: [{ device_type: 'device-1', position: 1, face: 'front' }]
+			devices: [{ id: 'export-test-1', device_type: 'device-1', position: 1, face: 'front' }]
 		},
 		{
 			name: 'Secondary Rack',
@@ -45,7 +47,7 @@ describe('Export Utilities', () => {
 			desc_units: false,
 			form_factor: '4-post',
 			starting_unit: 1,
-			devices: [{ device_type: 'device-2', position: 5, face: 'front' }]
+			devices: [{ id: 'export-test-2', device_type: 'device-2', position: 5, face: 'front' }]
 		}
 	];
 
@@ -470,7 +472,8 @@ describe('Device Positioning in Export', () => {
 				slug: 'device-1',
 				model: 'Test Server',
 				u_height: 2,
-				rackarr: { colour: '#4A90D9', category: 'server' }
+				colour: '#4A90D9',
+				category: 'server'
 			}
 		];
 
@@ -515,7 +518,8 @@ describe('Device Positioning in Export', () => {
 				slug: 'device-1',
 				model: 'Top Server',
 				u_height: 1,
-				rackarr: { colour: '#7B68EE', category: 'server' }
+				colour: '#7B68EE',
+				category: 'server'
 			}
 		];
 
@@ -528,7 +532,7 @@ describe('Device Positioning in Export', () => {
 				desc_units: false,
 				form_factor: '4-post',
 				starting_unit: 1,
-				devices: [{ device_type: 'device-1', position: 42, face: 'front' }]
+				devices: [{ id: 'export-pos-2', device_type: 'device-1', position: 42, face: 'front' }]
 			}
 		];
 
@@ -563,7 +567,8 @@ describe('Export Legend', () => {
 				slug: 'device-1',
 				model: 'Server 1',
 				u_height: 2,
-				rackarr: { colour: '#4A90D9', category: 'server' }
+				colour: '#4A90D9',
+				category: 'server'
 			}
 		];
 
@@ -577,8 +582,8 @@ describe('Export Legend', () => {
 				form_factor: '4-post',
 				starting_unit: 1,
 				devices: [
-					{ device_type: 'device-1', position: 1, face: 'front' },
-					{ device_type: 'device-1', position: 5, face: 'front' } // Same device twice
+					{ id: 'export-leg-1', device_type: 'device-1', position: 1, face: 'front' },
+					{ id: 'export-leg-2', device_type: 'device-1', position: 5, face: 'front' } // Same device twice
 				]
 			}
 		];
@@ -615,21 +620,24 @@ describe('CSV Export', () => {
 			model: 'PowerEdge R740',
 			manufacturer: 'Dell',
 			u_height: 2,
-			rackarr: { colour: '#4A90D9', category: 'server' }
+			colour: '#4A90D9',
+			category: 'server'
 		},
 		{
 			slug: 'switch-1',
 			model: 'Catalyst 9300',
 			manufacturer: 'Cisco',
 			u_height: 1,
-			rackarr: { colour: '#7B68EE', category: 'network' }
+			colour: '#7B68EE',
+			category: 'network'
 		},
 		{
 			slug: 'ups-1',
 			model: 'Smart-UPS 3000',
 			manufacturer: 'APC',
 			u_height: 4,
-			rackarr: { colour: '#22C55E', category: 'power' }
+			colour: '#22C55E',
+			category: 'power'
 		}
 	];
 
@@ -642,9 +650,9 @@ describe('CSV Export', () => {
 		form_factor: '4-post',
 		starting_unit: 1,
 		devices: [
-			{ device_type: 'server-1', position: 10, face: 'front', name: 'Web Server' },
-			{ device_type: 'switch-1', position: 42, face: 'rear' },
-			{ device_type: 'ups-1', position: 1, face: 'both', name: 'Main UPS' }
+			{ id: 'csv-1', device_type: 'server-1', position: 10, face: 'front', name: 'Web Server' },
+			{ id: 'csv-2', device_type: 'switch-1', position: 42, face: 'rear' },
+			{ id: 'csv-3', device_type: 'ups-1', position: 1, face: 'both', name: 'Main UPS' }
 		]
 	};
 
@@ -757,12 +765,13 @@ describe('CSV Export', () => {
 					slug: 'custom-device',
 					model: 'Custom Server',
 					u_height: 1,
-					rackarr: { colour: '#333333', category: 'other' }
+					colour: '#333333',
+					category: 'other'
 				}
 			];
 			const rackNoMfg: Rack = {
 				...mockRack,
-				devices: [{ device_type: 'custom-device', position: 1, face: 'front' }]
+				devices: [{ id: 'csv-nomfg-1', device_type: 'custom-device', position: 1, face: 'front' }]
 			};
 
 			const csv = exportToCSV(rackNoMfg, deviceTypesNoMfg);
@@ -778,12 +787,15 @@ describe('CSV Export', () => {
 				{
 					slug: 'generic-server',
 					u_height: 2,
-					rackarr: { colour: '#333333', category: 'server' }
+					colour: '#333333',
+					category: 'server'
 				}
 			];
 			const rackNoModel: Rack = {
 				...mockRack,
-				devices: [{ device_type: 'generic-server', position: 5, face: 'front' }]
+				devices: [
+					{ id: 'csv-nomodel-1', device_type: 'generic-server', position: 5, face: 'front' }
+				]
 			};
 
 			const csv = exportToCSV(rackNoModel, deviceTypesNoModel);
@@ -803,12 +815,13 @@ describe('CSV Export', () => {
 					model: 'Server, Model A',
 					manufacturer: 'Acme, Inc.',
 					u_height: 1,
-					rackarr: { colour: '#333333', category: 'server' }
+					colour: '#333333',
+					category: 'server'
 				}
 			];
 			const rackWithComma: Rack = {
 				...mockRack,
-				devices: [{ device_type: 'special-device', position: 1, face: 'front' }]
+				devices: [{ id: 'csv-comma-1', device_type: 'special-device', position: 1, face: 'front' }]
 			};
 
 			const csv = exportToCSV(rackWithComma, deviceTypesWithComma);
@@ -824,13 +837,20 @@ describe('CSV Export', () => {
 					slug: 'quoted-device',
 					model: 'Server "Pro"',
 					u_height: 1,
-					rackarr: { colour: '#333333', category: 'server' }
+					colour: '#333333',
+					category: 'server'
 				}
 			];
 			const rackWithQuote: Rack = {
 				...mockRack,
 				devices: [
-					{ device_type: 'quoted-device', position: 1, face: 'front', name: 'The "Main" Server' }
+					{
+						id: 'csv-quote-1',
+						device_type: 'quoted-device',
+						position: 1,
+						face: 'front',
+						name: 'The "Main" Server'
+					}
 				]
 			};
 
@@ -847,12 +867,15 @@ describe('CSV Export', () => {
 					slug: 'newline-device',
 					model: 'Server\nLine2',
 					u_height: 1,
-					rackarr: { colour: '#333333', category: 'server' }
+					colour: '#333333',
+					category: 'server'
 				}
 			];
 			const rackWithNewline: Rack = {
 				...mockRack,
-				devices: [{ device_type: 'newline-device', position: 1, face: 'front' }]
+				devices: [
+					{ id: 'csv-newline-1', device_type: 'newline-device', position: 1, face: 'front' }
+				]
 			};
 
 			const csv = exportToCSV(rackWithNewline, deviceTypesWithNewline);
@@ -882,8 +905,8 @@ describe('CSV Export', () => {
 			const rackWithUnknown: Rack = {
 				...mockRack,
 				devices: [
-					{ device_type: 'server-1', position: 10, face: 'front' },
-					{ device_type: 'unknown-device', position: 5, face: 'front' }
+					{ id: 'csv-unk-1', device_type: 'server-1', position: 10, face: 'front' },
+					{ id: 'csv-unk-2', device_type: 'unknown-device', position: 5, face: 'front' }
 				]
 			};
 
@@ -903,20 +926,23 @@ describe('Dual-View Export', () => {
 			model: 'Front Server',
 			u_height: 2,
 			is_full_depth: true,
-			rackarr: { colour: '#4A90D9', category: 'server' }
+			colour: '#4A90D9',
+			category: 'server'
 		},
 		{
 			slug: 'rear-patch',
 			model: 'Rear Patch Panel',
 			u_height: 1,
 			is_full_depth: false,
-			rackarr: { colour: '#7B68EE', category: 'network' }
+			colour: '#7B68EE',
+			category: 'network'
 		},
 		{
 			slug: 'both-ups',
 			model: 'UPS',
 			u_height: 4,
-			rackarr: { colour: '#22C55E', category: 'power' }
+			colour: '#22C55E',
+			category: 'power'
 		}
 	];
 
@@ -930,9 +956,9 @@ describe('Dual-View Export', () => {
 			form_factor: '4-post',
 			starting_unit: 1,
 			devices: [
-				{ device_type: 'front-server', position: 1, face: 'front' },
-				{ device_type: 'rear-patch', position: 5, face: 'rear' },
-				{ device_type: 'both-ups', position: 8, face: 'both' }
+				{ id: 'dual-1', device_type: 'front-server', position: 1, face: 'front' },
+				{ id: 'dual-2', device_type: 'rear-patch', position: 5, face: 'rear' },
+				{ id: 'dual-3', device_type: 'both-ups', position: 8, face: 'both' }
 			]
 		}
 	];

@@ -62,13 +62,13 @@
 	onkeydown={handleKeyDown}
 	ondragstart={handleDragStart}
 	ondragend={handleDragEnd}
-	aria-label="{deviceName}, {device.u_height}U {device.rackarr.category}"
+	aria-label="{deviceName}, {device.u_height}U {device.category}"
 >
 	<span class="drag-handle" aria-hidden="true">
 		<IconGrip size={16} />
 	</span>
-	<span class="category-icon-indicator" style="color: {device.rackarr.colour}">
-		<CategoryIcon category={device.rackarr.category} size={16} />
+	<span class="category-icon-indicator" style="color: {device.colour}">
+		<CategoryIcon category={device.category} size={16} />
 	</span>
 	<span class="device-name">{deviceName}</span>
 	<span class="device-height">{device.u_height}U</span>

@@ -8,7 +8,7 @@ import { ubiquitiDevices } from '$lib/data/brandPacks/ubiquiti';
 describe('Ubiquiti Brand Pack', () => {
 	describe('Device Count', () => {
 		it('exports correct number of devices', () => {
-			expect(ubiquitiDevices).toHaveLength(10);
+			expect(ubiquitiDevices).toHaveLength(52);
 		});
 	});
 
@@ -36,7 +36,8 @@ describe('Ubiquiti Brand Pack', () => {
 		it('all devices have valid category', () => {
 			const validCategories = ['network', 'storage', 'power'];
 			for (const device of ubiquitiDevices) {
-				expect(validCategories).toContain(device.rackarr.category);
+				// Schema v1.0.0: Flat structure with category at top level
+				expect(validCategories).toContain(device.category);
 			}
 		});
 	});
@@ -47,8 +48,9 @@ describe('Ubiquiti Brand Pack', () => {
 			expect(udmPro).toBeDefined();
 			expect(udmPro?.model).toBe('UDM-Pro');
 			expect(udmPro?.u_height).toBe(1);
-			expect(udmPro?.is_full_depth).toBe(true);
-			expect(udmPro?.rackarr.category).toBe('network');
+			expect(udmPro?.is_full_depth).toBe(false);
+			// Schema v1.0.0: Flat structure
+			expect(udmPro?.category).toBe('network');
 		});
 
 		it('includes USP-PDU-Pro with correct properties', () => {
@@ -57,7 +59,8 @@ describe('Ubiquiti Brand Pack', () => {
 			expect(pdu?.model).toBe('USP-PDU-Pro');
 			expect(pdu?.u_height).toBe(1);
 			expect(pdu?.is_full_depth).toBe(false);
-			expect(pdu?.rackarr.category).toBe('power');
+			// Schema v1.0.0: Flat structure
+			expect(pdu?.category).toBe('power');
 		});
 
 		it('includes UNVR-Pro with correct properties', () => {
@@ -65,8 +68,9 @@ describe('Ubiquiti Brand Pack', () => {
 			expect(unvrPro).toBeDefined();
 			expect(unvrPro?.model).toBe('UNVR-Pro');
 			expect(unvrPro?.u_height).toBe(2);
-			expect(unvrPro?.is_full_depth).toBe(true);
-			expect(unvrPro?.rackarr.category).toBe('storage');
+			expect(unvrPro?.is_full_depth).toBe(false);
+			// Schema v1.0.0: Flat structure
+			expect(unvrPro?.category).toBe('storage');
 		});
 	});
 

@@ -20,7 +20,8 @@ function createTestDevice(
 		slug,
 		model: `Test Device ${slug}`,
 		u_height,
-		rackarr: { colour: '#4A90D9', category: 'server' },
+		colour: '#4A90D9',
+		category: 'server',
 		...(options?.is_full_depth !== undefined && { is_full_depth: options.is_full_depth }),
 		...(options?.face !== undefined && { face: options.face })
 	};

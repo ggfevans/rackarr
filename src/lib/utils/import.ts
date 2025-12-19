@@ -151,14 +151,12 @@ export function parseDeviceLibraryImport(
 			slug: uniqueSlug,
 			u_height: rawDevice.height!,
 			model: rawDevice.name,
-			rackarr: {
-				colour: rawDevice.colour ?? getDefaultColour(rawDevice.category as DeviceCategory),
-				category: rawDevice.category as DeviceCategory
-			}
+			colour: rawDevice.colour ?? getDefaultColour(rawDevice.category as DeviceCategory),
+			category: rawDevice.category as DeviceCategory
 		};
 
 		if (rawDevice.notes) {
-			deviceType.comments = rawDevice.notes;
+			deviceType.notes = rawDevice.notes;
 		}
 
 		devices.push(deviceType);

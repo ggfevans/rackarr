@@ -236,7 +236,8 @@ describe('EditPanel Component', () => {
 				u_height: 2,
 				category: 'server',
 				colour: '#4A90D9',
-				comments: 'Important server notes'
+				// Schema v1.0.0: Uses 'notes' field
+				notes: 'Important server notes'
 			});
 			layoutStore.placeDevice(RACK_ID, device.slug, 1);
 			selectionStore.selectDevice(RACK_ID, 0, device.slug);
@@ -301,10 +302,8 @@ describe('EditPanel Component', () => {
 				u_height: 1,
 				model: 'Test PDU',
 				outlet_count: 8,
-				rackarr: {
-					colour: '#F5A623',
-					category: 'power' as const
-				}
+				colour: '#F5A623',
+				category: 'power' as const
 			};
 			layoutStore.layout.device_types.push(deviceType);
 			layoutStore.placeDevice(RACK_ID, deviceType.slug, 1);
@@ -329,10 +328,8 @@ describe('EditPanel Component', () => {
 				model: 'Test UPS',
 				outlet_count: 6,
 				va_rating: 1500,
-				rackarr: {
-					colour: '#F5A623',
-					category: 'power' as const
-				}
+				colour: '#F5A623',
+				category: 'power' as const
 			};
 			layoutStore.layout.device_types.push(deviceType);
 			layoutStore.placeDevice(RACK_ID, deviceType.slug, 1);
@@ -356,10 +353,8 @@ describe('EditPanel Component', () => {
 				model: 'Full UPS',
 				outlet_count: 8,
 				va_rating: 3000,
-				rackarr: {
-					colour: '#F5A623',
-					category: 'power' as const
-				}
+				colour: '#F5A623',
+				category: 'power' as const
 			};
 			layoutStore.layout.device_types.push(deviceType);
 			layoutStore.placeDevice(RACK_ID, deviceType.slug, 1);
@@ -384,10 +379,8 @@ describe('EditPanel Component', () => {
 				slug: 'basic-power',
 				u_height: 1,
 				model: 'Basic Power',
-				rackarr: {
-					colour: '#F5A623',
-					category: 'power' as const
-				}
+				colour: '#F5A623',
+				category: 'power' as const
 			};
 			layoutStore.layout.device_types.push(deviceType);
 			layoutStore.placeDevice(RACK_ID, deviceType.slug, 1);

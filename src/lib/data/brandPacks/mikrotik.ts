@@ -1,72 +1,292 @@
 /**
- * Mikrotik Brand Pack
- * Pre-defined device types for Mikrotik networking equipment
+ * MikroTik Brand Pack
+ * Pre-defined device types for MikroTik networking equipment
+ * Source: NetBox community devicetype-library
  */
 
 import type { DeviceType } from '$lib/types';
 import { CATEGORY_COLOURS } from '$lib/types/constants';
 
 /**
- * Mikrotik device definitions
- * Based on SPEC.md Section 11.6.4
+ * MikroTik device definitions (27 rack-mountable devices)
  */
 export const mikrotikDevices: DeviceType[] = [
-	// Cloud Router Switches
+	// ============================================
+	// Cloud Core Routers - CCR1009 Series
+	// ============================================
+	{
+		slug: 'ccr1009-7g-1c-1s-plus-pc',
+		u_height: 1,
+		manufacturer: 'MikroTik',
+		model: 'CCR1009-7G-1C-1S+PC',
+		is_full_depth: false,
+		colour: CATEGORY_COLOURS.network,
+		category: 'network'
+	},
+	{
+		slug: 'ccr1009-7g-1c-1s-plus',
+		u_height: 1,
+		manufacturer: 'MikroTik',
+		model: 'CCR1009-7G-1C-1S+',
+		is_full_depth: false,
+		colour: CATEGORY_COLOURS.network,
+		category: 'network'
+	},
+	{
+		slug: 'ccr1009-7g-1c-pc',
+		u_height: 1,
+		manufacturer: 'MikroTik',
+		model: 'CCR1009-7G-1C-PC',
+		is_full_depth: false,
+		colour: CATEGORY_COLOURS.network,
+		category: 'network'
+	},
+	{
+		slug: 'ccr1009-8g-1s-1s-plus',
+		u_height: 1,
+		manufacturer: 'MikroTik',
+		model: 'CCR1009-8G-1S-1S+',
+		is_full_depth: false,
+		colour: CATEGORY_COLOURS.network,
+		category: 'network'
+	},
+
+	// ============================================
+	// Cloud Core Routers - CCR1016 Series
+	// ============================================
+	{
+		slug: 'ccr1016-12g',
+		u_height: 1,
+		manufacturer: 'MikroTik',
+		model: 'CCR1016-12G',
+		is_full_depth: false,
+		colour: CATEGORY_COLOURS.network,
+		category: 'network'
+	},
+	{
+		slug: 'ccr1016-12s-1s-plus',
+		u_height: 1,
+		manufacturer: 'MikroTik',
+		model: 'CCR1016-12S-1S+',
+		is_full_depth: false,
+		colour: CATEGORY_COLOURS.network,
+		category: 'network'
+	},
+
+	// ============================================
+	// Cloud Core Routers - CCR1036 Series
+	// ============================================
+	{
+		slug: 'ccr1036-12g-4s-em',
+		u_height: 1,
+		manufacturer: 'MikroTik',
+		model: 'CCR1036-12G-4S-EM',
+		is_full_depth: false,
+		colour: CATEGORY_COLOURS.network,
+		category: 'network'
+	},
+	{
+		slug: 'ccr1036-12g-4s',
+		u_height: 1,
+		manufacturer: 'MikroTik',
+		model: 'CCR1036-12G-4S',
+		is_full_depth: false,
+		colour: CATEGORY_COLOURS.network,
+		category: 'network'
+	},
+	{
+		slug: 'ccr1036-8g-2s-plus-em',
+		u_height: 1,
+		manufacturer: 'MikroTik',
+		model: 'CCR1036-8G-2S+EM',
+		is_full_depth: false,
+		colour: CATEGORY_COLOURS.network,
+		category: 'network'
+	},
+	{
+		slug: 'ccr1036-8g-2s-plus',
+		u_height: 1,
+		manufacturer: 'MikroTik',
+		model: 'CCR1036-8G-2S+',
+		is_full_depth: false,
+		colour: CATEGORY_COLOURS.network,
+		category: 'network'
+	},
+
+	// ============================================
+	// Cloud Core Routers - CCR1072 Series
+	// ============================================
+	{
+		slug: 'ccr1072-1g-8s-plus',
+		u_height: 1,
+		manufacturer: 'MikroTik',
+		model: 'CCR1072-1G-8S+',
+		is_full_depth: false,
+		colour: CATEGORY_COLOURS.network,
+		category: 'network'
+	},
+
+	// ============================================
+	// Cloud Core Routers - CCR2004 Series
+	// ============================================
+	{
+		slug: 'ccr2004-16g-2s-plus',
+		u_height: 1,
+		manufacturer: 'MikroTik',
+		model: 'CCR2004-16G-2S+',
+		is_full_depth: false,
+		colour: CATEGORY_COLOURS.network,
+		category: 'network'
+	},
+	{
+		slug: 'ccr2004-1g-12s-plus-2xs',
+		u_height: 1,
+		manufacturer: 'MikroTik',
+		model: 'CCR2004-1G-12S+2XS',
+		is_full_depth: false,
+		colour: CATEGORY_COLOURS.network,
+		category: 'network'
+	},
+
+	// ============================================
+	// Cloud Core Routers - CCR2116/CCR2216 Series
+	// ============================================
+	{
+		slug: 'ccr2116-12g-4s-plus',
+		u_height: 1,
+		manufacturer: 'MikroTik',
+		model: 'CCR2116-12G-4S+',
+		is_full_depth: false,
+		colour: CATEGORY_COLOURS.network,
+		category: 'network'
+	},
+	{
+		slug: 'ccr2216-1g-12xs-2xq',
+		u_height: 1,
+		manufacturer: 'MikroTik',
+		model: 'CCR2216-1G-12XS-2XQ',
+		is_full_depth: false,
+		colour: CATEGORY_COLOURS.network,
+		category: 'network'
+	},
+
+	// ============================================
+	// Cloud Router Switches - CRS300 Series
+	// ============================================
+	{
+		slug: 'crs309-1g-8s-plus',
+		u_height: 1,
+		manufacturer: 'MikroTik',
+		model: 'CRS309-1G-8S+',
+		is_full_depth: false,
+		colour: CATEGORY_COLOURS.network,
+		category: 'network'
+	},
+	{
+		slug: 'crs312-4c-plus-8xg-rm',
+		u_height: 1,
+		manufacturer: 'MikroTik',
+		model: 'CRS312-4C+8XG-RM',
+		is_full_depth: false,
+		colour: CATEGORY_COLOURS.network,
+		category: 'network'
+	},
+	{
+		slug: 'crs317-1g-16s-plus-rm',
+		u_height: 1,
+		manufacturer: 'MikroTik',
+		model: 'CRS317-1G-16S+RM',
+		is_full_depth: false,
+		colour: CATEGORY_COLOURS.network,
+		category: 'network'
+	},
+	{
+		slug: 'crs320-8p-8b-4s-plus-rm',
+		u_height: 1,
+		manufacturer: 'MikroTik',
+		model: 'CRS320-8P-8B-4S+RM',
+		is_full_depth: false,
+		colour: CATEGORY_COLOURS.network,
+		category: 'network'
+	},
 	{
 		slug: 'crs326-24g-2s-plus',
 		u_height: 1,
-		manufacturer: 'Mikrotik',
+		manufacturer: 'MikroTik',
 		model: 'CRS326-24G-2S+',
-		is_full_depth: true,
-		rackarr: {
-			colour: CATEGORY_COLOURS.network,
-			category: 'network'
-		}
+		is_full_depth: false,
+		colour: CATEGORY_COLOURS.network,
+		category: 'network'
 	},
 	{
 		slug: 'crs328-24p-4s-plus',
 		u_height: 1,
-		manufacturer: 'Mikrotik',
+		manufacturer: 'MikroTik',
 		model: 'CRS328-24P-4S+',
-		is_full_depth: true,
-		rackarr: {
-			colour: CATEGORY_COLOURS.network,
-			category: 'network'
-		}
+		is_full_depth: false,
+		colour: CATEGORY_COLOURS.network,
+		category: 'network'
 	},
 	{
-		slug: 'crs309-1g-8s-plus',
+		slug: 'crs328-4c-20s-4s-plus-rm',
 		u_height: 1,
-		manufacturer: 'Mikrotik',
-		model: 'CRS309-1G-8S+',
-		is_full_depth: true,
-		rackarr: {
-			colour: CATEGORY_COLOURS.network,
-			category: 'network'
-		}
+		manufacturer: 'MikroTik',
+		model: 'CRS328-4C-20S-4S+RM',
+		is_full_depth: false,
+		colour: CATEGORY_COLOURS.network,
+		category: 'network'
 	},
-	// Cloud Core Routers
+
+	// ============================================
+	// Cloud Router Switches - CRS354 Series
+	// ============================================
 	{
-		slug: 'ccr2004-1g-12s-plus-2xs',
+		slug: 'crs354-48g-4s-plus-2q-plus-rm',
 		u_height: 1,
-		manufacturer: 'Mikrotik',
-		model: 'CCR2004-1G-12S+2XS',
-		is_full_depth: true,
-		rackarr: {
-			colour: CATEGORY_COLOURS.network,
-			category: 'network'
-		}
+		manufacturer: 'MikroTik',
+		model: 'CRS354-48G-4S+2Q+RM',
+		is_full_depth: false,
+		colour: CATEGORY_COLOURS.network,
+		category: 'network'
 	},
-	// RouterBOARD
 	{
-		slug: 'rb5009ug-plus-s-plus-in',
+		slug: 'crs354-48p-4s-plus-2q-plus-rm',
 		u_height: 1,
-		manufacturer: 'Mikrotik',
-		model: 'RB5009UG+S+IN',
-		is_full_depth: true,
-		rackarr: {
-			colour: CATEGORY_COLOURS.network,
-			category: 'network'
-		}
+		manufacturer: 'MikroTik',
+		model: 'CRS354-48P-4S+2Q+RM',
+		is_full_depth: false,
+		colour: CATEGORY_COLOURS.network,
+		category: 'network'
+	},
+
+	// ============================================
+	// RouterBOARD - RB Series
+	// ============================================
+	{
+		slug: 'rb2011uias-rm',
+		u_height: 1,
+		manufacturer: 'MikroTik',
+		model: 'RB2011UiAS-RM',
+		is_full_depth: false,
+		colour: CATEGORY_COLOURS.network,
+		category: 'network'
+	},
+	{
+		slug: 'rb3011uias-rm',
+		u_height: 1,
+		manufacturer: 'MikroTik',
+		model: 'RB3011UiAS-RM',
+		is_full_depth: false,
+		colour: CATEGORY_COLOURS.network,
+		category: 'network'
+	},
+	{
+		slug: 'rb4011igs-plus-rm',
+		u_height: 1,
+		manufacturer: 'MikroTik',
+		model: 'RB4011iGS+RM',
+		is_full_depth: false,
+		colour: CATEGORY_COLOURS.network,
+		category: 'network'
 	}
 ];

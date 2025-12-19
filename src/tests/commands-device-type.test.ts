@@ -45,7 +45,8 @@ describe('Device Type Commands', () => {
 			const deviceType: DeviceType = {
 				slug: 'my-server',
 				u_height: 1,
-				rackarr: { category: 'server', colour: '#336699' }
+				category: 'server',
+				colour: '#336699'
 			};
 
 			const command = createAddDeviceTypeCommand(deviceType, store);
@@ -134,7 +135,8 @@ describe('Device Type Commands', () => {
 			const deviceType: DeviceType = {
 				slug: 'rack-server',
 				u_height: 1,
-				rackarr: { category: 'server', colour: '#336699' }
+				category: 'server',
+				colour: '#336699'
 			};
 
 			const command = createDeleteDeviceTypeCommand(deviceType, [], store);

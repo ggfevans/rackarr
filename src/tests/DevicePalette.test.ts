@@ -251,7 +251,7 @@ describe('DevicePalette Exclusive Accordion', () => {
 		it('renders Mikrotik section', () => {
 			render(DevicePalette);
 
-			expect(screen.getByText('Mikrotik')).toBeInTheDocument();
+			expect(screen.getByText('MikroTik')).toBeInTheDocument();
 		});
 
 		it('Ubiquiti section is collapsed by default', () => {
@@ -271,15 +271,15 @@ describe('DevicePalette Exclusive Accordion', () => {
 		it('Ubiquiti section shows correct device count', () => {
 			render(DevicePalette);
 
-			// Ubiquiti has 10 devices
-			expect(screen.getByText('(10)')).toBeInTheDocument();
+			// Ubiquiti has 52 devices
+			expect(screen.getByText('(52)')).toBeInTheDocument();
 		});
 
-		it('Mikrotik section shows correct device count', () => {
+		it('MikroTik section shows correct device count', () => {
 			render(DevicePalette);
 
-			// Mikrotik has 5 devices
-			expect(screen.getByText('(5)')).toBeInTheDocument();
+			// MikroTik has 27 devices
+			expect(screen.getByText('(27)')).toBeInTheDocument();
 		});
 	});
 
@@ -376,10 +376,8 @@ describe('DevicePaletteItem Component', () => {
 		slug: 'device-1',
 		model: 'Test Server',
 		u_height: 2,
-		rackarr: {
-			colour: '#4A90D9',
-			category: 'server' as const
-		}
+		colour: '#4A90D9',
+		category: 'server' as const
 	};
 
 	describe('Display', () => {

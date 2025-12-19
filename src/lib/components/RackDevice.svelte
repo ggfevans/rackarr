@@ -88,7 +88,7 @@
 
 	// Aria label for accessibility
 	const ariaLabel = $derived(
-		`${deviceName}, ${device.u_height}U ${device.rackarr.category} at U${position}${selected ? ', selected' : ''}`
+		`${deviceName}, ${device.u_height}U ${device.category} at U${position}${selected ? ', selected' : ''}`
 	);
 
 	function handleClick(event: MouseEvent) {
@@ -135,7 +135,7 @@
 		y="0"
 		width={deviceWidth}
 		height={deviceHeight}
-		fill={device.rackarr.colour}
+		fill={device.colour}
 		rx="2"
 		ry="2"
 	/>
@@ -193,7 +193,7 @@
 		{#if deviceHeight >= 22}
 			<foreignObject x="8" y="0" width="16" height={deviceHeight} class="category-icon-wrapper">
 				<div class="icon-container">
-					<CategoryIcon category={device.rackarr.category} size={14} />
+					<CategoryIcon category={device.category} size={14} />
 				</div>
 			</foreignObject>
 		{/if}

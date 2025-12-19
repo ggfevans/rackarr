@@ -30,7 +30,8 @@ const mockDevice = {
 	slug: 'device-1',
 	model: 'Test Server',
 	u_height: 2,
-	rackarr: { colour: '#4A90D9', category: 'server' as const }
+	colour: '#4A90D9',
+	category: 'server' as const
 };
 
 describe('Accessibility Tests', () => {

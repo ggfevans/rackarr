@@ -20,7 +20,8 @@ import type {
 	DeviceFace,
 	DeviceCategory,
 	Layout,
-	LayoutSettings
+	LayoutSettings,
+	Airflow
 } from '$lib/types';
 import type { Command, CommandType } from '$lib/stores/commands/types';
 
@@ -64,6 +65,7 @@ export interface CreateTestDeviceTypeOptions {
 
 /**
  * Creates a test DeviceType with sensible defaults.
+ * Schema v1.0.0: Flat structure with colour, category at top level
  *
  * @example
  * // Simple usage
@@ -85,10 +87,9 @@ export function createTestDeviceType(
 			slug: slugOrOptions,
 			model: `Test Device ${slugOrOptions}`,
 			u_height: u_height ?? 1,
-			rackarr: {
-				category: 'server',
-				colour: '#4A90D9'
-			}
+			// Flat structure in v1.0.0
+			category: 'server',
+			colour: '#4A90D9'
 		};
 	}
 
@@ -98,10 +99,9 @@ export function createTestDeviceType(
 		slug: options.slug ?? 'test-device',
 		u_height: options.u_height ?? 1,
 		model: options.model ?? 'Test Device',
-		rackarr: {
-			category: options.category ?? 'server',
-			colour: options.colour ?? '#336699'
-		}
+		// Flat structure in v1.0.0
+		category: options.category ?? 'server',
+		colour: options.colour ?? '#336699'
 	};
 
 	// Add optional properties only if specified
@@ -118,9 +118,11 @@ export function createTestDeviceType(
 
 /**
  * Creates a test PlacedDevice with sensible defaults.
+ * Schema v1.0.0: PlacedDevice now requires a UUID id field
  */
 export function createTestDevice(overrides: Partial<PlacedDevice> = {}): PlacedDevice {
 	return {
+		id: overrides.id ?? crypto.randomUUID(),
 		device_type: 'test-device',
 		position: 10,
 		face: 'front',

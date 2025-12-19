@@ -30,9 +30,9 @@ Homelabbers planning rack layouts. Desktop browser users (mobile support planned
 
 ### 1.5 Links
 
-| Resource   | URL                                 |
-| ---------- | ----------------------------------- |
-| Live Demo  | https://app.rackarr.com/            |
+| Resource   | URL                                |
+| ---------- | ---------------------------------- |
+| Live Demo  | https://app.rackarr.com/           |
 | Repository | https://github.com/Rackarr/Rackarr |
 
 ---
@@ -76,15 +76,17 @@ Homelabbers planning rack layouts. Desktop browser users (mobile support planned
 
 ## 3. Data Model
 
+> **Reference:** For complete schema documentation including all fields, validation rules, and YAML examples, see [SCHEMA.md](./SCHEMA.md).
+
 ### 3.1 Type Definitions
 
 ```typescript
 // View types
 type RackView = 'front' | 'rear';
 type DeviceFace = 'front' | 'rear' | 'both';
-type DisplayMode = 'label' | 'image';
+type DisplayMode = 'label' | 'image' | 'image-label';
 
-// Device categories (11 types)
+// Device categories (12 types)
 type DeviceCategory =
 	| 'server'
 	| 'network'
@@ -96,14 +98,18 @@ type DeviceCategory =
 	| 'cooling'
 	| 'shelf'
 	| 'blank'
+	| 'cable-management'
 	| 'other';
 
-// Airflow directions (4 types)
+// Airflow directions (7 types, NetBox-compatible)
 type Airflow =
-	| 'passive' // No active cooling
-	| 'front-to-rear' // Standard server airflow
-	| 'rear-to-front' // Reverse airflow
-	| 'side-to-rear'; // Side intake (e.g., network switches)
+	| 'passive'
+	| 'front-to-rear'
+	| 'rear-to-front'
+	| 'left-to-right'
+	| 'right-to-left'
+	| 'side-to-rear'
+	| 'mixed';
 
 // Rack form factors (NetBox-compatible)
 type FormFactor = '2-post' | '4-post' | '4-post-cabinet' | 'wall-mount' | 'open-frame';
@@ -114,26 +120,49 @@ type WeightUnit = 'kg' | 'lb';
 
 ### 3.2 DeviceType (Library Item)
 
+**Schema v1.0.0:** Flat structure with `colour` and `category` at top level.
+
 ```typescript
 interface DeviceType {
+	// Core Identity
 	slug: string; // Unique identifier (e.g., 'dell-r650')
-	u_height: number; // 0.5-42U (supports half-U)
 	manufacturer?: string;
 	model?: string; // Display name
 	part_number?: string;
+
+	// Physical Properties
+	u_height: number; // 0.5-42U (supports half-U)
 	is_full_depth?: boolean; // Default: true
-	airflow?: Airflow;
+	is_powered?: boolean;
 	weight?: number;
 	weight_unit?: WeightUnit;
-	comments?: string;
-	// Power device properties (category: 'power')
-	outlet_count?: number; // Number of outlets (e.g., 8, 12, 16)
+	airflow?: Airflow;
+
+	// Image Flags
+	front_image?: boolean;
+	rear_image?: boolean;
+
+	// Rackarr Fields (flat, not nested)
+	colour: string; // Hex (#RRGGBB)
+	category: DeviceCategory;
+	tags?: string[];
+
+	// Extension Fields
+	notes?: string;
+	serial_number?: string;
+	asset_tag?: string;
+	links?: DeviceLink[];
+	custom_fields?: Record<string, unknown>;
+
+	// Component Arrays (schema-only, future features)
+	interfaces?: Interface[];
+	power_ports?: PowerPort[];
+	power_outlets?: PowerOutlet[];
+	device_bays?: DeviceBay[];
+	inventory_items?: InventoryItem[];
+
+	// Power Device Properties
 	va_rating?: number; // VA capacity (e.g., 1500, 3000)
-	rackarr: {
-		colour: string; // Hex (#RRGGBB)
-		category: DeviceCategory;
-		tags?: string[];
-	};
 }
 ```
 
@@ -141,11 +170,13 @@ interface DeviceType {
 
 ```typescript
 interface PlacedDevice {
-	id: string; // UUID for stable reference (survives reordering)
+	id: string; // UUID for stable reference
 	device_type: string; // Reference to DeviceType.slug
 	position: number; // Bottom U position (1-indexed)
 	face: DeviceFace;
 	name?: string; // Custom instance name
+	notes?: string;
+	custom_fields?: Record<string, unknown>;
 }
 ```
 
@@ -155,14 +186,16 @@ interface PlacedDevice {
 
 ```typescript
 interface Rack {
+	id?: string; // Unique identifier (for multi-rack support)
 	name: string;
 	height: number; // 1-100U (common: 12, 18, 24, 42)
-	width: 10 | 19; // 10 or 19 inches
+	width: 10 | 19 | 23; // Rack width in inches
 	position: number; // Order index
 	devices: PlacedDevice[];
 	form_factor: FormFactor; // Default: '4-post-cabinet'
 	desc_units: boolean; // U1 at top if true (default: false)
 	starting_unit: number; // Default: 1
+	notes?: string;
 }
 ```
 
@@ -951,17 +984,17 @@ npm run check        # Svelte type check
 
 ## 14. Version History
 
-| Version | Changes                                                                      |
-| ------- | ---------------------------------------------------------------------------- |
-| 0.6.0   | Brand starter packs, export UX overhaul, CSV export, power device properties |
-| 0.5.8   | Umami analytics integration with TypeScript support and custom event tracking|
-| 0.5.0   | Type system consolidation, legacy comments cleanup                           |
-| 0.4.9   | Airflow visualization, selection bug fix                                     |
-| 0.4.8   | Design token audit, CSS cleanup                                              |
-| 0.4.0   | Breaking: removed legacy format support                                      |
-| 0.3.x   | Undo/redo, YAML archive, device images                                       |
-| 0.2.x   | Single-rack mode, fixed sidebar                                              |
-| 0.1.x   | Initial release                                                              |
+| Version | Changes                                                                       |
+| ------- | ----------------------------------------------------------------------------- |
+| 0.6.0   | Brand starter packs, export UX overhaul, CSV export, power device properties  |
+| 0.5.8   | Umami analytics integration with TypeScript support and custom event tracking |
+| 0.5.0   | Type system consolidation, legacy comments cleanup                            |
+| 0.4.9   | Airflow visualization, selection bug fix                                      |
+| 0.4.8   | Design token audit, CSS cleanup                                               |
+| 0.4.0   | Breaking: removed legacy format support                                       |
+| 0.3.x   | Undo/redo, YAML archive, device images                                        |
+| 0.2.x   | Single-rack mode, fixed sidebar                                               |
+| 0.1.x   | Initial release                                                               |
 
 ---
 
@@ -1881,13 +1914,14 @@ Privacy-focused analytics using [Umami](https://umami.is/), a self-hosted, cooki
 
 Analytics are configured via Vite environment variables:
 
-| Variable               | Purpose                           | Default     |
-| ---------------------- | --------------------------------- | ----------- |
-| `VITE_UMAMI_ENABLED`   | Enable/disable analytics          | `false`     |
-| `VITE_UMAMI_SCRIPT_URL`| Umami script URL                  | (empty)     |
-| `VITE_UMAMI_WEBSITE_ID`| Website ID from Umami dashboard   | (empty)     |
+| Variable                | Purpose                         | Default |
+| ----------------------- | ------------------------------- | ------- |
+| `VITE_UMAMI_ENABLED`    | Enable/disable analytics        | `false` |
+| `VITE_UMAMI_SCRIPT_URL` | Umami script URL                | (empty) |
+| `VITE_UMAMI_WEBSITE_ID` | Website ID from Umami dashboard | (empty) |
 
 **Build-time constants** (injected via `vite.config.ts`):
+
 - `__UMAMI_ENABLED__` — Boolean flag
 - `__UMAMI_SCRIPT_URL__` — Script URL string
 - `__UMAMI_WEBSITE_ID__` — Website ID string
@@ -1913,38 +1947,38 @@ analytics.trackExportPDF('both');
 
 ### 20.4 Events Tracked
 
-| Event                    | Properties                        | Trigger                    |
-| ------------------------ | --------------------------------- | -------------------------- |
-| `file:save`              | `device_count`                    | Successful layout save     |
-| `file:load`              | `device_count`                    | Successful layout load     |
-| `export:image`           | `format`, `view`                  | PNG/JPEG/SVG export        |
-| `export:pdf`             | `view`                            | PDF export                 |
-| `export:csv`             | —                                 | CSV export                 |
-| `device:create_custom`   | `category`                        | Custom device type created |
-| `feature:display_mode`   | `mode`                            | Display mode toggled       |
-| `feature:airflow_view`   | `enabled`                         | Airflow view toggled       |
-| `keyboard:shortcut`      | `shortcut`                        | Keyboard shortcut used     |
+| Event                  | Properties       | Trigger                    |
+| ---------------------- | ---------------- | -------------------------- |
+| `file:save`            | `device_count`   | Successful layout save     |
+| `file:load`            | `device_count`   | Successful layout load     |
+| `export:image`         | `format`, `view` | PNG/JPEG/SVG export        |
+| `export:pdf`           | `view`           | PDF export                 |
+| `export:csv`           | —                | CSV export                 |
+| `device:create_custom` | `category`       | Custom device type created |
+| `feature:display_mode` | `mode`           | Display mode toggled       |
+| `feature:airflow_view` | `enabled`        | Airflow view toggled       |
+| `keyboard:shortcut`    | `shortcut`       | Keyboard shortcut used     |
 
 ### 20.5 Session Properties
 
 Session properties are set via `umami.identify()` on script load:
 
-| Property                   | Values                           | Purpose                    |
-| -------------------------- | -------------------------------- | -------------------------- |
-| `app_version`              | Semantic version (e.g., `0.5.7`) | Feature adoption tracking  |
-| `screen_category`          | `mobile`, `tablet`, `desktop`    | Responsive design insights |
-| `color_scheme_preference`  | `dark`, `light`, `no-preference` | Theme preference analysis  |
+| Property                  | Values                           | Purpose                    |
+| ------------------------- | -------------------------------- | -------------------------- |
+| `app_version`             | Semantic version (e.g., `0.5.7`) | Feature adoption tracking  |
+| `screen_category`         | `mobile`, `tablet`, `desktop`    | Responsive design insights |
+| `color_scheme_preference` | `dark`, `light`, `no-preference` | Theme preference analysis  |
 
 ### 20.6 Privacy Compliance
 
-| Requirement              | Implementation                                      |
-| ------------------------ | --------------------------------------------------- |
-| No cookies               | Umami is cookieless by design                       |
-| No personal data         | No user IDs, emails, or names collected             |
-| Disabled by default      | Requires `VITE_UMAMI_ENABLED=true`                  |
-| Dev-safe                 | Auto-disabled on localhost/127.0.0.1                |
-| Fail-safe                | Analytics errors never break the application        |
-| GDPR/CCPA compliant      | No consent banner required (no tracking cookies)    |
+| Requirement         | Implementation                                   |
+| ------------------- | ------------------------------------------------ |
+| No cookies          | Umami is cookieless by design                    |
+| No personal data    | No user IDs, emails, or names collected          |
+| Disabled by default | Requires `VITE_UMAMI_ENABLED=true`               |
+| Dev-safe            | Auto-disabled on localhost/127.0.0.1             |
+| Fail-safe           | Analytics errors never break the application     |
+| GDPR/CCPA compliant | No consent banner required (no tracking cookies) |
 
 ### 20.7 Production Deployment
 

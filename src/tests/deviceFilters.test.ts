@@ -10,7 +10,8 @@ const createDevice = (slug: string, model: string, category: DeviceCategory): De
 	slug,
 	model,
 	u_height: 1,
-	rackarr: { colour: '#000000', category }
+	colour: '#000000',
+	category
 });
 
 describe('deviceFilters', () => {

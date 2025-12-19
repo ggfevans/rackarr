@@ -117,16 +117,18 @@ describe('parseDeviceLibraryImport', () => {
 			devices: [{ name: 'Server', height: 2, category: 'server' }]
 		});
 		const result = parseDeviceLibraryImport(json);
-		expect(result.devices[0]?.rackarr.colour).toBeTruthy();
-		expect(result.devices[0]?.rackarr.colour).toMatch(/^#[0-9a-fA-F]{6}$/);
+		// Schema v1.0.0: Flat structure with colour at top level
+		expect(result.devices[0]?.colour).toBeTruthy();
+		expect(result.devices[0]?.colour).toMatch(/^#[0-9a-fA-F]{6}$/);
 	});
 
-	it('preserves optional notes field as comments', () => {
+	it('preserves optional notes field', () => {
 		const json = JSON.stringify({
 			devices: [{ name: 'Server', height: 2, category: 'server', notes: 'Test notes' }]
 		});
 		const result = parseDeviceLibraryImport(json);
-		expect(result.devices[0]?.comments).toBe('Test notes');
+		// Schema v1.0.0: Uses 'notes' field (not 'comments')
+		expect(result.devices[0]?.notes).toBe('Test notes');
 	});
 
 	it('returns empty array for invalid JSON', () => {

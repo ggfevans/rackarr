@@ -33,8 +33,8 @@ export function groupDevicesByCategory(devices: DeviceType[]): Map<DeviceCategor
 	const groups = new Map<DeviceCategory, DeviceType[]>();
 
 	for (const device of devices) {
-		const existing = groups.get(device.rackarr.category) ?? [];
-		groups.set(device.rackarr.category, [...existing, device]);
+		const existing = groups.get(device.category) ?? [];
+		groups.set(device.category, [...existing, device]);
 	}
 
 	return groups;

@@ -528,7 +528,7 @@ export function generateExportSVG(
 			deviceRect.setAttribute('y', String(deviceY + 1));
 			deviceRect.setAttribute('width', String(deviceWidth));
 			deviceRect.setAttribute('height', String(deviceHeight));
-			deviceRect.setAttribute('fill', device.rackarr.colour);
+			deviceRect.setAttribute('fill', device.colour);
 			deviceRect.setAttribute('rx', '2');
 			deviceRect.setAttribute('ry', '2');
 			rackGroup.appendChild(deviceRect);
@@ -569,7 +569,7 @@ export function generateExportSVG(
 				imageEl.setAttribute('clip-path', `url(#${clipId})`);
 			} else {
 				// Category icon (only for devices tall enough and with a category)
-				if (deviceHeight >= 20 && device.rackarr.category) {
+				if (deviceHeight >= 20 && device.category) {
 					const iconSize = 12;
 					const iconX = RAIL_WIDTH + 6;
 					const iconY = deviceY + (deviceHeight - iconSize) / 2 + 1;
@@ -583,12 +583,8 @@ export function generateExportSVG(
 
 					// White icon with slight transparency for visibility on coloured backgrounds
 					const iconColor = 'rgba(255, 255, 255, 0.85)';
-					const iconBgColor = device.rackarr.colour;
-					const iconElements = createCategoryIconElements(
-						device.rackarr.category,
-						iconColor,
-						iconBgColor
-					);
+					const iconBgColor = device.colour;
+					const iconElements = createCategoryIconElements(device.category, iconColor, iconBgColor);
 					for (const el of iconElements) {
 						iconSvg.appendChild(el);
 					}
@@ -724,7 +720,7 @@ export function generateExportSVG(
 			itemGroup.setAttribute('class', 'legend-item');
 
 			// Category icon (replaces colour swatch) or fallback to colour swatch
-			if (device.rackarr.category) {
+			if (device.category) {
 				const iconGroup = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
 				iconGroup.setAttribute('x', '0');
 				iconGroup.setAttribute('y', String(itemY));
@@ -732,11 +728,7 @@ export function generateExportSVG(
 				iconGroup.setAttribute('height', '16');
 				iconGroup.setAttribute('viewBox', '0 0 16 16');
 
-				const iconElements = createCategoryIconElements(
-					device.rackarr.category,
-					textColor,
-					bgColor
-				);
+				const iconElements = createCategoryIconElements(device.category, textColor, bgColor);
 				for (const el of iconElements) {
 					iconGroup.appendChild(el);
 				}
@@ -748,7 +740,7 @@ export function generateExportSVG(
 				swatch.setAttribute('y', String(itemY));
 				swatch.setAttribute('width', '16');
 				swatch.setAttribute('height', '16');
-				swatch.setAttribute('fill', device.rackarr.colour);
+				swatch.setAttribute('fill', device.colour);
 				swatch.setAttribute('rx', '2');
 				itemGroup.appendChild(swatch);
 			}
@@ -1026,7 +1018,7 @@ export function exportToCSV(rack: Rack, deviceTypes: DeviceType[]): string {
 		const model = escapeCSVField(deviceType.model || deviceType.slug);
 		const manufacturer = escapeCSVField(deviceType.manufacturer || '');
 		const uHeight = String(deviceType.u_height);
-		const category = deviceType.rackarr.category;
+		const category = deviceType.category;
 		const face = device.face;
 
 		rows.push(`${position},${name},${model},${manufacturer},${uHeight},${category},${face}`);

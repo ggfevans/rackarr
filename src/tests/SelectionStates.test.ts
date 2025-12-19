@@ -21,7 +21,8 @@ describe('Selection State Indicators', () => {
 		slug: 'device-1',
 		model: 'Test Server',
 		u_height: 2,
-		rackarr: { colour: '#4A90D9', category: 'server' }
+		colour: '#4A90D9',
+		category: 'server'
 	};
 
 	describe('Rack Selection', () => {

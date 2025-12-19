@@ -264,7 +264,7 @@
 		<!-- Device view -->
 		<div class="device-view">
 			<div class="device-header">
-				<ColourSwatch colour={selectedDeviceInfo.device.rackarr.colour} size={24} />
+				<ColourSwatch colour={selectedDeviceInfo.device.colour} size={24} />
 				<span class="device-name"
 					>{selectedDeviceInfo.device.model ?? selectedDeviceInfo.device.slug}</span
 				>
@@ -317,7 +317,7 @@
 				<div class="info-row">
 					<span class="info-label">Category</span>
 					<span class="info-value"
-						>{getCategoryDisplayName(selectedDeviceInfo.device.rackarr.category)}</span
+						>{getCategoryDisplayName(selectedDeviceInfo.device.category)}</span
 					>
 				</div>
 				<div class="info-row">
@@ -327,8 +327,8 @@
 				<div class="info-row">
 					<span class="info-label">Colour</span>
 					<span class="info-value colour-info">
-						<ColourSwatch colour={selectedDeviceInfo.device.rackarr.colour} size={16} />
-						{selectedDeviceInfo.device.rackarr.colour}
+						<ColourSwatch colour={selectedDeviceInfo.device.colour} size={16} />
+						{selectedDeviceInfo.device.colour}
 					</span>
 				</div>
 			</div>
@@ -371,7 +371,7 @@
 			</fieldset>
 
 			<!-- Power device properties -->
-			{#if selectedDeviceInfo.device.rackarr.category === 'power' && (selectedDeviceInfo.device.outlet_count || selectedDeviceInfo.device.va_rating)}
+			{#if selectedDeviceInfo.device.category === 'power' && (selectedDeviceInfo.device.outlet_count || selectedDeviceInfo.device.va_rating)}
 				<div class="info-section">
 					{#if selectedDeviceInfo.device.outlet_count}
 						<div class="info-row">
@@ -388,10 +388,10 @@
 				</div>
 			{/if}
 
-			{#if selectedDeviceInfo.device.comments}
+			{#if selectedDeviceInfo.device.notes}
 				<div class="notes-section">
 					<span class="info-label">Notes</span>
-					<p class="notes-text">{selectedDeviceInfo.device.comments}</p>
+					<p class="notes-text">{selectedDeviceInfo.device.notes}</p>
 				</div>
 			{/if}
 

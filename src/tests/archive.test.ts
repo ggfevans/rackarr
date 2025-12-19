@@ -140,11 +140,13 @@ describe('Folder Archive Utilities', () => {
 		it('YAML file contains correct layout data', async () => {
 			const layout = createTestLayout();
 			layout.name = 'Test';
+			// Schema v1.0.0: Flat structure with colour and category at top level
 			layout.device_types = [
 				{
 					slug: 'test-device',
 					u_height: 2,
-					rackarr: { colour: '#ff0000', category: 'server' }
+					colour: '#ff0000',
+					category: 'server'
 				}
 			];
 			const images: ImageStoreMap = new Map();
@@ -182,7 +184,8 @@ describe('Folder Archive Utilities', () => {
 				{
 					slug: 'my-device',
 					u_height: 1,
-					rackarr: { colour: '#000000', category: 'server' }
+					colour: '#000000',
+					category: 'server'
 				}
 			];
 
@@ -375,16 +378,21 @@ settings:
 		it('preserves layout data through create and extract', async () => {
 			const layout = createTestLayout();
 			layout.name = 'Round Trip Test';
+			// Schema v1.0.0: Flat structure with colour and category at top level
 			layout.device_types = [
 				{
 					slug: 'test-server',
 					u_height: 2,
 					manufacturer: 'Dell',
 					model: 'R740',
-					rackarr: { colour: '#3b82f6', category: 'server' }
+					colour: '#3b82f6',
+					category: 'server'
 				}
 			];
-			layout.rack.devices = [{ device_type: 'test-server', position: 5, face: 'front' }];
+			// Schema v1.0.0: PlacedDevice requires id
+			layout.rack.devices = [
+				{ id: 'device-1', device_type: 'test-server', position: 5, face: 'front' }
+			];
 			const images: ImageStoreMap = new Map();
 
 			const blob = await createFolderArchive(layout, images);
@@ -538,6 +546,7 @@ settings:
 		describe('graceful image loading failure handling', () => {
 			it('returns failedImages array when blob conversion fails', async () => {
 				const layout = createTestLayout();
+				// Schema v1.0.0: Flat structure
 				layout.device_types = [
 					{
 						slug: 'test-device',
@@ -545,11 +554,13 @@ settings:
 						manufacturer: 'Test',
 						u_height: 2,
 						is_full_depth: true,
-						rackarr: { colour: '#666666', category: 'server' }
+						colour: '#666666',
+						category: 'server'
 					}
 				];
 				layout.rack.devices = [
 					{
+						id: 'device-1',
 						device_type: 'test-device',
 						position: 1,
 						face: 'front'
@@ -571,6 +582,7 @@ settings:
 
 			it('continues loading other images when one fails', async () => {
 				const layout = createTestLayout();
+				// Schema v1.0.0: Flat structure
 				layout.device_types = [
 					{
 						slug: 'device-a',
@@ -578,7 +590,8 @@ settings:
 						manufacturer: 'Test',
 						u_height: 1,
 						is_full_depth: true,
-						rackarr: { colour: '#666666', category: 'server' }
+						colour: '#666666',
+						category: 'server'
 					},
 					{
 						slug: 'device-b',
@@ -586,7 +599,8 @@ settings:
 						manufacturer: 'Test',
 						u_height: 1,
 						is_full_depth: true,
-						rackarr: { colour: '#666666', category: 'server' }
+						colour: '#666666',
+						category: 'server'
 					}
 				];
 
@@ -610,8 +624,8 @@ settings:
 				const zip = new JSZip();
 				const folder = zip.folder('test-layout');
 
-				// Add valid YAML with proper rackarr structure
-				const yamlContent = `version: "0.2.0"
+				// Add valid YAML with flat structure (schema v1.0.0)
+				const yamlContent = `version: "1.0.0"
 name: Test Layout
 rack:
   name: Test Rack
@@ -628,9 +642,8 @@ device_types:
     manufacturer: Test
     u_height: 1
     is_full_depth: true
-    rackarr:
-      colour: "#666666"
-      category: server
+    colour: "#666666"
+    category: server
 settings:
   display_mode: label
   show_labels_on_images: true`;

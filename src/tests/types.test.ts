@@ -11,8 +11,7 @@ import type {
 	Airflow,
 	WeightUnit,
 	FormFactor,
-	DisplayMode,
-	RackarrDeviceTypeExtensions
+	DisplayMode
 } from '$lib/types';
 import {
 	CATEGORY_COLOURS,
@@ -29,30 +28,26 @@ describe('Types', () => {
 			const deviceType: DeviceType = {
 				slug: '1u-server',
 				u_height: 1,
-				rackarr: {
-					colour: '#4A90D9',
-					category: 'server'
-				}
+				colour: '#4A90D9',
+				category: 'server'
 			};
 
 			expect(deviceType.slug).toBe('1u-server');
 			expect(deviceType.u_height).toBe(1);
-			expect(deviceType.rackarr.colour).toBe('#4A90D9');
-			expect(deviceType.rackarr.category).toBe('server');
+			expect(deviceType.colour).toBe('#4A90D9');
+			expect(deviceType.category).toBe('server');
 		});
 
-		it('accepts device type with optional comments', () => {
+		it('accepts device type with optional notes', () => {
 			const deviceType: DeviceType = {
 				slug: '2u-server',
 				u_height: 2,
-				comments: 'Primary application server',
-				rackarr: {
-					colour: '#4A90D9',
-					category: 'server'
-				}
+				notes: 'Primary application server',
+				colour: '#4A90D9',
+				category: 'server'
 			};
 
-			expect(deviceType.comments).toBe('Primary application server');
+			expect(deviceType.notes).toBe('Primary application server');
 		});
 
 		it('accepts device type with all optional fields', () => {
@@ -65,12 +60,10 @@ describe('Types', () => {
 				weight: 25.5,
 				weight_unit: 'kg',
 				airflow: 'front-to-rear',
-				comments: 'Primary database server',
-				rackarr: {
-					colour: '#4A90D9',
-					category: 'server',
-					tags: ['production', 'database']
-				}
+				notes: 'Primary database server',
+				colour: '#4A90D9',
+				category: 'server',
+				tags: ['production', 'database']
 			};
 
 			expect(deviceType.manufacturer).toBe('Dell');
@@ -79,45 +72,21 @@ describe('Types', () => {
 			expect(deviceType.weight).toBe(25.5);
 			expect(deviceType.weight_unit).toBe('kg');
 			expect(deviceType.airflow).toBe('front-to-rear');
-			expect(deviceType.rackarr.tags).toEqual(['production', 'database']);
+			expect(deviceType.tags).toEqual(['production', 'database']);
 		});
 
 		it('works without optional fields', () => {
 			const deviceType: DeviceType = {
 				slug: '1u-switch',
 				u_height: 1,
-				rackarr: {
-					colour: '#7B68EE',
-					category: 'network'
-				}
+				colour: '#7B68EE',
+				category: 'network'
 			};
 
 			expect(deviceType.manufacturer).toBeUndefined();
 			expect(deviceType.model).toBeUndefined();
 			expect(deviceType.airflow).toBeUndefined();
 			expect(deviceType.weight).toBeUndefined();
-		});
-	});
-
-	describe('RackarrDeviceTypeExtensions interface', () => {
-		it('requires colour and category', () => {
-			const extensions: RackarrDeviceTypeExtensions = {
-				colour: '#4A90D9',
-				category: 'server'
-			};
-
-			expect(extensions.colour).toBe('#4A90D9');
-			expect(extensions.category).toBe('server');
-		});
-
-		it('accepts optional tags', () => {
-			const extensions: RackarrDeviceTypeExtensions = {
-				colour: '#4A90D9',
-				category: 'server',
-				tags: ['primary', 'production']
-			};
-
-			expect(extensions.tags).toEqual(['primary', 'production']);
 		});
 	});
 
@@ -150,6 +119,7 @@ describe('Types', () => {
 	describe('PlacedDevice interface', () => {
 		it('references device type by slug correctly', () => {
 			const placedDevice: PlacedDevice = {
+				id: crypto.randomUUID(),
 				device_type: 'dell-r740',
 				position: 5,
 				face: 'front'
@@ -162,6 +132,7 @@ describe('Types', () => {
 
 		it('accepts optional custom name', () => {
 			const placedDevice: PlacedDevice = {
+				id: crypto.randomUUID(),
 				device_type: 'dell-r740',
 				position: 5,
 				face: 'front',
@@ -173,16 +144,19 @@ describe('Types', () => {
 
 		it('accepts all valid face values', () => {
 			const frontDevice: PlacedDevice = {
+				id: crypto.randomUUID(),
 				device_type: 'dev-1',
 				position: 1,
 				face: 'front'
 			};
 			const rearDevice: PlacedDevice = {
+				id: crypto.randomUUID(),
 				device_type: 'dev-2',
 				position: 2,
 				face: 'rear'
 			};
 			const bothDevice: PlacedDevice = {
+				id: crypto.randomUUID(),
 				device_type: 'dev-3',
 				position: 3,
 				face: 'both'
@@ -243,8 +217,8 @@ describe('Types', () => {
 				starting_unit: 1,
 				position: 0,
 				devices: [
-					{ device_type: 'device-1', position: 1, face: 'front' },
-					{ device_type: 'device-2', position: 5, face: 'both' }
+					{ id: crypto.randomUUID(), device_type: 'device-1', position: 1, face: 'front' },
+					{ id: crypto.randomUUID(), device_type: 'device-2', position: 5, face: 'both' }
 				]
 			};
 
@@ -358,10 +332,8 @@ describe('Types', () => {
 				slug: '1u-server',
 				u_height: 1,
 				model: '1U Server',
-				rackarr: {
-					colour: '#4A90D9',
-					category: 'server'
-				}
+				colour: '#4A90D9',
+				category: 'server'
 			};
 
 			const layout: Layout = {
@@ -375,7 +347,9 @@ describe('Types', () => {
 					form_factor: '4-post-cabinet',
 					starting_unit: 1,
 					position: 0,
-					devices: [{ device_type: '1u-server', position: 1, face: 'front' }]
+					devices: [
+						{ id: crypto.randomUUID(), device_type: '1u-server', position: 1, face: 'front' }
+					]
 				},
 				device_types: [deviceType],
 				settings: {
@@ -503,8 +477,9 @@ describe('Constants', () => {
 	});
 
 	describe('CURRENT_VERSION', () => {
-		it('is set to 0.1.0', () => {
-			expect(CURRENT_VERSION).toBe('0.1.0');
+		it('is set to 1.0.0', () => {
+			// Schema v1.0.0: Stable schema version
+			expect(CURRENT_VERSION).toBe('1.0.0');
 		});
 	});
 

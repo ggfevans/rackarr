@@ -44,7 +44,7 @@ describe('Ubiquiti Brand Pack', () => {
 
 	describe('Specific Devices', () => {
 		it('includes UDM-Pro with correct properties', () => {
-			const udmPro = ubiquitiDevices.find((d) => d.slug === 'udm-pro');
+			const udmPro = ubiquitiDevices.find((d) => d.slug === 'ubiquiti-unifi-dream-machine-pro');
 			expect(udmPro).toBeDefined();
 			expect(udmPro?.model).toBe('UDM-Pro');
 			expect(udmPro?.u_height).toBe(1);
@@ -54,7 +54,7 @@ describe('Ubiquiti Brand Pack', () => {
 		});
 
 		it('includes USP-PDU-Pro with correct properties', () => {
-			const pdu = ubiquitiDevices.find((d) => d.slug === 'usp-pdu-pro');
+			const pdu = ubiquitiDevices.find((d) => d.slug === 'ubiquiti-usp-pdu-pro');
 			expect(pdu).toBeDefined();
 			expect(pdu?.model).toBe('USP-PDU-Pro');
 			expect(pdu?.u_height).toBe(1);
@@ -64,7 +64,9 @@ describe('Ubiquiti Brand Pack', () => {
 		});
 
 		it('includes UNVR-Pro with correct properties', () => {
-			const unvrPro = ubiquitiDevices.find((d) => d.slug === 'unvr-pro');
+			const unvrPro = ubiquitiDevices.find(
+				(d) => d.slug === 'ubiquiti-unifi-protect-network-video-recorder-pro'
+			);
 			expect(unvrPro).toBeDefined();
 			expect(unvrPro?.model).toBe('UNVR-Pro');
 			expect(unvrPro?.u_height).toBe(2);

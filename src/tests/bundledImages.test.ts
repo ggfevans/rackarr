@@ -87,38 +87,83 @@ describe('bundledImages', () => {
 		it('returns list of device slugs with bundled images', () => {
 			const slugs = getBundledImageSlugs();
 			expect(Array.isArray(slugs)).toBe(true);
-			expect(slugs.length).toBe(11); // 3 servers + 3 network + 3 storage + 1 power + 1 kvm
+			// 11 starter + 25 Ubiquiti = 36 total
+			expect(slugs.length).toBe(36);
 		});
 
-		it('includes all server slugs', () => {
+		it('includes all starter library server slugs', () => {
 			const slugs = getBundledImageSlugs();
 			expect(slugs).toContain('1u-server');
 			expect(slugs).toContain('2u-server');
 			expect(slugs).toContain('4u-server');
 		});
 
-		it('includes all network slugs', () => {
+		it('includes all starter library network slugs', () => {
 			const slugs = getBundledImageSlugs();
 			expect(slugs).toContain('24-port-switch');
 			expect(slugs).toContain('48-port-switch');
 			expect(slugs).toContain('1u-router-firewall');
 		});
 
-		it('includes all storage slugs', () => {
+		it('includes all starter library storage slugs', () => {
 			const slugs = getBundledImageSlugs();
 			expect(slugs).toContain('1u-storage');
 			expect(slugs).toContain('2u-storage');
 			expect(slugs).toContain('4u-storage');
 		});
 
-		it('includes power slugs', () => {
+		it('includes starter library power slugs', () => {
 			const slugs = getBundledImageSlugs();
 			expect(slugs).toContain('2u-ups');
 		});
 
-		it('includes kvm slugs', () => {
+		it('includes starter library kvm slugs', () => {
 			const slugs = getBundledImageSlugs();
 			expect(slugs).toContain('1u-console-drawer');
+		});
+
+		it('includes Ubiquiti brand pack slugs', () => {
+			const slugs = getBundledImageSlugs();
+			expect(slugs).toContain('ubiquiti-unifi-dream-machine-pro');
+			expect(slugs).toContain('ubiquiti-unifi-dream-machine-pro-max');
+			expect(slugs).toContain('ubiquiti-unifi-switch-24-pro');
+			expect(slugs).toContain('ubiquiti-unifi-switch-pro-max-24-poe');
+			expect(slugs).toContain('ubiquiti-usp-pdu-pro');
+		});
+	});
+
+	describe('Ubiquiti brand pack images', () => {
+		it('returns URL for UDM-Pro front image', () => {
+			const url = getBundledImage('ubiquiti-unifi-dream-machine-pro', 'front');
+			expect(url).toBeDefined();
+			expect(typeof url).toBe('string');
+			expect(url).toContain('.webp');
+		});
+
+		it('returns URL for UDM-Pro rear image', () => {
+			const url = getBundledImage('ubiquiti-unifi-dream-machine-pro', 'rear');
+			expect(url).toBeDefined();
+			expect(typeof url).toBe('string');
+			expect(url).toContain('.webp');
+		});
+
+		it('returns URL for USW-Pro-24 front image', () => {
+			const url = getBundledImage('ubiquiti-unifi-switch-24-pro', 'front');
+			expect(url).toBeDefined();
+		});
+
+		it('returns URL for UNVR front and rear images', () => {
+			expect(
+				getBundledImage('ubiquiti-unifi-protect-network-video-recorder', 'front')
+			).toBeDefined();
+			expect(
+				getBundledImage('ubiquiti-unifi-protect-network-video-recorder', 'rear')
+			).toBeDefined();
+		});
+
+		it('returns URL for USP-PDU-Pro front and rear images', () => {
+			expect(getBundledImage('ubiquiti-usp-pdu-pro', 'front')).toBeDefined();
+			expect(getBundledImage('ubiquiti-usp-pdu-pro', 'rear')).toBeDefined();
 		});
 	});
 });

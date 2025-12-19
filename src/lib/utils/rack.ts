@@ -61,9 +61,9 @@ export function validateRack(rack: Rack): RackValidationResult {
 		errors.push(`Height must be between ${MIN_RACK_HEIGHT} and ${MAX_RACK_HEIGHT}`);
 	}
 
-	// Validate width (must be 10 or 19 inches)
+	// Validate width (must be 10, 19, or 23 inches)
 	if (!ALLOWED_RACK_WIDTHS.includes(rack.width)) {
-		errors.push('Width must be 10 or 19 inches');
+		errors.push('Width must be 10, 19, or 23 inches');
 	}
 
 	return {

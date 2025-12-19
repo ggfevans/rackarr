@@ -15,10 +15,8 @@ describe('DevicePaletteItem', () => {
 			slug: 'test-server',
 			u_height: 2,
 			model: 'Test Server',
-			rackarr: {
-				colour: '#4A90D9',
-				category: 'server'
-			},
+			colour: '#4A90D9',
+			category: 'server',
 			...overrides
 		};
 	}
@@ -62,7 +60,7 @@ describe('DevicePaletteItem', () => {
 
 		it('applies category colour to icon', () => {
 			render(DevicePaletteItem, {
-				props: { device: createTestDevice({ rackarr: { colour: '#FF5500', category: 'network' } }) }
+				props: { device: createTestDevice({ colour: '#FF5500', category: 'network' }) }
 			});
 			const iconContainer = document.querySelector('.category-icon-indicator') as HTMLElement;
 			// happy-dom keeps hex, jsdom converts to rgb
@@ -308,7 +306,8 @@ describe('DevicePaletteItem', () => {
 		categories.forEach((category) => {
 			it(`renders ${category} category correctly`, () => {
 				const device = createTestDevice({
-					rackarr: { colour: '#123456', category }
+					colour: '#123456',
+					category
 				});
 				render(DevicePaletteItem, { props: { device } });
 				const item = document.querySelector('.device-palette-item');

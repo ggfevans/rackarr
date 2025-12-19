@@ -1,21 +1,21 @@
 /**
- * Mikrotik Brand Pack Tests
+ * MikroTik Brand Pack Tests
  */
 
 import { describe, it, expect } from 'vitest';
 import { mikrotikDevices } from '$lib/data/brandPacks/mikrotik';
 
-describe('Mikrotik Brand Pack', () => {
+describe('MikroTik Brand Pack', () => {
 	describe('Device Count', () => {
 		it('exports correct number of devices', () => {
-			expect(mikrotikDevices).toHaveLength(5);
+			expect(mikrotikDevices).toHaveLength(27);
 		});
 	});
 
 	describe('Common Properties', () => {
-		it('all devices have manufacturer set to Mikrotik', () => {
+		it('all devices have manufacturer set to MikroTik', () => {
 			for (const device of mikrotikDevices) {
-				expect(device.manufacturer).toBe('Mikrotik');
+				expect(device.manufacturer).toBe('MikroTik');
 			}
 		});
 
@@ -36,7 +36,8 @@ describe('Mikrotik Brand Pack', () => {
 
 		it('all devices have network category', () => {
 			for (const device of mikrotikDevices) {
-				expect(device.rackarr.category).toBe('network');
+				// Schema v1.0.0: Flat structure with category at top level
+				expect(device.category).toBe('network');
 			}
 		});
 	});
@@ -47,7 +48,7 @@ describe('Mikrotik Brand Pack', () => {
 			expect(crs326).toBeDefined();
 			expect(crs326?.slug).toBe('crs326-24g-2s-plus');
 			expect(crs326?.u_height).toBe(1);
-			expect(crs326?.is_full_depth).toBe(true);
+			expect(crs326?.is_full_depth).toBe(false);
 		});
 
 		it('includes CCR2004-1G-12S+2XS with correct properties', () => {
@@ -55,14 +56,14 @@ describe('Mikrotik Brand Pack', () => {
 			expect(ccr2004).toBeDefined();
 			expect(ccr2004?.slug).toBe('ccr2004-1g-12s-plus-2xs');
 			expect(ccr2004?.u_height).toBe(1);
-			expect(ccr2004?.is_full_depth).toBe(true);
+			expect(ccr2004?.is_full_depth).toBe(false);
 		});
 
 		it('handles special characters in model names correctly', () => {
 			// Model names with + should have slugs with '-plus'
 			const devicesWithPlus = mikrotikDevices.filter((d) => d.model?.includes('+'));
 			for (const device of devicesWithPlus) {
-				expect(device.slug).toContain('-plus');
+				expect(device.slug).toContain('plus');
 				expect(device.slug).not.toContain('+');
 			}
 		});

@@ -15,6 +15,7 @@
 	import { parseDeviceLibraryImport } from '$lib/utils/import';
 	import { getBrandPacks } from '$lib/data/brandPacks';
 	import DevicePaletteItem from './DevicePaletteItem.svelte';
+	import BrandIcon from './BrandIcon.svelte';
 	import type { DeviceType } from '$lib/types';
 
 	interface Props {
@@ -44,6 +45,8 @@
 		title: string;
 		devices: DeviceType[];
 		defaultExpanded: boolean;
+		/** simple-icons slug for brand logo */
+		icon?: string;
 	}
 
 	// Get brand packs
@@ -155,7 +158,12 @@
 					<Accordion.Item value={section.id} class="accordion-item">
 						<Accordion.Header>
 							<Accordion.Trigger class="accordion-trigger">
-								<span class="section-title">{section.title}</span>
+								<span class="section-header">
+									{#if section.icon || section.id === 'apc'}
+										<BrandIcon slug={section.icon} size={16} />
+									{/if}
+									<span class="section-title">{section.title}</span>
+								</span>
 								<span class="section-count">({section.devices.length})</span>
 							</Accordion.Trigger>
 						</Accordion.Header>
@@ -212,7 +220,12 @@
 				<span class="import-icon">↓</span>
 				Import
 			</button>
-			<button class="add-device-button" type="button" onclick={handleAddDevice} data-testid="btn-add-device">
+			<button
+				class="add-device-button"
+				type="button"
+				onclick={handleAddDevice}
+				data-testid="btn-add-device"
+			>
 				<span class="add-icon">+</span>
 				Add Device
 			</button>
@@ -290,6 +303,13 @@
 
 	:global(.accordion-trigger[data-state='open']) {
 		background: var(--colour-surface-active);
+	}
+
+	.section-header {
+		display: flex;
+		align-items: center;
+		gap: var(--space-2);
+		flex: 1;
 	}
 
 	.section-title {

@@ -15,7 +15,8 @@ describe('RackDevice SVG Component', () => {
 		slug: 'device-1',
 		model: 'Test Server',
 		u_height: 1,
-		rackarr: { colour: '#4A90D9', category: 'server' }
+		colour: '#4A90D9',
+		category: 'server'
 	};
 
 	const defaultProps = {
@@ -116,7 +117,7 @@ describe('RackDevice SVG Component', () => {
 		it('applies different colours for different devices', () => {
 			const redDevice: DeviceType = {
 				...mockDevice,
-				rackarr: { ...mockDevice.rackarr, colour: '#DC143C' }
+				colour: '#DC143C'
 			};
 			const { container } = render(RackDevice, {
 				props: { ...defaultProps, device: redDevice }
@@ -485,5 +486,4 @@ describe('RackDevice SVG Component', () => {
 			expect(container.querySelector('.label-overlay')).not.toBeInTheDocument();
 		});
 	});
-
 });

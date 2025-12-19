@@ -261,28 +261,24 @@ describe('Rack SVG Component', () => {
 				slug: 'dev-1',
 				model: 'Test Device',
 				u_height: 2,
-				rackarr: {
-					colour: '#4A90D9',
-					category: 'server'
-				}
+				colour: '#4A90D9',
+				category: 'server'
 			};
 
 			const rearDevice: DeviceType = {
 				slug: 'dev-2',
 				model: 'Rear Device',
 				u_height: 1,
-				rackarr: {
-					colour: '#7B68EE',
-					category: 'network'
-				}
+				colour: '#7B68EE',
+				category: 'network'
 			};
 
 			const rack: RackType = {
 				...mockRack,
 				view: 'front',
 				devices: [
-					{ device_type: 'dev-1', position: 1, face: 'front' },
-					{ device_type: 'dev-2', position: 5, face: 'rear' }
+					{ id: 'rc-test-1', device_type: 'dev-1', position: 1, face: 'front' },
+					{ id: 'rc-test-2', device_type: 'dev-2', position: 5, face: 'rear' }
 				]
 			};
 
@@ -304,28 +300,24 @@ describe('Rack SVG Component', () => {
 				slug: 'dev-1',
 				model: 'Test Device',
 				u_height: 2,
-				rackarr: {
-					colour: '#4A90D9',
-					category: 'server'
-				}
+				colour: '#4A90D9',
+				category: 'server'
 			};
 
 			const rearDevice: DeviceType = {
 				slug: 'dev-2',
 				model: 'Rear Device',
 				u_height: 1,
-				rackarr: {
-					colour: '#7B68EE',
-					category: 'network'
-				}
+				colour: '#7B68EE',
+				category: 'network'
 			};
 
 			const rack: RackType = {
 				...mockRack,
 				view: 'rear',
 				devices: [
-					{ device_type: 'dev-1', position: 1, face: 'front' },
-					{ device_type: 'dev-2', position: 5, face: 'rear' }
+					{ id: 'rc-test-3', device_type: 'dev-1', position: 1, face: 'front' },
+					{ id: 'rc-test-4', device_type: 'dev-2', position: 5, face: 'rear' }
 				]
 			};
 
@@ -347,15 +339,13 @@ describe('Rack SVG Component', () => {
 				slug: 'dev-1',
 				model: 'Full Depth Device',
 				u_height: 4,
-				rackarr: {
-					colour: '#50C878',
-					category: 'storage'
-				}
+				colour: '#50C878',
+				category: 'storage'
 			};
 
 			const rackFront: RackType = {
 				...mockRack,
-				devices: [{ device_type: 'dev-1', position: 1, face: 'both' }]
+				devices: [{ id: 'rc-test-5', device_type: 'dev-1', position: 1, face: 'both' }]
 			};
 
 			const { container: containerFront } = render(Rack, {
@@ -370,7 +360,7 @@ describe('Rack SVG Component', () => {
 
 			const rackRear: RackType = {
 				...mockRack,
-				devices: [{ device_type: 'dev-1', position: 1, face: 'both' }]
+				devices: [{ id: 'rc-test-6', device_type: 'dev-1', position: 1, face: 'both' }]
 			};
 
 			const { container: containerRear } = render(Rack, {
@@ -537,19 +527,22 @@ describe('Rack SVG Component', () => {
 				slug: 'front-device',
 				model: 'Front Device',
 				u_height: 2,
-				rackarr: { colour: '#4A90D9', category: 'server' }
+				colour: '#4A90D9',
+				category: 'server'
 			},
 			{
 				slug: 'rear-device',
 				model: 'Rear Device',
 				u_height: 1,
-				rackarr: { colour: '#7B68EE', category: 'network' }
+				colour: '#7B68EE',
+				category: 'network'
 			},
 			{
 				slug: 'both-device',
 				model: 'Full Depth Device',
 				u_height: 3,
-				rackarr: { colour: '#50C878', category: 'storage' }
+				colour: '#50C878',
+				category: 'storage'
 			}
 		];
 
@@ -557,9 +550,9 @@ describe('Rack SVG Component', () => {
 			...mockRack,
 			view: 'front', // Default view for filtering
 			devices: [
-				{ device_type: 'front-device', position: 1, face: 'front' },
-				{ device_type: 'rear-device', position: 5, face: 'rear' },
-				{ device_type: 'both-device', position: 8, face: 'both' }
+				{ id: 'rc-ff-1', device_type: 'front-device', position: 1, face: 'front' },
+				{ id: 'rc-ff-2', device_type: 'rear-device', position: 5, face: 'rear' },
+				{ id: 'rc-ff-3', device_type: 'both-device', position: 8, face: 'both' }
 			]
 		};
 
@@ -742,21 +735,23 @@ describe('Rack SVG Component', () => {
 				model: 'Full Depth Server',
 				u_height: 2,
 				is_full_depth: true,
-				rackarr: { category: 'server', colour: '#888888' }
+				category: 'server',
+				colour: '#888888'
 			},
 			{
 				slug: 'half-depth-switch',
 				model: 'Half Depth Switch',
 				u_height: 1,
 				is_full_depth: false,
-				rackarr: { category: 'network', colour: '#444444' }
+				category: 'network',
+				colour: '#444444'
 			}
 		];
 
 		it('renders blocked-slot rect elements when faceFilter is set', () => {
 			const rackWithDevice: RackType = {
 				...mockRack,
-				devices: [{ device_type: 'full-depth-server', position: 5, face: 'front' }]
+				devices: [{ id: 'rc-bs-1', device_type: 'full-depth-server', position: 5, face: 'front' }]
 			};
 
 			const { container } = render(Rack, {
@@ -776,7 +771,7 @@ describe('Rack SVG Component', () => {
 		it('blocked slot rects have correct position based on U', () => {
 			const rackWithDevice: RackType = {
 				...mockRack,
-				devices: [{ device_type: 'full-depth-server', position: 3, face: 'front' }]
+				devices: [{ id: 'rc-bs-2', device_type: 'full-depth-server', position: 3, face: 'front' }]
 			};
 
 			const { container } = render(Rack, {
@@ -801,7 +796,7 @@ describe('Rack SVG Component', () => {
 		it('blocked slot rects have correct height based on device U', () => {
 			const rackWithDevice: RackType = {
 				...mockRack,
-				devices: [{ device_type: 'full-depth-server', position: 5, face: 'front' }]
+				devices: [{ id: 'rc-bs-3', device_type: 'full-depth-server', position: 5, face: 'front' }]
 			};
 
 			const { container } = render(Rack, {
@@ -824,7 +819,7 @@ describe('Rack SVG Component', () => {
 		it('does not render blocked slots for half-depth devices', () => {
 			const rackWithDevice: RackType = {
 				...mockRack,
-				devices: [{ device_type: 'half-depth-switch', position: 5, face: 'front' }]
+				devices: [{ id: 'rc-bs-4', device_type: 'half-depth-switch', position: 5, face: 'front' }]
 			};
 
 			const { container } = render(Rack, {
@@ -843,7 +838,7 @@ describe('Rack SVG Component', () => {
 		it('does not render blocked slots when faceFilter is undefined', () => {
 			const rackWithDevice: RackType = {
 				...mockRack,
-				devices: [{ device_type: 'full-depth-server', position: 5, face: 'front' }]
+				devices: [{ id: 'rc-bs-5', device_type: 'full-depth-server', position: 5, face: 'front' }]
 			};
 
 			const { container } = render(Rack, {
@@ -867,13 +862,14 @@ describe('Rack SVG Component', () => {
 					model: 'UPS',
 					u_height: 3,
 					is_full_depth: true,
-					rackarr: { category: 'power', colour: '#888888' }
+					category: 'power',
+					colour: '#888888'
 				}
 			];
 
 			const rackWithDevice: RackType = {
 				...mockRack,
-				devices: [{ device_type: 'ups', position: 1, face: 'both' }]
+				devices: [{ id: 'rc-bs-6', device_type: 'ups', position: 1, face: 'both' }]
 			};
 
 			// Check front view
@@ -908,7 +904,7 @@ describe('Rack SVG Component', () => {
 		it('blocked slots have appropriate opacity', () => {
 			const rackWithDevice: RackType = {
 				...mockRack,
-				devices: [{ device_type: 'full-depth-server', position: 5, face: 'front' }]
+				devices: [{ id: 'rc-bs-7', device_type: 'full-depth-server', position: 5, face: 'front' }]
 			};
 
 			const { container } = render(Rack, {

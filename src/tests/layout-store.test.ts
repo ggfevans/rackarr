@@ -268,10 +268,12 @@ describe('Layout Store (v0.2)', () => {
 				u_height: 2,
 				category: 'server',
 				colour: '#FF0000',
-				comments: 'Test notes'
+				notes: 'Test notes'
 			});
-			expect(deviceType.rackarr.colour).toBe('#FF0000');
-			expect(deviceType.comments).toBe('Test notes');
+			// Schema v1.0.0: Flat structure with colour at top level
+			expect(deviceType.colour).toBe('#FF0000');
+			// Schema v1.0.0: Uses 'notes' field
+			expect(deviceType.notes).toBe('Test notes');
 		});
 
 		it('sets isDirty to true', () => {
@@ -1158,16 +1160,17 @@ describe('Layout Store (v0.2)', () => {
 			store.placeDevice('rack-0', 'usw-pro-24', 5);
 
 			const imported = store.device_types.find((d) => d.slug === 'usw-pro-24');
-			expect(imported?.is_full_depth).toBe(true);
-			expect(imported?.rackarr?.category).toBe('network');
+			expect(imported?.is_full_depth).toBe(false);
+			// Schema v1.0.0: Flat structure with category at top level
+			expect(imported?.category).toBe('network');
 		});
 
 		it('full-depth brand device defaults to both face when placed', () => {
 			const store = getLayoutStore();
 			store.addRack('Test Rack', 42);
 
-			// USW-Pro-24 has is_full_depth: true
-			store.placeDevice('rack-0', 'usw-pro-24', 5);
+			// US-24-500W has is_full_depth: true (legacy switch with power supply)
+			store.placeDevice('rack-0', 'us-24-500w', 5);
 
 			// Full-depth devices should default to 'both' face (visible front and rear)
 			expect(store.layout.rack.devices[0]!.face).toBe('both');

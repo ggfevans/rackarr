@@ -13,21 +13,24 @@ describe('DnD Between Racks', () => {
 		slug: 'device-1',
 		model: 'Test Server',
 		u_height: 2,
-		rackarr: { colour: '#4A90D9', category: 'server' }
+		colour: '#4A90D9',
+		category: 'server'
 	};
 
 	const testDevice2: DeviceType = {
 		slug: 'device-2',
 		model: 'Test Switch',
 		u_height: 1,
-		rackarr: { colour: '#7B68EE', category: 'network' }
+		colour: '#7B68EE',
+		category: 'network'
 	};
 
 	const tallDevice: DeviceType = {
 		slug: 'device-tall',
 		model: 'Tall Server',
 		u_height: 4,
-		rackarr: { colour: '#4A90D9', category: 'server' }
+		colour: '#4A90D9',
+		category: 'server'
 	};
 
 	const deviceLibrary: DeviceType[] = [testDevice, testDevice2, tallDevice];
@@ -51,7 +54,7 @@ describe('DnD Between Racks', () => {
 		desc_units: false,
 		form_factor: '4-post',
 		starting_unit: 1,
-		devices: [{ device_type: 'device-2', position: 3, face: 'front' }]
+		devices: [{ id: 'test-id-1', device_type: 'device-2', position: 3, face: 'front' }]
 	};
 
 	const smallTargetRack: Rack = {
@@ -173,9 +176,9 @@ describe('DnD Between Racks', () => {
 			form_factor: '4-post',
 			starting_unit: 1,
 			devices: [
-				{ device_type: 'device-1', position: 2, face: 'front' }, // U2-U3
-				{ device_type: 'device-2', position: 6, face: 'front' }, // U6
-				{ device_type: 'device-1', position: 9, face: 'front' } // U9-U10
+				{ id: 'test-id-2', device_type: 'device-1', position: 2, face: 'front' }, // U2-U3
+				{ id: 'test-id-3', device_type: 'device-2', position: 6, face: 'front' }, // U6
+				{ id: 'test-id-4', device_type: 'device-1', position: 9, face: 'front' } // U9-U10
 			]
 		};
 
@@ -220,7 +223,7 @@ describe('DnD Between Racks', () => {
 				desc_units: false,
 				form_factor: '4-post',
 				starting_unit: 1,
-				devices: [{ device_type: 'device-1', position: 1, face: 'front' }] // U1-U2
+				devices: [{ id: 'test-id-5', device_type: 'device-1', position: 1, face: 'front' }] // U1-U2
 			};
 			const feedback = getDropFeedback(rackWithBottomDevice, deviceLibrary, tallDevice.u_height, 3);
 			expect(feedback).toBe('valid');

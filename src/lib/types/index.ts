@@ -1,6 +1,6 @@
 /**
  * Rackarr Core Type Definitions
- * NetBox-compatible data structures with snake_case naming
+ * Schema v1.0.0 - Flat structure with NetBox-compatible fields
  */
 
 // =============================================================================
@@ -52,50 +52,181 @@ export type FormFactor = '2-post' | '4-post' | '4-post-cabinet' | 'wall-mount' |
  */
 export type DisplayMode = 'label' | 'image' | 'image-label';
 
+/**
+ * Airflow direction types (NetBox-compatible with full parity)
+ */
+export type Airflow =
+	| 'passive'
+	| 'front-to-rear'
+	| 'rear-to-front'
+	| 'left-to-right'
+	| 'right-to-left'
+	| 'side-to-rear'
+	| 'mixed';
+
+/**
+ * Subdevice role for parent/child device relationships
+ */
+export type SubdeviceRole = 'parent' | 'child';
+
 // =============================================================================
-// Device Types (Storage/Serialization - NetBox-compatible)
+// Component Types (NetBox-compatible, schema-only)
 // =============================================================================
 
 /**
- * Rackarr-specific extensions to DeviceType
+ * Network interface definition
  */
-export interface RackarrDeviceTypeExtensions {
+export interface Interface {
+	/** Interface name (e.g., 'eth0', 'Gi1/0/1') */
+	name: string;
+	/** Interface type (e.g., '1000base-t', '10gbase-x-sfpp') */
+	type: string;
+	/** Management interface only */
+	mgmt_only?: boolean;
+}
+
+/**
+ * Power port (input) definition
+ */
+export interface PowerPort {
+	/** Port name (e.g., 'PSU1', 'Power Input') */
+	name: string;
+	/** Port type */
+	type?: string;
+	/** Maximum power draw in watts */
+	maximum_draw?: number;
+	/** Allocated power draw in watts */
+	allocated_draw?: number;
+}
+
+/**
+ * Power outlet (output) definition
+ */
+export interface PowerOutlet {
+	/** Outlet name (e.g., 'Outlet 1', 'C13-1') */
+	name: string;
+	/** Outlet type */
+	type?: string;
+	/** Reference to PowerPort.name this outlet is fed from */
+	power_port?: string;
+	/** Feed leg for three-phase power */
+	feed_leg?: 'A' | 'B' | 'C';
+}
+
+/**
+ * Device bay for parent devices (blade chassis, modular switches)
+ */
+export interface DeviceBay {
+	/** Bay name (e.g., 'Blade Bay 1', 'Slot 1') */
+	name: string;
+	/** Bay position identifier */
+	position?: string;
+}
+
+/**
+ * Inventory item (internal components)
+ */
+export interface InventoryItem {
+	/** Item name (e.g., 'RAM Module 1', 'CPU') */
+	name: string;
+	/** Item manufacturer */
+	manufacturer?: string;
+	/** Part ID / SKU */
+	part_id?: string;
+	/** Serial number */
+	serial?: string;
+	/** Asset tag */
+	asset_tag?: string;
+}
+
+/**
+ * External link/reference
+ */
+export interface DeviceLink {
+	/** Link label (e.g., 'Vendor Manual', 'Support Page') */
+	label: string;
+	/** URL */
+	url: string;
+}
+
+// =============================================================================
+// Device Types (Storage/Serialization - Schema v1.0.0)
+// =============================================================================
+
+/**
+ * Device Type - template definition in library (Storage format)
+ * Schema v1.0.0: Flat structure with NetBox-compatible fields
+ */
+export interface DeviceType {
+	// --- Core Identity ---
+	/** Unique identifier, kebab-case slug */
+	slug: string;
+	/** Manufacturer name */
+	manufacturer?: string;
+	/** Model name */
+	model?: string;
+	/** Part number / SKU */
+	part_number?: string;
+
+	// --- Physical Properties ---
+	/** Height in rack units (0.5-42U) */
+	u_height: number;
+	/** Whether device occupies full rack depth (default: true) */
+	is_full_depth?: boolean;
+	/** Whether device is powered (false for patch panels, shelves) */
+	is_powered?: boolean;
+	/** Device weight */
+	weight?: number;
+	/** Weight unit (required if weight is provided) */
+	weight_unit?: WeightUnit;
+	/** Airflow direction */
+	airflow?: Airflow;
+
+	// --- Image Flags ---
+	/** Front image exists */
+	front_image?: boolean;
+	/** Rear image exists */
+	rear_image?: boolean;
+
+	// --- Rackarr Fields (flat, not nested) ---
 	/** Hex colour for display (e.g., '#4A90D9') */
 	colour: string;
 	/** Device category for UI filtering */
 	category: DeviceCategory;
 	/** User organization tags */
 	tags?: string[];
-}
 
-/**
- * Device Type - template definition in library (Storage format)
- * NetBox-compatible with Rackarr extensions
- */
-export interface DeviceType {
-	/** Unique identifier, kebab-case slug */
-	slug: string;
-	/** Height in rack units (0.5-42U) */
-	u_height: number;
-	/** Manufacturer name */
-	manufacturer?: string;
-	/** Model name */
-	model?: string;
-	/** Whether device occupies full rack depth (default: true) */
-	is_full_depth?: boolean;
-	/** Device weight */
-	weight?: number;
-	/** Weight unit (required if weight is provided) */
-	weight_unit?: WeightUnit;
+	// --- Extension Fields ---
 	/** Notes/comments */
-	comments?: string;
-	// Power device properties (category: 'power')
-	/** Number of outlets (e.g., 8, 12, 16) */
-	outlet_count?: number;
-	/** VA capacity (e.g., 1500, 3000) */
+	notes?: string;
+	/** Serial number */
+	serial_number?: string;
+	/** Asset tag */
+	asset_tag?: string;
+	/** External links */
+	links?: DeviceLink[];
+	/** User-defined custom fields */
+	custom_fields?: Record<string, unknown>;
+
+	// --- Component Arrays (schema-only, future features) ---
+	/** Network interfaces */
+	interfaces?: Interface[];
+	/** Power input ports */
+	power_ports?: PowerPort[];
+	/** Power output outlets (for PDUs) */
+	power_outlets?: PowerOutlet[];
+	/** Device bays (for blade chassis) */
+	device_bays?: DeviceBay[];
+	/** Inventory items (internal components) */
+	inventory_items?: InventoryItem[];
+
+	// --- Subdevice Support (schema-only) ---
+	/** Role in parent/child relationship */
+	subdevice_role?: SubdeviceRole;
+
+	// --- Power Device Properties ---
+	/** VA capacity (e.g., 1500, 3000) - for UPS devices */
 	va_rating?: number;
-	/** Rackarr-specific extensions */
-	rackarr: RackarrDeviceTypeExtensions;
 }
 
 /**
@@ -103,14 +234,28 @@ export interface DeviceType {
  * References a DeviceType by slug
  */
 export interface PlacedDevice {
+	/** Unique identifier (UUID) for stable references */
+	id: string;
 	/** Reference to DeviceType.slug */
 	device_type: string;
-	/** Optional custom display name for this placement */
-	name?: string;
 	/** Bottom U position (1-indexed, U1 is at the bottom) */
 	position: number;
 	/** Which face(s) of the rack the device occupies */
 	face: DeviceFace;
+	/** Optional custom display name for this placement */
+	name?: string;
+
+	// --- Subdevice Placement (schema-only) ---
+	/** Parent placement ID (for child devices in bays) */
+	parent_device?: string;
+	/** Bay name in parent device */
+	device_bay?: string;
+
+	// --- Extension Fields ---
+	/** Notes for this placement */
+	notes?: string;
+	/** User-defined custom fields */
+	custom_fields?: Record<string, unknown>;
 }
 
 // =============================================================================
@@ -121,12 +266,14 @@ export interface PlacedDevice {
  * A rack unit container
  */
 export interface Rack {
+	/** Unique identifier (for multi-rack references) */
+	id?: string;
 	/** Display name */
 	name: string;
 	/** Height in rack units (1-100U) */
 	height: number;
-	/** Width in inches (10 or 19) */
-	width: 10 | 19;
+	/** Width in inches (10, 19, or 23) */
+	width: 10 | 19 | 23;
 	/** Descending units - if true, U1 is at top (default: false) */
 	desc_units: boolean;
 	/** Rack form factor */
@@ -137,6 +284,8 @@ export interface Rack {
 	position: number;
 	/** Devices placed in this rack */
 	devices: PlacedDevice[];
+	/** Notes for this rack */
+	notes?: string;
 	/** Current view mode - runtime only, not persisted */
 	view?: RackView;
 }
@@ -185,13 +334,15 @@ export interface CreateDeviceTypeData {
 	colour: string;
 	manufacturer?: string;
 	model?: string;
+	part_number?: string;
 	is_full_depth?: boolean;
+	is_powered?: boolean;
 	weight?: number;
 	weight_unit?: WeightUnit;
-	comments?: string;
+	airflow?: Airflow;
 	tags?: string[];
+	notes?: string;
 	// Power device properties
-	outlet_count?: number;
 	va_rating?: number;
 }
 
@@ -201,7 +352,7 @@ export interface CreateDeviceTypeData {
 export interface CreateRackData {
 	name: string;
 	height: number;
-	width?: 10 | 19;
+	width?: 10 | 19 | 23;
 	form_factor?: FormFactor;
 	desc_units?: boolean;
 	starting_unit?: number;

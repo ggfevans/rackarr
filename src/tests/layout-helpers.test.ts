@@ -45,8 +45,9 @@ describe('createDeviceType', () => {
 		const result = createDeviceType(input);
 
 		expect(result.u_height).toBe(2);
-		expect(result.rackarr.category).toBe('server');
-		expect(result.rackarr.colour).toBe('#336699');
+		// Schema v1.0.0: Flat structure with colour and category at top level
+		expect(result.category).toBe('server');
+		expect(result.colour).toBe('#336699');
 		expect(result.slug).toBeDefined();
 		expect(typeof result.slug).toBe('string');
 	});
@@ -139,18 +140,19 @@ describe('createDeviceType', () => {
 		expect(result.airflow).toBe('front-to-rear');
 	});
 
-	it('sets optional comments field', () => {
+	it('sets optional notes field', () => {
 		const input: CreateDeviceTypeInput = {
 			name: 'Documented Device',
 			u_height: 1,
 			category: 'other',
 			colour: '#888888',
-			comments: 'This is a test comment'
+			notes: 'This is a test note'
 		};
 
 		const result = createDeviceType(input);
 
-		expect(result.comments).toBe('This is a test comment');
+		// Schema v1.0.0: Uses 'notes' instead of 'comments'
+		expect(result.notes).toBe('This is a test note');
 	});
 
 	it('sets optional tags field when tags array is non-empty', () => {
@@ -164,7 +166,8 @@ describe('createDeviceType', () => {
 
 		const result = createDeviceType(input);
 
-		expect(result.rackarr.tags).toEqual(['production', 'critical']);
+		// Schema v1.0.0: Flat structure, tags at top level
+		expect(result.tags).toEqual(['production', 'critical']);
 	});
 
 	it('does not set tags field when tags array is empty', () => {
@@ -178,7 +181,8 @@ describe('createDeviceType', () => {
 
 		const result = createDeviceType(input);
 
-		expect(result.rackarr.tags).toBeUndefined();
+		// Schema v1.0.0: Flat structure, tags at top level
+		expect(result.tags).toBeUndefined();
 	});
 
 	it('handles all optional fields together', () => {
@@ -193,7 +197,7 @@ describe('createDeviceType', () => {
 			weight: 10.5,
 			weight_unit: 'lb',
 			airflow: 'side-to-rear',
-			comments: 'NAS storage',
+			notes: 'NAS storage',
 			tags: ['nas', 'backup']
 		};
 
@@ -207,10 +211,11 @@ describe('createDeviceType', () => {
 		expect(result.weight).toBe(10.5);
 		expect(result.weight_unit).toBe('lb');
 		expect(result.airflow).toBe('side-to-rear');
-		expect(result.comments).toBe('NAS storage');
-		expect(result.rackarr.category).toBe('storage');
-		expect(result.rackarr.colour).toBe('#FF6600');
-		expect(result.rackarr.tags).toEqual(['nas', 'backup']);
+		expect(result.notes).toBe('NAS storage');
+		// Schema v1.0.0: Flat structure
+		expect(result.category).toBe('storage');
+		expect(result.colour).toBe('#FF6600');
+		expect(result.tags).toEqual(['nas', 'backup']);
 	});
 
 	it('handles special characters in names for slug generation', () => {

@@ -179,37 +179,35 @@ describe('v0.2 Layout YAML Serialization', () => {
 
 		it('properly indents nested structures', () => {
 			const layout = createValidLayout();
+			// Schema v1.0.0: Flat structure with colour and category at top level
 			layout.device_types = [
 				{
 					slug: 'test-server',
 					u_height: 2,
-					rackarr: {
-						colour: '#3b82f6',
-						category: 'server'
-					}
+					colour: '#3b82f6',
+					category: 'server'
 				}
 			];
 
 			const yaml = serializeLayoutToYaml(layout);
 
-			// Check that rackarr is nested under device type
-			expect(yaml).toContain('rackarr:');
+			// Check that colour and category are flat (not nested under rackarr)
+			expect(yaml).not.toContain('rackarr:');
 			expect(yaml).toContain('colour:');
 			expect(yaml).toContain('category:');
 		});
 
 		it('serializes device types correctly', () => {
 			const layout = createValidLayout();
+			// Schema v1.0.0: Flat structure
 			layout.device_types = [
 				{
 					slug: 'synology-ds920-plus',
 					u_height: 2,
 					manufacturer: 'Synology',
 					model: 'DS920+',
-					rackarr: {
-						colour: '#10b981',
-						category: 'storage'
-					}
+					colour: '#10b981',
+					category: 'storage'
 				}
 			];
 
@@ -222,16 +220,25 @@ describe('v0.2 Layout YAML Serialization', () => {
 
 		it('serializes placed devices correctly', () => {
 			const layout = createValidLayout();
+			// Schema v1.0.0: Flat structure
 			layout.device_types = [
 				{
 					slug: 'test-device',
 					u_height: 1,
-					rackarr: { colour: '#000', category: 'other' }
+					colour: '#000000',
+					category: 'other'
 				}
 			];
+			// Schema v1.0.0: PlacedDevice requires id
 			layout.rack.devices = [
-				{ device_type: 'test-device', position: 10, face: 'front' },
-				{ device_type: 'test-device', name: 'Named Instance', position: 20, face: 'rear' }
+				{ id: 'device-1', device_type: 'test-device', position: 10, face: 'front' },
+				{
+					id: 'device-2',
+					device_type: 'test-device',
+					name: 'Named Instance',
+					position: 20,
+					face: 'rear'
+				}
 			];
 
 			const yaml = serializeLayoutToYaml(layout);
@@ -257,11 +264,13 @@ describe('v0.2 Layout YAML Serialization', () => {
 
 		it('returns layout with all fields', () => {
 			const layout = createValidLayout();
+			// Schema v1.0.0: Flat structure
 			layout.device_types = [
 				{
 					slug: 'test-server',
 					u_height: 2,
-					rackarr: { colour: '#000000', category: 'server' }
+					colour: '#000000',
+					category: 'server'
 				}
 			];
 
@@ -341,19 +350,21 @@ settings:
 	describe('layout round-trip', () => {
 		it('serialize then parse returns equivalent object', () => {
 			const layout = createValidLayout();
+			// Schema v1.0.0: Flat structure
 			layout.device_types = [
 				{
 					slug: 'synology-ds920-plus',
 					u_height: 2,
 					manufacturer: 'Synology',
 					model: 'DS920+',
-					rackarr: {
-						colour: '#10b981',
-						category: 'storage'
-					}
+					colour: '#10b981',
+					category: 'storage'
 				}
 			];
-			layout.rack.devices = [{ device_type: 'synology-ds920-plus', position: 10, face: 'front' }];
+			// Schema v1.0.0: PlacedDevice requires id
+			layout.rack.devices = [
+				{ id: 'device-1', device_type: 'synology-ds920-plus', position: 10, face: 'front' }
+			];
 
 			const yaml = serializeLayoutToYaml(layout);
 			const parsed = parseLayoutYaml(yaml);
@@ -367,21 +378,25 @@ settings:
 
 		it('all device_types preserved', () => {
 			const layout = createValidLayout();
+			// Schema v1.0.0: Flat structure
 			layout.device_types = [
 				{
 					slug: 'device-1',
 					u_height: 1,
-					rackarr: { colour: '#111111', category: 'server' }
+					colour: '#111111',
+					category: 'server'
 				},
 				{
 					slug: 'device-2',
 					u_height: 2,
-					rackarr: { colour: '#222222', category: 'storage' }
+					colour: '#222222',
+					category: 'storage'
 				},
 				{
 					slug: 'device-3',
 					u_height: 3,
-					rackarr: { colour: '#333333', category: 'network' }
+					colour: '#333333',
+					category: 'network'
 				}
 			];
 
@@ -398,17 +413,20 @@ settings:
 
 		it('all devices preserved', () => {
 			const layout = createValidLayout();
+			// Schema v1.0.0: Flat structure
 			layout.device_types = [
 				{
 					slug: 'test-device',
 					u_height: 1,
-					rackarr: { colour: '#000000', category: 'other' }
+					colour: '#000000',
+					category: 'other'
 				}
 			];
+			// Schema v1.0.0: PlacedDevice requires id
 			layout.rack.devices = [
-				{ device_type: 'test-device', position: 1, face: 'front' },
-				{ device_type: 'test-device', name: 'Second', position: 5, face: 'rear' },
-				{ device_type: 'test-device', position: 10, face: 'both' }
+				{ id: 'device-1', device_type: 'test-device', position: 1, face: 'front' },
+				{ id: 'device-2', device_type: 'test-device', name: 'Second', position: 5, face: 'rear' },
+				{ id: 'device-3', device_type: 'test-device', position: 10, face: 'both' }
 			];
 
 			const yaml = serializeLayoutToYaml(layout);

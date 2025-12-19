@@ -37,6 +37,7 @@
 		"@testing-library/user-event": "^14.6.1",
 		"@types/js-yaml": "^4.0.9",
 		"@types/node": "^24.10.3",
+		"@types/qrcode": "^1.5.6",
 		"@types/umami-browser": "^2.18.0",
 		"@vitest/coverage-v8": "^3.2.4",
 		"eslint": "^9.39.1",
@@ -49,6 +50,7 @@
 		"lint-staged": "^16.1.0",
 		"prettier": "^3.6.2",
 		"prettier-plugin-svelte": "^3.4.0",
+		"qrcode": "^1.5.4",
 		"sharp": "^0.34.5",
 		"svelte": "^5.43.8",
 		"svelte-check": "^4.3.4",
@@ -69,6 +71,7 @@
 		"jspdf": "^3.0.4",
 		"jszip": "^3.10.1",
 		"panzoom": "^9.4.3",
+		"simple-icons": "^16.2.0",
 		"zod": "^4.1.13"
 	}
 }

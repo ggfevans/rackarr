@@ -11,7 +11,6 @@ import {
 	DeviceFaceSchema,
 	WeightUnitSchema,
 	DisplayModeSchema,
-	RackarrExtensionsSchema,
 	DeviceTypeSchema,
 	PlacedDeviceSchema,
 	RackSchema,
@@ -206,118 +205,78 @@ describe('DisplayModeSchema', () => {
 });
 
 // ============================================================================
-// RackarrExtensionsSchema Tests
+// Colour Validation Tests (flat structure in v1.0.0)
 // ============================================================================
 
-describe('RackarrExtensionsSchema', () => {
-	it('accepts valid extensions with required fields', () => {
-		const result = RackarrExtensionsSchema.safeParse({
-			colour: '#4A90D9',
-			category: 'server'
+describe('DeviceTypeSchema colour validation', () => {
+	const baseDevice = {
+		slug: 'test-device',
+		u_height: 1,
+		category: 'server' as const
+	};
+
+	it('accepts valid hex colour', () => {
+		const result = DeviceTypeSchema.safeParse({
+			...baseDevice,
+			colour: '#FF5733'
 		});
 		expect(result.success).toBe(true);
 	});
 
-	it('accepts extensions with optional tags', () => {
-		const result = RackarrExtensionsSchema.safeParse({
-			colour: '#4A90D9',
-			category: 'server',
-			tags: ['production', 'critical']
+	it('accepts lowercase hex colour', () => {
+		const result = DeviceTypeSchema.safeParse({
+			...baseDevice,
+			colour: '#ff5733'
 		});
 		expect(result.success).toBe(true);
 	});
 
-	it('rejects missing colour', () => {
-		const result = RackarrExtensionsSchema.safeParse({
-			category: 'server'
+	it('rejects colour without hash', () => {
+		const result = DeviceTypeSchema.safeParse({
+			...baseDevice,
+			colour: 'FF5733'
 		});
 		expect(result.success).toBe(false);
 	});
 
-	it('rejects missing category', () => {
-		const result = RackarrExtensionsSchema.safeParse({
-			colour: '#4A90D9'
+	it('rejects 3-character hex', () => {
+		const result = DeviceTypeSchema.safeParse({
+			...baseDevice,
+			colour: '#F00'
 		});
 		expect(result.success).toBe(false);
 	});
 
-	describe('colour validation', () => {
-		it('accepts valid hex colour', () => {
-			const result = RackarrExtensionsSchema.safeParse({
-				colour: '#FF5733',
-				category: 'server'
-			});
-			expect(result.success).toBe(true);
+	it('rejects 8-character hex (with alpha)', () => {
+		const result = DeviceTypeSchema.safeParse({
+			...baseDevice,
+			colour: '#FF5733FF'
 		});
+		expect(result.success).toBe(false);
+	});
 
-		it('accepts lowercase hex colour', () => {
-			const result = RackarrExtensionsSchema.safeParse({
-				colour: '#ff5733',
-				category: 'server'
-			});
-			expect(result.success).toBe(true);
+	it('rejects invalid hex characters', () => {
+		const result = DeviceTypeSchema.safeParse({
+			...baseDevice,
+			colour: '#GGGGGG'
 		});
-
-		it('rejects colour without hash', () => {
-			const result = RackarrExtensionsSchema.safeParse({
-				colour: 'FF5733',
-				category: 'server'
-			});
-			expect(result.success).toBe(false);
-		});
-
-		it('rejects 3-character hex', () => {
-			const result = RackarrExtensionsSchema.safeParse({
-				colour: '#F00',
-				category: 'server'
-			});
-			expect(result.success).toBe(false);
-		});
-
-		it('rejects 8-character hex (with alpha)', () => {
-			const result = RackarrExtensionsSchema.safeParse({
-				colour: '#FF5733FF',
-				category: 'server'
-			});
-			expect(result.success).toBe(false);
-		});
-
-		it('rejects invalid hex characters', () => {
-			const result = RackarrExtensionsSchema.safeParse({
-				colour: '#GGGGGG',
-				category: 'server'
-			});
-			expect(result.success).toBe(false);
-		});
+		expect(result.success).toBe(false);
 	});
 });
 
 describe('DeviceTypeSchema', () => {
+	// Schema v1.0.0: Flat structure with colour and category at top level
 	const validBaseDevice = {
 		slug: 'test-device',
 		u_height: 1,
-		rackarr: {
-			colour: '#4A90D9',
-			category: 'server' as const
-		}
+		colour: '#4A90D9',
+		category: 'server' as const
 	};
 
 	describe('power device properties', () => {
 		it('validates device type without power fields', () => {
 			const result = DeviceTypeSchema.safeParse(validBaseDevice);
 			expect(result.success).toBe(true);
-		});
-
-		it('validates device type with valid outlet_count', () => {
-			const device = {
-				...validBaseDevice,
-				outlet_count: 8
-			};
-			const result = DeviceTypeSchema.safeParse(device);
-			expect(result.success).toBe(true);
-			if (result.success) {
-				expect(result.data.outlet_count).toBe(8);
-			}
 		});
 
 		it('validates device type with valid va_rating', () => {
@@ -332,27 +291,36 @@ describe('DeviceTypeSchema', () => {
 			}
 		});
 
-		it('validates device type with both power fields', () => {
+		it('validates device type with power_outlets array', () => {
 			const device = {
 				...validBaseDevice,
-				outlet_count: 6,
-				va_rating: 3000
+				power_outlets: [
+					{ name: 'Outlet 1', type: 'iec-c13' },
+					{ name: 'Outlet 2', type: 'iec-c13' }
+				]
 			};
 			const result = DeviceTypeSchema.safeParse(device);
 			expect(result.success).toBe(true);
 			if (result.success) {
-				expect(result.data.outlet_count).toBe(6);
-				expect(result.data.va_rating).toBe(3000);
+				expect(result.data.power_outlets).toHaveLength(2);
 			}
 		});
 
-		it('rejects negative outlet_count', () => {
+		it('validates device type with power_ports and va_rating', () => {
 			const device = {
 				...validBaseDevice,
-				outlet_count: -1
+				va_rating: 3000,
+				power_ports: [
+					{ name: 'PSU1', maximum_draw: 500 },
+					{ name: 'PSU2', maximum_draw: 500 }
+				]
 			};
 			const result = DeviceTypeSchema.safeParse(device);
-			expect(result.success).toBe(false);
+			expect(result.success).toBe(true);
+			if (result.success) {
+				expect(result.data.power_ports).toHaveLength(2);
+				expect(result.data.va_rating).toBe(3000);
+			}
 		});
 
 		it('rejects negative va_rating', () => {
@@ -364,28 +332,10 @@ describe('DeviceTypeSchema', () => {
 			expect(result.success).toBe(false);
 		});
 
-		it('rejects non-integer outlet_count', () => {
-			const device = {
-				...validBaseDevice,
-				outlet_count: 8.5
-			};
-			const result = DeviceTypeSchema.safeParse(device);
-			expect(result.success).toBe(false);
-		});
-
 		it('rejects non-integer va_rating', () => {
 			const device = {
 				...validBaseDevice,
 				va_rating: 1500.5
-			};
-			const result = DeviceTypeSchema.safeParse(device);
-			expect(result.success).toBe(false);
-		});
-
-		it('rejects zero outlet_count', () => {
-			const device = {
-				...validBaseDevice,
-				outlet_count: 0
 			};
 			const result = DeviceTypeSchema.safeParse(device);
 			expect(result.success).toBe(false);
@@ -403,6 +353,7 @@ describe('DeviceTypeSchema', () => {
 
 	describe('existing field validation', () => {
 		it('validates device type with all optional fields', () => {
+			// Schema v1.0.0: Flat structure with all fields at top level
 			const device = {
 				slug: 'full-device',
 				u_height: 2,
@@ -411,14 +362,11 @@ describe('DeviceTypeSchema', () => {
 				is_full_depth: true,
 				weight: 25.5,
 				weight_unit: 'kg' as const,
-				comments: 'Test comments',
-				outlet_count: 8,
+				notes: 'Test notes',
 				va_rating: 1500,
-				rackarr: {
-					colour: '#4A90D9',
-					category: 'power' as const,
-					tags: ['test']
-				}
+				colour: '#4A90D9',
+				category: 'power' as const,
+				tags: ['test']
 			};
 			const result = DeviceTypeSchema.safeParse(device);
 			expect(result.success).toBe(true);
@@ -471,7 +419,8 @@ describe('DeviceTypeSchema', () => {
 		it('rejects missing slug', () => {
 			const device = {
 				u_height: 1,
-				rackarr: { colour: '#4A90D9', category: 'server' }
+				colour: '#4A90D9',
+				category: 'server'
 			};
 			expect(DeviceTypeSchema.safeParse(device).success).toBe(false);
 		});
@@ -479,15 +428,26 @@ describe('DeviceTypeSchema', () => {
 		it('rejects missing u_height', () => {
 			const device = {
 				slug: 'test-device',
-				rackarr: { colour: '#4A90D9', category: 'server' }
+				colour: '#4A90D9',
+				category: 'server'
 			};
 			expect(DeviceTypeSchema.safeParse(device).success).toBe(false);
 		});
 
-		it('rejects missing rackarr', () => {
+		it('rejects missing colour', () => {
 			const device = {
 				slug: 'test-device',
-				u_height: 1
+				u_height: 1,
+				category: 'server'
+			};
+			expect(DeviceTypeSchema.safeParse(device).success).toBe(false);
+		});
+
+		it('rejects missing category', () => {
+			const device = {
+				slug: 'test-device',
+				u_height: 1,
+				colour: '#4A90D9'
 			};
 			expect(DeviceTypeSchema.safeParse(device).success).toBe(false);
 		});
@@ -499,7 +459,9 @@ describe('DeviceTypeSchema', () => {
 // ============================================================================
 
 describe('PlacedDeviceSchema', () => {
+	// Schema v1.0.0: PlacedDevice requires id field
 	const validPlacedDevice = {
+		id: 'test-id-123',
 		device_type: 'test-device',
 		position: 1,
 		face: 'front' as const
@@ -600,7 +562,7 @@ describe('RackSchema', () => {
 		it('accepts rack with devices', () => {
 			const rack = {
 				...validRack,
-				devices: [{ device_type: 'server', position: 1, face: 'front' as const }]
+				devices: [{ id: 'device-1', device_type: 'server', position: 1, face: 'front' as const }]
 			};
 			expect(RackSchema.safeParse(rack).success).toBe(true);
 		});
@@ -627,8 +589,9 @@ describe('RackSchema', () => {
 			expect(RackSchema.safeParse(rack).success).toBe(false);
 		});
 
-		it('rejects 51U rack', () => {
-			const rack = { ...validRack, height: 51 };
+		it('rejects 101U rack', () => {
+			// Schema v1.0.0: Max rack height is 100U
+			const rack = { ...validRack, height: 101 };
 			expect(RackSchema.safeParse(rack).success).toBe(false);
 		});
 
@@ -721,13 +684,15 @@ describe('LayoutSchema', () => {
 		});
 
 		it('accepts layout with device types', () => {
+			// Schema v1.0.0: Flat structure with colour and category at top level
 			const layout = {
 				...validLayout,
 				device_types: [
 					{
 						slug: 'dell-r740',
 						u_height: 2,
-						rackarr: { colour: '#4A90D9', category: 'server' as const }
+						colour: '#4A90D9',
+						category: 'server' as const
 					}
 				]
 			};
@@ -741,12 +706,14 @@ describe('LayoutSchema', () => {
 					{
 						slug: 'server-1',
 						u_height: 2,
-						rackarr: { colour: '#4A90D9', category: 'server' as const }
+						colour: '#4A90D9',
+						category: 'server' as const
 					},
 					{
 						slug: 'switch-1',
 						u_height: 1,
-						rackarr: { colour: '#FF5733', category: 'network' as const }
+						colour: '#FF5733',
+						category: 'network' as const
 					}
 				]
 			};
@@ -762,12 +729,14 @@ describe('LayoutSchema', () => {
 					{
 						slug: 'duplicate-slug',
 						u_height: 2,
-						rackarr: { colour: '#4A90D9', category: 'server' as const }
+						colour: '#4A90D9',
+						category: 'server' as const
 					},
 					{
 						slug: 'duplicate-slug',
 						u_height: 1,
-						rackarr: { colour: '#FF5733', category: 'network' as const }
+						colour: '#FF5733',
+						category: 'network' as const
 					}
 				]
 			};
@@ -817,13 +786,7 @@ describe('validateSlugUniqueness', () => {
 	});
 
 	it('returns all duplicate slugs', () => {
-		const types = [
-			{ slug: 'a' },
-			{ slug: 'b' },
-			{ slug: 'a' },
-			{ slug: 'b' },
-			{ slug: 'c' }
-		];
+		const types = [{ slug: 'a' }, { slug: 'b' }, { slug: 'a' }, { slug: 'b' }, { slug: 'c' }];
 		const result = validateSlugUniqueness(types);
 		expect(result).toContain('a');
 		expect(result).toContain('b');

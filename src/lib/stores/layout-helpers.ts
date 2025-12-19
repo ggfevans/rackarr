@@ -16,6 +16,7 @@ import { generateDeviceSlug } from '$lib/utils/slug';
 
 /**
  * Input data for creating a new device type
+ * Schema v1.0.0: Uses 'notes' field instead of 'comments'
  */
 export interface CreateDeviceTypeInput {
 	name: string;
@@ -28,12 +29,13 @@ export interface CreateDeviceTypeInput {
 	weight?: number;
 	weight_unit?: WeightUnit;
 	airflow?: Airflow;
-	comments?: string;
+	notes?: string;
 	tags?: string[];
 }
 
 /**
  * Create a new DeviceType with auto-generated slug
+ * Schema v1.0.0: Flat structure with colour, category at top level
  * @param data - Input data for the device type
  * @returns A complete DeviceType object
  */
@@ -42,12 +44,13 @@ export function createDeviceType(data: CreateDeviceTypeInput): DeviceType {
 	const slug = generateDeviceSlug(data.manufacturer, data.model, data.name);
 
 	const deviceType: DeviceType = {
+		// --- Core Identity ---
 		slug,
+		// --- Physical Properties ---
 		u_height: data.u_height,
-		rackarr: {
-			colour: data.colour,
-			category: data.category
-		}
+		// --- Rackarr Fields (flat structure in v1.0.0) ---
+		colour: data.colour,
+		category: data.category
 	};
 
 	// Add optional fields if provided
@@ -72,11 +75,11 @@ export function createDeviceType(data: CreateDeviceTypeInput): DeviceType {
 	if (data.airflow) {
 		deviceType.airflow = data.airflow;
 	}
-	if (data.comments) {
-		deviceType.comments = data.comments;
+	if (data.notes) {
+		deviceType.notes = data.notes;
 	}
 	if (data.tags && data.tags.length > 0) {
-		deviceType.rackarr.tags = data.tags;
+		deviceType.tags = data.tags;
 	}
 
 	return deviceType;
@@ -84,11 +87,12 @@ export function createDeviceType(data: CreateDeviceTypeInput): DeviceType {
 
 /**
  * Create a placed device referencing a device type by slug
+ * Schema v1.0.0: PlacedDevice now requires a UUID id field
  * @param device_type - Slug of the device type
  * @param position - U position in rack
  * @param face - Which face(s) the device occupies
  * @param name - Optional display name override
- * @returns A PlacedDevice object
+ * @returns A PlacedDevice object with generated UUID
  */
 export function createDevice(
 	device_type: string,
@@ -97,6 +101,7 @@ export function createDevice(
 	name?: string
 ): PlacedDevice {
 	const device: PlacedDevice = {
+		id: crypto.randomUUID(),
 		device_type,
 		position,
 		face

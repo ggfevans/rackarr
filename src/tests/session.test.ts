@@ -65,10 +65,7 @@ describe('Session Utilities', () => {
 
 			saveToSession(layout);
 
-			expect(mockStorage.setItem).toHaveBeenCalledWith(
-				STORAGE_KEY,
-				expect.any(String)
-			);
+			expect(mockStorage.setItem).toHaveBeenCalledWith(STORAGE_KEY, expect.any(String));
 
 			// Verify the saved data is valid JSON
 			const savedJson = (mockStorage.setItem as ReturnType<typeof vi.fn>).mock.calls[0][1];
@@ -236,14 +233,15 @@ describe('Session Utilities', () => {
 					desc_units: false,
 					form_factor: '4-post',
 					starting_unit: 1,
-					devices: [{ device_type: 'test-device', position: 10, face: 'front' }]
+					devices: [{ id: 'test-id-1', device_type: 'test-device', position: 10, face: 'front' }]
 				},
 				device_types: [
 					{
 						slug: 'test-device',
 						u_height: 1,
 						model: 'Test Device',
-						rackarr: { category: 'server', colour: '#336699' }
+						category: 'server',
+						colour: '#336699'
 					}
 				],
 				settings: { display_mode: 'label', show_labels_on_images: false }

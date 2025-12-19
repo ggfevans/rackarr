@@ -74,7 +74,7 @@ export const MAX_RACKS = 1;
 /**
  * Current layout schema version
  */
-export const CURRENT_VERSION = '0.1.0';
+export const CURRENT_VERSION = '1.0.0';
 
 /**
  * Standard rack width in inches (19" rack)
@@ -87,9 +87,14 @@ export const STANDARD_RACK_WIDTH = 19;
 export const NARROW_RACK_WIDTH = 10;
 
 /**
+ * Telco rack width (23" rack)
+ */
+export const TELCO_RACK_WIDTH = 23;
+
+/**
  * Allowed rack widths
  */
-export const ALLOWED_RACK_WIDTHS: readonly number[] = [10, 19] as const;
+export const ALLOWED_RACK_WIDTHS: readonly number[] = [10, 19, 23] as const;
 
 /**
  * Default rack view (front-facing)

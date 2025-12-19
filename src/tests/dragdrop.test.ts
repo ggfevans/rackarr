@@ -66,7 +66,8 @@ describe('Drag and Drop Utilities', () => {
 			slug: 'device-1',
 			model: 'Test Server',
 			u_height: 2,
-			rackarr: { colour: '#4A90D9', category: 'server' }
+			colour: '#4A90D9',
+			category: 'server'
 		};
 
 		const emptyRack: Rack = {
@@ -111,7 +112,7 @@ describe('Drag and Drop Utilities', () => {
 		it('returns "blocked" for collision with existing device', () => {
 			const rackWithDevice: Rack = {
 				...emptyRack,
-				devices: [{ device_type: 'device-1', position: 5, face: 'front' }] // Device at U5-U6
+				devices: [{ id: 'dd-test-1', device_type: 'device-1', position: 5, face: 'front' }] // Device at U5-U6
 			};
 
 			// Trying to place at U5 (would collide)
@@ -122,7 +123,7 @@ describe('Drag and Drop Utilities', () => {
 		it('returns "blocked" for partial collision', () => {
 			const rackWithDevice: Rack = {
 				...emptyRack,
-				devices: [{ device_type: 'device-1', position: 5, face: 'front' }] // Device at U5-U6
+				devices: [{ id: 'dd-test-2', device_type: 'device-1', position: 5, face: 'front' }] // Device at U5-U6
 			};
 
 			// 2U device at position 4 would occupy U4-U5 (collides with U5)
@@ -133,7 +134,7 @@ describe('Drag and Drop Utilities', () => {
 		it('returns "valid" for position adjacent to existing device', () => {
 			const rackWithDevice: Rack = {
 				...emptyRack,
-				devices: [{ device_type: 'device-1', position: 5, face: 'front' }] // Device at U5-U6
+				devices: [{ id: 'dd-test-3', device_type: 'device-1', position: 5, face: 'front' }] // Device at U5-U6
 			};
 
 			// 2U device at position 7 would occupy U7-U8 (no collision)
@@ -159,7 +160,8 @@ describe('Drag and Drop Utilities', () => {
 					slug: 'device-1',
 					model: 'Test',
 					u_height: 1,
-					rackarr: { colour: '#000', category: 'server' }
+					colour: '#000',
+					category: 'server'
 				}
 			};
 
@@ -176,7 +178,8 @@ describe('Drag and Drop Utilities', () => {
 					slug: 'device-1',
 					model: 'Test',
 					u_height: 1,
-					rackarr: { colour: '#000', category: 'server' }
+					colour: '#000',
+					category: 'server'
 				},
 				sourceRackId: 'rack-1',
 				sourceIndex: 0

@@ -2,6 +2,9 @@
  * Ubiquiti Brand Pack
  * Pre-defined device types for Ubiquiti networking equipment
  * Source: NetBox community devicetype-library
+ *
+ * Slugs follow NetBox naming convention for compatibility:
+ * Pattern: {manufacturer}-{product-line}-{model}
  */
 
 import type { DeviceType } from '$lib/types';
@@ -9,89 +12,106 @@ import { CATEGORY_COLOURS } from '$lib/types/constants';
 
 /**
  * Ubiquiti device definitions (51 rack-mountable devices)
+ * Slugs updated to match NetBox devicetype-library for image compatibility
  */
 export const ubiquitiDevices: DeviceType[] = [
 	// ============================================
 	// UniFi Switches - Pro Series
 	// ============================================
 	{
-		slug: 'usw-pro-24',
+		slug: 'ubiquiti-unifi-switch-24-pro',
 		u_height: 1,
 		manufacturer: 'Ubiquiti',
 		model: 'USW-Pro-24',
 		is_full_depth: false,
 		colour: CATEGORY_COLOURS.network,
-		category: 'network'
+		category: 'network',
+		front_image: true,
+		rear_image: true
 	},
 	{
-		slug: 'usw-pro-48',
+		slug: 'ubiquiti-unifi-switch-48-pro',
 		u_height: 1,
 		manufacturer: 'Ubiquiti',
 		model: 'USW-Pro-48',
 		is_full_depth: false,
 		colour: CATEGORY_COLOURS.network,
-		category: 'network'
+		category: 'network',
+		front_image: true,
+		rear_image: true
 	},
 	{
-		slug: 'usw-pro-24-poe',
+		slug: 'ubiquiti-unifi-switch-24-pro-poe-gen2',
 		u_height: 1,
 		manufacturer: 'Ubiquiti',
 		model: 'USW-Pro-24-PoE',
 		is_full_depth: false,
 		colour: CATEGORY_COLOURS.network,
-		category: 'network'
+		category: 'network',
+		front_image: true,
+		rear_image: true
 	},
 	{
-		slug: 'usw-pro-48-poe',
+		slug: 'ubiquiti-unifi-switch-48-pro-poe-gen2',
 		u_height: 1,
 		manufacturer: 'Ubiquiti',
 		model: 'USW-Pro-48-PoE',
 		is_full_depth: false,
 		colour: CATEGORY_COLOURS.network,
-		category: 'network'
+		category: 'network',
+		front_image: true,
+		rear_image: true
 	},
 
 	// ============================================
 	// UniFi Switches - Pro Max Series
 	// ============================================
 	{
-		slug: 'usw-pro-max-24',
+		slug: 'ubiquiti-unifi-switch-pro-max-24',
 		u_height: 1,
 		manufacturer: 'Ubiquiti',
 		model: 'USW-Pro-Max-24',
 		is_full_depth: false,
 		colour: CATEGORY_COLOURS.network,
-		category: 'network'
+		category: 'network',
+		front_image: true,
+		rear_image: true
 	},
 	{
-		slug: 'usw-pro-max-24-poe',
+		slug: 'ubiquiti-unifi-switch-pro-max-24-poe',
 		u_height: 1,
 		manufacturer: 'Ubiquiti',
 		model: 'USW-Pro-Max-24-PoE',
 		is_full_depth: false,
 		colour: CATEGORY_COLOURS.network,
-		category: 'network'
+		category: 'network',
+		front_image: true,
+		rear_image: true
 	},
 	{
-		slug: 'usw-pro-max-48',
+		slug: 'ubiquiti-unifi-switch-pro-max-48',
 		u_height: 1,
 		manufacturer: 'Ubiquiti',
 		model: 'USW-Pro-Max-48',
 		is_full_depth: false,
 		colour: CATEGORY_COLOURS.network,
-		category: 'network'
+		category: 'network',
+		front_image: true,
+		rear_image: true
 	},
 	{
-		slug: 'usw-pro-max-48-poe',
+		slug: 'ubiquiti-unifi-switch-pro-max-48-poe',
 		u_height: 1,
 		manufacturer: 'Ubiquiti',
 		model: 'USW-Pro-Max-48-PoE',
 		is_full_depth: false,
 		colour: CATEGORY_COLOURS.network,
-		category: 'network'
+		category: 'network',
+		front_image: true,
+		rear_image: true
 	},
 	{
-		slug: 'usw-pro-max-16',
+		slug: 'ubiquiti-unifi-switch-pro-max-16',
 		u_height: 1,
 		manufacturer: 'Ubiquiti',
 		model: 'USW-Pro-Max-16',
@@ -100,7 +120,7 @@ export const ubiquitiDevices: DeviceType[] = [
 		category: 'network'
 	},
 	{
-		slug: 'usw-pro-max-16-poe',
+		slug: 'ubiquiti-unifi-switch-pro-max-16-poe',
 		u_height: 1,
 		manufacturer: 'Ubiquiti',
 		model: 'USW-Pro-Max-16-PoE',
@@ -113,47 +133,54 @@ export const ubiquitiDevices: DeviceType[] = [
 	// UniFi Switches - Aggregation & Enterprise
 	// ============================================
 	{
-		slug: 'usw-aggregation',
+		slug: 'ubiquiti-unifi-switch-aggregation',
 		u_height: 1,
 		manufacturer: 'Ubiquiti',
 		model: 'USW-Aggregation',
 		is_full_depth: false,
 		colour: CATEGORY_COLOURS.network,
-		category: 'network'
+		category: 'network',
+		front_image: true
 	},
 	{
-		slug: 'usw-pro-aggregation',
+		slug: 'ubiquiti-unifi-switch-pro-aggregation',
 		u_height: 1,
 		manufacturer: 'Ubiquiti',
 		model: 'USW-Pro-Aggregation',
 		is_full_depth: false,
 		colour: CATEGORY_COLOURS.network,
-		category: 'network'
+		category: 'network',
+		front_image: true,
+		rear_image: true
 	},
 	{
-		slug: 'usw-enterprise-24-poe',
+		slug: 'ubiquiti-unifi-switch-enterprise-24-poe',
 		u_height: 1,
 		manufacturer: 'Ubiquiti',
 		model: 'USW-Enterprise-24-PoE',
 		is_full_depth: false,
 		colour: CATEGORY_COLOURS.network,
-		category: 'network'
+		category: 'network',
+		front_image: true,
+		rear_image: true
 	},
 	{
-		slug: 'usw-enterprise-48-poe',
+		slug: 'ubiquiti-unifi-switch-enterprise-48-poe',
 		u_height: 1,
 		manufacturer: 'Ubiquiti',
 		model: 'USW-Enterprise-48-PoE',
 		is_full_depth: false,
 		colour: CATEGORY_COLOURS.network,
-		category: 'network'
+		category: 'network',
+		front_image: true,
+		rear_image: true
 	},
 
 	// ============================================
 	// UniFi Switches - Standard Series
 	// ============================================
 	{
-		slug: 'usw-24',
+		slug: 'ubiquiti-unifi-switch-24',
 		u_height: 1,
 		manufacturer: 'Ubiquiti',
 		model: 'USW-24',
@@ -162,16 +189,17 @@ export const ubiquitiDevices: DeviceType[] = [
 		category: 'network'
 	},
 	{
-		slug: 'usw-48',
+		slug: 'ubiquiti-unifi-switch-48-gen1',
 		u_height: 1,
 		manufacturer: 'Ubiquiti',
 		model: 'USW-48',
 		is_full_depth: false,
 		colour: CATEGORY_COLOURS.network,
-		category: 'network'
+		category: 'network',
+		front_image: true
 	},
 	{
-		slug: 'usw-24-poe',
+		slug: 'ubiquiti-unifi-switch-24-poe',
 		u_height: 1,
 		manufacturer: 'Ubiquiti',
 		model: 'USW-24-PoE',
@@ -180,7 +208,7 @@ export const ubiquitiDevices: DeviceType[] = [
 		category: 'network'
 	},
 	{
-		slug: 'usw-48-poe',
+		slug: 'ubiquiti-unifi-switch-48-poe',
 		u_height: 1,
 		manufacturer: 'Ubiquiti',
 		model: 'USW-48-PoE',
@@ -189,20 +217,21 @@ export const ubiquitiDevices: DeviceType[] = [
 		category: 'network'
 	},
 	{
-		slug: 'usw-16-poe',
+		slug: 'ubiquiti-unifi-switch-16-poe-gen2',
 		u_height: 1,
 		manufacturer: 'Ubiquiti',
 		model: 'USW-16-PoE',
 		is_full_depth: false,
 		colour: CATEGORY_COLOURS.network,
-		category: 'network'
+		category: 'network',
+		front_image: true
 	},
 
 	// ============================================
 	// UniFi Switches - Lite Series
 	// ============================================
 	{
-		slug: 'usw-lite-16-poe',
+		slug: 'ubiquiti-unifi-switch-lite-16-poe',
 		u_height: 1,
 		manufacturer: 'Ubiquiti',
 		model: 'USW-Lite-16-PoE',
@@ -211,20 +240,22 @@ export const ubiquitiDevices: DeviceType[] = [
 		category: 'network'
 	},
 	{
-		slug: 'usw-lite-8-poe',
+		slug: 'ubiquiti-unifi-switch-lite-8-poe',
 		u_height: 1,
 		manufacturer: 'Ubiquiti',
 		model: 'USW-Lite-8-PoE',
 		is_full_depth: false,
 		colour: CATEGORY_COLOURS.network,
-		category: 'network'
+		category: 'network',
+		front_image: true,
+		rear_image: true
 	},
 
 	// ============================================
 	// UniFi Switches - XG Series
 	// ============================================
 	{
-		slug: 'usw-pro-xg-8-poe',
+		slug: 'ubiquiti-unifi-switch-pro-xg-8-poe',
 		u_height: 1,
 		manufacturer: 'Ubiquiti',
 		model: 'USW-Pro-XG-8-PoE',
@@ -233,16 +264,17 @@ export const ubiquitiDevices: DeviceType[] = [
 		category: 'network'
 	},
 	{
-		slug: 'us-16-xg',
+		slug: 'ubiquiti-unifi-switch-16-xg',
 		u_height: 1,
 		manufacturer: 'Ubiquiti',
 		model: 'US-16-XG',
 		is_full_depth: false,
 		colour: CATEGORY_COLOURS.network,
-		category: 'network'
+		category: 'network',
+		front_image: true
 	},
 	{
-		slug: 'us-xg-6poe',
+		slug: 'ubiquiti-unifi-switch-xg-6poe',
 		u_height: 1,
 		manufacturer: 'Ubiquiti',
 		model: 'US-XG-6PoE',
@@ -255,7 +287,7 @@ export const ubiquitiDevices: DeviceType[] = [
 	// Legacy UniFi Switches (US Series)
 	// ============================================
 	{
-		slug: 'us-24-250w',
+		slug: 'ubiquiti-unifi-switch-24-250w',
 		u_height: 1,
 		manufacturer: 'Ubiquiti',
 		model: 'US-24-250W',
@@ -264,7 +296,7 @@ export const ubiquitiDevices: DeviceType[] = [
 		category: 'network'
 	},
 	{
-		slug: 'us-24-500w',
+		slug: 'ubiquiti-unifi-switch-24-500w',
 		u_height: 1,
 		manufacturer: 'Ubiquiti',
 		model: 'US-24-500W',
@@ -273,7 +305,7 @@ export const ubiquitiDevices: DeviceType[] = [
 		category: 'network'
 	},
 	{
-		slug: 'us-48-500w',
+		slug: 'ubiquiti-unifi-switch-48-500w',
 		u_height: 1,
 		manufacturer: 'Ubiquiti',
 		model: 'US-48-500W',
@@ -286,7 +318,7 @@ export const ubiquitiDevices: DeviceType[] = [
 	// EdgeSwitch Series
 	// ============================================
 	{
-		slug: 'es-16-150w',
+		slug: 'ubiquiti-edgeswitch-16-150w',
 		u_height: 1,
 		manufacturer: 'Ubiquiti',
 		model: 'ES-16-150W',
@@ -295,7 +327,7 @@ export const ubiquitiDevices: DeviceType[] = [
 		category: 'network'
 	},
 	{
-		slug: 'es-24-250w',
+		slug: 'ubiquiti-edgeswitch-24-250w',
 		u_height: 1,
 		manufacturer: 'Ubiquiti',
 		model: 'ES-24-250W',
@@ -304,7 +336,7 @@ export const ubiquitiDevices: DeviceType[] = [
 		category: 'network'
 	},
 	{
-		slug: 'es-24-500w',
+		slug: 'ubiquiti-edgeswitch-24-500w',
 		u_height: 1,
 		manufacturer: 'Ubiquiti',
 		model: 'ES-24-500W',
@@ -313,7 +345,7 @@ export const ubiquitiDevices: DeviceType[] = [
 		category: 'network'
 	},
 	{
-		slug: 'es-24-lite',
+		slug: 'ubiquiti-edgeswitch-24-lite',
 		u_height: 1,
 		manufacturer: 'Ubiquiti',
 		model: 'ES-24-Lite',
@@ -322,7 +354,7 @@ export const ubiquitiDevices: DeviceType[] = [
 		category: 'network'
 	},
 	{
-		slug: 'es-48-500w',
+		slug: 'ubiquiti-edgeswitch-48-500w',
 		u_height: 1,
 		manufacturer: 'Ubiquiti',
 		model: 'ES-48-500W',
@@ -331,7 +363,7 @@ export const ubiquitiDevices: DeviceType[] = [
 		category: 'network'
 	},
 	{
-		slug: 'es-48-750w',
+		slug: 'ubiquiti-edgeswitch-48-750w',
 		u_height: 1,
 		manufacturer: 'Ubiquiti',
 		model: 'ES-48-750W',
@@ -340,7 +372,7 @@ export const ubiquitiDevices: DeviceType[] = [
 		category: 'network'
 	},
 	{
-		slug: 'es-48-lite',
+		slug: 'ubiquiti-edgeswitch-48-lite',
 		u_height: 1,
 		manufacturer: 'Ubiquiti',
 		model: 'ES-48-Lite',
@@ -349,7 +381,7 @@ export const ubiquitiDevices: DeviceType[] = [
 		category: 'network'
 	},
 	{
-		slug: 'es-16-xg',
+		slug: 'ubiquiti-edgeswitch-16-xg',
 		u_height: 1,
 		manufacturer: 'Ubiquiti',
 		model: 'ES-16-XG',
@@ -362,56 +394,65 @@ export const ubiquitiDevices: DeviceType[] = [
 	// Dream Machines
 	// ============================================
 	{
-		slug: 'udm-pro',
+		slug: 'ubiquiti-unifi-dream-machine-pro',
 		u_height: 1,
 		manufacturer: 'Ubiquiti',
 		model: 'UDM-Pro',
 		is_full_depth: false,
 		colour: CATEGORY_COLOURS.network,
-		category: 'network'
+		category: 'network',
+		front_image: true,
+		rear_image: true
 	},
 	{
-		slug: 'udm-se',
+		slug: 'ubiquiti-unifi-dream-machine-pro-special-edition',
 		u_height: 1,
 		manufacturer: 'Ubiquiti',
 		model: 'UDM-SE',
 		is_full_depth: false,
 		colour: CATEGORY_COLOURS.network,
-		category: 'network'
+		category: 'network',
+		front_image: true,
+		rear_image: true
 	},
 	{
-		slug: 'udm-pro-max',
+		slug: 'ubiquiti-unifi-dream-machine-pro-max',
 		u_height: 1,
 		manufacturer: 'Ubiquiti',
 		model: 'UDM-Pro-Max',
 		is_full_depth: false,
 		colour: CATEGORY_COLOURS.network,
-		category: 'network'
+		category: 'network',
+		front_image: true,
+		rear_image: true
 	},
 
 	// ============================================
 	// Gateways
 	// ============================================
 	{
-		slug: 'usg-pro-4',
+		slug: 'ubiquiti-unifi-security-gateway-pro',
 		u_height: 1,
 		manufacturer: 'Ubiquiti',
 		model: 'USG-Pro-4',
 		is_full_depth: false,
 		colour: CATEGORY_COLOURS.network,
-		category: 'network'
+		category: 'network',
+		front_image: true,
+		rear_image: true
 	},
 	{
-		slug: 'uxg-pro',
+		slug: 'ubiquiti-unifi-gateway-pro',
 		u_height: 1,
 		manufacturer: 'Ubiquiti',
 		model: 'UXG-Pro',
 		is_full_depth: false,
 		colour: CATEGORY_COLOURS.network,
-		category: 'network'
+		category: 'network',
+		front_image: true
 	},
 	{
-		slug: 'uxg-max',
+		slug: 'ubiquiti-unifi-gateway-max',
 		u_height: 1,
 		manufacturer: 'Ubiquiti',
 		model: 'UXG-Max',
@@ -424,7 +465,7 @@ export const ubiquitiDevices: DeviceType[] = [
 	// EdgeRouter Series
 	// ============================================
 	{
-		slug: 'er-4',
+		slug: 'ubiquiti-edgerouter-4',
 		u_height: 1,
 		manufacturer: 'Ubiquiti',
 		model: 'ER-4',
@@ -433,7 +474,7 @@ export const ubiquitiDevices: DeviceType[] = [
 		category: 'network'
 	},
 	{
-		slug: 'er-6p',
+		slug: 'ubiquiti-edgerouter-6p',
 		u_height: 1,
 		manufacturer: 'Ubiquiti',
 		model: 'ER-6P',
@@ -442,7 +483,7 @@ export const ubiquitiDevices: DeviceType[] = [
 		category: 'network'
 	},
 	{
-		slug: 'er-8',
+		slug: 'ubiquiti-edgerouter-8',
 		u_height: 1,
 		manufacturer: 'Ubiquiti',
 		model: 'ER-8',
@@ -451,7 +492,7 @@ export const ubiquitiDevices: DeviceType[] = [
 		category: 'network'
 	},
 	{
-		slug: 'er-12',
+		slug: 'ubiquiti-edgerouter-12',
 		u_height: 1,
 		manufacturer: 'Ubiquiti',
 		model: 'ER-12',
@@ -460,7 +501,7 @@ export const ubiquitiDevices: DeviceType[] = [
 		category: 'network'
 	},
 	{
-		slug: 'er-12p',
+		slug: 'ubiquiti-edgerouter-12p',
 		u_height: 1,
 		manufacturer: 'Ubiquiti',
 		model: 'ER-12P',
@@ -469,7 +510,7 @@ export const ubiquitiDevices: DeviceType[] = [
 		category: 'network'
 	},
 	{
-		slug: 'erpro-8',
+		slug: 'ubiquiti-edgerouter-pro-8',
 		u_height: 1,
 		manufacturer: 'Ubiquiti',
 		model: 'ERPro-8',
@@ -478,7 +519,7 @@ export const ubiquitiDevices: DeviceType[] = [
 		category: 'network'
 	},
 	{
-		slug: 'er-8-xg',
+		slug: 'ubiquiti-edgerouter-8-xg',
 		u_height: 1,
 		manufacturer: 'Ubiquiti',
 		model: 'ER-8-XG',
@@ -491,43 +532,51 @@ export const ubiquitiDevices: DeviceType[] = [
 	// NVRs (Network Video Recorders)
 	// ============================================
 	{
-		slug: 'unvr',
+		slug: 'ubiquiti-unifi-protect-network-video-recorder',
 		u_height: 1,
 		manufacturer: 'Ubiquiti',
 		model: 'UNVR',
 		is_full_depth: false,
 		colour: CATEGORY_COLOURS.storage,
-		category: 'storage'
+		category: 'storage',
+		front_image: true,
+		rear_image: true
 	},
 	{
-		slug: 'unvr-pro',
+		slug: 'ubiquiti-unifi-protect-network-video-recorder-pro',
 		u_height: 2,
 		manufacturer: 'Ubiquiti',
 		model: 'UNVR-Pro',
 		is_full_depth: false,
 		colour: CATEGORY_COLOURS.storage,
-		category: 'storage'
+		category: 'storage',
+		front_image: true,
+		rear_image: true
 	},
 	{
-		slug: 'envr',
+		slug: 'ubiquiti-enterprise-network-video-recorder',
 		u_height: 4,
 		manufacturer: 'Ubiquiti',
 		model: 'ENVR',
 		is_full_depth: false,
 		colour: CATEGORY_COLOURS.storage,
-		category: 'storage'
+		category: 'storage',
+		front_image: true,
+		rear_image: true
 	},
 
 	// ============================================
 	// Power
 	// ============================================
 	{
-		slug: 'usp-pdu-pro',
+		slug: 'ubiquiti-usp-pdu-pro',
 		u_height: 1,
 		manufacturer: 'Ubiquiti',
 		model: 'USP-PDU-Pro',
 		is_full_depth: false,
 		colour: CATEGORY_COLOURS.power,
-		category: 'power'
+		category: 'power',
+		front_image: true,
+		rear_image: true
 	}
 ];

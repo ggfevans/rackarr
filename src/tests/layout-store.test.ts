@@ -1093,11 +1093,11 @@ describe('Layout Store (v0.2)', () => {
 			store.addRack('Test Rack', 42);
 
 			// Ubiquiti device slug from brand pack (not in starter library)
-			const result = store.placeDevice('rack-0', 'usw-pro-24', 5);
+			const result = store.placeDevice('rack-0', 'ubiquiti-unifi-switch-24-pro', 5);
 
 			expect(result).toBe(true);
 			expect(store.layout.rack.devices).toHaveLength(1);
-			expect(store.layout.rack.devices[0]!.device_type).toBe('usw-pro-24');
+			expect(store.layout.rack.devices[0]!.device_type).toBe('ubiquiti-unifi-switch-24-pro');
 			expect(store.layout.rack.devices[0]!.position).toBe(5);
 		});
 
@@ -1119,14 +1119,16 @@ describe('Layout Store (v0.2)', () => {
 
 			// Initially, brand device is not in device_types
 			const initialCount = store.device_types.length;
-			expect(store.device_types.find((d) => d.slug === 'usw-pro-24')).toBeUndefined();
+			expect(
+				store.device_types.find((d) => d.slug === 'ubiquiti-unifi-switch-24-pro')
+			).toBeUndefined();
 
 			// Place brand device
-			store.placeDevice('rack-0', 'usw-pro-24', 5);
+			store.placeDevice('rack-0', 'ubiquiti-unifi-switch-24-pro', 5);
 
 			// Device should now be in device_types
 			expect(store.device_types.length).toBe(initialCount + 1);
-			const imported = store.device_types.find((d) => d.slug === 'usw-pro-24');
+			const imported = store.device_types.find((d) => d.slug === 'ubiquiti-unifi-switch-24-pro');
 			expect(imported).toBeDefined();
 			expect(imported?.manufacturer).toBe('Ubiquiti');
 			expect(imported?.model).toBe('USW-Pro-24');
@@ -1137,10 +1139,10 @@ describe('Layout Store (v0.2)', () => {
 			store.addRack('Test Rack', 42);
 
 			// Place same brand device twice at different positions
-			store.placeDevice('rack-0', 'usw-pro-24', 5);
+			store.placeDevice('rack-0', 'ubiquiti-unifi-switch-24-pro', 5);
 			const countAfterFirst = store.device_types.length;
 
-			store.placeDevice('rack-0', 'usw-pro-24', 10);
+			store.placeDevice('rack-0', 'ubiquiti-unifi-switch-24-pro', 10);
 			expect(store.device_types.length).toBe(countAfterFirst);
 		});
 
@@ -1157,9 +1159,9 @@ describe('Layout Store (v0.2)', () => {
 			const store = getLayoutStore();
 			store.addRack('Test Rack', 42);
 
-			store.placeDevice('rack-0', 'usw-pro-24', 5);
+			store.placeDevice('rack-0', 'ubiquiti-unifi-switch-24-pro', 5);
 
-			const imported = store.device_types.find((d) => d.slug === 'usw-pro-24');
+			const imported = store.device_types.find((d) => d.slug === 'ubiquiti-unifi-switch-24-pro');
 			expect(imported?.is_full_depth).toBe(false);
 			// Schema v1.0.0: Flat structure with category at top level
 			expect(imported?.category).toBe('network');
@@ -1170,7 +1172,7 @@ describe('Layout Store (v0.2)', () => {
 			store.addRack('Test Rack', 42);
 
 			// US-24-500W has is_full_depth: true (legacy switch with power supply)
-			store.placeDevice('rack-0', 'us-24-500w', 5);
+			store.placeDevice('rack-0', 'ubiquiti-unifi-switch-24-500w', 5);
 
 			// Full-depth devices should default to 'both' face (visible front and rear)
 			expect(store.layout.rack.devices[0]!.face).toBe('both');
@@ -1181,7 +1183,7 @@ describe('Layout Store (v0.2)', () => {
 			store.addRack('Test Rack', 42);
 
 			// Ubiquiti PDU has is_full_depth: false
-			store.placeDevice('rack-0', 'usp-pdu-pro', 5);
+			store.placeDevice('rack-0', 'ubiquiti-usp-pdu-pro', 5);
 
 			// Half-depth devices should default to 'front' face
 			expect(store.layout.rack.devices[0]!.face).toBe('front');
@@ -1195,7 +1197,7 @@ describe('Layout Store (v0.2)', () => {
 			const originalDeviceTypes = store.device_types;
 
 			// Place a brand device that will trigger auto-import
-			store.placeDevice('rack-0', 'usw-pro-24', 5);
+			store.placeDevice('rack-0', 'ubiquiti-unifi-switch-24-pro', 5);
 
 			// The device_types array should be a NEW reference (not mutated in place)
 			// This is required for Svelte 5 reactivity to trigger UI updates

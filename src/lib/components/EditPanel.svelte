@@ -29,6 +29,7 @@
 	// State for device name editing
 	let editingDeviceName = $state(false);
 	let deviceNameInput = $state('');
+	let deviceNotes = $state('');
 
 	// Get the selected rack if any (single-rack mode)
 	const selectedRack = $derived.by(() => {
@@ -151,6 +152,13 @@
 		}
 	}
 
+	// Sync device notes with selection
+	$effect(() => {
+		if (selectedDeviceInfo) {
+			deviceNotes = selectedDeviceInfo.placedDevice.notes ?? '';
+		}
+	});
+
 	// Start editing device name
 	function startEditingDeviceName() {
 		if (selectedDeviceInfo) {
@@ -186,6 +194,25 @@
 			saveDeviceName();
 		} else if (event.key === 'Escape') {
 			editingDeviceName = false;
+		}
+	}
+
+	// Update device notes
+	function handleDeviceNotesBlur() {
+		if (
+			selectionStore.selectedRackId !== null &&
+			selectionStore.selectedDeviceIndex !== null &&
+			selectedDeviceInfo
+		) {
+			const trimmedNotes = deviceNotes.trim();
+			const notesToSave = trimmedNotes === '' ? undefined : trimmedNotes;
+			// Update via updateRack - modify the device in the rack's devices array
+			const updatedDevices = [...layoutStore.rack.devices];
+			updatedDevices[selectionStore.selectedDeviceIndex] = {
+				...updatedDevices[selectionStore.selectedDeviceIndex]!,
+				notes: notesToSave
+			};
+			layoutStore.updateRack(RACK_ID, { devices: updatedDevices });
 		}
 	}
 
@@ -288,26 +315,21 @@
 	{:else if selectedDeviceInfo}
 		<!-- Device view -->
 		<div class="device-view">
-			<div class="device-header">
-				<ColourSwatch colour={selectedDeviceInfo.device.colour} size={24} />
-				<span class="device-name"
-					>{selectedDeviceInfo.device.model ?? selectedDeviceInfo.device.slug}</span
-				>
-			</div>
-
-			<!-- Display Name (click-to-edit) -->
-			<div class="display-name-section">
-				<span class="info-label">Display Name</span>
+			<!-- Display Name at top (click-to-edit) -->
+			<div class="form-group">
+				<label for="device-display-name">Name</label>
 				{#if editingDeviceName}
 					<input
+						id="device-display-name"
 						type="text"
-						class="display-name-input"
+						class="input-field"
 						bind:value={deviceNameInput}
 						onblur={saveDeviceName}
 						onkeydown={handleDeviceNameKeydown}
 					/>
 				{:else}
 					<button
+						id="device-display-name"
 						type="button"
 						class="display-name-display"
 						onclick={startEditingDeviceName}
@@ -334,6 +356,17 @@
 				{/if}
 			</div>
 
+			<!-- Device Type (read-only) -->
+			<div class="info-section">
+				<div class="info-row">
+					<span class="info-label">Device Type</span>
+					<span class="info-value device-type">
+						<ColourSwatch colour={selectedDeviceInfo.device.colour} size={16} />
+						{selectedDeviceInfo.device.model ?? selectedDeviceInfo.device.slug}
+					</span>
+				</div>
+			</div>
+
 			<div class="info-section">
 				<div class="info-row">
 					<span class="info-label">Height</span>
@@ -358,42 +391,20 @@
 				</div>
 			</div>
 
-			<!-- Face selector -->
-			<fieldset class="face-selector" aria-label="Mounted face">
-				<legend>Mounted Face</legend>
-				<div class="radio-group">
-					<label>
-						<input
-							type="radio"
-							name="device-face"
-							value="front"
-							checked={selectedDeviceInfo.placedDevice.face === 'front'}
-							onchange={() => handleFaceChange('front')}
-						/>
-						Front
-					</label>
-					<label>
-						<input
-							type="radio"
-							name="device-face"
-							value="rear"
-							checked={selectedDeviceInfo.placedDevice.face === 'rear'}
-							onchange={() => handleFaceChange('rear')}
-						/>
-						Rear
-					</label>
-					<label>
-						<input
-							type="radio"
-							name="device-face"
-							value="both"
-							checked={selectedDeviceInfo.placedDevice.face === 'both'}
-							onchange={() => handleFaceChange('both')}
-						/>
-						Both (full-depth)
-					</label>
-				</div>
-			</fieldset>
+			<!-- Face selector (dropdown) -->
+			<div class="form-group">
+				<label for="device-face">Mounted Face</label>
+				<select
+					id="device-face"
+					class="input-field"
+					value={selectedDeviceInfo.placedDevice.face}
+					onchange={(e) => handleFaceChange((e.target as HTMLSelectElement).value as DeviceFace)}
+				>
+					<option value="front">Front</option>
+					<option value="rear">Rear</option>
+					<option value="both">Both (full-depth)</option>
+				</select>
+			</div>
 
 			<!-- Power device properties -->
 			{#if selectedDeviceInfo.device.category === 'power' && (selectedDeviceInfo.device.outlet_count || selectedDeviceInfo.device.va_rating)}
@@ -413,12 +424,26 @@
 				</div>
 			{/if}
 
+			<!-- Device Type Notes (read-only) -->
 			{#if selectedDeviceInfo.device.notes}
 				<div class="notes-section">
-					<span class="info-label">Notes</span>
+					<span class="info-label">Device Type Notes</span>
 					<p class="notes-text">{selectedDeviceInfo.device.notes}</p>
 				</div>
 			{/if}
+
+			<!-- Placement Notes (editable) -->
+			<div class="form-group">
+				<label for="device-notes">Notes</label>
+				<textarea
+					id="device-notes"
+					class="input-field textarea"
+					bind:value={deviceNotes}
+					onblur={handleDeviceNotesBlur}
+					rows="4"
+					placeholder="Add notes about this device placement..."
+				/>
+			</div>
 
 			<div class="actions">
 				<button
@@ -471,6 +496,21 @@
 	.form-group input:disabled {
 		opacity: 0.6;
 		cursor: not-allowed;
+	}
+
+	.form-group select {
+		padding: var(--space-2) var(--space-3);
+		background: var(--input-bg);
+		border: 1px solid var(--input-border);
+		border-radius: var(--radius-sm);
+		color: var(--colour-text);
+		font-size: var(--font-size-base);
+		cursor: pointer;
+	}
+
+	.form-group select:focus {
+		outline: none;
+		border-color: var(--colour-selection);
 	}
 
 	.form-group textarea {
@@ -556,23 +596,12 @@
 		font-family: monospace;
 	}
 
-	.device-header {
+	.device-type {
 		display: flex;
 		align-items: center;
-		gap: var(--space-3);
-		padding-bottom: var(--space-4);
+		gap: var(--space-2);
 	}
 
-	.device-name {
-		font-size: var(--font-size-md);
-		font-weight: 600;
-	}
-
-	.display-name-section {
-		display: flex;
-		flex-direction: column;
-		gap: var(--space-1-5);
-	}
 
 	.display-name-display {
 		display: flex;
@@ -664,40 +693,5 @@
 
 	.btn-danger:hover {
 		background: var(--colour-error-hover);
-	}
-
-	.face-selector {
-		border: 1px solid var(--colour-border);
-		border-radius: var(--radius-sm);
-		padding: var(--space-3);
-		margin: 0;
-	}
-
-	.face-selector legend {
-		font-size: var(--font-size-base);
-		font-weight: var(--font-weight-medium);
-		color: var(--colour-text);
-		padding: 0 4px;
-	}
-
-	.radio-group {
-		display: flex;
-		flex-direction: column;
-		gap: var(--space-2);
-	}
-
-	.radio-group label {
-		display: flex;
-		align-items: center;
-		gap: var(--space-2);
-		font-size: var(--font-size-base);
-		color: var(--colour-text);
-		cursor: pointer;
-	}
-
-	.radio-group input[type='radio'] {
-		width: 16px;
-		height: 16px;
-		cursor: pointer;
 	}
 </style>

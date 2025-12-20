@@ -193,24 +193,30 @@ describe('App Component', () => {
 			expect(preventDefaultSpy).toHaveBeenCalled();
 		});
 
-		it('does not show confirmation when not dirty', () => {
-			const layoutStore = getLayoutStore();
+	it('does not show confirmation when not dirty', async () => {
+		const layoutStore = getLayoutStore();
 
-			render(App);
+		render(App);
 
-			// No changes made, should not be dirty
-			expect(layoutStore.isDirty).toBe(false);
-
-			// Create a beforeunload event
-			const event = new Event('beforeunload', { cancelable: true });
-			const preventDefaultSpy = vi.spyOn(event, 'preventDefault');
-
-			// Dispatch it
-			window.dispatchEvent(event);
-
-			// Should NOT have called preventDefault
-			expect(preventDefaultSpy).not.toHaveBeenCalled();
+		// Wait for component to fully mount and effects to settle
+		await waitFor(() => {
+			// Component should be rendered
+			expect(screen.getByRole('button', { name: /new rack/i })).toBeInTheDocument();
 		});
+
+		// No changes made, should not be dirty
+		expect(layoutStore.isDirty).toBe(false);
+
+		// Create a beforeunload event
+		const event = new Event('beforeunload', { cancelable: true });
+		const preventDefaultSpy = vi.spyOn(event, 'preventDefault');
+
+		// Dispatch it
+		window.dispatchEvent(event);
+
+		// Should NOT have called preventDefault
+		expect(preventDefaultSpy).not.toHaveBeenCalled();
+	});
 	});
 
 	describe('Welcome Screen / Fresh Start', () => {
@@ -241,93 +247,110 @@ describe('App Component', () => {
 			expect(dialog.textContent).not.toMatch(/replace current rack/i);
 		});
 
-		it('auto-opens NewRackForm dialog on first load when no racks exist', async () => {
-			// Don't call markStarted - simulating fresh start
-			resetLayoutStore();
-			const layoutStore = getLayoutStore();
+	it('auto-opens NewRackForm dialog on first load when no racks exist', async () => {
+		// Don't call markStarted - simulating fresh start
+		resetLayoutStore();
+		const layoutStore = getLayoutStore();
 
-			expect(layoutStore.rackCount).toBe(0);
+		expect(layoutStore.rackCount).toBe(0);
 
-			render(App);
+		render(App);
 
-			// NewRackForm should auto-open without any user interaction
-			await waitFor(() => {
+		// NewRackForm should auto-open without any user interaction
+		// Increase timeout for CI environments
+		await waitFor(
+			() => {
 				const dialog = screen.getByRole('dialog');
 				expect(dialog).toBeInTheDocument();
 				expect(dialog.querySelector('.dialog-title')).toHaveTextContent('New Rack');
-			});
+			},
+			{ timeout: 3000 }
+		);
+	});
+
+	it('shows WelcomeScreen behind auto-opened dialog', async () => {
+		// Don't call markStarted - simulating fresh start
+		resetLayoutStore();
+
+		const { container } = render(App);
+
+		// Both WelcomeScreen and NewRackForm dialog should be in DOM
+		// Increase timeout for CI environments
+		await waitFor(
+			() => {
+				expect(screen.getByRole('dialog')).toBeInTheDocument();
+			},
+			{ timeout: 3000 }
+		);
+
+		// WelcomeScreen should also be present (behind the dialog)
+		expect(container.querySelector('.welcome-screen')).toBeInTheDocument();
+	});
+
+	it('returns to WelcomeScreen when dialog is dismissed without creating rack', async () => {
+		// Don't call markStarted - simulating fresh start
+		resetLayoutStore();
+
+		const { container } = render(App);
+
+		// Wait for dialog to auto-open (increase timeout for CI)
+		await waitFor(
+			() => {
+				expect(screen.getByRole('dialog')).toBeInTheDocument();
+			},
+			{ timeout: 3000 }
+		);
+
+		// Click Cancel button to dismiss
+		const cancelBtn = screen.getByRole('button', { name: /cancel/i });
+		await fireEvent.click(cancelBtn);
+
+		// Dialog should be closed
+		await waitFor(() => {
+			expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
 		});
 
-		it('shows WelcomeScreen behind auto-opened dialog', async () => {
-			// Don't call markStarted - simulating fresh start
-			resetLayoutStore();
+		// WelcomeScreen should still be visible
+		expect(container.querySelector('.welcome-screen')).toBeInTheDocument();
+	});
 
-			const { container } = render(App);
+	it('can re-open dialog by clicking WelcomeScreen after dismissing', async () => {
+		// Don't call markStarted - simulating fresh start
+		resetLayoutStore();
 
-			// Both WelcomeScreen and NewRackForm dialog should be in DOM
-			await waitFor(() => {
+		const { container } = render(App);
+
+		// Wait for dialog to auto-open (increase timeout for CI)
+		await waitFor(
+			() => {
 				expect(screen.getByRole('dialog')).toBeInTheDocument();
-			});
+			},
+			{ timeout: 3000 }
+		);
 
-			// WelcomeScreen should also be present (behind the dialog)
-			expect(container.querySelector('.welcome-screen')).toBeInTheDocument();
+		// Dismiss the dialog
+		const cancelBtn = screen.getByRole('button', { name: /cancel/i });
+		await fireEvent.click(cancelBtn);
+
+		await waitFor(() => {
+			expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
 		});
 
-		it('returns to WelcomeScreen when dialog is dismissed without creating rack', async () => {
-			// Don't call markStarted - simulating fresh start
-			resetLayoutStore();
+		// Click the WelcomeScreen to re-open
+		const welcomeScreen = container.querySelector('.welcome-screen');
+		expect(welcomeScreen).toBeInTheDocument();
+		await fireEvent.click(welcomeScreen!);
 
-			const { container } = render(App);
-
-			// Wait for dialog to auto-open
-			await waitFor(() => {
-				expect(screen.getByRole('dialog')).toBeInTheDocument();
-			});
-
-			// Click Cancel button to dismiss
-			const cancelBtn = screen.getByRole('button', { name: /cancel/i });
-			await fireEvent.click(cancelBtn);
-
-			// Dialog should be closed
-			await waitFor(() => {
-				expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
-			});
-
-			// WelcomeScreen should still be visible
-			expect(container.querySelector('.welcome-screen')).toBeInTheDocument();
-		});
-
-		it('can re-open dialog by clicking WelcomeScreen after dismissing', async () => {
-			// Don't call markStarted - simulating fresh start
-			resetLayoutStore();
-
-			const { container } = render(App);
-
-			// Wait for dialog to auto-open
-			await waitFor(() => {
-				expect(screen.getByRole('dialog')).toBeInTheDocument();
-			});
-
-			// Dismiss the dialog
-			const cancelBtn = screen.getByRole('button', { name: /cancel/i });
-			await fireEvent.click(cancelBtn);
-
-			await waitFor(() => {
-				expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
-			});
-
-			// Click the WelcomeScreen to re-open
-			const welcomeScreen = container.querySelector('.welcome-screen');
-			expect(welcomeScreen).toBeInTheDocument();
-			await fireEvent.click(welcomeScreen!);
-
-			// Dialog should re-open
-			await waitFor(() => {
+		// Dialog should re-open (increase timeout for CI)
+		await waitFor(
+			() => {
 				const dialog = screen.getByRole('dialog');
 				expect(dialog).toBeInTheDocument();
 				expect(dialog.querySelector('.dialog-title')).toHaveTextContent('New Rack');
-			});
-		});
+			},
+			{ timeout: 3000 }
+		);
+	});
 	});
 
 	describe('New Rack Action', () => {

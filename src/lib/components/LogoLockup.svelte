@@ -290,10 +290,15 @@
 		}
 	}
 
-	/* Responsive: hide title on small screens */
+	/* Responsive: hide title on small screens (but not in toolbar hamburger mode) */
 	@media (max-width: 600px) {
 		.logo-title {
 			display: none;
+		}
+
+		/* Always show in hamburger mode (toolbar brand button) */
+		.toolbar-brand .logo-title {
+			display: block;
 		}
 	}
 

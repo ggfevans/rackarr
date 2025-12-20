@@ -5,6 +5,53 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.5.9] - 2025-12-20
+
+### Added
+
+- Device palette search with keyboard navigation and highlighting (#13)
+- Notes field for racks in edit panel
+- localStorage auto-save for session persistence (#85)
+- Mobile view UI with touch gestures and viewport detection (#85)
+- Shareable layout links via URL (#89)
+- NetBox device import automation (#106)
+- Ubiquiti brand pack device images (#6)
+- Visual environment indicator in titlebar (#69)
+- GitHub Issue Types and size label automation (#81)
+
+### Changed
+
+- Redesigned device edit panel UX (#12)
+- Reduced visual noise in EditPanel (#11)
+- Standardized mobile breakpoint to 1024px (#85)
+- Migrated test environment from jsdom to happy-dom (#79)
+- Improved mobile toolbar UX with hamburger menu (#85)
+- Starter library now loads as runtime constant (#100)
+
+### Fixed
+
+- PlacedDevice UUID generation now uses generateId() (#114)
+- App test stability for CI
+- Share link crypto.randomUUID error
+- File picker dialog race conditions (#45)
+- Orphaned image cleanup for memory leaks (#46)
+- Device auto-import reactivity (#43)
+- Export preview error messages (#44)
+- Rectangular mounting holes on rack rails (#18)
+- Device images extend past rack rails for realism (#9)
+
+### Security
+
+- XSS defense measures and documentation
+- Explicit permissions for GitHub workflows (CWE-275)
+
+### Technical
+
+- Comprehensive test coverage expansion
+- Docker caching and CI workflow optimization (#77)
+- Pre-commit hooks optimization (#76, #78)
+- Documentation reorganization with ARCHITECTURE.md (#26)
+
 ## [0.2.1] - 2025-12-01
 
 ### Added

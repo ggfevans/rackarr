@@ -42,7 +42,9 @@ export interface MockCanvas {
  * @param options.blobType - MIME type for toBlob callback (default: 'image/png')
  * @param options.blobContent - Content for the blob (default: 'test')
  */
-export function createMockCanvas(options: { blobType?: string; blobContent?: string } = {}): MockCanvas {
+export function createMockCanvas(
+	options: { blobType?: string; blobContent?: string } = {}
+): MockCanvas {
 	const { blobType = 'image/png', blobContent = 'test' } = options;
 
 	const mockContext: MockCanvasContext = {
@@ -268,10 +270,12 @@ export function createMockFile(name: string, type: string, size: number = 1024):
  *   });
  * });
  */
-export function setupBrowserMocks(options: {
-	imageDimensions?: { width: number; height: number };
-	fileReaderResult?: string;
-} = {}): () => void {
+export function setupBrowserMocks(
+	options: {
+		imageDimensions?: { width: number; height: number };
+		fileReaderResult?: string;
+	} = {}
+): () => void {
 	const cleanupURL = setupURLMock();
 	const cleanupImage = setupImageMock(options.imageDimensions);
 	const cleanupFileReader = setupFileReaderMock(options.fileReaderResult);

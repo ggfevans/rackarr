@@ -295,5 +295,4 @@ describe('UI Store', () => {
 			expect(store.showLabelsOnImages).toBe(true);
 		});
 	});
-
 });

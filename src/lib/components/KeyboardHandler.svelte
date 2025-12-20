@@ -21,15 +21,8 @@
 		ontoggledisplaymode?: () => void;
 	}
 
-	let {
-		onsave,
-		onload,
-		onexport,
-		ondelete,
-		onfitall,
-		onhelp,
-		ontoggledisplaymode
-	}: Props = $props();
+	let { onsave, onload, onexport, ondelete, onfitall, onhelp, ontoggledisplaymode }: Props =
+		$props();
 
 	const layoutStore = getLayoutStore();
 	const selectionStore = getSelectionStore();

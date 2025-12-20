@@ -46,32 +46,38 @@ See [GitHub Milestones](https://github.com/Rackarr/Rackarr/milestones) for versi
 Rough priority order for future development. Subject to change based on community feedback.
 
 ### 1. Mobile & PWA
+
 - Full mobile phone support (create/edit layouts)
 - Touch-friendly interactions
 - Progressive Web App (installable, offline)
 - Primary targets: iPhone SE, iPhone 14, Pixel 7
 
 ### 2. Airflow Visualisation
+
 - Visual indicators for device airflow direction
 - Hot/cold aisle awareness
 - Conflict detection (opposing airflow)
 
 ### 3. Cable Routing
+
 - Visual cable path representation
 - Port/connection definitions on devices
 - Cable type metadata
 
 ### 4. Weight/Load Calculations
+
 - Device weight metadata
 - Per-U load calculations
 - Rack weight capacity warnings
 
 ### 5. Power Tracking
+
 - Device power requirements
 - Total rack power calculation
 - PDU capacity planning
 
 ### 6. Network Connectivity
+
 - Port count requirements
 - Patch panel tracking
 - Basic connectivity metadata
@@ -82,17 +88,17 @@ Rough priority order for future development. Subject to change based on communit
 
 Unscheduled ideas. May or may not be implemented.
 
-| Feature | Notes |
-|---------|-------|
-| Custom device categories | User-defined categories beyond defaults |
-| 3D visualisation | Three.js rack view |
-| Cloud sync / accounts | User accounts, cloud storage |
-| Collaborative editing | Real-time multi-user |
-| Tablet-optimised layout | Enhanced tablet experience |
-| Import from CSV | Bulk device import |
-| NetBox device type import | Import from community library |
-| Export both rack views | Front + rear in single export |
-| 0U vertical PDU support | Rail-mounted PDUs |
+| Feature                   | Notes                                   |
+| ------------------------- | --------------------------------------- |
+| Custom device categories  | User-defined categories beyond defaults |
+| 3D visualisation          | Three.js rack view                      |
+| Cloud sync / accounts     | User accounts, cloud storage            |
+| Collaborative editing     | Real-time multi-user                    |
+| Tablet-optimised layout   | Enhanced tablet experience              |
+| Import from CSV           | Bulk device import                      |
+| NetBox device type import | Import from community library           |
+| Export both rack views    | Front + rear in single export           |
+| 0U vertical PDU support   | Rail-mounted PDUs                       |
 
 ---
 

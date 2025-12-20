@@ -546,22 +546,22 @@ View-only mobile experience for phones (<1024px viewport) enabling users to view
 
 **Viewport Breakpoint:**
 
-| Viewport | Experience | Layout |
-| -------- | ---------- | ------ |
-| < 1024px | Mobile | View-only, simplified UI |
-| ≥ 1024px | Desktop | Full editing capabilities |
+| Viewport | Experience | Layout                    |
+| -------- | ---------- | ------------------------- |
+| < 1024px | Mobile     | View-only, simplified UI  |
+| ≥ 1024px | Desktop    | Full editing capabilities |
 
 **Mobile Specifications:**
 
-| Requirement | Value/Behavior |
-| ----------- | -------------- |
-| Minimum width | 375px (iPhone 12 mini) |
-| Orientation | Portrait-first (landscape acceptable) |
-| Data access | Shareable URL links (`?layout=` parameter) |
-| Auto-zoom | Device selected → zoom to device<br>No selection → fit entire rack |
-| Device details | Long-press (500ms) → bottom sheet |
-| Gestures | Long-press, swipe-to-dismiss |
-| Panning | Disabled (auto-zoom only) |
+| Requirement    | Value/Behavior                                                     |
+| -------------- | ------------------------------------------------------------------ |
+| Minimum width  | 375px (iPhone 12 mini)                                             |
+| Orientation    | Portrait-first (landscape acceptable)                              |
+| Data access    | Shareable URL links (`?layout=` parameter)                         |
+| Auto-zoom      | Device selected → zoom to device<br>No selection → fit entire rack |
+| Device details | Long-press (500ms) → bottom sheet                                  |
+| Gestures       | Long-press, swipe-to-dismiss                                       |
+| Panning        | Disabled (auto-zoom only)                                          |
 
 **Available Controls (Mobile):**
 
@@ -589,16 +589,17 @@ View-only mobile experience for phones (<1024px viewport) enabling users to view
 
 **Touch Interactions:**
 
-| Gesture | Action |
-| ------- | ------ |
+| Gesture                   | Action                             |
+| ------------------------- | ---------------------------------- |
 | Long-press device (500ms) | Select device + show details sheet |
-| Tap bottom sheet backdrop | Dismiss sheet |
-| Swipe down on sheet | Dismiss sheet |
-| Tap device (short) | No action (prevents conflicts) |
+| Tap bottom sheet backdrop | Dismiss sheet                      |
+| Swipe down on sheet       | Dismiss sheet                      |
+| Tap device (short)        | No action (prevents conflicts)     |
 
 **Bottom Sheet Content:**
 
 When device is long-pressed, shows:
+
 - Device name (or model if no custom name)
 - Height (e.g., "2U")
 - Category with icon

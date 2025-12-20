@@ -78,13 +78,13 @@ describe('viewport utility', () => {
 			const store = getViewportStore();
 			expect(store.isMobile).toBe(false);
 
-			// Simulate viewport change to mobile
-			matchResult = true;
-			if (changeHandler) {
-				changeHandler({ matches: true } as MediaQueryListEvent);
-			}
+		// Simulate viewport change to mobile
+		matchResult = true;
+		if (changeHandler) {
+			(changeHandler as (e: MediaQueryListEvent) => void)({ matches: true } as MediaQueryListEvent);
+		}
 
-			expect(store.isMobile).toBe(true);
+		expect(store.isMobile).toBe(true);
 		});
 	});
 });

@@ -23,11 +23,11 @@ Each worktree is an independent directory with its own files, but they share git
 
 ### When to Use Worktrees
 
-| Scenario | Recommendation |
-|----------|----------------|
-| Single issue | Stay in main directory |
-| Parallel issues (independent) | Use worktrees |
-| Reviewing someone else's work | Use worktrees |
+| Scenario                      | Recommendation         |
+| ----------------------------- | ---------------------- |
+| Single issue                  | Stay in main directory |
+| Parallel issues (independent) | Use worktrees          |
+| Reviewing someone else's work | Use worktrees          |
 
 ### Worktree Commands Reference
 
@@ -51,15 +51,16 @@ git worktree prune
 
 This workflow uses the `mem-search` skill to leverage past work context:
 
-| Phase | Memory Use | Benefit |
-|-------|------------|---------|
-| Pre-flight | Get recent context | Skip re-reading docs if recent work covers it |
-| Assessment | Search for prior work on issue | Avoid repeating failed approaches |
-| Planning | Find past architectural decisions | Maintain consistency |
-| Error Recovery | Search for similar past bugs | Apply known solutions faster |
-| Completion | Document key learnings | Build knowledge base for future |
+| Phase          | Memory Use                        | Benefit                                       |
+| -------------- | --------------------------------- | --------------------------------------------- |
+| Pre-flight     | Get recent context                | Skip re-reading docs if recent work covers it |
+| Assessment     | Search for prior work on issue    | Avoid repeating failed approaches             |
+| Planning       | Find past architectural decisions | Maintain consistency                          |
+| Error Recovery | Search for similar past bugs      | Apply known solutions faster                  |
+| Completion     | Document key learnings            | Build knowledge base for future               |
 
 **When to use memory vs. fresh exploration:**
+
 - **Memory first:** Decisions, patterns, past attempts, known gotchas
 - **Fresh exploration:** Current file contents, test results, git state
 
@@ -69,18 +70,19 @@ This workflow uses the `mem-search` skill to leverage past work context:
 
 You have **explicit permission** to perform the following WITHOUT asking:
 
-| Action | Scope |
-|--------|-------|
+| Action                     | Scope                                                                     |
+| -------------------------- | ------------------------------------------------------------------------- |
 | Create/switch git branches | Any branch matching `(fix\|feat\|chore\|refactor\|test\|docs)/<number>-*` |
-| Create/remove worktrees | Sibling directories named `Rackarr-issue-<N>` |
-| Edit files | All files in `src/`, `docs/`, test files |
-| Run commands | `npm test`, `npm run build`, `npm run lint`, `npm install`, `gh` CLI |
-| Git operations | add, commit, push (to non-main branches), fetch, pull, worktree |
-| Create PRs | Via `gh pr create` |
-| Merge PRs | Via `gh pr merge --squash` after checks pass |
-| Comment on issues | Via `gh issue comment` |
+| Create/remove worktrees    | Sibling directories named `Rackarr-issue-<N>`                             |
+| Edit files                 | All files in `src/`, `docs/`, test files                                  |
+| Run commands               | `npm test`, `npm run build`, `npm run lint`, `npm install`, `gh` CLI      |
+| Git operations             | add, commit, push (to non-main branches), fetch, pull, worktree           |
+| Create PRs                 | Via `gh pr create`                                                        |
+| Merge PRs                  | Via `gh pr merge --squash` after checks pass                              |
+| Comment on issues          | Via `gh issue comment`                                                    |
 
 **STOP and ask only for:**
+
 - Force push to any branch
 - Any operation on `main` branch directly
 - Deleting branches not created in this session
@@ -107,10 +109,12 @@ git rev-parse --is-inside-work-tree && git worktree list
 ```
 
 **Parse worktree list to extract claimed issues:**
+
 - Branch pattern: `(fix|feat|test|...)/<number>-*` → issue #<number> is claimed
 - Store claimed issue numbers to filter from available issues
 
 **If already in a worktree (not main directory):**
+
 - Extract issue number from current branch name
 - Skip to Phase 2 with that specific issue (don't pick a new one)
 - This allows resuming work in an existing worktree
@@ -118,6 +122,7 @@ git rev-parse --is-inside-work-tree && git worktree list
 ### 1b. Context Loading (Memory-First Approach)
 
 **Step 1: Search Memory** (use mem-search skill)
+
 ```
 mcp__plugin_claude-mem_claude-mem-search__get_recent_context:
   project: "Rackarr"
@@ -125,12 +130,14 @@ mcp__plugin_claude-mem_claude-mem-search__get_recent_context:
 ```
 
 This provides:
+
 - Recent architectural decisions
 - Patterns from past implementations
 - Known gotchas and solutions
 
 **Step 2: Fill Gaps** (only if memory lacks coverage)
 If memory doesn't cover core architecture, use Explore agent:
+
 ```
 Prompt: "Read docs/reference/SPEC.md and docs/ARCHITECTURE.md.
 Summarize: (1) key architectural patterns, (2) file organization,
@@ -138,12 +145,14 @@ Summarize: (1) key architectural patterns, (2) file organization,
 ```
 
 ### 1c. WIP Branch Check (Bash)
+
 ```bash
 git fetch origin --prune
 git branch -a | grep -E "(fix|feat|chore|refactor|test|docs)/" || echo "No WIP branches"
 ```
 
 ### 1d. Issue Fetch (Bash)
+
 ```bash
 gh issue list -R Rackarr/Rackarr --state open --label ready \
   --json number,title,labels,body \
@@ -167,7 +176,9 @@ gh issue list -R Rackarr/Rackarr --state open --label ready \
 ## Phase 2: Issue Assessment
 
 ### 2a. Select Issue
+
 From the fetched issues, pick the first one. Read full details:
+
 ```bash
 gh issue view <number> --json number,title,body,labels,comments
 ```
@@ -184,6 +195,7 @@ mcp__plugin_claude-mem_claude-mem-search__search:
 ```
 
 Also search for related patterns:
+
 ```
 mcp__plugin_claude-mem_claude-mem-search__search:
   concepts: "<feature area from issue>"
@@ -192,6 +204,7 @@ mcp__plugin_claude-mem_claude-mem-search__search:
 ```
 
 This reveals:
+
 - **Prior attempts:** WIP branches, partial implementations
 - **Design decisions:** Why things were built a certain way
 - **Known patterns:** What worked/failed in similar areas
@@ -202,11 +215,13 @@ This reveals:
 ### 2b. Determine Complexity
 
 **Simple Issue** (proceed directly to implementation):
+
 - Has `size:small` label AND
 - Acceptance criteria are explicit AND
 - Affects ≤3 files (estimate from description)
 
 **Complex Issue** (requires planning):
+
 - Has `size:medium` or `size:large` label OR
 - Has `type:feature` or architectural scope OR
 - Acceptance criteria need interpretation OR
@@ -215,6 +230,7 @@ This reveals:
 ### 2c. For Complex Issues: Use Plan Agent
 
 **First:** If not already done, search memory for architectural decisions in this area:
+
 ```
 mcp__plugin_claude-mem_claude-mem-search__search:
   concepts: "<feature area>"
@@ -224,6 +240,7 @@ mcp__plugin_claude-mem_claude-mem-search__search:
 ```
 
 **Then:** Launch Task with `subagent_type: Plan`, including memory context:
+
 ```
 Prompt: "Design implementation for Issue #<number>: <title>
 
@@ -246,6 +263,7 @@ Review the plan. If reasonable, proceed. If concerns, note them and continue (do
 ### 2d. Identify Affected Files (Task: Explore agent)
 
 For issues where affected files aren't obvious:
+
 ```
 Prompt: "Find files related to: <feature/component from issue>.
 Search for: imports, type definitions, component usages, test files.
@@ -263,6 +281,7 @@ Return file paths with brief relevance notes."
 **If in main directory, choose approach:**
 
 #### Option A: Same-directory branch (default, single session)
+
 ```bash
 # Ensure clean state
 git checkout main
@@ -296,6 +315,7 @@ npm install
 **Note:** After creating a worktree, you must run `npm install` as each worktree has its own `node_modules/`.
 
 ### 3b. Update Progress File
+
 ```bash
 cat >> .claude/session-progress.md << 'EOF'
 
@@ -315,6 +335,7 @@ EOF
 For each acceptance criterion:
 
 1. **Write failing test first**
+
    ```bash
    npm run test -- src/tests/<TestFile>.test.ts --reporter=verbose
    ```
@@ -325,6 +346,7 @@ For each acceptance criterion:
    - Follow Svelte 5 patterns (see Quick Reference below)
 
 3. **Verify test passes**
+
    ```bash
    npm run test:run
    ```
@@ -334,6 +356,7 @@ For each acceptance criterion:
 ### 3d. Pre-Commit Verification
 
 Before committing, run full verification:
+
 ```bash
 npm run lint && npm run test:run && npm run build
 ```
@@ -341,6 +364,7 @@ npm run lint && npm run test:run && npm run build
 **If failures occur:** See Error Recovery section.
 
 ### 3e. Commit
+
 ```bash
 git add -A
 git commit -m "$(cat <<'EOF'
@@ -356,6 +380,7 @@ EOF
 ```
 
 ### 3f. Push and Create PR
+
 ```bash
 git push -u origin <branch-name>
 
@@ -383,6 +408,7 @@ EOF
 ### 3g. Merge (Auto)
 
 Wait for CI checks, then merge:
+
 ```bash
 # Check PR status
 gh pr checks --watch
@@ -392,6 +418,7 @@ gh pr merge --squash --delete-branch --auto
 ```
 
 If `--auto` not available:
+
 ```bash
 gh pr merge --squash --delete-branch
 ```
@@ -416,6 +443,7 @@ git worktree prune
 ```
 
 **If staying to work on another issue**, you can reuse the worktree:
+
 ```bash
 # From within the worktree, update and create new branch
 git fetch origin main:main
@@ -423,6 +451,7 @@ git checkout -b fix/43-next-issue
 ```
 
 ### 3i. Update Progress File
+
 ```bash
 # Update status
 sed -i 's/Status:** In Progress/Status:** Completed/' .claude/session-progress.md
@@ -439,6 +468,7 @@ EOF
 ## Phase 4: Continue or Stop
 
 ### Check for More Issues
+
 ```bash
 gh issue list -R Rackarr/Rackarr --state open --label ready --json number | jq 'length'
 ```
@@ -446,20 +476,24 @@ gh issue list -R Rackarr/Rackarr --state open --label ready --json number | jq '
 ### Decision
 
 **If more issues exist AND in autonomous mode:**
+
 - Return to Phase 1 immediately
 - Do NOT pause for confirmation
 
 **If in a worktree:**
+
 - After completing the current issue, clean up (3h)
 - Either return to main directory for next issue, OR
 - Reuse worktree for next issue if continuing in this session
 
 **If no more issues:**
+
 - Write final summary to progress file
 - Clean up any worktrees
 - Report completion
 
 **Stopping conditions (ONLY these stop the loop):**
+
 1. No ready issues remaining (excluding claimed worktrees)
 2. Blocker hit (after error recovery attempts)
 3. User interruption
@@ -473,6 +507,7 @@ gh issue list -R Rackarr/Rackarr --state open --label ready --json number | jq '
 **Attempt 1:** Read test output carefully, fix obvious issues.
 
 **Attempt 2:** Search memory for similar past failures:
+
 ```
 mcp__plugin_claude-mem_claude-mem-search__search:
   query: "<error message keywords>"
@@ -482,10 +517,12 @@ mcp__plugin_claude-mem_claude-mem-search__search:
 ```
 
 Check if we've solved this pattern before. Also check:
+
 - Svelte 5 reactivity issues (see Quick Reference)
 - Async timing issues
 
 **Attempt 3:** Launch Task with Plan agent:
+
 ```
 Prompt: "Tests are failing after 2 fix attempts.
 
@@ -504,6 +541,7 @@ Analyze the mismatch and suggest a fix."
 ### Lint/Build Failures
 
 Usually auto-fixable:
+
 ```bash
 npm run lint -- --fix
 ```
@@ -517,6 +555,7 @@ If not auto-fixable, read the error and fix manually. These rarely need multiple
 If genuinely blocked:
 
 ### 1. Commit WIP
+
 ```bash
 git add -A
 git commit -m "wip: partial progress on #<number>" --no-verify
@@ -524,6 +563,7 @@ git push -u origin <branch-name>
 ```
 
 ### 2. Comment on Issue
+
 ```bash
 gh issue comment <number> --body "$(cat <<'EOF'
 ## Progress Update
@@ -549,6 +589,7 @@ EOF
 ```
 
 ### 3. Update Progress File
+
 ```bash
 cat >> .claude/session-progress.md << 'EOF'
 
@@ -559,6 +600,7 @@ EOF
 ```
 
 ### 4. Stop
+
 Do not continue to next issue. Report blocker and stop.
 
 ---
@@ -654,18 +696,21 @@ mcp__plugin_claude-mem_claude-mem-search__get_context_timeline:
 ### Type-Specific Checklists
 
 **bug:**
+
 - [ ] Reproduce first
 - [ ] Write failing test capturing bug
 - [ ] Fix and verify
 - [ ] Check for similar patterns elsewhere
 
 **feature:**
+
 - [ ] Understand acceptance criteria
 - [ ] Plan approach (if complex)
 - [ ] TDD implementation
 - [ ] Update docs if needed
 
 **area:ui:**
+
 - [ ] Keyboard navigation works
 - [ ] Dark/light theme correct
 - [ ] Uses design tokens (not hardcoded)

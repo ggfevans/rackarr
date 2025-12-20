@@ -36,28 +36,33 @@ EXECUTION:
 ## Label Reference
 
 ### State (Workflow Position)
+
 - `triage` — Needs review (external issues start here)
 - `ready` — Implementation-ready (work queue)
 - `in-progress` — Actively being worked
 - `blocked` — Waiting on dependency
 
 ### Type
+
 - `bug` — Something broken
 - `feature` — New capability
 - `chore` — Refactoring, docs, tooling
 - `epic` — Multi-issue parent
 
 ### Size
+
 - `size:small` — <1 hour, single commit
 - `size:medium` — 1-4 hours
 - `size:large` — Needs breakdown
 
 ### Priority
+
 - `priority:urgent` — Fix immediately
 - `priority:high` — Do soon
 - `priority:low` — When time permits
 
 ### Area
+
 - `area:canvas` — Rack rendering, interactions
 - `area:devices` — Device library
 - `area:export` — Save/load/export
@@ -72,11 +77,13 @@ EXECUTION:
 ### For Claude Code
 
 Find next work item:
+
 ```
 label:ready milestone:v0.6.0 sort:created-asc
 ```
 
 Find blocked items:
+
 ```
 label:blocked
 ```
@@ -84,16 +91,19 @@ label:blocked
 ### For Maintainers
 
 Triage queue:
+
 ```
 label:triage
 ```
 
 Current sprint:
+
 ```
 milestone:v0.6.0 is:open
 ```
 
 All bugs:
+
 ```
 label:bug is:open
 ```
@@ -171,6 +181,7 @@ Claude Code has GitHub MCP access. It can:
 ### Issue Body as Spec
 
 The issue body IS the prompt. Claude Code should:
+
 - Treat Acceptance Criteria as requirements
 - Treat Test Requirements as mandatory test cases
 - Reference Technical Notes for implementation guidance

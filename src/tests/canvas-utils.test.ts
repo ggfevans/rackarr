@@ -1,9 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import {
-	calculateRacksBoundingBox,
-	calculateFitAll,
-	racksToPositions
-} from '$lib/utils/canvas';
+import { calculateRacksBoundingBox, calculateFitAll, racksToPositions } from '$lib/utils/canvas';
 import { createTestRack } from './factories';
 
 describe('calculateRacksBoundingBox', () => {

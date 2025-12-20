@@ -34,7 +34,7 @@ jobs:
           node-version: '22'
           cache: 'npm'
 
-      - run: npm install -g npm@11 
+      - run: npm install -g npm@11
 
       - name: Install dependencies
         run: npm ci

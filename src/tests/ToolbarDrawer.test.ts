@@ -130,7 +130,6 @@ describe('ToolbarDrawer Component', () => {
 			expect(onnewrack).toHaveBeenCalled();
 			expect(onclose).toHaveBeenCalled();
 		});
-
 	});
 
 	describe('Keyboard', () => {

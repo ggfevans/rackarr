@@ -299,6 +299,17 @@ describe('Share Utilities', () => {
 	});
 
 	describe('decodeLayout', () => {
+		// Suppress console warnings for error case tests
+		let warnSpy: ReturnType<typeof vi.spyOn>;
+
+		beforeEach(() => {
+			warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
+		});
+
+		afterEach(() => {
+			warnSpy.mockRestore();
+		});
+
 		it('decodes valid encoded layout', () => {
 			const original = createTestLayout();
 			const encoded = encodeLayout(original);

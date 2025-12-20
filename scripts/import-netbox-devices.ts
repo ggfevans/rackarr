@@ -23,7 +23,7 @@ import { writeFile, mkdir } from 'fs/promises';
 import { existsSync } from 'fs';
 import { join, dirname } from 'path';
 import { fileURLToPath } from 'url';
-import { parse as parseYaml } from 'yaml';
+import yaml from 'js-yaml';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -182,8 +182,8 @@ async function fetchDeviceYaml(vendor: string, slug: string): Promise<NetBoxDevi
 	const url = `${NETBOX_RAW_BASE}/device-types/${vendor}/${slug}.yaml`;
 
 	try {
-		const yaml = await fetchText(url);
-		return parseYaml(yaml) as NetBoxDevice;
+		const yamlText = await fetchText(url);
+		return yaml.load(yamlText) as NetBoxDevice;
 	} catch {
 		return null;
 	}

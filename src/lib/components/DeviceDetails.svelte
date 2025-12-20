@@ -14,7 +14,7 @@
 		rackHeight?: number;
 	}
 
-	let { device, deviceType, rackView = 'front', rackHeight }: Props = $props();
+	let { device, deviceType, rackView: _rackView = 'front', rackHeight: _rackHeight }: Props = $props();
 
 	// Display name: custom name if set, otherwise device type model/slug
 	const displayName = $derived(device.name ?? deviceType.model ?? deviceType.slug);

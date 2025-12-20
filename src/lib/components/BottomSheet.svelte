@@ -3,7 +3,6 @@
   Slide-up modal for mobile device details with swipe-to-dismiss gesture
 -->
 <script lang="ts">
-	import { onMount } from 'svelte';
 
 	interface Props {
 		open: boolean;

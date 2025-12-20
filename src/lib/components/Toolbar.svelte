@@ -297,24 +297,26 @@
 		</Tooltip>
 	</div>
 
-	<!-- Right section: Theme toggle (always visible) -->
+	<!-- Right section: Theme toggle (hidden on mobile, moved to drawer) -->
 	<div class="toolbar-section toolbar-right">
-		<Tooltip text="Toggle Theme" position="bottom">
-			<button
-				class="toolbar-action-btn theme-toggle-btn"
-				aria-label="Toggle Theme"
-				onclick={ontoggletheme}
-				data-testid="btn-toggle-theme"
-			>
-				{#if theme === 'dark'}
-					<IconSun size={16} />
-					<span>Light</span>
-				{:else}
-					<IconMoon size={16} />
-					<span>Dark</span>
-				{/if}
-			</button>
-		</Tooltip>
+		{#if !isHamburgerMode}
+			<Tooltip text="Toggle Theme" position="bottom">
+				<button
+					class="toolbar-action-btn theme-toggle-btn"
+					aria-label="Toggle Theme"
+					onclick={ontoggletheme}
+					data-testid="btn-toggle-theme"
+				>
+					{#if theme === 'dark'}
+						<IconSun size={16} />
+						<span>Light</span>
+					{:else}
+						<IconMoon size={16} />
+						<span>Dark</span>
+					{/if}
+				</button>
+			</Tooltip>
+		{/if}
 	</div>
 </header>
 
@@ -322,6 +324,7 @@
 <ToolbarDrawer
 	open={drawerOpen}
 	{displayMode}
+	{theme}
 	canUndo={layoutStore.canUndo}
 	canRedo={layoutStore.canRedo}
 	{hasSelection}
@@ -337,6 +340,7 @@
 	{ondelete}
 	{onfitall}
 	{ontoggledisplaymode}
+	{ontoggletheme}
 	{onhelp}
 	onundo={handleUndo}
 	onredo={handleRedo}
@@ -364,6 +368,14 @@
 	.toolbar-left {
 		flex: 0 0 var(--sidebar-width);
 		justify-content: center;
+	}
+
+	/* Mobile: make toolbar-left full width in hamburger mode */
+	@media (max-width: 1024px) {
+		.toolbar-left {
+			flex: 1;
+			justify-content: flex-start;
+		}
 	}
 
 	.toolbar-center {
@@ -483,19 +495,14 @@
 		}
 	}
 
-	/* Responsive: Hamburger mode - hide center toolbar */
+	/* Responsive: Hamburger mode - hide center toolbar and right section */
 	@media (max-width: 1024px) {
 		.toolbar-center {
 			display: none;
 		}
 
-		/* Keep theme toggle icon-only in hamburger mode */
-		.theme-toggle-btn span {
+		.toolbar-right {
 			display: none;
-		}
-
-		.theme-toggle-btn {
-			padding: var(--space-2);
 		}
 	}
 
@@ -506,6 +513,8 @@
 		border: 1px solid var(--colour-border);
 		border-radius: var(--radius-md);
 		background: transparent;
+		width: 100%;
+		justify-content: space-between;
 	}
 
 	.toolbar-brand.hamburger-mode .hamburger-icon {

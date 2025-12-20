@@ -15,7 +15,9 @@
 		IconLabel,
 		IconImage,
 		IconUndo,
-		IconRedo
+		IconRedo,
+		IconSun,
+		IconMoon
 	} from './icons';
 	import type { DisplayMode } from '$lib/types';
 	import { getViewportStore } from '$lib/utils/viewport.svelte';
@@ -23,6 +25,7 @@
 	interface Props {
 		open?: boolean;
 		displayMode?: DisplayMode;
+		theme?: 'dark' | 'light';
 		canUndo?: boolean;
 		canRedo?: boolean;
 		hasSelection?: boolean;
@@ -38,6 +41,7 @@
 		ondelete?: () => void;
 		onfitall?: () => void;
 		ontoggledisplaymode?: () => void;
+		ontoggletheme?: () => void;
 		onhelp?: () => void;
 		onundo?: () => void;
 		onredo?: () => void;
@@ -46,6 +50,7 @@
 	let {
 		open = false,
 		displayMode = 'label',
+		theme = 'dark',
 		canUndo = false,
 		canRedo = false,
 		hasSelection = false,
@@ -61,6 +66,7 @@
 		ondelete,
 		onfitall,
 		ontoggledisplaymode,
+		ontoggletheme,
 		onhelp,
 		onundo,
 		onredo
@@ -226,6 +232,15 @@
 					<kbd class="drawer-shortcut">F</kbd>
 				</button>
 			{/if}
+			<button class="drawer-item" aria-label="Toggle Theme" onclick={() => handleAction(ontoggletheme)}>
+				{#if theme === 'dark'}
+					<IconSun size={18} />
+					<span>Light Theme</span>
+				{:else}
+					<IconMoon size={18} />
+					<span>Dark Theme</span>
+				{/if}
+			</button>
 			<button class="drawer-item" aria-label="About" onclick={() => handleAction(onhelp)}>
 				<IconHelp size={18} />
 				<span>About</span>

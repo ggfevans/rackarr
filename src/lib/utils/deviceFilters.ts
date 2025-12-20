@@ -41,6 +41,17 @@ export function groupDevicesByCategory(devices: DeviceType[]): Map<DeviceCategor
 }
 
 /**
+ * Get the first device matching a search query
+ * @param devices - Array of device types to search
+ * @param query - Search query string
+ * @returns First matching device or null if no matches
+ */
+export function getFirstMatch(devices: DeviceType[], query: string): DeviceType | null {
+	const matches = searchDevices(devices, query);
+	return matches.length > 0 ? matches[0] : null;
+}
+
+/**
  * Get display name for a device category
  * @param category - Device category
  * @returns Human-readable category name

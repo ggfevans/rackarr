@@ -397,57 +397,62 @@ describe('EditPanel Component', () => {
 	});
 
 	describe('Device face assignment', () => {
-		it('shows face selector when device selected', () => {
-			const layoutStore = getLayoutStore();
-			const selectionStore = getSelectionStore();
-			const RACK_ID = 'rack-0';
+	it('shows face selector when device selected', () => {
+		const layoutStore = getLayoutStore();
+		const selectionStore = getSelectionStore();
+		const RACK_ID = 'rack-0';
 
-			layoutStore.addRack('My Rack', 24);
-			const device = layoutStore.addDeviceType({
-				name: 'Test Server',
-				u_height: 2,
-				category: 'server',
-				colour: '#4A90D9'
-			});
-			layoutStore.placeDevice(RACK_ID, device.slug, 1);
-			selectionStore.selectDevice(RACK_ID, 0, device.slug);
-
-			const { getByRole } = render(EditPanel);
-			expect(getByRole('group', { name: /mounted face/i })).toBeTruthy();
+		layoutStore.addRack('My Rack', 24);
+		const device = layoutStore.addDeviceType({
+			name: 'Test Server',
+			u_height: 2,
+			category: 'server',
+			colour: '#4A90D9'
 		});
+		layoutStore.placeDevice(RACK_ID, device.slug, 1);
+		selectionStore.selectDevice(RACK_ID, 0, device.slug);
 
-		it('has three radio options', () => {
-			const layoutStore = getLayoutStore();
-			const selectionStore = getSelectionStore();
-			const RACK_ID = 'rack-0';
+		const { getByLabelText } = render(EditPanel);
+		expect(getByLabelText(/mounted face/i)).toBeTruthy();
+	});
 
-			layoutStore.addRack('My Rack', 24);
-			const device = layoutStore.addDeviceType({
-				name: 'Test Server',
-				u_height: 2,
-				category: 'server',
-				colour: '#4A90D9'
-			});
-			layoutStore.placeDevice(RACK_ID, device.slug, 1);
-			selectionStore.selectDevice(RACK_ID, 0, device.slug);
+	it('has three select options', () => {
+		const layoutStore = getLayoutStore();
+		const selectionStore = getSelectionStore();
+		const RACK_ID = 'rack-0';
 
-			const { getByLabelText } = render(EditPanel);
-			expect(getByLabelText('Front')).toBeTruthy();
-			expect(getByLabelText('Rear')).toBeTruthy();
-			expect(getByLabelText('Both (full-depth)')).toBeTruthy();
+		layoutStore.addRack('My Rack', 24);
+		const device = layoutStore.addDeviceType({
+			name: 'Test Server',
+			u_height: 2,
+			category: 'server',
+			colour: '#4A90D9'
 		});
+		layoutStore.placeDevice(RACK_ID, device.slug, 1);
+		selectionStore.selectDevice(RACK_ID, 0, device.slug);
 
-		it('does not show face selector for rack selection', () => {
-			const layoutStore = getLayoutStore();
-			const selectionStore = getSelectionStore();
-			const RACK_ID = 'rack-0';
+		const { getByRole } = render(EditPanel);
+		const select = getByRole('combobox', { name: /mounted face/i });
+		expect(select).toBeTruthy();
+		// Check for three options
+		const options = select.querySelectorAll('option');
+		expect(options.length).toBe(3);
+		expect(options[0]?.textContent).toBe('Front');
+		expect(options[1]?.textContent).toBe('Rear');
+		expect(options[2]?.textContent).toBe('Both (full-depth)');
+	});
 
-			layoutStore.addRack('My Rack', 24);
-			selectionStore.selectRack(RACK_ID);
+	it('does not show face selector for rack selection', () => {
+		const layoutStore = getLayoutStore();
+		const selectionStore = getSelectionStore();
+		const RACK_ID = 'rack-0';
 
-			const { queryByRole } = render(EditPanel);
-			expect(queryByRole('group', { name: /mounted face/i })).toBeNull();
-		});
+		layoutStore.addRack('My Rack', 24);
+		selectionStore.selectRack(RACK_ID);
+
+		const { queryByLabelText } = render(EditPanel);
+		expect(queryByLabelText(/mounted face/i)).toBeNull();
+	});
 	});
 });
 

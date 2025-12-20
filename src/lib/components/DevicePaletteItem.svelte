@@ -8,17 +8,22 @@
 	import IconGrip from './icons/IconGrip.svelte';
 	import CategoryIcon from './CategoryIcon.svelte';
 	import { createPaletteDragData, serializeDragData } from '$lib/utils/dragdrop';
+	import { highlightMatch } from '$lib/utils/searchHighlight';
 
 	interface Props {
 		device: DeviceType;
 		librarySelected?: boolean;
+		searchQuery?: string;
 		onselect?: (event: CustomEvent<{ device: DeviceType }>) => void;
 	}
 
-	let { device, librarySelected = false, onselect }: Props = $props();
+	let { device, librarySelected = false, searchQuery = '', onselect }: Props = $props();
 
 	// Device display name: model or slug
 	const deviceName = $derived(device.model ?? device.slug);
+
+	// Highlighted text segments for search matching
+	const highlightedSegments = $derived(highlightMatch(deviceName, searchQuery));
 
 	// Track dragging state for visual feedback
 	let isDragging = $state(false);
@@ -70,7 +75,15 @@
 	<span class="category-icon-indicator" style="color: {device.colour}">
 		<CategoryIcon category={device.category} size={16} />
 	</span>
-	<span class="device-name">{deviceName}</span>
+	<span class="device-name">
+		{#each highlightedSegments as segment}
+			{#if segment.isMatch}
+				<strong>{segment.text}</strong>
+			{:else}
+				{segment.text}
+			{/if}
+		{/each}
+	</span>
 	<span class="device-height">{device.u_height}U</span>
 </div>
 

@@ -10,8 +10,11 @@
 	import {
 		searchDevices,
 		groupDevicesByCategory,
-		getCategoryDisplayName
+		getCategoryDisplayName,
+		getFirstMatch
 	} from '$lib/utils/deviceFilters';
+	import { debounce } from '$lib/utils/debounce';
+	import { truncateWithEllipsis } from '$lib/utils/searchHighlight';
 	import { parseDeviceLibraryImport } from '$lib/utils/import';
 	import { getBrandPacks } from '$lib/data/brandPacks';
 	import { getStarterLibrary, getStarterSlugs } from '$lib/data/starterLibrary';
@@ -29,11 +32,24 @@
 	const layoutStore = getLayoutStore();
 	const toastStore = getToastStore();
 
-	// Search state
+	// Search state with debouncing
+	let searchQueryRaw = $state('');
 	let searchQuery = $state('');
+	const isSearchActive = $derived(searchQuery.trim().length > 0);
 
-	// Accordion state - 'generic' is expanded by default
-	let expandedSection = $state<string>('generic');
+	// Accordion mode and state tracking
+	let accordionMode = $state<'single' | 'multiple'>('single');
+	// Using single binding value that will hold either string or string[] based on mode
+	let accordionValue = $state<string | string[]>('generic');
+	let preSearchState = $state<{ mode: 'single' | 'multiple'; value: string | string[] }>({
+		mode: 'single',
+		value: 'generic'
+	});
+
+	// Debounce search input
+	const updateSearchQuery = debounce((value: string) => {
+		searchQuery = value;
+	}, 150);
 
 	// File import ref
 	let fileInputRef: HTMLInputElement;
@@ -48,6 +64,12 @@
 		defaultExpanded: boolean;
 		/** simple-icons slug for brand logo */
 		icon?: string;
+		/** Number of devices matching search query */
+		matchCount?: number;
+		/** First matching device for preview */
+		firstMatch?: DeviceType;
+		/** True if section has no matches during search */
+		isEmpty?: boolean;
 	}
 
 	// Get brand packs
@@ -83,20 +105,63 @@
 	);
 
 	// Define all sections: Generic first, then brand packs
-	const sections = $derived<DeviceSection[]>([
-		{
-			id: 'generic',
-			title: 'Generic',
-			devices: filteredGenericDevices,
-			defaultExpanded: true
-		},
-		...filteredBrandPacks
-	]);
+	// Enhanced with match tracking during search
+	const sections = $derived<DeviceSection[]>(
+		[
+			{
+				id: 'generic',
+				title: 'Generic',
+				devices: filteredGenericDevices,
+				defaultExpanded: true
+			},
+			...filteredBrandPacks
+		].map((section) => {
+			if (!isSearchActive) {
+				return section;
+			}
+
+			// During search, compute match info
+			const matchCount = section.devices.length;
+			const firstMatch = section.devices[0] ?? null;
+			const isEmpty = matchCount === 0;
+
+			return {
+				...section,
+				matchCount,
+				firstMatch,
+				isEmpty
+			};
+		})
+	);
 
 	// Check if any section has devices (filtered by search)
 	const totalDevicesCount = $derived(sections.reduce((acc, s) => acc + s.devices.length, 0));
 	const hasDevices = $derived(allGenericDevices.length > 0 || brandPacks.length > 0);
 	const hasResults = $derived(totalDevicesCount > 0);
+
+	// Reactive accordion mode switching based on search state
+	$effect(() => {
+		if (isSearchActive) {
+			// Entering search: save current state and switch to multi-mode
+			if (accordionMode === 'single') {
+				preSearchState = {
+					mode: 'single',
+					value: accordionValue
+				};
+			}
+			accordionMode = 'multiple';
+
+			// Auto-expand all sections with matches
+			const sectionsWithMatches = sections
+				.filter((s) => !s.isEmpty && s.devices.length > 0)
+				.map((s) => s.id);
+			accordionValue = sectionsWithMatches;
+		} else if (accordionMode === 'multiple' && preSearchState) {
+			// Exiting search: restore previous state but stay in multi-mode
+			// (will switch back to single on user interaction)
+			accordionValue = preSearchState.value;
+		}
+	});
 
 	function handleAddDevice() {
 		onadddevice?.();
@@ -104,6 +169,14 @@
 
 	function handleDeviceSelect(event: CustomEvent<{ device: DeviceType }>) {
 		ondeviceselect?.(event);
+	}
+
+	function handleAccordionTriggerClick() {
+		// When user manually clicks accordion after search, switch back to single mode
+		if (accordionMode === 'multiple' && !isSearchActive) {
+			accordionMode = 'single';
+			// The clicked section will be set by the accordion component
+		}
 	}
 
 	function handleImportClick() {
@@ -153,7 +226,8 @@
 			type="search"
 			class="search-input"
 			placeholder="Search devices..."
-			bind:value={searchQuery}
+			bind:value={searchQueryRaw}
+			oninput={() => updateSearchQuery(searchQueryRaw)}
 			aria-label="Search devices"
 			data-testid="search-devices"
 		/>
@@ -171,39 +245,57 @@
 				<p class="empty-message">No devices match your search</p>
 			</div>
 		{:else}
-			<Accordion.Root type="single" bind:value={expandedSection}>
+			<Accordion.Root type={accordionMode} bind:value={accordionValue}>
 				{#each sections as section (section.id)}
 					<Accordion.Item value={section.id} class="accordion-item">
 						<Accordion.Header>
-							<Accordion.Trigger class="accordion-trigger">
-								<span class="section-header">
-									{#if section.icon || section.id === 'apc'}
-										<BrandIcon slug={section.icon} size={16} />
+						<Accordion.Trigger
+							class="accordion-trigger{section.isEmpty ? ' has-no-matches' : ''}"
+							onclick={handleAccordionTriggerClick}
+						>
+							<span class="section-header">
+								{#if section.icon || section.id === 'apc'}
+									<BrandIcon slug={section.icon} size={16} />
+								{/if}
+								<span class="section-title">{section.title}</span>
+							</span>
+
+							{#if isSearchActive && section.matchCount !== undefined}
+								<span class="match-info">
+									<span class="match-count">({section.matchCount})</span>
+									{#if section.firstMatch && Array.isArray(accordionValue) && !accordionValue.includes(section.id)}
+										<span class="match-preview">
+											-
+											{truncateWithEllipsis(section.firstMatch.model ?? section.firstMatch.slug, 30)}
+										</span>
 									{/if}
-									<span class="section-title">{section.title}</span>
 								</span>
+							{:else}
 								<span class="section-count">({section.devices.length})</span>
-							</Accordion.Trigger>
+							{/if}
+						</Accordion.Trigger>
 						</Accordion.Header>
 						<Accordion.Content class="accordion-content">
 							<div class="accordion-content-inner">
 								{#if section.id === 'generic'}
 									<!-- Generic section uses category grouping -->
 									{#each [...groupedGenericDevices.entries()] as [category, devices] (category)}
-										<div class="category-group">
+										{#if !isSearchActive || devices.length > 0}
+											<div class="category-group">
 											<h3 class="category-header">{getCategoryDisplayName(category)}</h3>
 											<div class="category-devices">
 												{#each devices as device (device.slug)}
-													<DevicePaletteItem {device} onselect={handleDeviceSelect} />
+													<DevicePaletteItem {device} searchQuery={isSearchActive ? searchQuery : ''} onselect={handleDeviceSelect} />
 												{/each}
 											</div>
 										</div>
+										{/if}
 									{/each}
 								{:else}
 									<!-- Brand sections show devices in a flat list -->
 									<div class="brand-devices">
 										{#each section.devices as device (device.slug)}
-											<DevicePaletteItem {device} onselect={handleDeviceSelect} />
+											<DevicePaletteItem {device} searchQuery={isSearchActive ? searchQuery : ''} onselect={handleDeviceSelect} />
 										{/each}
 									</div>
 								{/if}
@@ -323,6 +415,11 @@
 		background: var(--colour-surface-active);
 	}
 
+	:global(.accordion-trigger.has-no-matches) {
+		opacity: 0.5;
+		color: var(--colour-text-muted);
+	}
+
 	.section-header {
 		display: flex;
 		align-items: center;
@@ -338,6 +435,28 @@
 		margin-left: var(--space-2);
 		font-weight: 400;
 		color: var(--colour-text-muted);
+	}
+
+	.match-info {
+		display: flex;
+		align-items: center;
+		gap: var(--space-1);
+		margin-left: var(--space-2);
+	}
+
+	.match-count {
+		font-weight: 400;
+		color: var(--colour-text-muted);
+	}
+
+	.match-preview {
+		font-style: italic;
+		font-weight: 400;
+		color: var(--colour-text-muted);
+		white-space: nowrap;
+		overflow: hidden;
+		text-overflow: ellipsis;
+		max-width: 200px;
 	}
 
 	/* Accordion Content Styling with CSS Grid animation */

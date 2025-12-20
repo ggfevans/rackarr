@@ -161,6 +161,7 @@
 
 	<!-- Center section: Main actions -->
 	<div class="toolbar-section toolbar-center">
+		<!-- File Operations -->
 		<Tooltip text="New Rack" shortcut="N" position="bottom">
 			<button
 				class="toolbar-action-btn"
@@ -185,8 +186,6 @@
 				<span>Load Layout</span>
 			</button>
 		</Tooltip>
-
-		<div class="separator" aria-hidden="true"></div>
 
 		<Tooltip text="Save Layout" shortcut="Ctrl+S" position="bottom">
 			<button class="toolbar-action-btn" aria-label="Save" onclick={onsave} data-testid="btn-save">
@@ -222,27 +221,7 @@
 
 		<div class="separator" aria-hidden="true"></div>
 
-		<Tooltip text="Display Mode: {displayModeLabel}" shortcut="I" position="bottom">
-			<button
-				class="toolbar-action-btn"
-				aria-label="Display Mode: {displayModeLabel}"
-				onclick={ontoggledisplaymode}
-				data-testid="btn-toggle-display-mode"
-			>
-				{#if displayMode === 'label'}
-					<IconLabel size={16} />
-				{:else if displayMode === 'image'}
-					<IconImage size={16} />
-				{:else}
-					<!-- image-label mode: show both icons stacked -->
-					<IconImage size={16} />
-				{/if}
-				<span>{displayModeLabel}</span>
-			</button>
-		</Tooltip>
-
-		<div class="separator" aria-hidden="true"></div>
-
+		<!-- Edit Operations -->
 		<Tooltip text={layoutStore.undoDescription ?? 'Undo'} shortcut="Ctrl+Z" position="bottom">
 			<button
 				class="toolbar-action-btn"
@@ -269,8 +248,6 @@
 			</button>
 		</Tooltip>
 
-		<div class="separator" aria-hidden="true"></div>
-
 		<Tooltip text="Delete Selected" shortcut="Del" position="bottom">
 			<button
 				class="toolbar-action-btn"
@@ -281,6 +258,28 @@
 			>
 				<IconTrash size={16} />
 				<span>Delete</span>
+			</button>
+		</Tooltip>
+
+		<div class="separator" aria-hidden="true"></div>
+
+		<!-- View Operations -->
+		<Tooltip text="Display Mode: {displayModeLabel}" shortcut="I" position="bottom">
+			<button
+				class="toolbar-action-btn"
+				aria-label="Display Mode: {displayModeLabel}"
+				onclick={ontoggledisplaymode}
+				data-testid="btn-toggle-display-mode"
+			>
+				{#if displayMode === 'label'}
+					<IconLabel size={16} />
+				{:else if displayMode === 'image'}
+					<IconImage size={16} />
+				{:else}
+					<!-- image-label mode: show both icons stacked -->
+					<IconImage size={16} />
+				{/if}
+				<span>{displayModeLabel}</span>
 			</button>
 		</Tooltip>
 
@@ -295,28 +294,27 @@
 				<span>Reset View</span>
 			</button>
 		</Tooltip>
+
+		<Tooltip text="Toggle Theme" position="bottom">
+			<button
+				class="toolbar-action-btn"
+				aria-label="Toggle Theme"
+				onclick={ontoggletheme}
+				data-testid="btn-toggle-theme"
+			>
+				{#if theme === 'dark'}
+					<IconSun size={16} />
+					<span>Light</span>
+				{:else}
+					<IconMoon size={16} />
+					<span>Dark</span>
+				{/if}
+			</button>
+		</Tooltip>
 	</div>
 
-	<!-- Right section: Theme toggle (hidden on mobile, moved to drawer) -->
+	<!-- Right section: Empty (previously held theme toggle) -->
 	<div class="toolbar-section toolbar-right">
-		{#if !isHamburgerMode}
-			<Tooltip text="Toggle Theme" position="bottom">
-				<button
-					class="toolbar-action-btn theme-toggle-btn"
-					aria-label="Toggle Theme"
-					onclick={ontoggletheme}
-					data-testid="btn-toggle-theme"
-				>
-					{#if theme === 'dark'}
-						<IconSun size={16} />
-						<span>Light</span>
-					{:else}
-						<IconMoon size={16} />
-						<span>Dark</span>
-					{/if}
-				</button>
-			</Tooltip>
-		{/if}
 	</div>
 </header>
 

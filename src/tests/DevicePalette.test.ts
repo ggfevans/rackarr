@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { render, screen, fireEvent } from '@testing-library/svelte';
+import { render, screen, fireEvent, waitFor } from '@testing-library/svelte';
 import DevicePalette from '$lib/components/DevicePalette.svelte';
 import DevicePaletteItem from '$lib/components/DevicePaletteItem.svelte';
 import { getLayoutStore, resetLayoutStore } from '$lib/stores/layout.svelte';
@@ -66,11 +66,17 @@ describe('DevicePalette Component', () => {
 
 			render(DevicePalette);
 
-			const searchInput = screen.getByRole('searchbox');
-			await fireEvent.input(searchInput, { target: { value: 'Server' } });
+		const searchInput = screen.getByRole('searchbox');
+		await fireEvent.input(searchInput, { target: { value: 'Server' } });
 
-			expect(screen.getByText('Server 1')).toBeInTheDocument();
-			expect(screen.queryByText('Switch 1')).not.toBeInTheDocument();
+		// Wait for debounce (150ms)
+		await waitFor(
+			() => {
+				expect(screen.getByText('Server 1')).toBeInTheDocument();
+				expect(screen.queryByText('Switch 1')).not.toBeInTheDocument();
+			},
+			{ timeout: 300 }
+		);
 		});
 
 		it('search is case-insensitive', async () => {
@@ -84,10 +90,13 @@ describe('DevicePalette Component', () => {
 
 			render(DevicePalette);
 
-			const searchInput = screen.getByRole('searchbox');
-			await fireEvent.input(searchInput, { target: { value: 'server' } });
+		const searchInput = screen.getByRole('searchbox');
+		await fireEvent.input(searchInput, { target: { value: 'server' } });
 
+		// Wait for debounce (150ms)
+		await waitFor(() => {
 			expect(screen.getByText('Server 1')).toBeInTheDocument();
+		}, { timeout: 300 });
 		});
 
 		it('shows no results message when search has no matches', async () => {
@@ -101,10 +110,13 @@ describe('DevicePalette Component', () => {
 
 			render(DevicePalette);
 
-			const searchInput = screen.getByRole('searchbox');
-			await fireEvent.input(searchInput, { target: { value: 'xyz' } });
+		const searchInput = screen.getByRole('searchbox');
+		await fireEvent.input(searchInput, { target: { value: 'xyz' } });
 
+		// Wait for debounce (150ms)
+		await waitFor(() => {
 			expect(screen.getByText(/no devices match/i)).toBeInTheDocument();
+		}, { timeout: 300 });
 		});
 	});
 
@@ -345,8 +357,14 @@ describe('DevicePalette Exclusive Accordion', () => {
 			const searchInput = screen.getByRole('searchbox');
 			await fireEvent.input(searchInput, { target: { value: '24-Port' } });
 
-			expect(screen.getByText('24-Port Switch')).toBeInTheDocument();
-			expect(screen.queryByText('1U Server')).not.toBeInTheDocument();
+			// Wait for debounce (150ms)
+			await waitFor(
+				() => {
+					expect(screen.getByText('24-Port Switch')).toBeInTheDocument();
+					expect(screen.queryByText('1U Server')).not.toBeInTheDocument();
+				},
+				{ timeout: 300 }
+			);
 		});
 
 		it('search updates section count', async () => {
@@ -355,9 +373,15 @@ describe('DevicePalette Exclusive Accordion', () => {
 			const searchInput = screen.getByRole('searchbox');
 			await fireEvent.input(searchInput, { target: { value: '1U' } });
 
+			// Wait for debounce (150ms)
 			// Should show count of filtered devices (e.g., "1U Server", "1U PDU", etc.)
 			// Just verify the count changes from the original 26
-			expect(screen.queryByText('(26)')).not.toBeInTheDocument();
+			await waitFor(
+				() => {
+					expect(screen.queryByText('(26)')).not.toBeInTheDocument();
+				},
+				{ timeout: 300 }
+			);
 		});
 
 		it('shows no results message when search has no matches in any section', async () => {
@@ -366,7 +390,10 @@ describe('DevicePalette Exclusive Accordion', () => {
 			const searchInput = screen.getByRole('searchbox');
 			await fireEvent.input(searchInput, { target: { value: 'zzzznotfound' } });
 
-			expect(screen.getByText(/no devices match/i)).toBeInTheDocument();
+			// Wait for debounce (150ms)
+			await waitFor(() => {
+				expect(screen.getByText(/no devices match/i)).toBeInTheDocument();
+			}, { timeout: 300 });
 		});
 	});
 });

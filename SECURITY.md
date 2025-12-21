@@ -6,8 +6,8 @@ Rackarr is currently in active development. Security updates are applied to the 
 
 | Version | Supported          |
 | ------- | ------------------ |
-| 0.3.x   | :white_check_mark: |
-| < 0.3   | :x:                |
+| 0.5.9   | :white_check_mark: |
+| < 0.5.9 | :x:                |
 
 ## Reporting a Vulnerability
 

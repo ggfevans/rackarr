@@ -28,6 +28,11 @@ const EXPORT_PADDING = 20;
 const RACK_NAME_HEIGHT = 18; // Space for rack name above rack
 const VIEW_LABEL_HEIGHT = 15; // Space for FRONT/REAR labels
 
+// QR Code export constants
+const QR_SIZE = 150; // Size of QR code in pixels for screen exports
+const QR_PADDING = 10; // Padding around QR code
+const QR_MARGIN = 15; // Margin from edge of export
+
 // Theme colours
 const DARK_BG = '#1a1a1a';
 const LIGHT_BG = '#f5f5f5';
@@ -321,7 +326,18 @@ export function generateExportSVG(
 	options: ExportOptions,
 	images?: ImageStoreMap
 ): SVGElement {
-	const { includeNames, includeLegend, background, exportView, displayMode = 'label' } = options;
+	const {
+		includeNames,
+		includeLegend,
+		background,
+		exportView,
+		displayMode = 'label',
+		includeQR,
+		qrCodeDataUrl
+	} = options;
+
+	// Determine if we should render QR code
+	const shouldRenderQR = includeQR === true && !!qrCodeDataUrl;
 
 	// Determine if we're doing dual-view export
 	const isDualView = exportView === 'both';
@@ -360,8 +376,12 @@ export function generateExportSVG(
 	const contentWidth = totalRackWidth + (includeLegend ? LEGEND_PADDING + legendWidth : 0);
 	const contentHeight = Math.max(rackAreaHeight, legendHeight);
 
+	// Calculate QR code space if needed
+	const qrTotalSize = QR_SIZE + QR_PADDING * 2; // QR size including padding
+	const qrExtraHeight = shouldRenderQR ? qrTotalSize + QR_MARGIN : 0;
+
 	const svgWidth = contentWidth + EXPORT_PADDING * 2;
-	const svgHeight = contentHeight + EXPORT_PADDING * 2;
+	const svgHeight = contentHeight + EXPORT_PADDING * 2 + qrExtraHeight;
 
 	// Determine colours based on background
 	const isDark = background === 'dark';
@@ -759,6 +779,40 @@ export function generateExportSVG(
 		});
 
 		svg.appendChild(legendGroup);
+	}
+
+	// QR Code (bottom-right corner)
+	if (shouldRenderQR && qrCodeDataUrl) {
+		const qrGroup = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+		qrGroup.setAttribute('class', 'export-qr');
+
+		// Position QR code at bottom-right of content area
+		const qrX = svgWidth - EXPORT_PADDING - qrTotalSize;
+		const qrY = svgHeight - EXPORT_PADDING - qrTotalSize;
+		qrGroup.setAttribute('transform', `translate(${qrX}, ${qrY})`);
+
+		// White background for QR code visibility
+		const qrBg = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+		qrBg.setAttribute('x', '0');
+		qrBg.setAttribute('y', '0');
+		qrBg.setAttribute('width', String(qrTotalSize));
+		qrBg.setAttribute('height', String(qrTotalSize));
+		qrBg.setAttribute('fill', '#ffffff');
+		qrBg.setAttribute('rx', '4');
+		qrBg.setAttribute('ry', '4');
+		qrGroup.appendChild(qrBg);
+
+		// QR code image
+		const qrImage = document.createElementNS('http://www.w3.org/2000/svg', 'image');
+		qrImage.setAttribute('x', String(QR_PADDING));
+		qrImage.setAttribute('y', String(QR_PADDING));
+		qrImage.setAttribute('width', String(QR_SIZE));
+		qrImage.setAttribute('height', String(QR_SIZE));
+		qrImage.setAttribute('href', qrCodeDataUrl);
+		qrImage.setAttribute('preserveAspectRatio', 'xMidYMid meet');
+		qrGroup.appendChild(qrImage);
+
+		svg.appendChild(qrGroup);
 	}
 
 	return svg;

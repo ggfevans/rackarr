@@ -21,7 +21,8 @@
 	import HelpPanel from '$lib/components/HelpPanel.svelte';
 	import BottomSheet from '$lib/components/BottomSheet.svelte';
 	import DeviceDetails from '$lib/components/DeviceDetails.svelte';
-import { getShareParam, clearShareParam, decodeLayout } from '$lib/utils/share';
+import { getShareParam, clearShareParam, decodeLayout, generateShareUrl } from '$lib/utils/share';
+import { generateQRCode, canFitInQR } from '$lib/utils/qrcode';
 import { saveSession, loadSession, clearSession } from '$lib/utils/session-storage';
 import { getLayoutStore } from '$lib/stores/layout.svelte';
 	import { getSelectionStore } from '$lib/stores/selection.svelte';
@@ -72,6 +73,9 @@ import { getLayoutStore } from '$lib/stores/layout.svelte';
 	let deleteTarget: { type: 'rack' | 'device'; name: string } | null = $state(null);
 	let showReplaceDialog = $state(false);
 	let pendingSaveFirst = $state(false);
+
+	// QR code for export (generated when export dialog opens)
+	let exportQrCodeDataUrl: string | undefined = $state(undefined);
 
 	// Mobile bottom sheet state
 	let bottomSheetOpen = $state(false);
@@ -288,11 +292,26 @@ import { getLayoutStore } from '$lib/stores/layout.svelte';
 		}
 	}
 
-	function handleExport() {
+	async function handleExport() {
 		if (!layoutStore.hasRack) {
 			toastStore.showToast('No racks to export', 'warning');
 			return;
 		}
+
+		// Generate QR code for the share URL (for optional embedding in export)
+		try {
+			const shareUrl = generateShareUrl(layoutStore.layout);
+			if (canFitInQR(shareUrl)) {
+				exportQrCodeDataUrl = await generateQRCode(shareUrl, { width: 444 });
+			} else {
+				// Layout too large for QR code
+				exportQrCodeDataUrl = undefined;
+			}
+		} catch {
+			// If QR generation fails, continue without it
+			exportQrCodeDataUrl = undefined;
+		}
+
 		exportDialogOpen = true;
 	}
 
@@ -684,6 +703,7 @@ import { getLayoutStore } from '$lib/stores/layout.svelte';
 		displayMode={uiStore.displayMode}
 		layoutName={layoutStore.layout.name}
 		selectedRackId={selectionStore.isRackSelected ? selectionStore.selectedId : null}
+		qrCodeDataUrl={exportQrCodeDataUrl}
 		onexport={(e) => handleExportSubmit(e.detail)}
 		oncancel={handleExportCancel}
 	/>

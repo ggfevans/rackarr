@@ -29,6 +29,7 @@
 		selectedRackId: string | null;
 		isExporting?: boolean;
 		exportMessage?: string;
+		qrCodeDataUrl?: string;
 		onexport?: (event: CustomEvent<ExportOptions>) => void;
 		oncancel?: () => void;
 	}
@@ -43,6 +44,7 @@
 		selectedRackId: _selectedRackId,
 		isExporting = false,
 		exportMessage = 'Exporting...',
+		qrCodeDataUrl,
 		onexport,
 		oncancel
 	}: Props = $props();
@@ -53,12 +55,16 @@
 	let background = $state<ExportBackground>('dark');
 	let exportView = $state<ExportView>('both');
 	let transparent = $state(false);
+	let includeQR = $state(false);
 
 	// Computed: Is CSV format (data export - no image options)
 	const isCSV = $derived(format === 'csv');
 
 	// Computed: Can select transparent background (PNG and SVG only)
 	const canSelectTransparent = $derived(format === 'svg' || format === 'png');
+
+	// Computed: Can include QR code (when QR code data URL is available and not CSV)
+	const canIncludeQR = $derived(!isCSV && !!qrCodeDataUrl);
 
 	// Computed: Can export (has racks)
 	const canExport = $derived(racks.length > 0);
@@ -128,7 +134,9 @@
 			includeNames: true,
 			includeLegend,
 			background: effectiveBackground,
-			exportView
+			exportView,
+			includeQR: canIncludeQR ? includeQR : false,
+			qrCodeDataUrl: canIncludeQR && includeQR ? qrCodeDataUrl : undefined
 		};
 		onexport?.(new CustomEvent('export', { detail: options }));
 	}
@@ -201,6 +209,15 @@
 					<label>
 						<input type="checkbox" bind:checked={transparent} />
 						Transparent background
+					</label>
+				</div>
+			{/if}
+
+			{#if canIncludeQR}
+				<div class="form-group checkbox-group">
+					<label>
+						<input type="checkbox" bind:checked={includeQR} />
+						Include sharing QR code
 					</label>
 				</div>
 			{/if}

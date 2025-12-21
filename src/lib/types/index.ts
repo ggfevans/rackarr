@@ -400,4 +400,8 @@ export interface ExportOptions {
 	exportView?: ExportView;
 	/** Display mode */
 	displayMode?: DisplayMode;
+	/** Include sharing QR code in export */
+	includeQR?: boolean;
+	/** Pre-generated QR code as PNG data URL (required when includeQR is true) */
+	qrCodeDataUrl?: string;
 }

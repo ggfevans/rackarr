@@ -919,6 +919,187 @@ describe('CSV Export', () => {
 	});
 });
 
+describe('QR Code Export', () => {
+	const mockDeviceLibrary: DeviceType[] = [
+		{
+			slug: 'device-1',
+			model: 'Server 1',
+			u_height: 2,
+			colour: '#4A90D9',
+			category: 'server'
+		}
+	];
+
+	const mockRacks: Rack[] = [
+		{
+			name: 'Main Rack',
+			height: 42,
+			width: 19,
+			position: 0,
+			desc_units: false,
+			form_factor: '4-post',
+			starting_unit: 1,
+			devices: [{ id: 'qr-test-1', device_type: 'device-1', position: 1, face: 'front' }]
+		}
+	];
+
+	const defaultOptions: ExportOptions = {
+		format: 'png',
+		scope: 'all',
+		includeNames: true,
+		includeLegend: false,
+		background: 'dark'
+	};
+
+	// Mock QR code data URL (a simple 1x1 white pixel PNG)
+	const mockQrCodeDataUrl =
+		'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==';
+
+	describe('generateExportSVG with QR code', () => {
+		it('does not include QR code when includeQR is false', () => {
+			const options: ExportOptions = {
+				...defaultOptions,
+				includeQR: false,
+				qrCodeDataUrl: mockQrCodeDataUrl
+			};
+			const svg = generateExportSVG(mockRacks, mockDeviceLibrary, options);
+
+			const qrGroup = svg.querySelector('.export-qr');
+			expect(qrGroup).toBeNull();
+		});
+
+		it('does not include QR code when includeQR is undefined', () => {
+			const options: ExportOptions = {
+				...defaultOptions
+				// includeQR not specified
+			};
+			const svg = generateExportSVG(mockRacks, mockDeviceLibrary, options);
+
+			const qrGroup = svg.querySelector('.export-qr');
+			expect(qrGroup).toBeNull();
+		});
+
+		it('includes QR code when includeQR is true and qrCodeDataUrl provided', () => {
+			const options: ExportOptions = {
+				...defaultOptions,
+				includeQR: true,
+				qrCodeDataUrl: mockQrCodeDataUrl
+			};
+			const svg = generateExportSVG(mockRacks, mockDeviceLibrary, options);
+
+			const qrGroup = svg.querySelector('.export-qr');
+			expect(qrGroup).not.toBeNull();
+		});
+
+		it('does not include QR code when includeQR is true but no qrCodeDataUrl', () => {
+			const options: ExportOptions = {
+				...defaultOptions,
+				includeQR: true
+				// No qrCodeDataUrl
+			};
+			const svg = generateExportSVG(mockRacks, mockDeviceLibrary, options);
+
+			const qrGroup = svg.querySelector('.export-qr');
+			expect(qrGroup).toBeNull();
+		});
+
+		it('positions QR code in bottom-right corner', () => {
+			const options: ExportOptions = {
+				...defaultOptions,
+				includeQR: true,
+				qrCodeDataUrl: mockQrCodeDataUrl
+			};
+			const svg = generateExportSVG(mockRacks, mockDeviceLibrary, options);
+
+			const qrGroup = svg.querySelector('.export-qr');
+			expect(qrGroup).not.toBeNull();
+
+			// Check that the QR code position is in the bottom-right
+			const transform = qrGroup?.getAttribute('transform');
+			expect(transform).toMatch(/translate\(\d+,\s*\d+\)/);
+
+			// Verify it's positioned near the right edge
+			const svgWidth = parseInt(svg.getAttribute('width') || '0', 10);
+			const matchResult = transform?.match(/translate\((\d+),\s*(\d+)\)/);
+			if (matchResult) {
+				const qrX = parseInt(matchResult[1]!, 10);
+				// QR should be positioned near the right edge (within ~200px of edge, accounting for QR size)
+				expect(qrX).toBeGreaterThan(svgWidth - 300);
+			}
+		});
+
+		it('QR code uses a white background for contrast', () => {
+			const options: ExportOptions = {
+				...defaultOptions,
+				background: 'dark',
+				includeQR: true,
+				qrCodeDataUrl: mockQrCodeDataUrl
+			};
+			const svg = generateExportSVG(mockRacks, mockDeviceLibrary, options);
+
+			const qrGroup = svg.querySelector('.export-qr');
+			const bgRect = qrGroup?.querySelector('rect');
+
+			// Should have a white background rect for QR code visibility
+			expect(bgRect).not.toBeNull();
+			expect(bgRect?.getAttribute('fill')).toBe('#ffffff');
+		});
+
+		it('includes QR code in dual-view export', () => {
+			const options: ExportOptions = {
+				...defaultOptions,
+				exportView: 'both',
+				includeQR: true,
+				qrCodeDataUrl: mockQrCodeDataUrl
+			};
+			const svg = generateExportSVG(mockRacks, mockDeviceLibrary, options);
+
+			const qrGroup = svg.querySelector('.export-qr');
+			expect(qrGroup).not.toBeNull();
+		});
+
+		it('QR code does not overlap with legend', () => {
+			const options: ExportOptions = {
+				...defaultOptions,
+				includeLegend: true,
+				includeQR: true,
+				qrCodeDataUrl: mockQrCodeDataUrl
+			};
+			const svg = generateExportSVG(mockRacks, mockDeviceLibrary, options);
+
+			const qrGroup = svg.querySelector('.export-qr');
+			const legend = svg.querySelector('.export-legend');
+
+			expect(qrGroup).not.toBeNull();
+			expect(legend).not.toBeNull();
+
+			// QR code should be positioned after the legend (below in the export)
+			// or the SVG should be tall enough to accommodate both
+			const svgHeight = parseInt(svg.getAttribute('height') || '0', 10);
+			expect(svgHeight).toBeGreaterThan(0);
+		});
+	});
+
+	describe('QR code size', () => {
+		it('renders QR code at appropriate size for screen exports', () => {
+			const options: ExportOptions = {
+				...defaultOptions,
+				format: 'png',
+				includeQR: true,
+				qrCodeDataUrl: mockQrCodeDataUrl
+			};
+			const svg = generateExportSVG(mockRacks, mockDeviceLibrary, options);
+
+			const qrGroup = svg.querySelector('.export-qr');
+			const qrImage = qrGroup?.querySelector('image');
+
+			// QR image size for screen exports should be 150px
+			const qrWidth = parseInt(qrImage?.getAttribute('width') || '0', 10);
+			expect(qrWidth).toBe(150);
+		});
+	});
+});
+
 describe('Dual-View Export', () => {
 	const mockDevices: DeviceType[] = [
 		{

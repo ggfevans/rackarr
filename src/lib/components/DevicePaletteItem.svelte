@@ -7,6 +7,7 @@
 	import type { DeviceType } from '$lib/types';
 	import IconGrip from './icons/IconGrip.svelte';
 	import CategoryIcon from './CategoryIcon.svelte';
+	import ImageIndicator from './ImageIndicator.svelte';
 	import { createPaletteDragData, serializeDragData } from '$lib/utils/dragdrop';
 	import { highlightMatch } from '$lib/utils/searchHighlight';
 
@@ -84,6 +85,9 @@
 			{/if}
 		{/each}
 	</span>
+	{#if device.front_image || device.rear_image}
+		<ImageIndicator front={device.front_image} rear={device.rear_image} size={14} />
+	{/if}
 	<span class="device-height">{device.u_height}U</span>
 </div>
 

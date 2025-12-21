@@ -1,6 +1,6 @@
 <!--
 	ImageIndicator Component
-	Shows device image availability with a split-fill visual
+	Shows device image availability with a camera icon
 	Left half = front image, Right half = rear image
 -->
 <script lang="ts">
@@ -40,29 +40,47 @@
 			aria-hidden="true"
 		>
 			<title>{title}</title>
-			<!-- Left half (front) -->
+			<!-- Camera body outline -->
 			<rect
-				class="indicator-left"
 				x="1"
-				y="3"
-				width="6"
+				y="4"
+				width="14"
 				height="10"
-				rx="1"
-				fill={leftFill}
+				rx="2"
+				fill="none"
 				stroke="currentColor"
 				stroke-width="1.5"
 			/>
-			<!-- Right half (rear) -->
+			<!-- Viewfinder bump -->
 			<rect
-				class="indicator-right"
-				x="9"
-				y="3"
+				x="5"
+				y="2"
 				width="6"
-				height="10"
+				height="3"
 				rx="1"
-				fill={rightFill}
+				fill="none"
 				stroke="currentColor"
 				stroke-width="1.5"
+			/>
+			<!-- Left half fill (front) -->
+			<rect
+				class="indicator-left"
+				x="2"
+				y="5"
+				width="6"
+				height="8"
+				rx="1"
+				fill={leftFill}
+			/>
+			<!-- Right half fill (rear) -->
+			<rect
+				class="indicator-right"
+				x="8"
+				y="5"
+				width="6"
+				height="8"
+				rx="1"
+				fill={rightFill}
 			/>
 		</svg>
 	</span>

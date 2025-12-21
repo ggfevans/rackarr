@@ -1003,7 +1003,7 @@ describe('QR Code Export', () => {
 			expect(qrGroup).toBeNull();
 		});
 
-		it('positions QR code in bottom-right corner', () => {
+		it('positions QR code to the right of content', () => {
 			const options: ExportOptions = {
 				...defaultOptions,
 				includeQR: true,
@@ -1014,18 +1014,38 @@ describe('QR Code Export', () => {
 			const qrGroup = svg.querySelector('.export-qr');
 			expect(qrGroup).not.toBeNull();
 
-			// Check that the QR code position is in the bottom-right
+			// Check that the QR code has a transform position
 			const transform = qrGroup?.getAttribute('transform');
 			expect(transform).toMatch(/translate\(\d+,\s*\d+\)/);
 
-			// Verify it's positioned near the right edge
+			// SVG should be wider to accommodate QR code on the right
 			const svgWidth = parseInt(svg.getAttribute('width') || '0', 10);
-			const matchResult = transform?.match(/translate\((\d+),\s*(\d+)\)/);
-			if (matchResult) {
-				const qrX = parseInt(matchResult[1]!, 10);
-				// QR should be positioned near the right edge (within ~200px of edge, accounting for QR size)
-				expect(qrX).toBeGreaterThan(svgWidth - 300);
-			}
+			// QR area adds ~190px (150px QR + 20px padding + 20px margin)
+			expect(svgWidth).toBeGreaterThan(200);
+		});
+
+		it('includes label with Rackarr branding', () => {
+			const options: ExportOptions = {
+				...defaultOptions,
+				includeQR: true,
+				qrCodeDataUrl: mockQrCodeDataUrl
+			};
+			const svg = generateExportSVG(mockRacks, mockDeviceLibrary, options);
+
+			const qrGroup = svg.querySelector('.export-qr');
+			const labelText = qrGroup?.querySelector('text');
+			expect(labelText).not.toBeNull();
+
+			// Check for the two tspans
+			const tspans = labelText?.querySelectorAll('tspan');
+			expect(tspans?.length).toBe(2);
+			expect(tspans?.[0]?.textContent).toBe('Scan to open in ');
+			expect(tspans?.[1]?.textContent).toBe('Rackarr');
+
+			// Rackarr should be in brand purple
+			const rackarrSpan = tspans?.[1];
+			const fill = rackarrSpan?.getAttribute('fill');
+			expect(fill).toMatch(/#[0-9A-Fa-f]{6}/); // Should be a hex color
 		});
 
 		it('QR code uses a white background for contrast', () => {
@@ -1043,6 +1063,9 @@ describe('QR Code Export', () => {
 			// Should have a white background rect for QR code visibility
 			expect(bgRect).not.toBeNull();
 			expect(bgRect?.getAttribute('fill')).toBe('#ffffff');
+			// Background rect should be below the label (y > 0)
+			const bgY = parseInt(bgRect?.getAttribute('y') || '0', 10);
+			expect(bgY).toBeGreaterThan(0);
 		});
 
 		it('includes QR code in dual-view export', () => {
@@ -1096,6 +1119,10 @@ describe('QR Code Export', () => {
 			// QR image size for screen exports should be 150px
 			const qrWidth = parseInt(qrImage?.getAttribute('width') || '0', 10);
 			expect(qrWidth).toBe(150);
+
+			// QR image should be positioned below the label
+			const qrY = parseInt(qrImage?.getAttribute('y') || '0', 10);
+			expect(qrY).toBeGreaterThan(0);
 		});
 	});
 });

@@ -31,7 +31,12 @@ const VIEW_LABEL_HEIGHT = 15; // Space for FRONT/REAR labels
 // QR Code export constants
 const QR_SIZE = 150; // Size of QR code in pixels for screen exports
 const QR_PADDING = 10; // Padding around QR code
-const QR_MARGIN = 15; // Margin from edge of export
+const QR_MARGIN = 20; // Margin from content to QR area
+const QR_LABEL_HEIGHT = 20; // Height for "Scan to open in Rackarr" label
+
+// Brand colours for QR label
+const BRAND_PURPLE_DARK = '#BD93F9';
+const BRAND_PURPLE_LIGHT = '#644AC9';
 
 // Theme colours
 const DARK_BG = '#1a1a1a';
@@ -376,12 +381,13 @@ export function generateExportSVG(
 	const contentWidth = totalRackWidth + (includeLegend ? LEGEND_PADDING + legendWidth : 0);
 	const contentHeight = Math.max(rackAreaHeight, legendHeight);
 
-	// Calculate QR code space if needed
+	// Calculate QR code space if needed (positioned to the right of content)
 	const qrTotalSize = QR_SIZE + QR_PADDING * 2; // QR size including padding
-	const qrExtraHeight = shouldRenderQR ? qrTotalSize + QR_MARGIN : 0;
+	const qrAreaWidth = shouldRenderQR ? qrTotalSize + QR_MARGIN : 0;
+	const qrAreaHeight = qrTotalSize + QR_LABEL_HEIGHT; // QR + label above it
 
-	const svgWidth = contentWidth + EXPORT_PADDING * 2;
-	const svgHeight = contentHeight + EXPORT_PADDING * 2 + qrExtraHeight;
+	const svgWidth = contentWidth + EXPORT_PADDING * 2 + qrAreaWidth;
+	const svgHeight = Math.max(contentHeight, shouldRenderQR ? qrAreaHeight : 0) + EXPORT_PADDING * 2;
 
 	// Determine colours based on background
 	const isDark = background === 'dark';
@@ -781,20 +787,41 @@ export function generateExportSVG(
 		svg.appendChild(legendGroup);
 	}
 
-	// QR Code (bottom-right corner)
+	// QR Code (to the right of content, vertically centered)
 	if (shouldRenderQR && qrCodeDataUrl) {
 		const qrGroup = document.createElementNS('http://www.w3.org/2000/svg', 'g');
 		qrGroup.setAttribute('class', 'export-qr');
 
-		// Position QR code at bottom-right of content area
-		const qrX = svgWidth - EXPORT_PADDING - qrTotalSize;
-		const qrY = svgHeight - EXPORT_PADDING - qrTotalSize;
-		qrGroup.setAttribute('transform', `translate(${qrX}, ${qrY})`);
+		// Position QR area to the right of content, vertically centered
+		const qrX = contentWidth + EXPORT_PADDING + QR_MARGIN;
+		const qrY = EXPORT_PADDING + (contentHeight - qrAreaHeight) / 2;
+		qrGroup.setAttribute('transform', `translate(${qrX}, ${Math.max(qrY, EXPORT_PADDING)})`);
 
-		// White background for QR code visibility
+		// Label: "Scan to open in Rackarr" with Rackarr in brand purple
+		const labelGroup = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+		labelGroup.setAttribute('x', String(qrTotalSize / 2));
+		labelGroup.setAttribute('y', '12');
+		labelGroup.setAttribute('text-anchor', 'middle');
+		labelGroup.setAttribute('font-size', '11');
+		labelGroup.setAttribute('font-family', 'system-ui, sans-serif');
+
+		const labelPart1 = document.createElementNS('http://www.w3.org/2000/svg', 'tspan');
+		labelPart1.setAttribute('fill', textColor);
+		labelPart1.textContent = 'Scan to open in ';
+		labelGroup.appendChild(labelPart1);
+
+		const labelPart2 = document.createElementNS('http://www.w3.org/2000/svg', 'tspan');
+		labelPart2.setAttribute('fill', isDark ? BRAND_PURPLE_DARK : BRAND_PURPLE_LIGHT);
+		labelPart2.setAttribute('font-weight', '600');
+		labelPart2.textContent = 'Rackarr';
+		labelGroup.appendChild(labelPart2);
+
+		qrGroup.appendChild(labelGroup);
+
+		// White background for QR code visibility (below the label)
 		const qrBg = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
 		qrBg.setAttribute('x', '0');
-		qrBg.setAttribute('y', '0');
+		qrBg.setAttribute('y', String(QR_LABEL_HEIGHT));
 		qrBg.setAttribute('width', String(qrTotalSize));
 		qrBg.setAttribute('height', String(qrTotalSize));
 		qrBg.setAttribute('fill', '#ffffff');
@@ -805,7 +832,7 @@ export function generateExportSVG(
 		// QR code image
 		const qrImage = document.createElementNS('http://www.w3.org/2000/svg', 'image');
 		qrImage.setAttribute('x', String(QR_PADDING));
-		qrImage.setAttribute('y', String(QR_PADDING));
+		qrImage.setAttribute('y', String(QR_LABEL_HEIGHT + QR_PADDING));
 		qrImage.setAttribute('width', String(QR_SIZE));
 		qrImage.setAttribute('height', String(QR_SIZE));
 		qrImage.setAttribute('href', qrCodeDataUrl);

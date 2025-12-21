@@ -125,3 +125,25 @@ export function findBrandDevice(slug: string): DeviceType | undefined {
 
 	return allDevices.find((d) => d.slug === slug);
 }
+
+// Cached set of all brand device slugs
+let brandSlugsCache: Set<string> | null = null;
+
+/**
+ * Get a Set of all brand device slugs for fast lookup
+ * Used to distinguish brand devices from custom devices
+ */
+export function getBrandSlugs(): Set<string> {
+	if (!brandSlugsCache) {
+		const allDevices = [
+			...ubiquitiDevices,
+			...mikrotikDevices,
+			...synologyDevices,
+			...apcDevices,
+			...dellDevices,
+			...supermicroDevices
+		];
+		brandSlugsCache = new Set(allDevices.map((d) => d.slug));
+	}
+	return brandSlugsCache;
+}

@@ -15,7 +15,7 @@
 	import { debounce } from '$lib/utils/debounce';
 	import { truncateWithEllipsis } from '$lib/utils/searchHighlight';
 	import { parseDeviceLibraryImport } from '$lib/utils/import';
-	import { getBrandPacks } from '$lib/data/brandPacks';
+	import { getBrandPacks, getBrandSlugs } from '$lib/data/brandPacks';
 	import { getStarterLibrary, getStarterSlugs } from '$lib/data/starterLibrary';
 	import DevicePaletteItem from './DevicePaletteItem.svelte';
 	import BrandIcon from './BrandIcon.svelte';
@@ -77,17 +77,19 @@
 	// Merge starter library with layout device types for display
 	// Starter library is always available; layout.device_types contains placed/custom devices
 	// Custom devices with same slug as starter will shadow (replace) the starter version
+	// Brand devices are excluded - they appear in their respective brand sections
 	const allGenericDevices = $derived.by(() => {
 		const starter = getStarterLibrary();
 		const placed = layoutStore.device_types;
 		const placedSlugs = new Set(placed.map((d) => d.slug));
 		const starterSlugs = getStarterSlugs();
+		const brandSlugs = getBrandSlugs();
 
-		// Starter devices (excluding any shadowed by placed), then custom devices not in starter
+		// Starter devices (excluding any shadowed by placed), then custom devices not in starter or brands
 		return [
 			...starter.filter((d) => !placedSlugs.has(d.slug)),
 			...placed.filter((d) => starterSlugs.has(d.slug)), // Placed versions of starter devices
-			...placed.filter((d) => !starterSlugs.has(d.slug)) // Custom devices not in starter
+			...placed.filter((d) => !starterSlugs.has(d.slug) && !brandSlugs.has(d.slug)) // Custom devices only
 		];
 	});
 

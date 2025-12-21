@@ -357,6 +357,75 @@ describe('DevicePalette Exclusive Accordion', () => {
 		});
 	});
 
+	describe('Brand Device Placement (Issue #119)', () => {
+		it('placed brand devices do NOT appear in Generic section', async () => {
+			const layoutStore = getLayoutStore();
+
+			// Place a Ubiquiti device (brand device)
+			layoutStore.placeDevice('ubiquiti-unifi-switch-24', 1);
+
+			const { container } = render(DevicePalette);
+
+			// Expand Generic section to see its contents
+			const genericButton = screen.getByRole('button', { name: /generic/i });
+			await fireEvent.click(genericButton);
+			await fireEvent.click(genericButton); // Toggle to ensure it's open
+
+			// The brand device should NOT appear in the Generic section
+			// Get all device names within the Generic accordion content
+			const genericSection = container.querySelector('[data-state="open"] .accordion-content-inner');
+
+			// If Generic is expanded, check it doesn't contain the brand device
+			if (genericSection) {
+				expect(genericSection.textContent).not.toContain('UniFi Switch 24');
+			}
+
+			// The device count in Generic should still be 26 (starter library only)
+			expect(screen.getByText('(26)')).toBeInTheDocument();
+		});
+
+		it('brand devices still appear in their brand section after placement', async () => {
+			const layoutStore = getLayoutStore();
+
+			// Place a Ubiquiti device (slug: ubiquiti-unifi-switch-24, model: USW-24)
+			layoutStore.placeDevice('ubiquiti-unifi-switch-24', 1);
+
+			render(DevicePalette);
+
+			// Ubiquiti section should still show its devices
+			const ubiquitiButton = screen.getByRole('button', { name: /ubiquiti/i });
+			expect(ubiquitiButton).toBeInTheDocument();
+
+			// Expand Ubiquiti section
+			await fireEvent.click(ubiquitiButton);
+
+			// The device should be visible in the Ubiquiti section (model name is USW-24)
+			expect(screen.getByText('USW-24')).toBeInTheDocument();
+		});
+
+		it('custom devices (not starter, not brand) still appear in Generic', () => {
+			const layoutStore = getLayoutStore();
+
+			// Add a truly custom device (not from starter or brand packs)
+			layoutStore.addDeviceType({
+				name: 'My Custom Server',
+				u_height: 2,
+				category: 'server',
+				colour: CATEGORY_COLOURS.server
+			});
+
+			const { container } = render(DevicePalette);
+
+			// Custom device should appear in Generic
+			// Generic count should now be 27 (26 starter + 1 custom)
+			// Use a more specific selector to find the Generic section's count
+			const genericButton = container.querySelector('.accordion-trigger');
+			expect(genericButton).toBeInTheDocument();
+			expect(genericButton?.textContent).toContain('Generic');
+			expect(genericButton?.textContent).toContain('(27)');
+		});
+	});
+
 	describe('Exclusive Behavior', () => {
 		it('only one section can be expanded at a time', async () => {
 			render(DevicePalette);

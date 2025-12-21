@@ -10,6 +10,11 @@
 	import { getUIStore } from '$lib/stores/ui.svelte';
 	import { getCanvasStore } from '$lib/stores/canvas.svelte';
 	import { getCategoryDisplayName } from '$lib/utils/deviceFilters';
+	import {
+		canResizeRackTo,
+		getConflictDetails,
+		formatConflictMessage
+	} from '$lib/utils/rack-resize';
 	import { COMMON_RACK_HEIGHTS } from '$lib/types/constants';
 	import type { Rack, DeviceType, PlacedDevice, DeviceFace } from '$lib/types';
 
@@ -25,6 +30,9 @@
 	let rackName = $state('');
 	let rackHeight = $state(42);
 	let rackNotes = $state('');
+
+	// Resize validation error state
+	let resizeError = $state<string | null>(null);
 
 	// State for device name editing
 	let editingDeviceName = $state(false);
@@ -74,17 +82,15 @@
 		}
 	});
 
-	// Sync local state with selected rack
+	// Sync local state with selected rack and clear errors
 	$effect(() => {
 		if (selectedRack) {
 			rackName = selectedRack.name;
 			rackHeight = selectedRack.height;
 			rackNotes = selectedRack.notes ?? '';
+			resizeError = null; // Clear any previous resize error
 		}
 	});
-
-	// Check if rack has devices (prevents height editing)
-	const rackHasDevices = $derived(selectedRack ? selectedRack.devices.length > 0 : false);
 
 	// Update rack name on blur
 	function handleNameBlur() {
@@ -111,15 +117,41 @@
 		}
 	}
 
-	// Update rack height
+	// Validate and apply height change
+	function attemptHeightChange(newHeight: number): boolean {
+		if (!selectedRack) return false;
+
+		const result = canResizeRackTo(selectedRack, newHeight, layoutStore.device_types);
+
+		if (!result.allowed) {
+			const conflictDetails = getConflictDetails(result.conflicts, layoutStore.device_types);
+			resizeError = formatConflictMessage(conflictDetails);
+			// Revert local state to current rack height
+			rackHeight = selectedRack.height;
+			return false;
+		}
+
+		// Clear error and apply change
+		resizeError = null;
+		layoutStore.updateRack(RACK_ID, { height: newHeight });
+		// Reset view to center the resized rack
+		canvasStore.fitAll(layoutStore.rack ? [layoutStore.rack] : []);
+		return true;
+	}
+
+	// Update rack height on input change
 	function handleHeightChange(event: Event) {
 		const target = event.target as HTMLInputElement;
 		const newHeight = parseInt(target.value, 10);
-		if (selectedRack && !rackHasDevices && newHeight >= 1 && newHeight <= 100) {
-			layoutStore.updateRack(RACK_ID, { height: newHeight });
-			// Reset view to center the resized rack
-			canvasStore.fitAll(layoutStore.rack ? [layoutStore.rack] : []);
+		if (newHeight >= 1 && newHeight <= 100) {
+			attemptHeightChange(newHeight);
 		}
+	}
+
+	// Handle preset button click
+	function handlePresetClick(preset: number) {
+		rackHeight = preset;
+		attemptHeightChange(preset);
 	}
 
 	// Delete selected rack
@@ -247,39 +279,31 @@
 
 			<div class="form-group">
 				<label for="rack-height">Height</label>
-				{#if rackHasDevices}
-					<input type="number" id="rack-height" class="input-field" value={rackHeight} disabled />
-					<p class="helper-text warning">Remove all devices to resize</p>
-				{:else}
-					<input
-						type="number"
-						id="rack-height"
-						class="input-field"
-						bind:value={rackHeight}
-						onchange={handleHeightChange}
-						min="1"
-						max="100"
-					/>
-					<div class="height-presets">
-						{#each COMMON_RACK_HEIGHTS as preset (preset)}
-							<button
-								type="button"
-								class="preset-btn"
-								class:active={rackHeight === preset}
-								onclick={() => {
-									rackHeight = preset;
-									if (selectedRack) {
-										layoutStore.updateRack(RACK_ID, { height: preset });
-										// Reset view to center the resized rack
-										canvasStore.fitAll(layoutStore.rack ? [layoutStore.rack] : []);
-									}
-								}}
-							>
-								{preset}U
-							</button>
-						{/each}
-					</div>
+				<input
+					type="number"
+					id="rack-height"
+					class="input-field"
+					class:error={resizeError !== null}
+					bind:value={rackHeight}
+					onchange={handleHeightChange}
+					min="1"
+					max="100"
+				/>
+				{#if resizeError}
+					<p class="helper-text error">Cannot resize: {resizeError}</p>
 				{/if}
+				<div class="height-presets">
+					{#each COMMON_RACK_HEIGHTS as preset (preset)}
+						<button
+							type="button"
+							class="preset-btn"
+							class:active={rackHeight === preset}
+							onclick={() => handlePresetClick(preset)}
+						>
+							{preset}U
+						</button>
+					{/each}
+				</div>
 			</div>
 
 			<div class="info-section">
@@ -536,8 +560,12 @@
 		color: var(--colour-text-muted);
 	}
 
-	.helper-text.warning {
-		color: var(--colour-warning);
+	.helper-text.error {
+		color: var(--colour-error);
+	}
+
+	.input-field.error {
+		border-color: var(--colour-error);
 	}
 
 	.height-presets {

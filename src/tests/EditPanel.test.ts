@@ -119,7 +119,7 @@ describe('EditPanel Component', () => {
 			expect(heightInput).not.toBeDisabled();
 		});
 
-		it('rack height shows message when devices present', () => {
+		it('rack height input is enabled when devices present (smart validation)', () => {
 			const layoutStore = getLayoutStore();
 			const selectionStore = getSelectionStore();
 			const RACK_ID = 'rack-0';
@@ -136,7 +136,9 @@ describe('EditPanel Component', () => {
 
 			render(EditPanel);
 
-			expect(screen.getByText(/remove all devices to resize/i)).toBeInTheDocument();
+			// Input should be enabled even with devices (smart validation allows growing)
+			const heightInput = screen.getByLabelText(/height/i) as HTMLInputElement;
+			expect(heightInput).not.toBeDisabled();
 		});
 
 		it('name change updates layout store', async () => {

@@ -149,7 +149,7 @@ describe('EditPanel Visual Hierarchy', () => {
 			expect(activePreset?.textContent).toBe('24U');
 		});
 
-		it('height input is disabled when rack has devices', () => {
+		it('height input is enabled when rack has devices (smart validation)', () => {
 			const layoutStore = getLayoutStore();
 			const selectionStore = getSelectionStore();
 			const RACK_ID = 'rack-0';
@@ -166,9 +166,9 @@ describe('EditPanel Visual Hierarchy', () => {
 
 			render(EditPanel);
 
-			// Height input should be disabled
+			// Height input should be enabled (smart validation allows resizing)
 			const heightInput = screen.getByLabelText(/height/i);
-			expect(heightInput).toBeDisabled();
+			expect(heightInput).not.toBeDisabled();
 		});
 	});
 

@@ -2,7 +2,7 @@ name: Deploy to Dev (GitHub Pages)
 
 on:
   push:
-    branches: [main]
+    branches: [dev]
   workflow_dispatch:
 
 permissions:
@@ -54,7 +54,7 @@ jobs:
     runs-on: ubuntu-latest
     environment:
       name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
+      url: 'https://dev.rackarr.com'
     steps:
       - name: Deploy to GitHub Pages
         id: deployment

@@ -127,14 +127,14 @@ describe('ExportDialog', () => {
 		});
 	});
 
-	describe('Background Options', () => {
-		it('shows background dropdown with dark, light options', () => {
+	describe('Theme Options', () => {
+		it('shows theme dropdown with dark, light options', () => {
 			render(ExportDialog, {
 				props: { open: true, racks: mockRacks, deviceTypes: mockDeviceTypes, selectedRackId: null }
 			});
 
-			const bgSelect = screen.getByLabelText(/^background$/i);
-			expect(bgSelect).toBeInTheDocument();
+			const themeSelect = screen.getByLabelText(/^theme$/i);
+			expect(themeSelect).toBeInTheDocument();
 			expect(screen.getByRole('option', { name: /dark/i })).toBeInTheDocument();
 			expect(screen.getByRole('option', { name: /light/i })).toBeInTheDocument();
 		});

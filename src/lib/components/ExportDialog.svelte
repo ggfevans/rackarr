@@ -164,7 +164,7 @@
 	});
 </script>
 
-<Dialog {open} title="Export" width="380px" onclose={handleCancel}>
+<Dialog {open} title="Export" width="456px" onclose={handleCancel}>
 	<div class="export-form">
 		<div class="form-group">
 			<label for="export-format">Format</label>
@@ -191,16 +191,9 @@
 				</select>
 			</div>
 
-			<div class="form-group checkbox-group">
-				<label>
-					<input type="checkbox" bind:checked={includeLegend} />
-					Include legend
-				</label>
-			</div>
-
 			<div class="form-group">
-				<label for="export-background">Background</label>
-				<select id="export-background" bind:value={background} disabled={transparent}>
+				<label for="export-theme">Theme</label>
+				<select id="export-theme" bind:value={background} disabled={transparent}>
 					<option value="dark">Dark</option>
 					<option value="light">Light</option>
 				</select>
@@ -214,6 +207,13 @@
 					</label>
 				</div>
 			{/if}
+
+			<div class="form-group checkbox-group">
+				<label>
+					<input type="checkbox" bind:checked={includeLegend} />
+					Include legend
+				</label>
+			</div>
 
 			{#if canIncludeQR}
 				<div class="form-group checkbox-group">

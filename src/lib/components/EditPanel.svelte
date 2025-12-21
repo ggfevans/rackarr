@@ -298,7 +298,7 @@
 					onblur={handleNotesBlur}
 					rows="4"
 					placeholder="Add notes about this rack..."
-				/>
+				></textarea>
 			</div>
 
 			<div class="actions">
@@ -442,7 +442,7 @@
 					onblur={handleDeviceNotesBlur}
 					rows="4"
 					placeholder="Add notes about this device placement..."
-				/>
+				></textarea>
 			</div>
 
 			<div class="actions">
@@ -643,21 +643,6 @@
 
 	.display-name-display:hover .edit-icon {
 		opacity: 1;
-	}
-
-	.display-name-input {
-		width: 100%;
-		padding: var(--space-2) var(--space-3);
-		font-size: var(--font-size-base);
-		border: 1px solid var(--colour-selection);
-		border-radius: var(--radius-sm);
-		background: var(--colour-bg);
-		color: var(--colour-text);
-		outline: none;
-	}
-
-	.display-name-input:focus {
-		box-shadow: var(--glow-pink-sm);
 	}
 
 	.notes-section {

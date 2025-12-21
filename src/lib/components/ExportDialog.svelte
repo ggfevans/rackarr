@@ -104,7 +104,9 @@
 			includeLegend,
 			background: effectiveBackground,
 			exportView,
-			displayMode
+			displayMode,
+			includeQR: canIncludeQR ? includeQR : false,
+			qrCodeDataUrl: canIncludeQR && includeQR ? qrCodeDataUrl : undefined
 		};
 
 		try {

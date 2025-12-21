@@ -428,6 +428,47 @@ describe('ExportDialog', () => {
 			expect(qrCheckbox).not.toBeInTheDocument();
 		});
 
+		it('preview updates when QR checkbox is toggled', async () => {
+			const { container } = render(ExportDialog, {
+				props: {
+					open: true,
+					racks: mockRacks,
+					deviceTypes: mockDeviceTypes,
+					selectedRackId: null,
+					qrCodeDataUrl: mockQrCodeDataUrl
+				}
+			});
+
+			// Wait for initial preview to render
+			await waitFor(() => {
+				const preview = container.querySelector('.preview-container svg');
+				expect(preview).toBeInTheDocument();
+			});
+
+			// Initially QR is unchecked, so no QR in preview
+			let preview = container.querySelector('.preview-container svg');
+			expect(preview?.querySelector('.export-qr')).toBeNull();
+
+			// Enable QR code
+			const qrCheckbox = screen.getByLabelText(/include.*qr/i);
+			await fireEvent.click(qrCheckbox);
+
+			// Wait for preview to update with QR code
+			await waitFor(() => {
+				preview = container.querySelector('.preview-container svg');
+				expect(preview?.querySelector('.export-qr')).not.toBeNull();
+			});
+
+			// Disable QR code
+			await fireEvent.click(qrCheckbox);
+
+			// Wait for preview to update without QR code
+			await waitFor(() => {
+				preview = container.querySelector('.preview-container svg');
+				expect(preview?.querySelector('.export-qr')).toBeNull();
+			});
+		});
+
 		// NOTE: happy-dom doesn't properly trigger Svelte select bindings on change events
 		// The CSV format hiding QR checkbox is verified in browser E2E tests
 		it.skip('hides QR checkbox for CSV format', async () => {

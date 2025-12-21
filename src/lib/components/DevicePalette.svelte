@@ -103,7 +103,14 @@
 		}))
 	);
 
-	// Define all sections: Generic first, then brand packs
+	// Sort brand packs alphabetically (case-insensitive)
+	const sortedBrandPacks = $derived(
+		[...filteredBrandPacks].sort((a, b) =>
+			a.title.toLowerCase().localeCompare(b.title.toLowerCase())
+		)
+	);
+
+	// Define all sections: Generic first, then brand packs (sorted alphabetically)
 	// Enhanced with match tracking during search
 	const sections = $derived<DeviceSection[]>(
 		[
@@ -113,7 +120,7 @@
 				devices: filteredGenericDevices,
 				defaultExpanded: true
 			},
-			...filteredBrandPacks
+			...sortedBrandPacks
 		].map((section) => {
 			if (!isSearchActive) {
 				return section;

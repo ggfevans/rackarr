@@ -300,6 +300,63 @@ describe('DevicePalette Exclusive Accordion', () => {
 		});
 	});
 
+	describe('Section Ordering', () => {
+		it('Generic section appears first', () => {
+			const { container } = render(DevicePalette);
+
+			// Get all accordion trigger buttons (section headers)
+			const triggers = container.querySelectorAll('.accordion-trigger');
+			expect(triggers.length).toBeGreaterThan(0);
+
+			// First section should be Generic
+			expect(triggers[0].textContent).toContain('Generic');
+		});
+
+		it('brand sections are sorted alphabetically after Generic', () => {
+			const { container } = render(DevicePalette);
+
+			// Get all accordion trigger buttons (section headers)
+			const triggers = container.querySelectorAll('.accordion-trigger');
+
+			// Extract section titles (first section is Generic, rest should be alphabetical)
+			const titles = Array.from(triggers).map((trigger) => {
+				// Get the text content of the section-title span
+				const titleSpan = trigger.querySelector('.section-title');
+				return titleSpan?.textContent?.trim() ?? '';
+			});
+
+			// First should be Generic
+			expect(titles[0]).toBe('Generic');
+
+			// Brand sections (everything after Generic) should be alphabetically sorted
+			const brandTitles = titles.slice(1);
+			const sortedBrandTitles = [...brandTitles].sort((a, b) =>
+				a.toLowerCase().localeCompare(b.toLowerCase())
+			);
+
+			expect(brandTitles).toEqual(sortedBrandTitles);
+		});
+
+		it('sorting is case-insensitive', () => {
+			const { container } = render(DevicePalette);
+
+			const triggers = container.querySelectorAll('.accordion-trigger');
+			const titles = Array.from(triggers).map((trigger) => {
+				const titleSpan = trigger.querySelector('.section-title');
+				return titleSpan?.textContent?.trim() ?? '';
+			});
+
+			// Brand sections should be sorted case-insensitively
+			// e.g., "APC" should come before "Dell" regardless of case
+			const brandTitles = titles.slice(1);
+			const sortedBrandTitles = [...brandTitles].sort((a, b) =>
+				a.toLowerCase().localeCompare(b.toLowerCase())
+			);
+
+			expect(brandTitles).toEqual(sortedBrandTitles);
+		});
+	});
+
 	describe('Exclusive Behavior', () => {
 		it('only one section can be expanded at a time', async () => {
 			render(DevicePalette);

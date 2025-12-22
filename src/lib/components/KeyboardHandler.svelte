@@ -112,7 +112,7 @@
 				action: () => ondelete?.()
 			},
 
-			// Arrow keys - device movement
+			// Arrow keys - device movement (1U or device height)
 			{
 				key: 'ArrowUp',
 				action: () => moveSelectedDevice(1)
@@ -120,6 +120,18 @@
 			{
 				key: 'ArrowDown',
 				action: () => moveSelectedDevice(-1)
+			},
+
+			// Shift+Arrow keys - fine device movement (0.5U)
+			{
+				key: 'ArrowUp',
+				shift: true,
+				action: () => moveSelectedDevice(1, 0.5)
+			},
+			{
+				key: 'ArrowDown',
+				shift: true,
+				action: () => moveSelectedDevice(-1, 0.5)
 			},
 
 			// Arrow keys - rack reordering
@@ -209,8 +221,9 @@
 	/**
 	 * Move the selected device up or down, leapfrogging over blocking devices
 	 * @param direction - 1 for up (higher U), -1 for down (lower U)
+	 * @param stepOverride - Optional step size (default: device height). Use 0.5 for fine movement.
 	 */
-	function moveSelectedDevice(direction: number) {
+	function moveSelectedDevice(direction: number, stepOverride?: number) {
 		if (!selectionStore.isDeviceSelected) return;
 		if (selectionStore.selectedRackId === null || selectionStore.selectedDeviceIndex === null)
 			return;
@@ -225,8 +238,8 @@
 		const device = layoutStore.device_types.find((d) => d.slug === placedDevice.device_type);
 		if (!device) return;
 
-		// Movement increment equals device height (fixes Issue 2.1: 0.5U movement)
-		const moveIncrement = device.u_height;
+		// Movement increment: use override if provided, otherwise device height
+		const moveIncrement = stepOverride ?? device.u_height;
 		const isFullDepth = device.is_full_depth !== false;
 
 		// Try to find a valid position in the direction of movement

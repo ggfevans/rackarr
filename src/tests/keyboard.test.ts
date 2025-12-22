@@ -605,6 +605,129 @@ describe('KeyboardHandler Component', () => {
 		});
 	});
 
+	describe('Fine Movement (0.5U) with Shift+Arrow', () => {
+		it('Shift+ArrowUp moves device up by 0.5U', async () => {
+			const layoutStore = getLayoutStore();
+			const selectionStore = getSelectionStore();
+
+			layoutStore.addRack('Test Rack', 42);
+			const deviceType = layoutStore.addDeviceType({
+				name: 'Test Server',
+				u_height: 1,
+				category: 'server',
+				colour: CATEGORY_COLOURS.server
+			});
+			layoutStore.placeDevice('rack-0', deviceType.slug, 5);
+			selectionStore.selectDevice('rack-0', 0, deviceType.slug);
+
+			render(KeyboardHandler);
+
+			const initialPosition = layoutStore.rack!.devices[0]!.position;
+			await fireEvent.keyDown(window, { key: 'ArrowUp', shiftKey: true });
+
+			// Should move by 0.5U instead of full device height
+			expect(layoutStore.rack!.devices[0]!.position).toBe(initialPosition + 0.5);
+		});
+
+		it('Shift+ArrowDown moves device down by 0.5U', async () => {
+			const layoutStore = getLayoutStore();
+			const selectionStore = getSelectionStore();
+
+			layoutStore.addRack('Test Rack', 42);
+			const deviceType = layoutStore.addDeviceType({
+				name: 'Test Server',
+				u_height: 1,
+				category: 'server',
+				colour: CATEGORY_COLOURS.server
+			});
+			layoutStore.placeDevice('rack-0', deviceType.slug, 5);
+			selectionStore.selectDevice('rack-0', 0, deviceType.slug);
+
+			render(KeyboardHandler);
+
+			const initialPosition = layoutStore.rack!.devices[0]!.position;
+			await fireEvent.keyDown(window, { key: 'ArrowDown', shiftKey: true });
+
+			// Should move by 0.5U instead of full device height
+			expect(layoutStore.rack!.devices[0]!.position).toBe(initialPosition - 0.5);
+		});
+
+		it('Shift+ArrowDown does not move below 1U', async () => {
+			const layoutStore = getLayoutStore();
+			const selectionStore = getSelectionStore();
+
+			layoutStore.addRack('Test Rack', 42);
+			const deviceType = layoutStore.addDeviceType({
+				name: 'Test Server',
+				u_height: 1,
+				category: 'server',
+				colour: CATEGORY_COLOURS.server
+			});
+			layoutStore.placeDevice('rack-0', deviceType.slug, 1);
+			selectionStore.selectDevice('rack-0', 0, deviceType.slug);
+
+			render(KeyboardHandler);
+
+			await fireEvent.keyDown(window, { key: 'ArrowDown', shiftKey: true });
+
+			// Should stay at position 1 (cannot go below)
+			expect(layoutStore.rack!.devices[0]!.position).toBe(1);
+		});
+
+		it('Shift+Arrow still respects collision detection', async () => {
+			const layoutStore = getLayoutStore();
+			const selectionStore = getSelectionStore();
+
+			layoutStore.addRack('Test Rack', 42);
+			const deviceType = layoutStore.addDeviceType({
+				name: 'Test Server',
+				u_height: 1,
+				category: 'server',
+				colour: CATEGORY_COLOURS.server
+			});
+
+			// Place two adjacent devices
+			layoutStore.placeDevice('rack-0', deviceType.slug, 5);
+			layoutStore.placeDevice('rack-0', deviceType.slug, 6);
+
+			// Select the first device
+			selectionStore.selectDevice('rack-0', 0, deviceType.slug);
+
+			render(KeyboardHandler);
+
+			// Move up 0.5U - position 5.5 is valid (no collision with device at 6)
+			await fireEvent.keyDown(window, { key: 'ArrowUp', shiftKey: true });
+			expect(layoutStore.rack!.devices[0]!.position).toBe(5.5);
+
+			// Move up another 0.5U - position 6 is blocked, should leapfrog to 6.5
+			await fireEvent.keyDown(window, { key: 'ArrowUp', shiftKey: true });
+			expect(layoutStore.rack!.devices[0]!.position).toBe(6.5);
+		});
+
+		it('2U device with Shift+Arrow moves by 0.5U not 2U', async () => {
+			const layoutStore = getLayoutStore();
+			const selectionStore = getSelectionStore();
+
+			layoutStore.addRack('Test Rack', 42);
+			const deviceType = layoutStore.addDeviceType({
+				name: '2U Server',
+				u_height: 2,
+				category: 'server',
+				colour: CATEGORY_COLOURS.server
+			});
+			layoutStore.placeDevice('rack-0', deviceType.slug, 10);
+			selectionStore.selectDevice('rack-0', 0, deviceType.slug);
+
+			render(KeyboardHandler);
+
+			const initialPosition = layoutStore.rack!.devices[0]!.position;
+			await fireEvent.keyDown(window, { key: 'ArrowUp', shiftKey: true });
+
+			// Should move by 0.5U, not by device height (2U)
+			expect(layoutStore.rack!.devices[0]!.position).toBe(initialPosition + 0.5);
+		});
+	});
+
 	describe('Multi-U Device Movement', () => {
 		it('moves 2U device by 2U increments', async () => {
 			const layoutStore = getLayoutStore();

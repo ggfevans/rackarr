@@ -94,6 +94,9 @@
 	const imageX = $derived(showImage ? -IMAGE_OVERFLOW : 0);
 	const imageWidth = $derived(showImage ? deviceWidth + IMAGE_OVERFLOW * 2 : deviceWidth);
 
+	// Unique clipPath ID for this device instance
+	const clipId = $derived(`clip-${device.slug}-${position}`);
+
 	// Aria label for accessibility
 	const ariaLabel = $derived(
 		`${deviceName}, ${device.u_height}U ${device.category} at U${position}${selected ? ', selected' : ''}`
@@ -183,6 +186,12 @@
 
 	<!-- Device content: Image or Label -->
 	{#if showImage}
+		<!-- ClipPath for rounded corners on device image -->
+		<defs>
+			<clipPath id={clipId}>
+				<rect x={imageX} y="0" width={imageWidth} height={deviceHeight} rx="2" ry="2" />
+			</clipPath>
+		</defs>
 		<!-- Device image: extends past rack rails for realistic front-mounting appearance -->
 		<image
 			class="device-image"
@@ -192,6 +201,7 @@
 			height={deviceHeight}
 			href={deviceImageUrl}
 			preserveAspectRatio="xMidYMid slice"
+			clip-path="url(#{clipId})"
 		/>
 		<!-- Label overlay when showLabelsOnImages is true -->
 		{#if showLabelsOnImages}

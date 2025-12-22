@@ -405,6 +405,55 @@ describe('RackDevice SVG Component', () => {
 			// Image is positioned at negative x to extend past left rail
 			expect(image?.getAttribute('x')).toBe(String(-IMAGE_OVERFLOW));
 		});
+
+		it('image has clipPath with rounded corners for clean edges', () => {
+			const imageStore = getImageStore();
+			imageStore.setDeviceImage(mockDevice.slug, 'front', mockImageData);
+
+			const { container } = render(RackDevice, {
+				props: { ...defaultProps, displayMode: 'image', rackView: 'front' }
+			});
+
+			const image = container.querySelector('.device-image');
+			expect(image).not.toBeNull();
+
+			// Image should have a clip-path attribute
+			const clipPathAttr = image?.getAttribute('clip-path');
+			expect(clipPathAttr).not.toBeNull();
+			expect(clipPathAttr).toMatch(/url\(#clip-/);
+
+			// ClipPath element should exist in the SVG
+			const clipPathId = clipPathAttr?.match(/url\(#(.+)\)/)?.[1];
+			expect(clipPathId).toBeDefined();
+			const clipPath = container.querySelector(`#${clipPathId}`);
+			expect(clipPath).not.toBeNull();
+
+			// ClipPath should contain a rect with rounded corners
+			const clipRect = clipPath?.querySelector('rect');
+			expect(clipRect).not.toBeNull();
+			expect(clipRect?.getAttribute('rx')).toBe('2');
+			expect(clipRect?.getAttribute('ry')).toBe('2');
+		});
+
+		it('clipPath bounds image to device dimensions with overflow', () => {
+			const imageStore = getImageStore();
+			imageStore.setDeviceImage(mockDevice.slug, 'front', mockImageData);
+
+			const { container } = render(RackDevice, {
+				props: { ...defaultProps, displayMode: 'image', rackView: 'front' }
+			});
+
+			const image = container.querySelector('.device-image');
+			const clipPathId = image?.getAttribute('clip-path')?.match(/url\(#(.+)\)/)?.[1];
+			const clipRect = container.querySelector(`#${clipPathId} rect`);
+
+			// ClipPath rect should match the image dimensions (with overflow)
+			const expectedWidth = RACK_WIDTH - RAIL_WIDTH * 2 + IMAGE_OVERFLOW * 2;
+			expect(clipRect?.getAttribute('x')).toBe(String(-IMAGE_OVERFLOW));
+			expect(clipRect?.getAttribute('y')).toBe('0');
+			expect(clipRect?.getAttribute('width')).toBe(String(expectedWidth));
+			expect(clipRect?.getAttribute('height')).toBe(String(U_HEIGHT));
+		});
 	});
 
 	describe('Label Overlay', () => {

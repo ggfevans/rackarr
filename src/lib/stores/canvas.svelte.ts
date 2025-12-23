@@ -7,6 +7,15 @@ import type panzoom from 'panzoom';
 import type { Rack } from '$lib/types';
 import { calculateFitAll, racksToPositions } from '$lib/utils/canvas';
 import { debug } from '$lib/utils/debug';
+import {
+	U_HEIGHT_PX,
+	BASE_RACK_WIDTH,
+	RAIL_WIDTH,
+	BASE_RACK_PADDING,
+	RACK_ROW_PADDING,
+	DUAL_VIEW_GAP,
+	DUAL_VIEW_EXTRA_HEIGHT
+} from '$lib/constants/layout';
 
 // Panzoom constants
 export const ZOOM_MIN = 0.25; // 25% - allows fitting 6+ large racks
@@ -276,26 +285,18 @@ function zoomToDevice(rack: Rack, deviceIndex: number, deviceTypes: import('$lib
 	const deviceType = deviceTypes.find((dt) => dt.slug === device.device_type);
 	if (!deviceType) return;
 
-	// Rack rendering constants (must match canvas.ts and Rack.svelte)
-	const U_HEIGHT = 22;
-	const RACK_WIDTH = 220;
-	const RAIL_WIDTH = 17;
-	const RACK_PADDING = 18;
-	const DUAL_VIEW_EXTRA_HEIGHT = 56;
-	const RACK_ROW_PADDING = 16;
-	const DUAL_VIEW_GAP = 24;
-
 	// Calculate device position in SVG coordinates
 	// Device Y position: from top of SVG viewBox
 	const rackHeight = rack.height;
-	const deviceYInRack = (rackHeight - device.position - deviceType.u_height + 1) * U_HEIGHT;
-	const deviceHeight = deviceType.u_height * U_HEIGHT;
+	const deviceYInRack = (rackHeight - device.position - deviceType.u_height + 1) * U_HEIGHT_PX;
+	const deviceHeight = deviceType.u_height * U_HEIGHT_PX;
 
 	// Device absolute Y: includes rack padding, top rail, and dual-view extra height
-	const deviceAbsY = RACK_ROW_PADDING + DUAL_VIEW_EXTRA_HEIGHT + RACK_PADDING + RAIL_WIDTH + deviceYInRack;
+	const deviceAbsY =
+		RACK_ROW_PADDING + DUAL_VIEW_EXTRA_HEIGHT + BASE_RACK_PADDING + RAIL_WIDTH + deviceYInRack;
 
 	// Device X position: centered between two rack views in dual-view mode
-	const dualViewWidth = RACK_WIDTH * 2 + DUAL_VIEW_GAP;
+	const dualViewWidth = BASE_RACK_WIDTH * 2 + DUAL_VIEW_GAP;
 	const deviceAbsX = RACK_ROW_PADDING + dualViewWidth / 2;
 
 	// Get viewport dimensions

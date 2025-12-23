@@ -4,25 +4,28 @@
   Click anywhere to create a new rack
 -->
 <script lang="ts">
+	import {
+		U_HEIGHT_PX,
+		BASE_RACK_WIDTH,
+		RAIL_WIDTH,
+		BASE_RACK_PADDING
+	} from '$lib/constants/layout';
+
 	interface Props {
 		onclick?: () => void;
 	}
 
 	let { onclick }: Props = $props();
 
-	// Match Rack.svelte dimensions exactly
-	const U_HEIGHT = 22;
-	const RACK_WIDTH = 220;
-	const RAIL_WIDTH = 17;
-	const RACK_PADDING = 18;
+	// Welcome screen shows a 42U rack (standard full-height rack)
 	const RACK_HEIGHT = 42;
-	const totalHeight = RACK_HEIGHT * U_HEIGHT; // 924
-	const interiorWidth = RACK_WIDTH - RAIL_WIDTH * 2; // 186
+	const totalHeight = RACK_HEIGHT * U_HEIGHT_PX;
+	const interiorWidth = BASE_RACK_WIDTH - RAIL_WIDTH * 2;
 
 	// Generate U labels (highest number at top, ascending from bottom)
 	const uLabels = Array.from({ length: RACK_HEIGHT }, (_, i) => ({
 		uNumber: RACK_HEIGHT - i,
-		yPosition: i * U_HEIGHT + U_HEIGHT / 2 + RACK_PADDING + RAIL_WIDTH
+		yPosition: i * U_HEIGHT_PX + U_HEIGHT_PX / 2 + BASE_RACK_PADDING + RAIL_WIDTH
 	}));
 
 	function handleClick() {
@@ -48,26 +51,26 @@
 	<!-- Ghostly 42U rack background (matching Rack.svelte dimensions) -->
 	<svg
 		class="ghost-rack"
-		viewBox="0 0 {RACK_WIDTH} {RACK_PADDING + RAIL_WIDTH * 2 + totalHeight}"
+		viewBox="0 0 {BASE_RACK_WIDTH} {BASE_RACK_PADDING + RAIL_WIDTH * 2 + totalHeight}"
 		aria-hidden="true"
 	>
 		<!-- Rack interior -->
 		<rect
 			x={RAIL_WIDTH}
-			y={RACK_PADDING + RAIL_WIDTH}
+			y={BASE_RACK_PADDING + RAIL_WIDTH}
 			width={interiorWidth}
 			height={totalHeight}
 			class="rack-interior"
 		/>
 
 		<!-- Top bar (horizontal) -->
-		<rect x="0" y={RACK_PADDING} width={RACK_WIDTH} height={RAIL_WIDTH} class="rack-rail" />
+		<rect x="0" y={BASE_RACK_PADDING} width={BASE_RACK_WIDTH} height={RAIL_WIDTH} class="rack-rail" />
 
 		<!-- Bottom bar (horizontal) -->
 		<rect
 			x="0"
-			y={RACK_PADDING + RAIL_WIDTH + totalHeight}
-			width={RACK_WIDTH}
+			y={BASE_RACK_PADDING + RAIL_WIDTH + totalHeight}
+			width={BASE_RACK_WIDTH}
 			height={RAIL_WIDTH}
 			class="rack-rail"
 		/>
@@ -75,7 +78,7 @@
 		<!-- Left rail (vertical) -->
 		<rect
 			x="0"
-			y={RACK_PADDING + RAIL_WIDTH}
+			y={BASE_RACK_PADDING + RAIL_WIDTH}
 			width={RAIL_WIDTH}
 			height={totalHeight}
 			class="rack-rail"
@@ -83,8 +86,8 @@
 
 		<!-- Right rail (vertical) -->
 		<rect
-			x={RACK_WIDTH - RAIL_WIDTH}
-			y={RACK_PADDING + RAIL_WIDTH}
+			x={BASE_RACK_WIDTH - RAIL_WIDTH}
+			y={BASE_RACK_PADDING + RAIL_WIDTH}
 			width={RAIL_WIDTH}
 			height={totalHeight}
 			class="rack-rail"
@@ -94,9 +97,9 @@
 		{#each Array(RACK_HEIGHT + 1) as _, i (i)}
 			<line
 				x1={RAIL_WIDTH}
-				y1={i * U_HEIGHT + RACK_PADDING + RAIL_WIDTH}
-				x2={RACK_WIDTH - RAIL_WIDTH}
-				y2={i * U_HEIGHT + RACK_PADDING + RAIL_WIDTH}
+				y1={i * U_HEIGHT_PX + BASE_RACK_PADDING + RAIL_WIDTH}
+				x2={BASE_RACK_WIDTH - RAIL_WIDTH}
+				y2={i * U_HEIGHT_PX + BASE_RACK_PADDING + RAIL_WIDTH}
 				class="rack-line"
 			/>
 		{/each}

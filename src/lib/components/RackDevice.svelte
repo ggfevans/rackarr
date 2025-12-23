@@ -10,6 +10,7 @@
 	import { getImageStore } from '$lib/stores/images.svelte';
 	import { getViewportStore } from '$lib/utils/viewport.svelte';
 	import { useLongPress } from '$lib/utils/gestures';
+	import { RAIL_WIDTH } from '$lib/constants/layout';
 
 	interface Props {
 		device: DeviceType;
@@ -76,9 +77,6 @@
 
 	// Drag handle element ref for long-press
 	let dragHandleElement: HTMLDivElement | null = $state(null);
-
-	// Rail width (matches Rack.svelte)
-	const RAIL_WIDTH = 17;
 
 	// Image overflow: how far device images extend past rack rails (Issue #9)
 	// Real equipment extends past the rails; this creates realistic front-mounting appearance

@@ -5,17 +5,18 @@
  */
 
 import type { Rack } from '$lib/types';
-
-// Rack rendering constants (must match Rack.svelte and Canvas.svelte)
-const U_HEIGHT = 22;
-const RACK_WIDTH = 220;
-const RAIL_WIDTH = 17; // Width of rails and top/bottom bars
-const RACK_PADDING = 18; // Space at top for rack name (must match Rack.svelte)
-const RACK_GAP = 24; // Gap between racks (unused in v0.1.1 single-rack mode)
-const RACK_ROW_PADDING = 16; // Padding around rack-row
-const DUAL_VIEW_GAP = 24; // Gap between front/rear views in dual-view mode (--spacing-lg)
-// Dual-view wrapper adds extra height: padding (12+12) + gap (8) + name (~20) + margin (4) = ~56px
-const DUAL_VIEW_EXTRA_HEIGHT = 56;
+import {
+	U_HEIGHT_PX,
+	BASE_RACK_WIDTH,
+	RAIL_WIDTH,
+	BASE_RACK_PADDING,
+	RACK_GAP,
+	RACK_ROW_PADDING,
+	DUAL_VIEW_GAP,
+	DUAL_VIEW_EXTRA_HEIGHT,
+	FIT_ALL_PADDING,
+	FIT_ALL_MAX_ZOOM
+} from '$lib/constants/layout';
 
 /**
  * Bounding box interface
@@ -46,15 +47,7 @@ export interface FitAllResult {
 	panY: number;
 }
 
-/**
- * Padding around content for fit-all calculation (in pixels)
- */
-const FIT_ALL_PADDING = 48;
-
-/**
- * Maximum zoom level for fit-all
- */
-const FIT_ALL_MAX_ZOOM = 2;
+// FIT_ALL_PADDING and FIT_ALL_MAX_ZOOM imported from layout constants
 
 /**
  * Calculate the bounding box that encompasses all racks.
@@ -169,15 +162,15 @@ export function racksToPositions(racks: Rack[]): RackPosition[] {
 	const sorted = [...racks].sort((a, b) => a.position - b.position);
 
 	// Calculate total rendered height
-	// SVG viewBoxHeight = RACK_PADDING + RAIL_WIDTH * 2 + rack.height * U_HEIGHT
+	// SVG viewBoxHeight = BASE_RACK_PADDING + RAIL_WIDTH * 2 + rack.height * U_HEIGHT_PX
 	// (rack name padding + top bar + U slots + bottom bar)
 	// Plus dual-view wrapper extra height (v0.4)
 	const getRackHeight = (rack: Rack) =>
-		RACK_PADDING + RAIL_WIDTH * 2 + rack.height * U_HEIGHT + DUAL_VIEW_EXTRA_HEIGHT;
+		BASE_RACK_PADDING + RAIL_WIDTH * 2 + rack.height * U_HEIGHT_PX + DUAL_VIEW_EXTRA_HEIGHT;
 
 	// v0.4: Dual-view mode shows two racks side by side
-	// Visual width = 2 * RACK_WIDTH + DUAL_VIEW_GAP
-	const getDualViewWidth = () => RACK_WIDTH * 2 + DUAL_VIEW_GAP;
+	// Visual width = 2 * BASE_RACK_WIDTH + DUAL_VIEW_GAP
+	const getDualViewWidth = () => BASE_RACK_WIDTH * 2 + DUAL_VIEW_GAP;
 
 	// Find max height for vertical alignment (single value in v0.1.1)
 	const maxHeight = Math.max(...sorted.map(getRackHeight));

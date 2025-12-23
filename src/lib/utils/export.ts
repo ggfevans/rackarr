@@ -12,22 +12,28 @@ import type {
 } from '$lib/types';
 import type { ImageStoreMap } from '$lib/types/images';
 import { getBlockedSlots } from './blocked-slots';
+import {
+	U_HEIGHT_PX,
+	BASE_RACK_WIDTH,
+	RAIL_WIDTH,
+	RACK_PADDING_HIDDEN
+} from '$lib/constants/layout';
 
 // Note: jsPDF is imported dynamically in exportAsPDF() to avoid loading
 // the large jsPDF + html2canvas bundle (~200KB) on app startup.
 // See issue #68 for details.
 
-// Constants matching Rack.svelte dimensions
-const U_HEIGHT = 22;
-const RACK_WIDTH = 220;
-const RAIL_WIDTH = 17;
-const RACK_PADDING = 4;
+// Aliases for export context (export uses hidden padding since view labels show rack name)
+const U_HEIGHT = U_HEIGHT_PX;
+const RACK_WIDTH = BASE_RACK_WIDTH;
+const RACK_PADDING = RACK_PADDING_HIDDEN;
 const RACK_GAP = 40;
 const LEGEND_PADDING = 20;
 const LEGEND_ITEM_HEIGHT = 24;
 const EXPORT_PADDING = 20;
 const RACK_NAME_HEIGHT = 18; // Space for rack name above rack
 const VIEW_LABEL_HEIGHT = 15; // Space for FRONT/REAR labels
+const RACK_BOTTOM_PADDING = 2; // Visual breathing room below bottom rail
 
 // QR Code export constants
 const QR_SIZE = 150; // Size of QR code in pixels for screen exports
@@ -386,7 +392,13 @@ export function generateExportSVG(
 		: isDualView
 			? VIEW_LABEL_HEIGHT // Just view labels
 			: 0;
-	const rackAreaHeight = maxRackHeight * U_HEIGHT + RACK_PADDING * 2 + headerSpace;
+	// Rack internal height: top padding + top rail + U slots + bottom rail + bottom padding
+	const rackAreaHeight =
+		maxRackHeight * U_HEIGHT +
+		RACK_PADDING +
+		RAIL_WIDTH * 2 +
+		RACK_BOTTOM_PADDING +
+		headerSpace;
 	const legendWidth = includeLegend ? 180 : 0;
 	const legendHeight = includeLegend
 		? usedDevices.length * LEGEND_ITEM_HEIGHT + LEGEND_PADDING * 2

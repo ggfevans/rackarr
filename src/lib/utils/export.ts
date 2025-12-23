@@ -516,19 +516,35 @@ export function generateExportSVG(
 			rackGroup.appendChild(line);
 		}
 
-		// Mounting holes on right rail (3 per U)
+		// Mounting holes on both rails (3 per U) - matches Rack.svelte exactly
 		const holeColor = isDark ? '#505050' : '#a0a0a0';
+		const leftHoleX = RAIL_WIDTH - 4;
+		const rightHoleX = RACK_WIDTH - RAIL_WIDTH + 1;
+
 		for (let i = 0; i < rack.height; i++) {
 			const baseY = i * U_HEIGHT + RACK_PADDING + RAIL_WIDTH + 4;
-			const holeX = RACK_WIDTH - RAIL_WIDTH + 2.5;
 
-			for (const offsetY of [0, 7, 14]) {
-				const hole = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
-				hole.setAttribute('cx', String(holeX));
-				hole.setAttribute('cy', String(baseY + offsetY));
-				hole.setAttribute('r', '2');
-				hole.setAttribute('fill', holeColor);
-				rackGroup.appendChild(hole);
+			// Three holes per U, matching canvas offsets: -2, 5, 12
+			for (const offsetY of [-2, 5, 12]) {
+				// Left rail holes
+				const leftHole = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+				leftHole.setAttribute('x', String(leftHoleX));
+				leftHole.setAttribute('y', String(baseY + offsetY));
+				leftHole.setAttribute('width', '3');
+				leftHole.setAttribute('height', '4');
+				leftHole.setAttribute('rx', '0.5');
+				leftHole.setAttribute('fill', holeColor);
+				rackGroup.appendChild(leftHole);
+
+				// Right rail holes
+				const rightHole = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+				rightHole.setAttribute('x', String(rightHoleX));
+				rightHole.setAttribute('y', String(baseY + offsetY));
+				rightHole.setAttribute('width', '3');
+				rightHole.setAttribute('height', '4');
+				rightHole.setAttribute('rx', '0.5');
+				rightHole.setAttribute('fill', holeColor);
+				rackGroup.appendChild(rightHole);
 			}
 		}
 

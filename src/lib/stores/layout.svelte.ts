@@ -25,6 +25,7 @@ import { findDeviceType } from '$lib/utils/device-lookup';
 import { debug } from '$lib/utils/debug';
 import { generateId } from '$lib/utils/device';
 import { getHistoryStore } from './history.svelte';
+import { getImageStore } from './images.svelte';
 import {
 	createAddDeviceTypeCommand,
 	createUpdateDeviceTypeCommand,
@@ -548,6 +549,9 @@ function removeDeviceTypeRaw(slug: string): void {
 			devices: layout.rack.devices.filter((d) => d.device_type !== slug)
 		}
 	};
+
+	// Clean up associated images to prevent memory leaks
+	getImageStore().removeAllDeviceImages(slug);
 }
 
 /**

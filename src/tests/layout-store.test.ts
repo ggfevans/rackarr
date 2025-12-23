@@ -1,5 +1,6 @@
 import { describe, it, expect, beforeEach } from 'vitest';
 import { getLayoutStore, resetLayoutStore } from '$lib/stores/layout.svelte';
+import { getImageStore, resetImageStore } from '$lib/stores/images.svelte';
 import type { Layout } from '$lib/types';
 import { VERSION } from '$lib/version';
 
@@ -357,6 +358,40 @@ describe('Layout Store (v0.2)', () => {
 			store.markClean();
 			store.deleteDeviceType(deviceType.slug);
 			expect(store.isDirty).toBe(true);
+		});
+
+		it('cleans up associated images from image store (Issue #147)', () => {
+			const store = getLayoutStore();
+			resetImageStore();
+			const imageStore = getImageStore();
+
+			const deviceType = store.addDeviceType({
+				name: 'Device With Image',
+				u_height: 2,
+				category: 'server',
+				colour: '#4A90D9'
+			});
+
+			// Add images for the device type
+			imageStore.setDeviceImage(deviceType.slug, 'front', {
+				dataUrl: 'data:image/png;base64,test',
+				filename: 'front.png'
+			});
+			imageStore.setDeviceImage(deviceType.slug, 'rear', {
+				dataUrl: 'data:image/png;base64,test',
+				filename: 'rear.png'
+			});
+
+			// Verify images exist
+			expect(imageStore.hasImage(deviceType.slug, 'front')).toBe(true);
+			expect(imageStore.hasImage(deviceType.slug, 'rear')).toBe(true);
+
+			// Delete the device type
+			store.deleteDeviceType(deviceType.slug);
+
+			// Images should be cleaned up
+			expect(imageStore.hasImage(deviceType.slug, 'front')).toBe(false);
+			expect(imageStore.hasImage(deviceType.slug, 'rear')).toBe(false);
 		});
 	});
 

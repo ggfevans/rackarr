@@ -75,7 +75,13 @@
 	let firstFocusableRef: HTMLButtonElement | null = $state(null);
 
 	const viewportStore = getViewportStore();
-	const displayModeLabel = $derived(displayMode === 'label' ? 'Label Mode' : 'Image Mode');
+	// Display mode labels for the 3-way toggle (prefixed with "View:" to indicate current state)
+	const displayModeLabels: Record<DisplayMode, string> = {
+		label: 'View: Label',
+		image: 'View: Image',
+		'image-label': 'View: Both'
+	};
+	const displayModeLabel = $derived(displayModeLabels[displayMode]);
 
 	function handleAction(action: (() => void) | undefined) {
 		if (action) {

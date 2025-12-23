@@ -62,11 +62,11 @@
 		onhelp
 	}: Props = $props();
 
-	// Display mode labels for the 3-way toggle
+	// Display mode labels for the 3-way toggle (prefixed with "View:" to indicate current state)
 	const displayModeLabels: Record<DisplayMode, string> = {
-		label: 'Label',
-		image: 'Image',
-		'image-label': 'Image+Label'
+		label: 'View: Label',
+		image: 'View: Image',
+		'image-label': 'View: Both'
 	};
 	const displayModeLabel = $derived(displayModeLabels[displayMode]);
 

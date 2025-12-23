@@ -111,7 +111,7 @@ describe('ToolbarDrawer Component', () => {
 		it('renders view group with display mode, reset view, about', () => {
 			render(ToolbarDrawer, { props: { open: true } });
 
-			expect(screen.getByRole('button', { name: /mode/i })).toBeInTheDocument();
+			expect(screen.getByRole('button', { name: /view:/i })).toBeInTheDocument();
 			expect(screen.getByRole('button', { name: /reset view/i })).toBeInTheDocument();
 			expect(screen.getByRole('button', { name: /about/i })).toBeInTheDocument();
 		});

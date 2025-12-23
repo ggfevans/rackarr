@@ -212,7 +212,9 @@
 			deviceLibrary,
 			dragData.device.u_height,
 			targetU,
-			excludeIndex
+			excludeIndex,
+			effectiveFaceFilter,
+			dragData.device.is_full_depth ?? true
 		);
 
 		dropPreview = {
@@ -287,7 +289,9 @@
 			deviceLibrary,
 			dragData.device.u_height,
 			targetU,
-			excludeIndex
+			excludeIndex,
+			effectiveFaceFilter,
+			dragData.device.is_full_depth ?? true
 		);
 
 		if (feedback === 'valid') {

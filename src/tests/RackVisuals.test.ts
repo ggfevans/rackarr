@@ -193,7 +193,7 @@ describe('Rack Visual Enhancements', () => {
 	});
 
 	describe('Device Selection', () => {
-		it('only the device at the selected index shows selection highlight, not all devices of same type', () => {
+		it('only the device with selected ID shows selection highlight, not all devices of same type', () => {
 			// Create two devices with the same device_type (same device type)
 			const deviceType: DeviceType = {
 				slug: 'device-type-1',
@@ -206,18 +206,18 @@ describe('Rack Visual Enhancements', () => {
 			const rackWithDevices: RackType = {
 				...testRack,
 				devices: [
-					{ device_type: 'device-type-1', position: 5, face: 'front' },
-					{ device_type: 'device-type-1', position: 10, face: 'front' } // Same device_type, different position
+					{ id: 'uuid-1', device_type: 'device-type-1', position: 5, face: 'front' },
+					{ id: 'uuid-2', device_type: 'device-type-1', position: 10, face: 'front' } // Same device_type, different position
 				]
 			};
 
-			// Render with only device at index 0 selected
+			// Render with only the first device selected by ID
 			const { container } = render(Rack, {
 				props: {
 					rack: rackWithDevices,
 					deviceLibrary: [deviceType],
 					selected: false,
-					selectedDeviceIndex: 0 // Select the first device only
+					selectedDeviceId: 'uuid-1' // Select the first device only
 				}
 			});
 
@@ -232,7 +232,7 @@ describe('Rack Visual Enhancements', () => {
 			expect(selectionOutlines.length).toBe(1);
 		});
 
-		it('no devices are selected when selectedDeviceIndex is null', () => {
+		it('no devices are selected when selectedDeviceId is null', () => {
 			const deviceType: DeviceType = {
 				slug: 'device-type-1',
 				model: 'Test Server',
@@ -243,8 +243,8 @@ describe('Rack Visual Enhancements', () => {
 			const rackWithDevices: RackType = {
 				...testRack,
 				devices: [
-					{ device_type: 'device-type-1', position: 5, face: 'front' },
-					{ device_type: 'device-type-1', position: 10, face: 'front' }
+					{ id: 'uuid-1', device_type: 'device-type-1', position: 5, face: 'front' },
+					{ id: 'uuid-2', device_type: 'device-type-1', position: 10, face: 'front' }
 				]
 			};
 
@@ -253,7 +253,7 @@ describe('Rack Visual Enhancements', () => {
 					rack: rackWithDevices,
 					deviceLibrary: [deviceType],
 					selected: false,
-					selectedDeviceIndex: null
+					selectedDeviceId: null
 				}
 			});
 

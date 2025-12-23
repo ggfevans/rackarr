@@ -168,7 +168,8 @@ describe('EditPanel Visual Hierarchy', () => {
 				colour: '#2563eb'
 			});
 			layoutStore.placeDevice(RACK_ID, device.slug, 10);
-			selectionStore.selectDevice(RACK_ID, 0, device.slug);
+			const deviceId = layoutStore.rack!.devices[0]!.id;
+			selectionStore.selectDevice(RACK_ID, deviceId);
 
 			render(EditPanel);
 
@@ -190,7 +191,8 @@ describe('EditPanel Visual Hierarchy', () => {
 				colour: '#2563eb'
 			});
 			layoutStore.placeDevice(RACK_ID, device.slug, 10);
-			selectionStore.selectDevice(RACK_ID, 0, device.slug);
+			const deviceId = layoutStore.rack!.devices[0]!.id;
+			selectionStore.selectDevice(RACK_ID, deviceId);
 
 			render(EditPanel);
 
@@ -213,7 +215,8 @@ describe('EditPanel Visual Hierarchy', () => {
 				colour: '#2563eb'
 			});
 			layoutStore.placeDevice(RACK_ID, device.slug, 10);
-			selectionStore.selectDevice(RACK_ID, 0, device.slug);
+			const deviceId = layoutStore.rack!.devices[0]!.id;
+			selectionStore.selectDevice(RACK_ID, deviceId);
 
 			render(EditPanel);
 

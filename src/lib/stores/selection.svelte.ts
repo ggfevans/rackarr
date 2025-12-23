@@ -1,19 +1,24 @@
 /**
  * Selection Store
  * Manages selection state for racks and devices using Svelte 5 runes
+ *
+ * v0.5.1: Switched to UUID-based device tracking for stability
+ * - Devices are now tracked by unique ID instead of array index
+ * - Selection remains valid after device additions/deletions
  */
+
+import type { PlacedDevice } from '$lib/types';
 
 // Selection types
 type SelectionType = 'rack' | 'device' | null;
 
 // Module-level state (using $state rune)
-let selectedId = $state<string | null>(null);
 let selectedType = $state<SelectionType>(null);
 let selectedRackId = $state<string | null>(null);
-let selectedDeviceIndex = $state<number | null>(null);
+let selectedDeviceId = $state<string | null>(null);
 
 // Derived values (using $derived rune)
-const hasSelection = $derived(selectedId !== null);
+const hasSelection = $derived(selectedType !== null);
 const isRackSelected = $derived(selectedType === 'rack');
 const isDeviceSelected = $derived(selectedType === 'device');
 
@@ -21,10 +26,9 @@ const isDeviceSelected = $derived(selectedType === 'device');
  * Reset the store to initial state (primarily for testing)
  */
 export function resetSelectionStore(): void {
-	selectedId = null;
 	selectedType = null;
 	selectedRackId = null;
-	selectedDeviceIndex = null;
+	selectedDeviceId = null;
 }
 
 /**
@@ -34,17 +38,14 @@ export function resetSelectionStore(): void {
 export function getSelectionStore() {
 	return {
 		// State getters
-		get selectedId() {
-			return selectedId;
-		},
 		get selectedType() {
 			return selectedType;
 		},
 		get selectedRackId() {
 			return selectedRackId;
 		},
-		get selectedDeviceIndex() {
-			return selectedDeviceIndex;
+		get selectedDeviceId() {
+			return selectedDeviceId;
 		},
 
 		// Derived getters
@@ -61,7 +62,10 @@ export function getSelectionStore() {
 		// Actions
 		selectRack,
 		selectDevice,
-		clearSelection
+		clearSelection,
+
+		// Helpers
+		getSelectedDeviceIndex
 	};
 }
 
@@ -70,31 +74,38 @@ export function getSelectionStore() {
  * @param rackId - ID of the rack to select
  */
 function selectRack(rackId: string): void {
-	selectedId = rackId;
 	selectedType = 'rack';
-	selectedRackId = null;
-	selectedDeviceIndex = null;
+	selectedRackId = rackId;
+	selectedDeviceId = null;
 }
 
 /**
  * Select a device within a rack
  * @param rackId - ID of the rack containing the device
- * @param deviceIndex - Index of the device in the rack's devices array
- * @param deviceLibraryId - Library ID of the device
+ * @param deviceId - Unique ID of the placed device (UUID)
  */
-function selectDevice(rackId: string, deviceIndex: number, deviceLibraryId: string): void {
-	selectedId = deviceLibraryId;
+function selectDevice(rackId: string, deviceId: string): void {
 	selectedType = 'device';
 	selectedRackId = rackId;
-	selectedDeviceIndex = deviceIndex;
+	selectedDeviceId = deviceId;
 }
 
 /**
  * Clear the current selection
  */
 function clearSelection(): void {
-	selectedId = null;
 	selectedType = null;
 	selectedRackId = null;
-	selectedDeviceIndex = null;
+	selectedDeviceId = null;
+}
+
+/**
+ * Get the index of the currently selected device in the devices array
+ * @param devices - Array of placed devices to search
+ * @returns The index of the selected device, or null if not found
+ */
+function getSelectedDeviceIndex(devices: PlacedDevice[]): number | null {
+	if (!selectedDeviceId) return null;
+	const index = devices.findIndex((d) => d.id === selectedDeviceId);
+	return index >= 0 ? index : null;
 }

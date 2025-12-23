@@ -147,14 +147,14 @@
 	}
 
 	function handleDeviceSelect(event: CustomEvent<{ slug: string; position: number }>) {
-		// Find the device index in the rack (single-rack mode)
+		// Find the device by slug and position, then select by ID (UUID-based tracking)
 		const currentRack = layoutStore.rack;
 		if (currentRack) {
-			const deviceIndex = currentRack.devices.findIndex(
+			const device = currentRack.devices.find(
 				(d) => d.device_type === event.detail.slug && d.position === event.detail.position
 			);
-			if (deviceIndex !== -1) {
-				selectionStore.selectDevice(RACK_ID, deviceIndex, event.detail.slug);
+			if (device) {
+				selectionStore.selectDevice(RACK_ID, device.id);
 			}
 		}
 		ondeviceselect?.(event);
@@ -220,10 +220,10 @@
 				<RackDualView
 					{rack}
 					deviceLibrary={layoutStore.device_types}
-					selected={selectionStore.selectedType === 'rack' && selectionStore.selectedId === RACK_ID}
-					selectedDeviceIndex={selectionStore.selectedType === 'device' &&
+					selected={selectionStore.selectedType === 'rack' && selectionStore.selectedRackId === RACK_ID}
+					selectedDeviceId={selectionStore.selectedType === 'device' &&
 					selectionStore.selectedRackId === RACK_ID
-						? selectionStore.selectedDeviceIndex
+						? selectionStore.selectedDeviceId
 						: null}
 					displayMode={uiStore.displayMode}
 					showLabelsOnImages={uiStore.showLabelsOnImages}

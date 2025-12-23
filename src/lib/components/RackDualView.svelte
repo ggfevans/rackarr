@@ -14,8 +14,8 @@
 		rack: RackType;
 		deviceLibrary: DeviceType[];
 		selected: boolean;
-		/** Index of the selected device in the rack's devices array */
-		selectedDeviceIndex?: number | null;
+		/** ID of the selected device (UUID-based tracking) */
+		selectedDeviceId?: string | null;
 		displayMode?: DisplayMode;
 		showLabelsOnImages?: boolean;
 		/** Party mode visual effects active */
@@ -47,7 +47,7 @@
 		rack,
 		deviceLibrary,
 		selected,
-		selectedDeviceIndex = null,
+		selectedDeviceId = null,
 		displayMode = 'label',
 		showLabelsOnImages = false,
 		partyMode = false,
@@ -122,7 +122,7 @@
 				{rack}
 				{deviceLibrary}
 				selected={false}
-				{selectedDeviceIndex}
+				{selectedDeviceId}
 				{displayMode}
 				{showLabelsOnImages}
 				{partyMode}
@@ -143,7 +143,7 @@
 				{rack}
 				{deviceLibrary}
 				selected={false}
-				{selectedDeviceIndex}
+				{selectedDeviceId}
 				{displayMode}
 				{showLabelsOnImages}
 				{partyMode}

@@ -417,7 +417,7 @@ import { getLayoutStore } from '$lib/stores/layout.svelte';
 	}
 
 	function handleDelete() {
-		if (selectionStore.isRackSelected && selectionStore.selectedId) {
+		if (selectionStore.isRackSelected && selectionStore.selectedRackId) {
 			// Single-rack mode
 			const rack = layoutStore.rack;
 			if (rack) {
@@ -425,11 +425,12 @@ import { getLayoutStore } from '$lib/stores/layout.svelte';
 				confirmDeleteOpen = true;
 			}
 		} else if (selectionStore.isDeviceSelected) {
-			if (selectionStore.selectedRackId !== null && selectionStore.selectedDeviceIndex !== null) {
+			if (selectionStore.selectedRackId !== null && selectionStore.selectedDeviceId !== null) {
 				// Single-rack mode
 				const rack = layoutStore.rack;
-				if (rack && rack.devices[selectionStore.selectedDeviceIndex]) {
-					const device = rack.devices[selectionStore.selectedDeviceIndex];
+				const deviceIndex = selectionStore.getSelectedDeviceIndex(rack?.devices ?? []);
+				if (rack && deviceIndex !== null && rack.devices[deviceIndex]) {
+					const device = rack.devices[deviceIndex];
 					const deviceDef = layoutStore.device_types.find((d) => d.slug === device?.device_type);
 					deleteTarget = { type: 'device', name: deviceDef?.model ?? deviceDef?.slug ?? 'Device' };
 					confirmDeleteOpen = true;
@@ -439,14 +440,16 @@ import { getLayoutStore } from '$lib/stores/layout.svelte';
 	}
 
 	function handleConfirmDelete() {
-		if (deleteTarget?.type === 'rack' && selectionStore.selectedId) {
-			layoutStore.deleteRack(selectionStore.selectedId);
+		if (deleteTarget?.type === 'rack' && selectionStore.selectedRackId) {
+			layoutStore.deleteRack(selectionStore.selectedRackId);
 			selectionStore.clearSelection();
 		} else if (deleteTarget?.type === 'device') {
-			if (selectionStore.selectedRackId !== null && selectionStore.selectedDeviceIndex !== null) {
+			const rack = layoutStore.rack;
+			const deviceIndex = selectionStore.getSelectedDeviceIndex(rack?.devices ?? []);
+			if (selectionStore.selectedRackId !== null && deviceIndex !== null) {
 				layoutStore.removeDeviceFromRack(
 					selectionStore.selectedRackId,
-					selectionStore.selectedDeviceIndex
+					deviceIndex
 				);
 				selectionStore.clearSelection();
 			}
@@ -562,7 +565,7 @@ import { getLayoutStore } from '$lib/stores/layout.svelte';
 	// Watch for device selection changes to trigger mobile bottom sheet
 	$effect(() => {
 		if (viewportStore.isMobile && selectionStore.isDeviceSelected) {
-			const deviceIndex = selectionStore.selectedDeviceIndex;
+			const deviceIndex = selectionStore.getSelectedDeviceIndex(layoutStore.rack?.devices ?? []);
 			console.log('[Mobile] Device selected:', { deviceIndex, hasRack: !!layoutStore.rack });
 			if (deviceIndex !== null && layoutStore.rack) {
 				selectedDeviceForSheet = deviceIndex;
@@ -702,7 +705,7 @@ import { getLayoutStore } from '$lib/stores/layout.svelte';
 		images={imageStore.getAllImages()}
 		displayMode={uiStore.displayMode}
 		layoutName={layoutStore.layout.name}
-		selectedRackId={selectionStore.isRackSelected ? selectionStore.selectedId : null}
+		selectedRackId={selectionStore.isRackSelected ? selectionStore.selectedRackId : null}
 		qrCodeDataUrl={exportQrCodeDataUrl}
 		onexport={(e) => handleExportSubmit(e.detail)}
 		oncancel={handleExportCancel}

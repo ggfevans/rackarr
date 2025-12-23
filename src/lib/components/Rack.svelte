@@ -25,8 +25,8 @@
 		rack: RackType;
 		deviceLibrary: DeviceType[];
 		selected: boolean;
-		/** Index of the selected device in the rack's devices array (null if no device selected) */
-		selectedDeviceIndex?: number | null;
+		/** ID of the selected device (UUID-based tracking, null if no device selected) */
+		selectedDeviceId?: string | null;
 		displayMode?: DisplayMode;
 		showLabelsOnImages?: boolean;
 		/** Filter devices by face - when set, overrides rack.view for filtering */
@@ -57,7 +57,7 @@
 		rack,
 		deviceLibrary,
 		selected,
-		selectedDeviceIndex = null,
+		selectedDeviceId = null,
 		displayMode = 'label',
 		showLabelsOnImages = false,
 		faceFilter,
@@ -514,7 +514,7 @@
 						rackHeight={rack.height}
 						rackId={RACK_ID}
 						deviceIndex={originalIndex}
-						selected={selectedDeviceIndex === originalIndex}
+						selected={selectedDeviceId === placedDevice.id}
 						uHeight={U_HEIGHT}
 						rackWidth={RACK_WIDTH}
 						{displayMode}

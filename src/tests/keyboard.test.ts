@@ -165,8 +165,9 @@ describe('KeyboardHandler Component', () => {
 			const rackId = 'rack-0';
 			layoutStore.placeDevice(rackId, deviceType.slug, 5);
 
-			// Select the device
-			selectionStore.selectDevice(rackId, 0, deviceType.slug);
+			// Select the device by ID
+			const deviceId = layoutStore.rack!.devices[0]!.id;
+			selectionStore.selectDevice(rackId, deviceId);
 
 			render(KeyboardHandler);
 
@@ -192,8 +193,9 @@ describe('KeyboardHandler Component', () => {
 			const rackId = 'rack-0';
 			layoutStore.placeDevice(rackId, deviceType.slug, 5);
 
-			// Select the device
-			selectionStore.selectDevice(rackId, 0, deviceType.slug);
+			// Select the device by ID
+			const deviceId = layoutStore.rack!.devices[0]!.id;
+			selectionStore.selectDevice(rackId, deviceId);
 
 			render(KeyboardHandler);
 
@@ -219,8 +221,9 @@ describe('KeyboardHandler Component', () => {
 			const rackId = 'rack-0';
 			layoutStore.placeDevice(rackId, deviceType.slug, 1);
 
-			// Select the device
-			selectionStore.selectDevice(rackId, 0, deviceType.slug);
+			// Select the device by ID
+			const deviceId = layoutStore.rack!.devices[0]!.id;
+			selectionStore.selectDevice(rackId, deviceId);
 
 			render(KeyboardHandler);
 
@@ -618,7 +621,8 @@ describe('KeyboardHandler Component', () => {
 				colour: CATEGORY_COLOURS.server
 			});
 			layoutStore.placeDevice('rack-0', deviceType.slug, 5);
-			selectionStore.selectDevice('rack-0', 0, deviceType.slug);
+			const deviceId = layoutStore.rack!.devices[0]!.id;
+			selectionStore.selectDevice('rack-0', deviceId);
 
 			render(KeyboardHandler);
 
@@ -641,7 +645,8 @@ describe('KeyboardHandler Component', () => {
 				colour: CATEGORY_COLOURS.server
 			});
 			layoutStore.placeDevice('rack-0', deviceType.slug, 5);
-			selectionStore.selectDevice('rack-0', 0, deviceType.slug);
+			const deviceId = layoutStore.rack!.devices[0]!.id;
+			selectionStore.selectDevice('rack-0', deviceId);
 
 			render(KeyboardHandler);
 
@@ -664,7 +669,8 @@ describe('KeyboardHandler Component', () => {
 				colour: CATEGORY_COLOURS.server
 			});
 			layoutStore.placeDevice('rack-0', deviceType.slug, 1);
-			selectionStore.selectDevice('rack-0', 0, deviceType.slug);
+			const deviceId = layoutStore.rack!.devices[0]!.id;
+			selectionStore.selectDevice('rack-0', deviceId);
 
 			render(KeyboardHandler);
 
@@ -688,10 +694,11 @@ describe('KeyboardHandler Component', () => {
 
 			// Place two adjacent devices
 			layoutStore.placeDevice('rack-0', deviceType.slug, 5);
+			const firstDeviceId = layoutStore.rack!.devices[0]!.id;
 			layoutStore.placeDevice('rack-0', deviceType.slug, 6);
 
-			// Select the first device
-			selectionStore.selectDevice('rack-0', 0, deviceType.slug);
+			// Select the first device by ID
+			selectionStore.selectDevice('rack-0', firstDeviceId);
 
 			render(KeyboardHandler);
 
@@ -716,7 +723,8 @@ describe('KeyboardHandler Component', () => {
 				colour: CATEGORY_COLOURS.server
 			});
 			layoutStore.placeDevice('rack-0', deviceType.slug, 10);
-			selectionStore.selectDevice('rack-0', 0, deviceType.slug);
+			const deviceId = layoutStore.rack!.devices[0]!.id;
+			selectionStore.selectDevice('rack-0', deviceId);
 
 			render(KeyboardHandler);
 
@@ -741,7 +749,8 @@ describe('KeyboardHandler Component', () => {
 				colour: CATEGORY_COLOURS.server
 			});
 			layoutStore.placeDevice('rack-0', deviceType.slug, 10);
-			selectionStore.selectDevice('rack-0', 0, deviceType.slug);
+			const deviceId = layoutStore.rack!.devices[0]!.id;
+			selectionStore.selectDevice('rack-0', deviceId);
 
 			render(KeyboardHandler);
 
@@ -766,11 +775,12 @@ describe('KeyboardHandler Component', () => {
 
 			// Place a device at position 5
 			layoutStore.placeDevice('rack-0', serverType.slug, 5);
+			const firstDeviceId = layoutStore.rack!.devices[0]!.id;
 			// Place another device at position 6 (blocking)
 			layoutStore.placeDevice('rack-0', serverType.slug, 6);
 
-			// Select the first device (at position 5)
-			selectionStore.selectDevice('rack-0', 0, serverType.slug);
+			// Select the first device (at position 5) by ID
+			selectionStore.selectDevice('rack-0', firstDeviceId);
 
 			render(KeyboardHandler);
 

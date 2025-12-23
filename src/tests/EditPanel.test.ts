@@ -59,8 +59,9 @@ describe('EditPanel Component', () => {
 			});
 			layoutStore.placeDevice(RACK_ID, device.slug, 1);
 
-			// Select the device
-			selectionStore.selectDevice(RACK_ID, 0, device.slug);
+			// Select the device by ID
+			const deviceId = layoutStore.rack!.devices[0]!.id;
+			selectionStore.selectDevice(RACK_ID, deviceId);
 
 			render(EditPanel);
 			const panel = screen.getByRole('complementary');
@@ -188,7 +189,8 @@ describe('EditPanel Component', () => {
 				comments: 'Some notes'
 			});
 			layoutStore.placeDevice(RACK_ID, device.slug, 5);
-			selectionStore.selectDevice(RACK_ID, 0, device.slug);
+			const deviceId = layoutStore.rack!.devices[0]!.id;
+			selectionStore.selectDevice(RACK_ID, deviceId);
 
 			render(EditPanel);
 
@@ -218,7 +220,8 @@ describe('EditPanel Component', () => {
 				notes: 'Important server notes'
 			});
 			layoutStore.placeDevice(RACK_ID, device.slug, 1);
-			selectionStore.selectDevice(RACK_ID, 0, device.slug);
+			const deviceId = layoutStore.rack!.devices[0]!.id;
+			selectionStore.selectDevice(RACK_ID, deviceId);
 
 			render(EditPanel);
 
@@ -238,7 +241,8 @@ describe('EditPanel Component', () => {
 				colour: '#4A90D9'
 			});
 			layoutStore.placeDevice(RACK_ID, device.slug, 1);
-			selectionStore.selectDevice(RACK_ID, 0, device.slug);
+			const deviceId = layoutStore.rack!.devices[0]!.id;
+			selectionStore.selectDevice(RACK_ID, deviceId);
 
 			render(EditPanel);
 
@@ -260,7 +264,8 @@ describe('EditPanel Component', () => {
 				colour: '#4A90D9'
 			});
 			layoutStore.placeDevice(RACK_ID, device.slug, 1);
-			selectionStore.selectDevice(RACK_ID, 0, device.slug);
+			const deviceId = layoutStore.rack!.devices[0]!.id;
+			selectionStore.selectDevice(RACK_ID, deviceId);
 
 			render(EditPanel);
 
@@ -285,7 +290,8 @@ describe('EditPanel Component', () => {
 			};
 			layoutStore.layout.device_types.push(deviceType);
 			layoutStore.placeDevice(RACK_ID, deviceType.slug, 1);
-			selectionStore.selectDevice(RACK_ID, 0, deviceType.slug);
+			const deviceId = layoutStore.rack!.devices[0]!.id;
+			selectionStore.selectDevice(RACK_ID, deviceId);
 
 			render(EditPanel);
 
@@ -311,7 +317,8 @@ describe('EditPanel Component', () => {
 			};
 			layoutStore.layout.device_types.push(deviceType);
 			layoutStore.placeDevice(RACK_ID, deviceType.slug, 1);
-			selectionStore.selectDevice(RACK_ID, 0, deviceType.slug);
+			const deviceId = layoutStore.rack!.devices[0]!.id;
+			selectionStore.selectDevice(RACK_ID, deviceId);
 
 			render(EditPanel);
 
@@ -336,7 +343,8 @@ describe('EditPanel Component', () => {
 			};
 			layoutStore.layout.device_types.push(deviceType);
 			layoutStore.placeDevice(RACK_ID, deviceType.slug, 1);
-			selectionStore.selectDevice(RACK_ID, 0, deviceType.slug);
+			const deviceId = layoutStore.rack!.devices[0]!.id;
+			selectionStore.selectDevice(RACK_ID, deviceId);
 
 			render(EditPanel);
 
@@ -362,7 +370,8 @@ describe('EditPanel Component', () => {
 			};
 			layoutStore.layout.device_types.push(deviceType);
 			layoutStore.placeDevice(RACK_ID, deviceType.slug, 1);
-			selectionStore.selectDevice(RACK_ID, 0, deviceType.slug);
+			const deviceId = layoutStore.rack!.devices[0]!.id;
+			selectionStore.selectDevice(RACK_ID, deviceId);
 
 			render(EditPanel);
 
@@ -388,7 +397,8 @@ describe('EditPanel Component', () => {
 			colour: '#4A90D9'
 		});
 		layoutStore.placeDevice(RACK_ID, device.slug, 1);
-		selectionStore.selectDevice(RACK_ID, 0, device.slug);
+		const deviceId = layoutStore.rack!.devices[0]!.id;
+		selectionStore.selectDevice(RACK_ID, deviceId);
 
 		const { getByLabelText } = render(EditPanel);
 		expect(getByLabelText(/mounted face/i)).toBeTruthy();
@@ -407,7 +417,8 @@ describe('EditPanel Component', () => {
 			colour: '#4A90D9'
 		});
 		layoutStore.placeDevice(RACK_ID, device.slug, 1);
-		selectionStore.selectDevice(RACK_ID, 0, device.slug);
+		const deviceId = layoutStore.rack!.devices[0]!.id;
+		selectionStore.selectDevice(RACK_ID, deviceId);
 
 		const { getByRole } = render(EditPanel);
 		const select = getByRole('combobox', { name: /mounted face/i });

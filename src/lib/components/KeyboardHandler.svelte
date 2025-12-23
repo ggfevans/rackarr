@@ -225,14 +225,18 @@
 	 */
 	function moveSelectedDevice(direction: number, stepOverride?: number) {
 		if (!selectionStore.isDeviceSelected) return;
-		if (selectionStore.selectedRackId === null || selectionStore.selectedDeviceIndex === null)
+		if (selectionStore.selectedRackId === null || selectionStore.selectedDeviceId === null)
 			return;
 
 		// Single-rack mode
 		const rack = layoutStore.rack;
 		if (!rack) return;
 
-		const placedDevice = rack.devices[selectionStore.selectedDeviceIndex];
+		// Get device index from ID (UUID-based tracking)
+		const deviceIndex = selectionStore.getSelectedDeviceIndex(rack.devices);
+		if (deviceIndex === null) return;
+
+		const placedDevice = rack.devices[deviceIndex];
 		if (!placedDevice) return;
 
 		const device = layoutStore.device_types.find((d) => d.slug === placedDevice.device_type);
@@ -253,7 +257,7 @@
 				layoutStore.device_types,
 				device.u_height,
 				newPosition,
-				selectionStore.selectedDeviceIndex!,
+				deviceIndex,
 				placedDevice.face,
 				isFullDepth
 			);
@@ -262,7 +266,7 @@
 				// Found a valid position, move there
 				layoutStore.moveDevice(
 					selectionStore.selectedRackId!,
-					selectionStore.selectedDeviceIndex!,
+					deviceIndex,
 					newPosition
 				);
 				return;
@@ -288,9 +292,9 @@
 	 * Duplicate the selected rack
 	 */
 	function duplicateSelectedRack() {
-		if (!selectionStore.isRackSelected || !selectionStore.selectedId) return;
+		if (!selectionStore.isRackSelected || !selectionStore.selectedRackId) return;
 
-		const result = layoutStore.duplicateRack(selectionStore.selectedId);
+		const result = layoutStore.duplicateRack(selectionStore.selectedRackId);
 		if (result.error) {
 			toastStore.showToast(result.error, 'error');
 		}

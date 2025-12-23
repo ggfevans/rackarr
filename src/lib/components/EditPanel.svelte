@@ -41,7 +41,7 @@
 
 	// Get the selected rack if any (single-rack mode)
 	const selectedRack = $derived.by(() => {
-		if (!selectionStore.isRackSelected || selectionStore.selectedId !== RACK_ID) return null;
+		if (!selectionStore.isRackSelected || selectionStore.selectedRackId !== RACK_ID) return null;
 		return layoutStore.rack;
 	});
 
@@ -51,25 +51,29 @@
 			device: DeviceType;
 			placedDevice: PlacedDevice;
 			rack: Rack;
+			deviceIndex: number;
 		} | null => {
 			if (!selectionStore.isDeviceSelected) return null;
 			if (
 				selectionStore.selectedRackId === null ||
-				selectionStore.selectedDeviceIndex === null ||
-				selectionStore.selectedId === null
+				selectionStore.selectedDeviceId === null
 			)
 				return null;
 
 			const rack = layoutStore.rack;
 			if (!rack) return null;
 
-			const placedDevice = rack.devices[selectionStore.selectedDeviceIndex];
+			// Find device by ID (UUID-based tracking)
+			const deviceIndex = selectionStore.getSelectedDeviceIndex(rack.devices);
+			if (deviceIndex === null) return null;
+
+			const placedDevice = rack.devices[deviceIndex];
 			if (!placedDevice) return null;
 
-			const device = layoutStore.device_types.find((d) => d.slug === selectionStore.selectedId);
+			const device = layoutStore.device_types.find((d) => d.slug === placedDevice.device_type);
 			if (!device) return null;
 
-			return { device, placedDevice, rack };
+			return { device, placedDevice, rack, deviceIndex };
 		}
 	);
 
@@ -164,10 +168,10 @@
 
 	// Remove device from rack
 	function handleRemoveDevice() {
-		if (selectionStore.selectedRackId !== null && selectionStore.selectedDeviceIndex !== null) {
+		if (selectedDeviceInfo) {
 			layoutStore.removeDeviceFromRack(
-				selectionStore.selectedRackId,
-				selectionStore.selectedDeviceIndex
+				selectionStore.selectedRackId!,
+				selectedDeviceInfo.deviceIndex
 			);
 			selectionStore.clearSelection();
 		}
@@ -175,10 +179,10 @@
 
 	// Update device face
 	function handleFaceChange(face: DeviceFace) {
-		if (selectionStore.selectedRackId !== null && selectionStore.selectedDeviceIndex !== null) {
+		if (selectedDeviceInfo) {
 			layoutStore.updateDeviceFace(
-				selectionStore.selectedRackId,
-				selectionStore.selectedDeviceIndex,
+				selectionStore.selectedRackId!,
+				selectedDeviceInfo.deviceIndex,
 				face
 			);
 		}
@@ -202,18 +206,14 @@
 
 	// Save device name
 	function saveDeviceName() {
-		if (
-			selectionStore.selectedRackId !== null &&
-			selectionStore.selectedDeviceIndex !== null &&
-			selectedDeviceInfo
-		) {
+		if (selectedDeviceInfo) {
 			const newName = deviceNameInput.trim();
 			const deviceName = selectedDeviceInfo.device.model ?? selectedDeviceInfo.device.slug;
 			// If same as device type name, clear the custom name
 			const nameToSave = newName === deviceName || newName === '' ? undefined : newName;
 			layoutStore.updateDeviceName(
-				selectionStore.selectedRackId,
-				selectionStore.selectedDeviceIndex,
+				selectionStore.selectedRackId!,
+				selectedDeviceInfo.deviceIndex,
 				nameToSave
 			);
 		}
@@ -231,17 +231,13 @@
 
 	// Update device notes
 	function handleDeviceNotesBlur() {
-		if (
-			selectionStore.selectedRackId !== null &&
-			selectionStore.selectedDeviceIndex !== null &&
-			selectedDeviceInfo
-		) {
+		if (selectedDeviceInfo) {
 			const trimmedNotes = deviceNotes.trim();
 			const notesToSave = trimmedNotes === '' ? undefined : trimmedNotes;
 			// Update via updateRack - modify the device in the rack's devices array
 			const updatedDevices = [...layoutStore.rack.devices];
-			updatedDevices[selectionStore.selectedDeviceIndex] = {
-				...updatedDevices[selectionStore.selectedDeviceIndex]!,
+			updatedDevices[selectedDeviceInfo.deviceIndex] = {
+				...updatedDevices[selectedDeviceInfo.deviceIndex]!,
 				notes: notesToSave
 			};
 			layoutStore.updateRack(RACK_ID, { devices: updatedDevices });

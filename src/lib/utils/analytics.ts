@@ -165,8 +165,9 @@ export function trackEvent<E extends keyof AnalyticsEvents>(
 		} else {
 			window.umami?.track(eventName);
 		}
-	} catch {
-		// Silently fail - analytics should never break the app
+	} catch (e) {
+		// Analytics errors should not break the app, but log for debugging
+		console.warn('[rackarr] Analytics tracking failed:', e);
 	}
 }
 

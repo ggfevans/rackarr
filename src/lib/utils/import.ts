@@ -122,7 +122,8 @@ export function parseDeviceLibraryImport(
 	// Parse JSON
 	try {
 		data = JSON.parse(json);
-	} catch {
+	} catch (e) {
+		console.warn('[rackarr] Failed to parse device library JSON:', e);
 		return { devices: [], skipped: 0 };
 	}
 

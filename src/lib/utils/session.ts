@@ -16,8 +16,9 @@ export function saveToSession(layout: Layout): void {
 	try {
 		const json = JSON.stringify(layout);
 		sessionStorage.setItem(STORAGE_KEY, json);
-	} catch {
+	} catch (e) {
 		// sessionStorage not available or quota exceeded
+		console.warn('[rackarr] Failed to save layout to sessionStorage:', e);
 	}
 }
 
@@ -41,8 +42,9 @@ export function loadFromSession(): Layout | null {
 		}
 
 		return result.data as Layout;
-	} catch {
+	} catch (e) {
 		// sessionStorage not available or invalid JSON
+		console.warn('[rackarr] Failed to load layout from sessionStorage:', e);
 		return null;
 	}
 }
@@ -53,8 +55,9 @@ export function loadFromSession(): Layout | null {
 export function clearSession(): void {
 	try {
 		sessionStorage.removeItem(STORAGE_KEY);
-	} catch {
+	} catch (e) {
 		// sessionStorage not available
+		console.warn('[rackarr] Failed to clear sessionStorage:', e);
 	}
 }
 

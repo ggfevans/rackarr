@@ -16,8 +16,9 @@ export function loadThemeFromStorage(): Theme {
 		if (stored === 'light' || stored === 'dark') {
 			return stored;
 		}
-	} catch {
+	} catch (e) {
 		// localStorage not available (SSR or privacy mode)
+		console.warn('[rackarr] Failed to load theme from localStorage:', e);
 	}
 	return 'dark';
 }
@@ -29,8 +30,9 @@ export function loadThemeFromStorage(): Theme {
 export function saveThemeToStorage(theme: Theme): void {
 	try {
 		localStorage.setItem(THEME_STORAGE_KEY, theme);
-	} catch {
+	} catch (e) {
 		// localStorage not available (SSR or privacy mode)
+		console.warn('[rackarr] Failed to save theme to localStorage:', e);
 	}
 }
 

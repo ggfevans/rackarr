@@ -624,7 +624,7 @@ function moveDeviceRaw(index: number, newPosition: number): boolean {
  * @param index - Device index
  * @param face - New face value
  */
-function updateDeviceFaceRaw(index: number, face: 'front' | 'rear'): void {
+function updateDeviceFaceRaw(index: number, face: DeviceFace): void {
 	if (index < 0 || index >= layout.rack.devices.length) return;
 
 	layout = {

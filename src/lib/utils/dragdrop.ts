@@ -3,7 +3,7 @@
  * Handles drag data, position calculation, and drop validation
  */
 
-import type { DeviceType, Rack } from '$lib/types';
+import type { DeviceType, DeviceFace, Rack } from '$lib/types';
 import { canPlaceDevice } from './collision';
 
 /**
@@ -67,6 +67,8 @@ export function calculateDropPosition(
  * @param deviceHeight - Height of device being dropped
  * @param targetU - Target U position
  * @param excludeIndex - Optional device index to exclude from collision check (for moves within same rack)
+ * @param targetFace - Target face for placement (defaults to 'front')
+ * @param isFullDepth - Whether the device being dropped is full-depth (defaults to true)
  * @returns Feedback: 'valid', 'invalid', or 'blocked'
  */
 export function getDropFeedback(
@@ -74,7 +76,9 @@ export function getDropFeedback(
 	deviceLibrary: DeviceType[],
 	deviceHeight: number,
 	targetU: number,
-	excludeIndex?: number
+	excludeIndex?: number,
+	targetFace: DeviceFace = 'front',
+	isFullDepth: boolean = true
 ): DropFeedback {
 	// Check bounds first
 	if (targetU < 1) {
@@ -85,8 +89,16 @@ export function getDropFeedback(
 		return 'invalid';
 	}
 
-	// Check for collisions
-	const canPlace = canPlaceDevice(rack, deviceLibrary, deviceHeight, targetU, excludeIndex);
+	// Check for collisions with face-aware validation
+	const canPlace = canPlaceDevice(
+		rack,
+		deviceLibrary,
+		deviceHeight,
+		targetU,
+		excludeIndex,
+		targetFace,
+		isFullDepth
+	);
 
 	if (!canPlace) {
 		return 'blocked';

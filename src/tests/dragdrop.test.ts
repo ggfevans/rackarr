@@ -152,6 +152,149 @@ describe('Drag and Drop Utilities', () => {
 		});
 	});
 
+	describe('getDropFeedback with face awareness (#168)', () => {
+		// Half-depth device for testing
+		const halfDepthDevice: DeviceType = {
+			slug: 'patch-panel',
+			model: 'Patch Panel',
+			u_height: 1,
+			colour: '#888888',
+			category: 'patch_panel',
+			is_full_depth: false
+		};
+
+		// Full-depth device for testing
+		const fullDepthDevice: DeviceType = {
+			slug: 'full-server',
+			model: 'Full Server',
+			u_height: 2,
+			colour: '#4A90D9',
+			category: 'server',
+			is_full_depth: true
+		};
+
+		const deviceLibrary: DeviceType[] = [halfDepthDevice, fullDepthDevice];
+
+		const emptyRack: Rack = {
+			name: 'Test Rack',
+			height: 12,
+			width: 19,
+			position: 0,
+			desc_units: false,
+			form_factor: '4-post',
+			starting_unit: 1,
+			devices: []
+		};
+
+		it('allows drop on rear when half-depth front device exists at same U', () => {
+			const rackWithFrontDevice: Rack = {
+				...emptyRack,
+				devices: [{ id: 'front-1', device_type: 'patch-panel', position: 5, face: 'front' }]
+			};
+
+			// Dropping half-depth device on rear at U5 should be valid
+			const feedback = getDropFeedback(
+				rackWithFrontDevice,
+				deviceLibrary,
+				1, // device height
+				5, // target U
+				undefined, // excludeIndex
+				'rear', // target face
+				false // is half-depth
+			);
+			expect(feedback).toBe('valid');
+		});
+
+		it('allows drop on front when half-depth rear device exists at same U', () => {
+			const rackWithRearDevice: Rack = {
+				...emptyRack,
+				devices: [{ id: 'rear-1', device_type: 'patch-panel', position: 5, face: 'rear' }]
+			};
+
+			// Dropping half-depth device on front at U5 should be valid
+			const feedback = getDropFeedback(
+				rackWithRearDevice,
+				deviceLibrary,
+				1,
+				5,
+				undefined,
+				'front',
+				false
+			);
+			expect(feedback).toBe('valid');
+		});
+
+		it('blocks drop on rear when full-depth front device exists at same U', () => {
+			const rackWithFullDepthDevice: Rack = {
+				...emptyRack,
+				devices: [{ id: 'front-full', device_type: 'full-server', position: 5, face: 'front' }]
+			};
+
+			// Dropping any device on rear at U5 should be blocked (full-depth occupies both faces)
+			const feedback = getDropFeedback(
+				rackWithFullDepthDevice,
+				deviceLibrary,
+				1,
+				5,
+				undefined,
+				'rear',
+				false
+			);
+			expect(feedback).toBe('blocked');
+		});
+
+		it('blocks drop when full-depth device dropped over half-depth device', () => {
+			const rackWithHalfDepthDevice: Rack = {
+				...emptyRack,
+				devices: [{ id: 'front-half', device_type: 'patch-panel', position: 5, face: 'front' }]
+			};
+
+			// Dropping full-depth device on rear at U5 should be blocked
+			const feedback = getDropFeedback(
+				rackWithHalfDepthDevice,
+				deviceLibrary,
+				1,
+				5,
+				undefined,
+				'rear',
+				true // full-depth device being dropped
+			);
+			expect(feedback).toBe('blocked');
+		});
+
+		it('blocks drop when half-depth devices overlap on same face', () => {
+			const rackWithFrontDevice: Rack = {
+				...emptyRack,
+				devices: [{ id: 'front-1', device_type: 'patch-panel', position: 5, face: 'front' }]
+			};
+
+			// Dropping half-depth device on front at U5 should be blocked (same face)
+			const feedback = getDropFeedback(
+				rackWithFrontDevice,
+				deviceLibrary,
+				1,
+				5,
+				undefined,
+				'front',
+				false
+			);
+			expect(feedback).toBe('blocked');
+		});
+
+		it('defaults to front face when targetFace not provided (backward compatibility)', () => {
+			const rackWithRearDevice: Rack = {
+				...emptyRack,
+				devices: [{ id: 'rear-1', device_type: 'patch-panel', position: 5, face: 'rear' }]
+			};
+
+			// Without face param, should default to 'front' and allow placement
+			// (rear device doesn't block front for half-depth)
+			const feedback = getDropFeedback(rackWithRearDevice, deviceLibrary, 1, 5);
+			// Note: Default isFullDepth=true means it will block rear device
+			expect(feedback).toBe('blocked');
+		});
+	});
+
 	describe('DragData interface', () => {
 		it('palette drag data has correct shape', () => {
 			const dragData: DragData = {

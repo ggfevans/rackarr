@@ -149,25 +149,51 @@ describe('Rack Mounting Holes Position (#134)', () => {
 			background: 'dark'
 		};
 
+		it('renders holes on both rails in export (matching canvas)', () => {
+			const svg = generateExportSVG([testRack], mockDeviceLibrary, defaultOptions);
+
+			// Export now uses rects (matching Rack.svelte)
+			// Find rects with rx="0.5" which are the mounting holes
+			const allRects = svg.querySelectorAll('rect[rx="0.5"]');
+			// 12U rack = 12 * 3 holes per side * 2 sides = 72 holes
+			expect(allRects.length).toBe(72);
+		});
+
+		it('positions left rail holes near inner edge in export', () => {
+			const svg = generateExportSVG([testRack], mockDeviceLibrary, defaultOptions);
+
+			// Get hole rects (those with rx="0.5")
+			const holes = svg.querySelectorAll('rect[rx="0.5"]');
+			expect(holes.length).toBeGreaterThan(0);
+
+			// First hole is left rail
+			const leftHole = holes[0] as SVGRectElement;
+			const holeX = parseFloat(leftHole.getAttribute('x') || '0');
+
+			// Left rail holes should be positioned 12-14px from outer edge
+			expect(holeX).toBeGreaterThanOrEqual(11);
+			expect(holeX).toBeLessThanOrEqual(15);
+		});
+
 		it('positions right rail holes near inner edge in export', () => {
 			const svg = generateExportSVG([testRack], mockDeviceLibrary, defaultOptions);
 
-			// Export uses circles for holes, not rects
-			const holes = svg.querySelectorAll('circle');
+			// Get hole rects (those with rx="0.5")
+			const holes = svg.querySelectorAll('rect[rx="0.5"]');
 			expect(holes.length).toBeGreaterThan(0);
 
-			// Get first hole's cx position
-			const firstHole = holes[0] as SVGCircleElement;
-			const holeCX = parseFloat(firstHole.getAttribute('cx') || '0');
+			// Second hole is right rail (holes rendered: left, right, left, right per offset)
+			const rightHole = holes[1] as SVGRectElement;
+			const holeX = parseFloat(rightHole.getAttribute('x') || '0');
 
 			// Right rail starts at RACK_WIDTH - RAIL_WIDTH = 203
-			// Holes should be near inner edge: cx should be between 203 and 208
+			// Holes should be near inner edge: x should be between 203 and 207
 			const rightRailInnerEdge = RACK_WIDTH - RAIL_WIDTH;
-			expect(holeCX).toBeGreaterThanOrEqual(rightRailInnerEdge);
-			expect(holeCX).toBeLessThanOrEqual(rightRailInnerEdge + 6);
+			expect(holeX).toBeGreaterThanOrEqual(rightRailInnerEdge);
+			expect(holeX).toBeLessThanOrEqual(rightRailInnerEdge + 6);
 		});
 
-		it('export holes are positioned consistently with interactive component', () => {
+		it('export holes are positioned identically to interactive component', () => {
 			// Render interactive component
 			const { container } = render(Rack, {
 				props: {
@@ -185,23 +211,18 @@ describe('Rack Mounting Holes Position (#134)', () => {
 			const interactiveHole = interactiveHoles[0] as SVGRectElement;
 			const interactiveX = parseFloat(interactiveHole.getAttribute('x') || '0');
 
-			// Get right rail hole from export
-			const exportHoles = svg.querySelectorAll('circle');
-			const exportHole = exportHoles[0] as SVGCircleElement;
-			const exportCX = parseFloat(exportHole.getAttribute('cx') || '0');
+			// Get left rail hole from export (first hole with rx="0.5")
+			const exportHoles = svg.querySelectorAll('rect[rx="0.5"]');
+			const exportHole = exportHoles[0] as SVGRectElement;
+			const exportX = parseFloat(exportHole.getAttribute('x') || '0');
 
-			// Both should be positioned near inner edge of their respective rails
-			// Interactive: left rail, near inner edge (x ~13)
-			// Export: right rail, near inner edge (cx ~204)
+			// Both should be at the same X position (left rail, near inner edge)
+			expect(exportX).toBe(interactiveX);
 
-			// Verify interactive left rail hole is near inner edge
-			expect(interactiveX).toBeGreaterThanOrEqual(11);
-			expect(interactiveX).toBeLessThanOrEqual(15);
-
-			// Verify export right rail hole is near inner edge
-			const rightRailInnerEdge = RACK_WIDTH - RAIL_WIDTH;
-			expect(exportCX).toBeGreaterThanOrEqual(rightRailInnerEdge);
-			expect(exportCX).toBeLessThanOrEqual(rightRailInnerEdge + 6);
+			// Both should use same dimensions
+			const interactiveWidth = parseFloat(interactiveHole.getAttribute('width') || '0');
+			const exportWidth = parseFloat(exportHole.getAttribute('width') || '0');
+			expect(exportWidth).toBe(interactiveWidth);
 		});
 	});
 });

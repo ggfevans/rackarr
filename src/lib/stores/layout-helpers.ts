@@ -64,8 +64,12 @@ export function createDeviceType(data: CreateDeviceTypeInput): DeviceType {
 	} else if (data.name) {
 		deviceType.model = data.name;
 	}
+	// Handle is_full_depth: explicit value takes precedence, otherwise default based on category
 	if (data.is_full_depth !== undefined) {
 		deviceType.is_full_depth = data.is_full_depth;
+	} else if (data.category === 'shelf') {
+		// Shelf devices span full rack depth by design
+		deviceType.is_full_depth = true;
 	}
 	if (data.weight !== undefined) {
 		deviceType.weight = data.weight;

@@ -250,6 +250,49 @@ describe('createDeviceType', () => {
 
 		expect(result.slug).toBe(`device-${mockTimestamp}`);
 	});
+
+	it('defaults is_full_depth to true for shelf category', () => {
+		const input: CreateDeviceTypeInput = {
+			name: '1U Shelf',
+			u_height: 1,
+			category: 'shelf',
+			colour: '#8BE9FD'
+		};
+
+		const result = createDeviceType(input);
+
+		// Shelf devices span full rack depth by design
+		expect(result.is_full_depth).toBe(true);
+	});
+
+	it('allows explicit is_full_depth override for shelf category', () => {
+		const input: CreateDeviceTypeInput = {
+			name: 'Half Depth Shelf',
+			u_height: 1,
+			category: 'shelf',
+			colour: '#8BE9FD',
+			is_full_depth: false
+		};
+
+		const result = createDeviceType(input);
+
+		// Explicit override should be respected
+		expect(result.is_full_depth).toBe(false);
+	});
+
+	it('does not auto-set is_full_depth for non-shelf categories', () => {
+		const input: CreateDeviceTypeInput = {
+			name: 'Server',
+			u_height: 2,
+			category: 'server',
+			colour: '#336699'
+		};
+
+		const result = createDeviceType(input);
+
+		// Non-shelf categories should not have is_full_depth auto-set
+		expect(result.is_full_depth).toBeUndefined();
+	});
 });
 
 // =============================================================================

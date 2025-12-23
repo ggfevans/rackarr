@@ -57,9 +57,9 @@ const STARTER_DEVICES: StarterDeviceSpec[] = [
 	{ name: '1U Blank', u_height: 1, category: 'blank', is_full_depth: false },
 	{ name: '2U Blank', u_height: 2, category: 'blank', is_full_depth: false },
 
-	// Shelf devices (2) - half-depth
-	{ name: '1U Shelf', u_height: 1, category: 'shelf', is_full_depth: false },
-	{ name: '2U Shelf', u_height: 2, category: 'shelf', is_full_depth: false },
+	// Shelf devices (2) - full depth (shelves span entire rack depth)
+	{ name: '1U Shelf', u_height: 1, category: 'shelf', is_full_depth: true },
+	{ name: '2U Shelf', u_height: 2, category: 'shelf', is_full_depth: true },
 
 	// Cable management (2) - half-depth
 	{ name: '1U Brush Panel', u_height: 1, category: 'cable-management', is_full_depth: false },

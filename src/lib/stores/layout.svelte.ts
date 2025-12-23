@@ -18,11 +18,10 @@ import { canPlaceDevice } from '$lib/utils/collision';
 import { createLayout, createRack } from '$lib/utils/serialization';
 import {
 	createDeviceType as createDeviceTypeHelper,
-	findDeviceType,
+	findDeviceType as findDeviceTypeInArray,
 	type CreateDeviceTypeInput
 } from '$lib/stores/layout-helpers';
-import { findBrandDevice } from '$lib/data/brandPacks';
-import { findStarterDevice } from '$lib/data/starterLibrary';
+import { findDeviceType } from '$lib/utils/device-lookup';
 import { debug } from '$lib/utils/debug';
 import { generateId } from '$lib/utils/device';
 import { getHistoryStore } from './history.svelte';
@@ -809,7 +808,7 @@ function addDeviceTypeRecorded(data: CreateDeviceTypeInput): DeviceType {
  * Update a device type with undo/redo support
  */
 function updateDeviceTypeRecorded(slug: string, updates: Partial<DeviceType>): void {
-	const existing = findDeviceType(layout.device_types, slug);
+	const existing = findDeviceTypeInArray(layout.device_types, slug);
 	if (!existing) return;
 
 	// Capture before state for the fields being updated
@@ -830,7 +829,7 @@ function updateDeviceTypeRecorded(slug: string, updates: Partial<DeviceType>): v
  * Delete a device type with undo/redo support
  */
 function deleteDeviceTypeRecorded(slug: string): void {
-	const existing = findDeviceType(layout.device_types, slug);
+	const existing = findDeviceTypeInArray(layout.device_types, slug);
 	if (!existing) return;
 
 	const placedDevices = getPlacedDevicesForType(slug);
@@ -849,31 +848,15 @@ function deleteDeviceTypeRecorded(slug: string): void {
  * @returns true if placed successfully
  */
 function placeDeviceRecorded(deviceTypeSlug: string, position: number, face?: DeviceFace): boolean {
-	// First try to find in layout's device_types (already imported devices)
-	let deviceType = findDeviceType(layout.device_types, deviceTypeSlug);
+	// Find device type across all sources (layout → starter → brand)
+	const deviceType = findDeviceType(deviceTypeSlug, layout.device_types);
 
-	// If not found, check starter library and auto-import if found
-	if (!deviceType) {
-		const starterDevice = findStarterDevice(deviceTypeSlug);
-		if (starterDevice) {
-			// Import starter device into the layout's device_types
-			layout.device_types = [...layout.device_types, starterDevice];
-			deviceType = starterDevice;
-		}
+	// Auto-import if found in starter/brand but not yet in layout
+	if (deviceType && !layout.device_types.find((dt) => dt.slug === deviceTypeSlug)) {
+		layout.device_types = [...layout.device_types, deviceType];
 	}
 
-	// If still not found, check brand packs and auto-import if found
-	if (!deviceType) {
-		const brandDevice = findBrandDevice(deviceTypeSlug);
-		if (brandDevice) {
-			// Import brand device into the layout's device_types
-			// Use spread to create new array reference for Svelte 5 reactivity
-			layout.device_types = [...layout.device_types, brandDevice];
-			deviceType = brandDevice;
-		}
-	}
-
-	// If still not found, device type doesn't exist
+	// If not found, device type doesn't exist
 	if (!deviceType) {
 		debug.devicePlace({
 			slug: deviceTypeSlug,
@@ -962,7 +945,7 @@ function moveDeviceRecorded(deviceIndex: number, newPosition: number): boolean {
 	}
 
 	const device = layout.rack.devices[deviceIndex]!;
-	const deviceType = findDeviceType(layout.device_types, device.device_type);
+	const deviceType = findDeviceTypeInArray(layout.device_types, device.device_type);
 	if (!deviceType) {
 		debug.deviceMove({
 			index: deviceIndex,
@@ -1037,7 +1020,7 @@ function removeDeviceRecorded(deviceIndex: number): void {
 	if (deviceIndex < 0 || deviceIndex >= layout.rack.devices.length) return;
 
 	const device = layout.rack.devices[deviceIndex]!;
-	const deviceType = findDeviceType(layout.device_types, device.device_type);
+	const deviceType = findDeviceTypeInArray(layout.device_types, device.device_type);
 	const deviceName = deviceType?.model ?? deviceType?.slug ?? 'device';
 
 	const history = getHistoryStore();
@@ -1056,7 +1039,7 @@ function updateDeviceFaceRecorded(deviceIndex: number, face: DeviceFace): void {
 
 	const device = layout.rack.devices[deviceIndex]!;
 	const oldFace = device.face ?? 'front';
-	const deviceType = findDeviceType(layout.device_types, device.device_type);
+	const deviceType = findDeviceTypeInArray(layout.device_types, device.device_type);
 	const deviceName = deviceType?.model ?? deviceType?.slug ?? 'device';
 
 	const history = getHistoryStore();
@@ -1075,7 +1058,7 @@ function updateDeviceNameRecorded(deviceIndex: number, name: string | undefined)
 
 	const device = layout.rack.devices[deviceIndex]!;
 	const oldName = device.name;
-	const deviceType = findDeviceType(layout.device_types, device.device_type);
+	const deviceType = findDeviceTypeInArray(layout.device_types, device.device_type);
 	const deviceTypeName = deviceType?.model ?? deviceType?.slug ?? 'device';
 
 	// Normalize empty string to undefined

@@ -1130,18 +1130,18 @@ describe('QR Code Export', () => {
 describe('Dual-View Export', () => {
 	const mockDevices: DeviceType[] = [
 		{
-			slug: 'front-server',
-			model: 'Front Server',
-			u_height: 2,
-			is_full_depth: true,
+			slug: 'front-switch',
+			model: 'Front Switch',
+			u_height: 1,
+			is_full_depth: false, // half-depth, only visible on front
 			colour: '#4A90D9',
-			category: 'server'
+			category: 'network'
 		},
 		{
 			slug: 'rear-patch',
 			model: 'Rear Patch Panel',
 			u_height: 1,
-			is_full_depth: false,
+			is_full_depth: false, // half-depth, only visible on rear
 			colour: '#7B68EE',
 			category: 'network'
 		},
@@ -1164,7 +1164,7 @@ describe('Dual-View Export', () => {
 			form_factor: '4-post',
 			starting_unit: 1,
 			devices: [
-				{ id: 'dual-1', device_type: 'front-server', position: 1, face: 'front' },
+				{ id: 'dual-1', device_type: 'front-switch', position: 1, face: 'front' },
 				{ id: 'dual-2', device_type: 'rear-patch', position: 5, face: 'rear' },
 				{ id: 'dual-3', device_type: 'both-ups', position: 8, face: 'both' }
 			]
@@ -1186,7 +1186,7 @@ describe('Dual-View Export', () => {
 			const svgString = svg.outerHTML;
 
 			// Should include front and both-face devices
-			expect(svgString).toContain('#4A90D9'); // front-server (front)
+			expect(svgString).toContain('#4A90D9'); // front-switch (front)
 			expect(svgString).toContain('#22C55E'); // both-ups (both)
 			// Should NOT include rear-only devices
 			expect(svgString).not.toContain('#7B68EE'); // rear-patch (rear)
@@ -1208,8 +1208,8 @@ describe('Dual-View Export', () => {
 			// Should include rear and both-face devices
 			expect(svgString).toContain('#7B68EE'); // rear-patch (rear)
 			expect(svgString).toContain('#22C55E'); // both-ups (both)
-			// Should NOT include front-only devices
-			expect(svgString).not.toContain('#4A90D9'); // front-server (front)
+			// Should NOT include front-only half-depth devices
+			expect(svgString).not.toContain('#4A90D9'); // front-switch (front)
 		});
 
 		it('exports both views side-by-side when exportView is "both"', () => {
@@ -1230,7 +1230,7 @@ describe('Dual-View Export', () => {
 			expect(svgString).toContain('REAR');
 
 			// All device colours should be present (different faces in different views)
-			expect(svgString).toContain('#4A90D9'); // front-server
+			expect(svgString).toContain('#4A90D9'); // front-switch
 			expect(svgString).toContain('#7B68EE'); // rear-patch
 			expect(svgString).toContain('#22C55E'); // both-ups (appears in both)
 		});
@@ -1249,7 +1249,7 @@ describe('Dual-View Export', () => {
 			const svgString = svg.outerHTML;
 
 			// Legacy behavior: all devices visible
-			expect(svgString).toContain('#4A90D9'); // front-server
+			expect(svgString).toContain('#4A90D9'); // front-switch
 			expect(svgString).toContain('#7B68EE'); // rear-patch
 			expect(svgString).toContain('#22C55E'); // both-ups
 		});
@@ -1416,7 +1416,7 @@ describe('Dual-View Export', () => {
 
 			// All devices should be in legend
 			const legendItems = legend?.querySelectorAll('.legend-item');
-			expect(legendItems?.length).toBe(3); // front-server, rear-patch, both-ups
+			expect(legendItems?.length).toBe(3); // front-switch, rear-patch, both-ups
 		});
 	});
 });

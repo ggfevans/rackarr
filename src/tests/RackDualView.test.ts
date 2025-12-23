@@ -248,8 +248,33 @@ describe('RackDualView Component', () => {
 	});
 
 	describe('Device Display', () => {
-		it('shows front-face devices only in front view', () => {
+		it('shows half-depth front-face devices only in front view', () => {
 			const rack = createTestRack({
+				// device-2 is half-depth, so it should only appear on its face
+				devices: [{ device_type: 'device-2', position: 1, face: 'front' }]
+			});
+			const { container } = render(RackDualView, {
+				props: {
+					rack,
+					deviceLibrary: createTestDeviceLibrary(),
+					selected: false
+				}
+			});
+
+			const frontView = container.querySelector('.rack-front');
+			const rearView = container.querySelector('.rack-rear');
+
+			// Half-depth device should only be in front view
+			const frontDevices = frontView?.querySelectorAll('.rack-device');
+			const rearDevices = rearView?.querySelectorAll('.rack-device');
+
+			expect(frontDevices?.length).toBe(1);
+			expect(rearDevices?.length).toBe(0);
+		});
+
+		it('shows full-depth front-face devices in both views', () => {
+			const rack = createTestRack({
+				// device-1 is full-depth, so it should be visible from both sides
 				devices: [{ device_type: 'device-1', position: 1, face: 'front' }]
 			});
 			const { container } = render(RackDualView, {
@@ -263,12 +288,12 @@ describe('RackDualView Component', () => {
 			const frontView = container.querySelector('.rack-front');
 			const rearView = container.querySelector('.rack-rear');
 
-			// Device should be in front view
+			// Full-depth device should be visible in both views
 			const frontDevices = frontView?.querySelectorAll('.rack-device');
 			const rearDevices = rearView?.querySelectorAll('.rack-device');
 
 			expect(frontDevices?.length).toBe(1);
-			expect(rearDevices?.length).toBe(0);
+			expect(rearDevices?.length).toBe(1);
 		});
 
 		it('shows rear-face devices only in rear view', () => {

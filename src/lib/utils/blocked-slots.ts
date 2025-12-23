@@ -16,38 +16,42 @@ export interface URange {
 }
 
 /**
- * Calculate which U slots are blocked for a given view.
+ * Calculate which U slots should show hatching for the given view.
  *
- * A slot is blocked when:
- * - A device on the OPPOSITE face has is_full_depth=true (or undefined, which defaults to true)
- * - A device with face='both' occupies that slot
+ * Hatching indicates "there's a device here on the other side that you can't see".
+ * This happens when:
+ * - A half-depth device is on the OPPOSITE face (is_full_depth=false)
+ *
+ * Full-depth devices are visible from both sides, so they don't need hatching.
+ * Face='both' devices are always visible on both faces, so no hatching needed.
  *
  * @param rack - The rack containing devices
  * @param view - The view to calculate blocked slots for ('front' or 'rear')
  * @param deviceLibrary - Array of device types to look up device heights
- * @returns Array of U ranges that are blocked
+ * @returns Array of U ranges that should show hatching
  */
 export function getBlockedSlots(rack: Rack, view: RackView, deviceLibrary: DeviceType[]): URange[] {
 	const blocked: URange[] = [];
 
 	for (const placedDevice of rack.devices) {
-		// Skip devices on the same face (they don't block the view we're checking)
+		// Skip devices on the same face (they're visible, no need for hatching)
 		if (placedDevice.face === view) continue;
+
+		// Skip 'both' face devices (they're visible on both faces)
+		if (placedDevice.face === 'both') continue;
 
 		// Find the device type to get height and full-depth info
 		const deviceType = deviceLibrary.find((d) => d.slug === placedDevice.device_type);
 		if (!deviceType) continue;
 
-		// Check if this device blocks the opposite face
-		// A device blocks the opposite face if:
-		// 1. It has face='both' (always blocks both)
-		// 2. It is full-depth (is_full_depth=true or undefined, which defaults to true)
+		// Check if this device is half-depth
+		// Only half-depth devices need hatching (full-depth devices are visible from both sides)
 		const isFullDepth = deviceType.is_full_depth !== false; // undefined or true = full depth
 
-		// If not full-depth and not 'both' face, it doesn't block
-		if (!isFullDepth && placedDevice.face !== 'both') continue;
+		// Skip full-depth devices (they're visible from both sides, rendered as actual devices)
+		if (isFullDepth) continue;
 
-		// Calculate the U range this device blocks
+		// Calculate the U range this half-depth device occupies
 		const bottom = placedDevice.position;
 		const top = placedDevice.position + deviceType.u_height - 1;
 

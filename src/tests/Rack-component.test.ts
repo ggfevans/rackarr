@@ -522,20 +522,24 @@ describe('Rack SVG Component', () => {
 	});
 
 	describe('Face Filter (faceFilter prop)', () => {
+		// Use half-depth devices to test face filtering
+		// Full-depth devices are now visible from both sides
 		const deviceLibrary: DeviceType[] = [
 			{
 				slug: 'front-device',
 				model: 'Front Device',
 				u_height: 2,
 				colour: '#4A90D9',
-				category: 'server'
+				category: 'server',
+				is_full_depth: false // Half-depth: only visible on front face
 			},
 			{
 				slug: 'rear-device',
 				model: 'Rear Device',
 				u_height: 1,
 				colour: '#7B68EE',
-				category: 'network'
+				category: 'network',
+				is_full_depth: false // Half-depth: only visible on rear face
 			},
 			{
 				slug: 'both-device',
@@ -543,6 +547,7 @@ describe('Rack SVG Component', () => {
 				u_height: 3,
 				colour: '#50C878',
 				category: 'storage'
+				// is_full_depth defaults to true, face='both' makes it visible on both
 			}
 		];
 
@@ -556,7 +561,7 @@ describe('Rack SVG Component', () => {
 			]
 		};
 
-		it('shows only front and both-face devices when faceFilter=front', () => {
+		it('shows only front, both-face, and full-depth opposite-face devices when faceFilter=front', () => {
 			const { container } = render(Rack, {
 				props: {
 					rack: rackWithDevices,
@@ -567,7 +572,8 @@ describe('Rack SVG Component', () => {
 			});
 
 			const devices = container.querySelectorAll('[data-device-id]');
-			// Should show front-device and both-device, NOT rear-device
+			// Should show front-device and both-device
+			// rear-device is half-depth so NOT visible from front
 			expect(devices).toHaveLength(2);
 
 			const deviceIds = Array.from(devices).map((d) => d.getAttribute('data-device-id'));
@@ -576,7 +582,7 @@ describe('Rack SVG Component', () => {
 			expect(deviceIds).not.toContain('rear-device');
 		});
 
-		it('shows only rear and both-face devices when faceFilter=rear', () => {
+		it('shows only rear, both-face, and full-depth opposite-face devices when faceFilter=rear', () => {
 			const { container } = render(Rack, {
 				props: {
 					rack: rackWithDevices,
@@ -587,13 +593,48 @@ describe('Rack SVG Component', () => {
 			});
 
 			const devices = container.querySelectorAll('[data-device-id]');
-			// Should show rear-device and both-device, NOT front-device
+			// Should show rear-device and both-device
+			// front-device is half-depth so NOT visible from rear
 			expect(devices).toHaveLength(2);
 
 			const deviceIds = Array.from(devices).map((d) => d.getAttribute('data-device-id'));
 			expect(deviceIds).toContain('rear-device');
 			expect(deviceIds).toContain('both-device');
 			expect(deviceIds).not.toContain('front-device');
+		});
+
+		it('shows full-depth devices from opposite face', () => {
+			// Create a full-depth device on front face
+			const fullDepthLibrary: DeviceType[] = [
+				{
+					slug: 'full-depth-server',
+					model: 'Full Depth Server',
+					u_height: 2,
+					colour: '#888888',
+					category: 'server',
+					is_full_depth: true
+				}
+			];
+
+			const rackWithFullDepth: RackType = {
+				...mockRack,
+				devices: [{ id: 'rc-ff-fd', device_type: 'full-depth-server', position: 1, face: 'front' }]
+			};
+
+			const { container } = render(Rack, {
+				props: {
+					rack: rackWithFullDepth,
+					deviceLibrary: fullDepthLibrary,
+					selected: false,
+					faceFilter: 'rear' // Viewing rear, but full-depth front device should be visible
+				}
+			});
+
+			const devices = container.querySelectorAll('[data-device-id]');
+			expect(devices).toHaveLength(1);
+
+			const deviceIds = Array.from(devices).map((d) => d.getAttribute('data-device-id'));
+			expect(deviceIds).toContain('full-depth-server');
 		});
 
 		it('shows all devices when faceFilter is undefined (backwards compat)', () => {
@@ -729,6 +770,8 @@ describe('Rack SVG Component', () => {
 
 	describe('Blocked Slots Rendering', () => {
 		// Create a device library with full-depth and half-depth devices
+		// Blocked slots (hatching) now show for HALF-DEPTH devices only
+		// Full-depth devices are visible from both sides, so no hatching needed
 		const deviceLibrary: DeviceType[] = [
 			{
 				slug: 'full-depth-server',
@@ -745,13 +788,21 @@ describe('Rack SVG Component', () => {
 				is_full_depth: false,
 				category: 'network',
 				colour: '#444444'
+			},
+			{
+				slug: 'half-depth-2u',
+				model: 'Half Depth 2U',
+				u_height: 2,
+				is_full_depth: false,
+				category: 'network',
+				colour: '#666666'
 			}
 		];
 
-		it('renders blocked-slot rect elements when faceFilter is set', () => {
+		it('renders blocked-slot rect elements for half-depth devices on opposite face', () => {
 			const rackWithDevice: RackType = {
 				...mockRack,
-				devices: [{ id: 'rc-bs-1', device_type: 'full-depth-server', position: 5, face: 'front' }]
+				devices: [{ id: 'rc-bs-1', device_type: 'half-depth-switch', position: 5, face: 'front' }]
 			};
 
 			const { container } = render(Rack, {
@@ -759,7 +810,7 @@ describe('Rack SVG Component', () => {
 					rack: rackWithDevice,
 					deviceLibrary,
 					selected: false,
-					faceFilter: 'rear' // Viewing rear, front full-depth device should block
+					faceFilter: 'rear' // Viewing rear, front half-depth device shows hatching
 				}
 			});
 
@@ -771,7 +822,7 @@ describe('Rack SVG Component', () => {
 		it('blocked slot rects have correct position based on U', () => {
 			const rackWithDevice: RackType = {
 				...mockRack,
-				devices: [{ id: 'rc-bs-2', device_type: 'full-depth-server', position: 3, face: 'front' }]
+				devices: [{ id: 'rc-bs-2', device_type: 'half-depth-2u', position: 3, face: 'front' }]
 			};
 
 			const { container } = render(Rack, {
@@ -787,8 +838,6 @@ describe('Rack SVG Component', () => {
 			expect(blockedSlot).toBeInTheDocument();
 
 			// Check Y position - should correspond to U position 3-4 (2U device)
-			// Y = (rackHeight - top) * U_HEIGHT + RACK_PADDING + RAIL_WIDTH
-			// For 12U rack with 2U device at position 3: top=4, Y = (12 - 4) * 22 + 4 + 17 = 197
 			const y = parseFloat(blockedSlot?.getAttribute('y') ?? '0');
 			expect(y).toBeGreaterThan(0);
 		});
@@ -796,7 +845,7 @@ describe('Rack SVG Component', () => {
 		it('blocked slot rects have correct height based on device U', () => {
 			const rackWithDevice: RackType = {
 				...mockRack,
-				devices: [{ id: 'rc-bs-3', device_type: 'full-depth-server', position: 5, face: 'front' }]
+				devices: [{ id: 'rc-bs-3', device_type: 'half-depth-2u', position: 5, face: 'front' }]
 			};
 
 			const { container } = render(Rack, {
@@ -816,10 +865,10 @@ describe('Rack SVG Component', () => {
 			expect(height).toBe(44); // 2U * 22
 		});
 
-		it('does not render blocked slots for half-depth devices', () => {
+		it('does not render blocked slots for full-depth devices (they are visible from both sides)', () => {
 			const rackWithDevice: RackType = {
 				...mockRack,
-				devices: [{ id: 'rc-bs-4', device_type: 'half-depth-switch', position: 5, face: 'front' }]
+				devices: [{ id: 'rc-bs-4', device_type: 'full-depth-server', position: 5, face: 'front' }]
 			};
 
 			const { container } = render(Rack, {
@@ -827,7 +876,7 @@ describe('Rack SVG Component', () => {
 					rack: rackWithDevice,
 					deviceLibrary,
 					selected: false,
-					faceFilter: 'rear' // Viewing rear, but half-depth front device shouldn't block
+					faceFilter: 'rear' // Viewing rear, full-depth front device should be visible (not hatched)
 				}
 			});
 
@@ -838,7 +887,7 @@ describe('Rack SVG Component', () => {
 		it('does not render blocked slots when faceFilter is undefined', () => {
 			const rackWithDevice: RackType = {
 				...mockRack,
-				devices: [{ id: 'rc-bs-5', device_type: 'full-depth-server', position: 5, face: 'front' }]
+				devices: [{ id: 'rc-bs-5', device_type: 'half-depth-switch', position: 5, face: 'front' }]
 			};
 
 			const { container } = render(Rack, {
@@ -855,7 +904,7 @@ describe('Rack SVG Component', () => {
 			expect(blockedSlots.length).toBe(0);
 		});
 
-		it('renders blocked slots for both-face devices on both views', () => {
+		it('does not render blocked slots for both-face devices (they are visible on both)', () => {
 			const bothFaceLibrary: DeviceType[] = [
 				{
 					slug: 'ups',
@@ -872,7 +921,7 @@ describe('Rack SVG Component', () => {
 				devices: [{ id: 'rc-bs-6', device_type: 'ups', position: 1, face: 'both' }]
 			};
 
-			// Check front view
+			// Check front view - both-face device should be visible, not hatched
 			const { container: frontContainer } = render(Rack, {
 				props: {
 					rack: rackWithDevice,
@@ -882,11 +931,10 @@ describe('Rack SVG Component', () => {
 				}
 			});
 
-			// 2 per slot: background + stripes pattern
 			const frontBlockedSlots = frontContainer.querySelectorAll('.blocked-slot');
-			expect(frontBlockedSlots.length).toBe(2);
+			expect(frontBlockedSlots.length).toBe(0);
 
-			// Check rear view
+			// Check rear view - both-face device should be visible, not hatched
 			const { container: rearContainer } = render(Rack, {
 				props: {
 					rack: rackWithDevice,
@@ -896,15 +944,14 @@ describe('Rack SVG Component', () => {
 				}
 			});
 
-			// 2 per slot: background + stripes pattern
 			const rearBlockedSlots = rearContainer.querySelectorAll('.blocked-slot');
-			expect(rearBlockedSlots.length).toBe(2);
+			expect(rearBlockedSlots.length).toBe(0);
 		});
 
 		it('blocked slots have appropriate opacity', () => {
 			const rackWithDevice: RackType = {
 				...mockRack,
-				devices: [{ id: 'rc-bs-7', device_type: 'full-depth-server', position: 5, face: 'front' }]
+				devices: [{ id: 'rc-bs-7', device_type: 'half-depth-switch', position: 5, face: 'front' }]
 			};
 
 			const { container } = render(Rack, {

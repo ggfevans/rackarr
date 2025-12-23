@@ -43,8 +43,8 @@ describe('getBlockedSlots', () => {
 		it('returns empty array when all devices are on same face as view', () => {
 			const rack = createTestRack({
 				devices: [
-					{ device_type: 'device-1', position: 1, face: 'front' as DeviceFace },
-					{ device_type: 'device-2', position: 5, face: 'front' as DeviceFace }
+					{ id: 'bs-1', device_type: 'device-1', position: 1, face: 'front' as DeviceFace },
+					{ id: 'bs-2', device_type: 'device-2', position: 5, face: 'front' as DeviceFace }
 				]
 			});
 			const deviceLibrary = [
@@ -58,38 +58,38 @@ describe('getBlockedSlots', () => {
 		});
 	});
 
-	describe('Full-depth device blocking', () => {
-		it('returns blocked range for full-depth front device when checking rear view', () => {
+	describe('Full-depth device handling', () => {
+		it('does NOT return blocked range for full-depth devices (they are visible from both sides)', () => {
 			const rack = createTestRack({
-				devices: [{ device_type: 'server-1', position: 5, face: 'front' as DeviceFace }]
+				devices: [{ id: 'bs-3', device_type: 'server-1', position: 5, face: 'front' as DeviceFace }]
 			});
 			const deviceLibrary = [createTestDevice('server-1', 2, true)]; // full-depth
 
 			const blocked = getBlockedSlots(rack, 'rear', deviceLibrary);
 
-			expect(blocked).toHaveLength(1);
-			expect(blocked[0]).toEqual({ bottom: 5, top: 6 }); // 2U device at position 5
+			// Full-depth devices are visible from both sides, no hatching needed
+			expect(blocked).toHaveLength(0);
 		});
 
-		it('returns blocked range for full-depth rear device when checking front view', () => {
+		it('does NOT return blocked range for full-depth rear device when checking front', () => {
 			const rack = createTestRack({
-				devices: [{ device_type: 'server-1', position: 3, face: 'rear' as DeviceFace }]
+				devices: [{ id: 'bs-4', device_type: 'server-1', position: 3, face: 'rear' as DeviceFace }]
 			});
 			const deviceLibrary = [createTestDevice('server-1', 3, true)]; // full-depth, 3U
 
 			const blocked = getBlockedSlots(rack, 'front', deviceLibrary);
 
-			expect(blocked).toHaveLength(1);
-			expect(blocked[0]).toEqual({ bottom: 3, top: 5 }); // 3U device at position 3
+			// Full-depth devices are visible from both sides, no hatching needed
+			expect(blocked).toHaveLength(0);
 		});
 	});
 
 	describe('Half-depth devices', () => {
-		it('does NOT return blocked range for half-depth devices', () => {
+		it('returns blocked range for half-depth devices on opposite face', () => {
 			const rack = createTestRack({
 				devices: [
-					{ device_type: 'switch-1', position: 1, face: 'front' as DeviceFace },
-					{ device_type: 'patch-1', position: 5, face: 'rear' as DeviceFace }
+					{ id: 'bs-5', device_type: 'switch-1', position: 1, face: 'front' as DeviceFace },
+					{ id: 'bs-6', device_type: 'patch-1', position: 5, face: 'rear' as DeviceFace }
 				]
 			});
 			const deviceLibrary = [
@@ -97,106 +97,98 @@ describe('getBlockedSlots', () => {
 				createTestDevice('patch-1', 2, false) // half-depth
 			];
 
-			// Neither should block the opposite view
+			// Front half-depth device should show hatching on rear view
 			const blockedRear = getBlockedSlots(rack, 'rear', deviceLibrary);
+			expect(blockedRear).toHaveLength(1);
+			expect(blockedRear[0]).toEqual({ bottom: 1, top: 1 }); // switch-1
+
+			// Rear half-depth device should show hatching on front view
 			const blockedFront = getBlockedSlots(rack, 'front', deviceLibrary);
-
-			expect(blockedRear).toEqual([]);
-			expect(blockedFront).toEqual([]);
-		});
-	});
-
-	describe('Both-face devices', () => {
-		it('returns blocked range for both-face devices on front view', () => {
-			const rack = createTestRack({
-				devices: [{ device_type: 'ups-1', position: 1, face: 'both' as DeviceFace }]
-			});
-			const deviceLibrary = [createTestDevice('ups-1', 4, true)]; // full-depth, 4U
-
-			const blocked = getBlockedSlots(rack, 'front', deviceLibrary);
-
-			// Both-face devices block both views
-			expect(blocked).toHaveLength(1);
-			expect(blocked[0]).toEqual({ bottom: 1, top: 4 }); // 4U device at position 1
+			expect(blockedFront).toHaveLength(1);
+			expect(blockedFront[0]).toEqual({ bottom: 5, top: 6 }); // patch-1
 		});
 
-		it('returns blocked range for both-face devices on rear view', () => {
+		it('returns blocked range for half-depth 1U device', () => {
 			const rack = createTestRack({
-				devices: [{ device_type: 'ups-1', position: 10, face: 'both' as DeviceFace }]
+				devices: [{ id: 'bs-7', device_type: 'switch-1', position: 7, face: 'front' as DeviceFace }]
 			});
-			const deviceLibrary = [createTestDevice('ups-1', 2, true)];
+			const deviceLibrary = [createTestDevice('switch-1', 1, false)]; // half-depth
 
 			const blocked = getBlockedSlots(rack, 'rear', deviceLibrary);
 
 			expect(blocked).toHaveLength(1);
-			expect(blocked[0]).toEqual({ bottom: 10, top: 11 }); // 2U device at position 10
+			expect(blocked[0]).toEqual({ bottom: 7, top: 7 }); // 1U at position 7
+		});
+
+		it('returns blocked range for large half-depth device', () => {
+			const rack = createTestRack({
+				devices: [{ id: 'bs-8', device_type: 'storage-1', position: 1, face: 'rear' as DeviceFace }]
+			});
+			const deviceLibrary = [createTestDevice('storage-1', 10, false)]; // half-depth, 10U
+
+			const blocked = getBlockedSlots(rack, 'front', deviceLibrary);
+
+			expect(blocked).toHaveLength(1);
+			expect(blocked[0]).toEqual({ bottom: 1, top: 10 }); // 10U device at position 1
+		});
+	});
+
+	describe('Both-face devices', () => {
+		it('does NOT return blocked range for both-face devices (they are visible on both faces)', () => {
+			const rack = createTestRack({
+				devices: [{ id: 'bs-9', device_type: 'ups-1', position: 1, face: 'both' as DeviceFace }]
+			});
+			const deviceLibrary = [createTestDevice('ups-1', 4, true)]; // full-depth, 4U
+
+			const blockedFront = getBlockedSlots(rack, 'front', deviceLibrary);
+			const blockedRear = getBlockedSlots(rack, 'rear', deviceLibrary);
+
+			// Both-face devices are visible on both views, no hatching needed
+			expect(blockedFront).toHaveLength(0);
+			expect(blockedRear).toHaveLength(0);
 		});
 	});
 
 	describe('Multiple devices', () => {
-		it('handles multiple devices with separate ranges', () => {
+		it('handles multiple half-depth devices with separate ranges', () => {
 			const rack = createTestRack({
 				devices: [
-					{ device_type: 'server-1', position: 1, face: 'front' as DeviceFace },
-					{ device_type: 'server-2', position: 6, face: 'front' as DeviceFace },
-					{ device_type: 'switch-1', position: 10, face: 'front' as DeviceFace }
+					{ id: 'bs-10', device_type: 'switch-1', position: 1, face: 'front' as DeviceFace },
+					{ id: 'bs-11', device_type: 'switch-2', position: 6, face: 'front' as DeviceFace },
+					{ id: 'bs-12', device_type: 'server-1', position: 10, face: 'front' as DeviceFace }
 				]
 			});
 			const deviceLibrary = [
-				createTestDevice('server-1', 2, true), // full-depth
-				createTestDevice('server-2', 3, true), // full-depth
-				createTestDevice('switch-1', 1, false) // half-depth - shouldn't block
+				createTestDevice('switch-1', 1, false), // half-depth
+				createTestDevice('switch-2', 2, false), // half-depth
+				createTestDevice('server-1', 1, true) // full-depth - shouldn't block
 			];
 
 			const blocked = getBlockedSlots(rack, 'rear', deviceLibrary);
 
 			expect(blocked).toHaveLength(2);
-			expect(blocked).toContainEqual({ bottom: 1, top: 2 }); // server-1
-			expect(blocked).toContainEqual({ bottom: 6, top: 8 }); // server-2
+			expect(blocked).toContainEqual({ bottom: 1, top: 1 }); // switch-1
+			expect(blocked).toContainEqual({ bottom: 6, top: 7 }); // switch-2
 		});
 
-		it('handles overlapping/adjacent ranges', () => {
+		it('handles adjacent half-depth devices', () => {
 			const rack = createTestRack({
 				devices: [
-					{ device_type: 'server-1', position: 1, face: 'front' as DeviceFace },
-					{ device_type: 'server-2', position: 3, face: 'front' as DeviceFace } // adjacent
+					{ id: 'bs-13', device_type: 'switch-1', position: 1, face: 'front' as DeviceFace },
+					{ id: 'bs-14', device_type: 'switch-2', position: 2, face: 'front' as DeviceFace } // adjacent
 				]
 			});
 			const deviceLibrary = [
-				createTestDevice('server-1', 2, true),
-				createTestDevice('server-2', 2, true)
+				createTestDevice('switch-1', 1, false),
+				createTestDevice('switch-2', 1, false)
 			];
 
 			const blocked = getBlockedSlots(rack, 'rear', deviceLibrary);
 
 			// Returns separate ranges (not merged)
 			expect(blocked).toHaveLength(2);
-			expect(blocked).toContainEqual({ bottom: 1, top: 2 });
-			expect(blocked).toContainEqual({ bottom: 3, top: 4 });
-		});
-	});
-
-	describe('U range calculations', () => {
-		it('correctly calculates U ranges for 1U device', () => {
-			const rack = createTestRack({
-				devices: [{ device_type: 'switch-1', position: 7, face: 'front' as DeviceFace }]
-			});
-			const deviceLibrary = [createTestDevice('switch-1', 1, true)];
-
-			const blocked = getBlockedSlots(rack, 'rear', deviceLibrary);
-
-			expect(blocked[0]).toEqual({ bottom: 7, top: 7 }); // 1U at position 7
-		});
-
-		it('correctly calculates U ranges for large device', () => {
-			const rack = createTestRack({
-				devices: [{ device_type: 'storage-1', position: 1, face: 'rear' as DeviceFace }]
-			});
-			const deviceLibrary = [createTestDevice('storage-1', 10, true)]; // 10U device
-
-			const blocked = getBlockedSlots(rack, 'front', deviceLibrary);
-
-			expect(blocked[0]).toEqual({ bottom: 1, top: 10 }); // 10U device at position 1
+			expect(blocked).toContainEqual({ bottom: 1, top: 1 });
+			expect(blocked).toContainEqual({ bottom: 2, top: 2 });
 		});
 	});
 
@@ -204,28 +196,28 @@ describe('getBlockedSlots', () => {
 		it('skips devices without matching library entry', () => {
 			const rack = createTestRack({
 				devices: [
-					{ device_type: 'unknown-device', position: 1, face: 'front' as DeviceFace },
-					{ device_type: 'server-1', position: 5, face: 'front' as DeviceFace }
+					{ id: 'bs-15', device_type: 'unknown-device', position: 1, face: 'front' as DeviceFace },
+					{ id: 'bs-16', device_type: 'switch-1', position: 5, face: 'front' as DeviceFace }
 				]
 			});
-			const deviceLibrary = [createTestDevice('server-1', 2, true)];
+			const deviceLibrary = [createTestDevice('switch-1', 2, false)]; // half-depth
 
 			const blocked = getBlockedSlots(rack, 'rear', deviceLibrary);
 
-			// Should only include server-1, skip unknown-device
+			// Should only include switch-1, skip unknown-device
 			expect(blocked).toHaveLength(1);
 			expect(blocked[0]).toEqual({ bottom: 5, top: 6 });
 		});
 	});
 
 	describe('Default is_full_depth behavior', () => {
-		it('treats undefined is_full_depth as true (full-depth)', () => {
+		it('treats undefined is_full_depth as true (no blocking)', () => {
 			const rack = createTestRack({
 				devices: [
-					{ id: 'bs-test-1', device_type: 'device-1', position: 3, face: 'front' as DeviceFace }
+					{ id: 'bs-17', device_type: 'device-1', position: 3, face: 'front' as DeviceFace }
 				]
 			});
-			// Device without is_full_depth property
+			// Device without is_full_depth property (defaults to true = full-depth)
 			const deviceLibrary: DeviceType[] = [
 				{
 					slug: 'device-1',
@@ -233,15 +225,14 @@ describe('getBlockedSlots', () => {
 					u_height: 2,
 					category: 'server',
 					colour: '#888888'
-					// is_full_depth not specified
+					// is_full_depth not specified - defaults to true
 				}
 			];
 
 			const blocked = getBlockedSlots(rack, 'rear', deviceLibrary);
 
-			// Should block because undefined is_full_depth defaults to true
-			expect(blocked).toHaveLength(1);
-			expect(blocked[0]).toEqual({ bottom: 3, top: 4 });
+			// Full-depth devices (including undefined) don't cause blocking
+			expect(blocked).toHaveLength(0);
 		});
 	});
 });

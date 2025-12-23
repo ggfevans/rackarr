@@ -11,6 +11,7 @@ import type {
 	ExportBackground
 } from '$lib/types';
 import type { ImageStoreMap } from '$lib/types/images';
+import { getBlockedSlots } from './blocked-slots';
 
 // Note: jsPDF is imported dynamically in exportAsPDF() to avoid loading
 // the large jsPDF + html2canvas bundle (~200KB) on app startup.
@@ -51,13 +52,27 @@ const LIGHT_GRID = '#a0a0a0';
 
 /**
  * Filter devices by face for export
+ * Full-depth devices are visible from both sides, so they're included on both faces
  */
 function filterDevicesByFace(
 	devices: Rack['devices'],
-	faceFilter: 'front' | 'rear' | undefined
+	faceFilter: 'front' | 'rear' | undefined,
+	deviceLibrary: DeviceType[]
 ): Rack['devices'] {
 	if (!faceFilter) return devices;
-	return devices.filter((d) => d.face === faceFilter || d.face === 'both');
+	return devices.filter((d) => {
+		// Both-face devices are always visible
+		if (d.face === 'both') return true;
+		// Devices on this face are visible
+		if (d.face === faceFilter) return true;
+		// Full-depth devices on the opposite face are also visible
+		const deviceType = deviceLibrary.find((dt) => dt.slug === d.device_type);
+		if (deviceType) {
+			const isFullDepth = deviceType.is_full_depth !== false;
+			if (isFullDepth) return true;
+		}
+		return false;
+	});
 }
 
 /**
@@ -534,8 +549,64 @@ export function generateExportSVG(
 			rackGroup.appendChild(label);
 		}
 
+		// Render blocked slots (hatching for half-depth devices on opposite face)
+		if (faceFilter) {
+			const blockedSlots = getBlockedSlots(rack, faceFilter, deviceLibrary);
+			if (blockedSlots.length > 0) {
+				// Create pattern definition if not already in defs
+				const patternId = `blocked-stripe-pattern-${faceFilter}`;
+				let defs = svg.querySelector('defs');
+				if (!defs) {
+					defs = document.createElementNS('http://www.w3.org/2000/svg', 'defs');
+					svg.insertBefore(defs, svg.firstChild);
+				}
+				if (!defs.querySelector(`#${patternId}`)) {
+					const pattern = document.createElementNS('http://www.w3.org/2000/svg', 'pattern');
+					pattern.setAttribute('id', patternId);
+					pattern.setAttribute('patternUnits', 'userSpaceOnUse');
+					pattern.setAttribute('width', '8');
+					pattern.setAttribute('height', '8');
+					pattern.setAttribute('patternTransform', 'rotate(45)');
+					const rect = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+					rect.setAttribute('width', '4');
+					rect.setAttribute('height', '8');
+					rect.setAttribute('fill', isDark ? 'rgba(239, 68, 68, 0.35)' : 'rgba(239, 68, 68, 0.35)');
+					pattern.appendChild(rect);
+					defs.appendChild(pattern);
+				}
+
+				// Render blocked slot rectangles
+				for (const slot of blockedSlots) {
+					const slotY =
+						(rack.height - slot.top) * U_HEIGHT + RACK_PADDING + RAIL_WIDTH;
+					const slotHeight = (slot.top - slot.bottom + 1) * U_HEIGHT;
+					const slotWidth = RACK_WIDTH - 2 * RAIL_WIDTH;
+
+					// Background wash
+					const bgRect = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+					bgRect.setAttribute('x', String(RAIL_WIDTH));
+					bgRect.setAttribute('y', String(slotY));
+					bgRect.setAttribute('width', String(slotWidth));
+					bgRect.setAttribute('height', String(slotHeight));
+					bgRect.setAttribute('fill', 'rgba(239, 68, 68, 0.08)');
+					bgRect.setAttribute('opacity', '0.5');
+					rackGroup.appendChild(bgRect);
+
+					// Stripe pattern
+					const stripeRect = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+					stripeRect.setAttribute('x', String(RAIL_WIDTH));
+					stripeRect.setAttribute('y', String(slotY));
+					stripeRect.setAttribute('width', String(slotWidth));
+					stripeRect.setAttribute('height', String(slotHeight));
+					stripeRect.setAttribute('fill', `url(#${patternId})`);
+					stripeRect.setAttribute('opacity', '0.8');
+					rackGroup.appendChild(stripeRect);
+				}
+			}
+		}
+
 		// Filter and render devices
-		const filteredDevices = filterDevicesByFace(rack.devices, faceFilter);
+		const filteredDevices = filterDevicesByFace(rack.devices, faceFilter, deviceLibrary);
 		for (const placedDevice of filteredDevices) {
 			const device = deviceLibrary.find((d) => d.slug === placedDevice.device_type);
 			if (!device) continue;

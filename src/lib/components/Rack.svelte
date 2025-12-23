@@ -132,13 +132,25 @@
 	const effectiveFaceFilter = $derived(faceFilter ?? rack.view);
 
 	// Filter devices by face and preserve original indices for selection tracking
+	// Full-depth devices are visible from both sides, so they appear on both faces
 	const visibleDevices = $derived(
 		rack.devices
 			.map((placedDevice, originalIndex) => ({ placedDevice, originalIndex }))
 			.filter(({ placedDevice }) => {
 				const { face } = placedDevice;
-				if (face === 'both') return true; // Both-face devices visible in all views
-				return face === effectiveFaceFilter; // Show devices matching the filter
+				// Both-face devices visible in all views
+				if (face === 'both') return true;
+				// Devices on this face are always visible
+				if (face === effectiveFaceFilter) return true;
+				// Full-depth devices on the opposite face are also visible (they span full rack depth)
+				if (faceFilter) {
+					const deviceType = getDeviceBySlug(placedDevice.device_type);
+					if (deviceType) {
+						const isFullDepth = deviceType.is_full_depth !== false;
+						if (isFullDepth) return true;
+					}
+				}
+				return false;
 			})
 	);
 

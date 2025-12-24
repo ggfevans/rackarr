@@ -90,7 +90,8 @@ function orderDeviceTypeFields(dt: DeviceType): Record<string, unknown> {
 
 /**
  * Order PlacedDevice fields according to schema v1.0.0
- * Field order: id, device_type, position, face, name, parent_device, device_bay, notes, custom_fields
+ * Field order: id, device_type, name, position, face, front_image, rear_image,
+ *              parent_device, device_bay, notes, custom_fields
  */
 function orderPlacedDeviceFields(device: PlacedDevice): Record<string, unknown> {
 	const ordered: Record<string, unknown> = {};
@@ -98,9 +99,13 @@ function orderPlacedDeviceFields(device: PlacedDevice): Record<string, unknown> 
 	// --- Core Fields ---
 	ordered.id = device.id;
 	ordered.device_type = device.device_type;
+	if (device.name !== undefined) ordered.name = device.name;
 	ordered.position = device.position;
 	ordered.face = device.face;
-	if (device.name !== undefined) ordered.name = device.name;
+
+	// --- Placement Image Override ---
+	if (device.front_image !== undefined) ordered.front_image = device.front_image;
+	if (device.rear_image !== undefined) ordered.rear_image = device.rear_image;
 
 	// --- Subdevice Placement ---
 	if (device.parent_device !== undefined) ordered.parent_device = device.parent_device;

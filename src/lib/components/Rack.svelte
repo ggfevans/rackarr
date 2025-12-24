@@ -521,6 +521,7 @@
 						rackView={effectiveFaceFilter}
 						{showLabelsOnImages}
 						placedDeviceName={placedDevice.name}
+						placedDeviceId={placedDevice.id}
 						onselect={ondeviceselect}
 						ondragstart={() => handleDeviceDragStart(originalIndex)}
 						ondragend={handleDeviceDragEnd}

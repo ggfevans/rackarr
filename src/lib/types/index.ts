@@ -245,6 +245,12 @@ export interface PlacedDevice {
 	/** Optional custom display name for this placement */
 	name?: string;
 
+	// --- Placement Image Override ---
+	/** Custom front image for this specific placement (overrides device type image) */
+	front_image?: string;
+	/** Custom rear image for this specific placement (overrides device type image) */
+	rear_image?: string;
+
 	// --- Subdevice Placement (schema-only) ---
 	/** Parent placement ID (for child devices in bays) */
 	parent_device?: string;

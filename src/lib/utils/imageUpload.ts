@@ -55,6 +55,36 @@ export function generateImageFilename(
 }
 
 /**
+ * Sanitize a filename to prevent path traversal and other security issues
+ * - Removes path separators and parent directory references
+ * - Removes null bytes and control characters
+ * - Limits length to prevent buffer issues
+ * - Only allows alphanumeric, dash, underscore, and dot
+ */
+export function sanitizeFilename(filename: string): string {
+	if (!filename) return '';
+
+	// Remove path separators and parent directory references
+	let sanitized = filename
+		.replace(/[/\\]/g, '') // Remove path separators
+		.replace(/\.\./g, '') // Remove parent directory references
+		.replace(/\0/g, ''); // Remove null bytes
+
+	// Only keep safe characters: alphanumeric, dash, underscore, dot
+	sanitized = sanitized.replace(/[^a-zA-Z0-9._-]/g, '');
+
+	// Limit length to 255 characters (common filesystem limit)
+	sanitized = sanitized.slice(0, 255);
+
+	// Ensure it doesn't start with a dot (hidden file)
+	if (sanitized.startsWith('.')) {
+		sanitized = sanitized.slice(1);
+	}
+
+	return sanitized;
+}
+
+/**
  * Get file extension from MIME type
  */
 function getExtensionFromMimeType(mimeType: string): string {

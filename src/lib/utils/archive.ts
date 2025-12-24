@@ -70,19 +70,42 @@ export async function createFolderArchive(layout: Layout, images: ImageStoreMap)
 			throw new Error('Failed to create assets folder');
 		}
 
-		for (const [deviceSlug, deviceImages] of images) {
-			const deviceFolder = assetsFolder.folder(deviceSlug);
-			if (!deviceFolder) continue;
+		for (const [imageKey, deviceImages] of images) {
+			// Handle placement-specific images (key format: placement-{deviceId})
+			if (imageKey.startsWith('placement-')) {
+				const deviceId = imageKey.replace('placement-', '');
+				// Find the device to get its device_type slug for the folder path
+				const placedDevice = layout.rack?.devices.find((d) => d.id === deviceId);
+				if (!placedDevice) continue;
 
-			// Only save images that have blobs (user uploads, not bundled images)
-			if (deviceImages.front?.blob) {
-				const ext = getImageExtension(deviceImages.front.blob.type);
-				deviceFolder.file(`front.${ext}`, deviceImages.front.blob);
-			}
+				const deviceFolder = assetsFolder.folder(placedDevice.device_type);
+				if (!deviceFolder) continue;
 
-			if (deviceImages.rear?.blob) {
-				const ext = getImageExtension(deviceImages.rear.blob.type);
-				deviceFolder.file(`rear.${ext}`, deviceImages.rear.blob);
+				// Save as {deviceId}-front.{ext} within the device type folder
+				if (deviceImages.front?.blob) {
+					const ext = getImageExtension(deviceImages.front.blob.type);
+					deviceFolder.file(`${deviceId}-front.${ext}`, deviceImages.front.blob);
+				}
+
+				if (deviceImages.rear?.blob) {
+					const ext = getImageExtension(deviceImages.rear.blob.type);
+					deviceFolder.file(`${deviceId}-rear.${ext}`, deviceImages.rear.blob);
+				}
+			} else {
+				// Handle device type images (key is the device slug)
+				const deviceFolder = assetsFolder.folder(imageKey);
+				if (!deviceFolder) continue;
+
+				// Only save images that have blobs (user uploads, not bundled images)
+				if (deviceImages.front?.blob) {
+					const ext = getImageExtension(deviceImages.front.blob.type);
+					deviceFolder.file(`front.${ext}`, deviceImages.front.blob);
+				}
+
+				if (deviceImages.rear?.blob) {
+					const ext = getImageExtension(deviceImages.rear.blob.type);
+					deviceFolder.file(`rear.${ext}`, deviceImages.rear.blob);
+				}
 			}
 		}
 	}
@@ -139,7 +162,7 @@ export async function extractFolderArchive(
 	);
 
 	for (const imagePath of imageFiles) {
-		// Parse path: folder/assets/[slug]/[face].[ext]
+		// Parse path: folder/assets/[slug]/[filename].[ext]
 		const relativePath = imagePath.substring(assetsPrefix.length);
 		const parts = relativePath.split('/');
 
@@ -149,11 +172,28 @@ export async function extractFolderArchive(
 		const filename = parts[1];
 		if (!deviceSlug || !filename) continue;
 
-		const faceMatch = filename.match(/^(front|rear)\.\w+$/);
+		// Check for device type image: front.{ext} or rear.{ext}
+		const deviceTypeFaceMatch = filename.match(/^(front|rear)\.\w+$/);
 
-		if (!faceMatch) continue;
+		// Check for placement image: {deviceId}-front.{ext} or {deviceId}-rear.{ext}
+		const placementFaceMatch = filename.match(/^(.+)-(front|rear)\.\w+$/);
 
-		const face = faceMatch[1] as 'front' | 'rear';
+		let imageKey: string;
+		let face: 'front' | 'rear';
+
+		if (deviceTypeFaceMatch) {
+			// Device type image
+			imageKey = deviceSlug;
+			face = deviceTypeFaceMatch[1] as 'front' | 'rear';
+		} else if (placementFaceMatch) {
+			// Placement-specific image
+			const deviceId = placementFaceMatch[1];
+			face = placementFaceMatch[2] as 'front' | 'rear';
+			imageKey = `placement-${deviceId}`;
+		} else {
+			continue; // Unknown format
+		}
+
 		const imageFile = zip.file(imagePath);
 
 		if (!imageFile) continue;
@@ -175,8 +215,8 @@ export async function extractFolderArchive(
 				filename
 			};
 
-			const existing = images.get(deviceSlug) ?? {};
-			images.set(deviceSlug, {
+			const existing = images.get(imageKey) ?? {};
+			images.set(imageKey, {
 				...existing,
 				[face]: imageData
 			});

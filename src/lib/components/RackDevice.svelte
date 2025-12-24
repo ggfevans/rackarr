@@ -25,6 +25,7 @@
 		rackView?: RackView;
 		showLabelsOnImages?: boolean;
 		placedDeviceName?: string;
+		placedDeviceId?: string;
 		onselect?: (event: CustomEvent<{ slug: string; position: number }>) => void;
 		ondragstart?: (event: CustomEvent<{ rackId: string; deviceIndex: number }>) => void;
 		ondragend?: () => void;
@@ -43,6 +44,7 @@
 		rackView = 'front',
 		showLabelsOnImages = false,
 		placedDeviceName,
+		placedDeviceId,
 		onselect,
 		ondragstart: ondragstartProp,
 		ondragend: ondragendProp
@@ -60,9 +62,18 @@
 	const isImageMode = $derived(displayMode === 'image' || displayMode === 'image-label');
 
 	// Get the device image URL for the current view
+	// Fallback chain: placement image → device type image → null
 	const deviceImageUrl = $derived.by(() => {
 		if (!isImageMode) return null;
 		const face = rackView === 'rear' ? 'rear' : 'front';
+
+		// Try placement-specific image first (if placedDeviceId is provided)
+		if (placedDeviceId) {
+			const placementUrl = imageStore.getImageUrl(`placement-${placedDeviceId}`, face);
+			if (placementUrl) return placementUrl;
+		}
+
+		// Fall back to device type image
 		return imageStore.getImageUrl(device.slug, face);
 	});
 

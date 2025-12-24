@@ -261,6 +261,10 @@ export const PlacedDeviceSchema = z
 		position: z.number().int().min(1, 'Position must be at least 1'),
 		face: DeviceFaceSchema,
 
+		// --- Placement Image Override ---
+		front_image: z.string().optional(),
+		rear_image: z.string().optional(),
+
 		// --- Subdevice Placement ---
 		parent_device: z.string().optional(),
 		device_bay: z.string().optional(),

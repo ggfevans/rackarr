@@ -24,6 +24,7 @@ import {
 import { findDeviceType } from '$lib/utils/device-lookup';
 import { debug } from '$lib/utils/debug';
 import { generateId } from '$lib/utils/device';
+import { sanitizeFilename } from '$lib/utils/imageUpload';
 import { getHistoryStore } from './history.svelte';
 import { getImageStore } from './images.svelte';
 import {
@@ -151,6 +152,7 @@ export function getLayoutStore() {
 		removeDeviceFromRack,
 		updateDeviceFace,
 		updateDeviceName,
+		updateDevicePlacementImage,
 
 		// Settings actions
 		updateDisplayMode,
@@ -172,6 +174,7 @@ export function getLayoutStore() {
 		moveDeviceRaw,
 		updateDeviceFaceRaw,
 		updateDeviceNameRaw,
+		updateDevicePlacementImageRaw,
 		getDeviceAtIndex,
 		getPlacedDevicesForType,
 		updateRackRaw,
@@ -473,6 +476,23 @@ function updateDeviceName(_rackId: string, deviceIndex: number, name: string | u
 }
 
 /**
+ * Update a device's placement image filename
+ * @param _rackId - Rack ID (ignored in v0.2)
+ * @param deviceIndex - Index of device in rack's devices array
+ * @param face - Which face to update ('front' or 'rear')
+ * @param filename - Image filename (undefined to clear)
+ */
+function updateDevicePlacementImage(
+	_rackId: string,
+	deviceIndex: number,
+	face: 'front' | 'rear',
+	filename: string | undefined
+): void {
+	updateDevicePlacementImageRaw(deviceIndex, face, filename);
+	isDirty = true;
+}
+
+/**
  * Mark the layout as having unsaved changes
  */
 function markDirty(): void {
@@ -592,6 +612,13 @@ function removeDeviceAtIndexRaw(index: number): PlacedDevice | undefined {
 	if (index < 0 || index >= layout.rack.devices.length) return undefined;
 
 	const removed = layout.rack.devices[index];
+
+	// Clean up placement-specific images for this device
+	if (removed) {
+		const imageStore = getImageStore();
+		imageStore.removeAllDeviceImages(`placement-${removed.id}`);
+	}
+
 	layout = {
 		...layout,
 		rack: {
@@ -656,6 +683,36 @@ function updateDeviceNameRaw(index: number, name: string | undefined): void {
 		rack: {
 			...layout.rack,
 			devices: layout.rack.devices.map((d, i) => (i === index ? { ...d, name: normalizedName } : d))
+		}
+	};
+}
+
+/**
+ * Update a device's placement image directly (raw)
+ * @param index - Device index
+ * @param face - Which face to update ('front' or 'rear')
+ * @param filename - Image filename (undefined to clear)
+ */
+function updateDevicePlacementImageRaw(
+	index: number,
+	face: 'front' | 'rear',
+	filename: string | undefined
+): void {
+	if (index < 0 || index >= layout.rack.devices.length) return;
+
+	// Sanitize filename to prevent path traversal attacks
+	const sanitizedFilename = filename ? sanitizeFilename(filename) : undefined;
+
+	// Update the appropriate field based on face
+	const fieldName = face === 'front' ? 'front_image' : 'rear_image';
+
+	layout = {
+		...layout,
+		rack: {
+			...layout.rack,
+			devices: layout.rack.devices.map((d, i) =>
+				i === index ? { ...d, [fieldName]: sanitizedFilename } : d
+			)
 		}
 	};
 }
@@ -777,6 +834,7 @@ function getCommandStoreAdapter(): DeviceTypeCommandStore & DeviceCommandStore &
 		moveDeviceRaw,
 		updateDeviceFaceRaw,
 		updateDeviceNameRaw,
+		updateDevicePlacementImageRaw,
 		getDeviceAtIndex,
 
 		// RackCommandStore

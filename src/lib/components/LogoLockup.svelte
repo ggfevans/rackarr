@@ -6,6 +6,8 @@
 -->
 <script lang="ts">
 	import EnvironmentBadge from './EnvironmentBadge.svelte';
+	import SantaHat from './SantaHat.svelte';
+	import { isChristmas } from '$lib/utils/christmas';
 
 	interface Props {
 		size?: number;
@@ -15,6 +17,9 @@
 	}
 
 	let { size = 36, celebrate = false, partyMode = false, showcase = false }: Props = $props();
+
+	// Christmas easter egg - only show on December 25
+	const showChristmasHat = isChristmas();
 
 	// Hover state for rainbow animation
 	let hovering = $state(false);
@@ -182,22 +187,29 @@
 		</defs>
 	</svg>
 
-	<!-- Logo mark (simple rack outline from rackarr-site) -->
-	<svg
-		class="logo-mark"
-		class:logo-mark--celebrate={celebrate}
-		class:logo-mark--party={partyMode}
-		class:logo-mark--showcase={showcase}
-		class:logo-mark--hover={hovering && !partyMode && !celebrate && !showcase}
-		viewBox="0 0 32 32"
-		width={size}
-		height={size}
-		aria-hidden="true"
-		fill-rule="evenodd"
-		style={gradientId ? `--active-gradient: ${gradientId}` : undefined}
-	>
-		<path d="M6 4 h20 v24 h-20 z M10 8 h12 v4 h-12 z M10 14 h12 v4 h-12 z M10 20 h12 v4 h-12 z" />
-	</svg>
+	<!-- Logo mark with optional Christmas hat -->
+	<div class="logo-mark-container">
+		<svg
+			class="logo-mark"
+			class:logo-mark--celebrate={celebrate}
+			class:logo-mark--party={partyMode}
+			class:logo-mark--showcase={showcase}
+			class:logo-mark--hover={hovering && !partyMode && !celebrate && !showcase}
+			viewBox="0 0 32 32"
+			width={size}
+			height={size}
+			aria-hidden="true"
+			fill-rule="evenodd"
+			style={gradientId ? `--active-gradient: ${gradientId}` : undefined}
+		>
+			<path d="M6 4 h20 v24 h-20 z M10 8 h12 v4 h-12 z M10 14 h12 v4 h-12 z M10 20 h12 v4 h-12 z" />
+		</svg>
+		{#if showChristmasHat}
+			<div class="logo-hat">
+				<SantaHat size={size * 0.45} />
+			</div>
+		{/if}
+	</div>
 
 	<!-- Title (SVG text for gradient support) -->
 	<svg
@@ -224,6 +236,18 @@
 		display: flex;
 		align-items: center;
 		gap: var(--space-2);
+	}
+
+	.logo-mark-container {
+		position: relative;
+		flex-shrink: 0;
+	}
+
+	.logo-hat {
+		position: absolute;
+		top: -9px;
+		right: 0px;
+		z-index: 1;
 	}
 
 	.logo-mark,

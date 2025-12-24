@@ -15,8 +15,12 @@
 	import { screenToSVG } from '$lib/utils/coordinates';
 	import { getCanvasStore } from '$lib/stores/canvas.svelte';
 	import { getBlockedSlots } from '$lib/utils/blocked-slots';
+	import { isChristmas } from '$lib/utils/christmas';
 
 	const canvasStore = getCanvasStore();
+
+	// Christmas easter egg
+	const showChristmasHats = isChristmas();
 
 	// Synthetic rack ID for single-rack mode
 	const RACK_ID = 'rack-0';
@@ -133,6 +137,7 @@
 
 	// Filter devices by face - use faceFilter prop if provided, otherwise fall back to rack.view
 	const effectiveFaceFilter = $derived(faceFilter ?? rack.view);
+
 
 	// Filter devices by face and preserve original indices for selection tracking
 	// Full-depth devices are visible from both sides, so they appear on both faces
@@ -362,6 +367,7 @@
 		ondragenter={handleDragEnter}
 		ondragleave={handleDragLeave}
 		ondrop={handleDrop}
+		style="overflow: visible"
 	>
 		<!-- Rack background (interior) -->
 		<rect
@@ -570,6 +576,23 @@
 			>
 				{viewLabel}
 			</text>
+		{/if}
+
+		<!-- Christmas Santa hat (front view only, rendered last to appear on top of name) -->
+		{#if showChristmasHats && effectiveFaceFilter === 'front'}
+			<g transform="translate({-24}, {RACK_PADDING - 85}) rotate(-18, 45, 75) scale(1.35)">
+				<!-- Shadow -->
+				<ellipse cx="40" cy="68" rx="26" ry="5" fill="rgba(0,0,0,0.12)" />
+				<!-- Hat body - tapered cone -->
+				<path d="M14 65 L36 15 L44 15 L66 65 Z" fill="#E63946" />
+				<path d="M18 65 L37 18 L43 18 L62 65 Z" fill="#FF5555" />
+				<!-- White fur trim -->
+				<rect x="8" y="60" width="64" height="14" rx="7" fill="#F1F1F1" />
+				<rect x="10" y="62" width="60" height="10" rx="5" fill="#FFFFFF" />
+				<!-- Pom-pom - connected to tip -->
+				<circle cx="40" cy="15" r="10" fill="#F1F1F1" />
+				<circle cx="40" cy="15" r="8" fill="#FFFFFF" />
+			</g>
 		{/if}
 	</svg>
 </div>

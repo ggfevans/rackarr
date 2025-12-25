@@ -101,6 +101,39 @@ describe('Export Utilities', () => {
 			expect(legend).toBeNull();
 		});
 
+		it('legend has background box when transparent background is used', () => {
+			const options: ExportOptions = {
+				...defaultOptions,
+				includeLegend: true,
+				background: 'transparent'
+			};
+			const svg = generateExportSVG(mockRacks, mockDeviceLibrary, options);
+
+			const legend = svg.querySelector('.export-legend');
+			expect(legend).not.toBeNull();
+
+			// Legend should have a background rect for visibility on transparent backgrounds
+			const legendBg = legend?.querySelector('.legend-background');
+			expect(legendBg).not.toBeNull();
+			expect(legendBg?.getAttribute('fill')).toContain('rgba(255, 255, 255');
+		});
+
+		it('legend has no background box when non-transparent background is used', () => {
+			const options: ExportOptions = {
+				...defaultOptions,
+				includeLegend: true,
+				background: 'dark'
+			};
+			const svg = generateExportSVG(mockRacks, mockDeviceLibrary, options);
+
+			const legend = svg.querySelector('.export-legend');
+			expect(legend).not.toBeNull();
+
+			// Legend should NOT have a background rect when using dark/light background
+			const legendBg = legend?.querySelector('.legend-background');
+			expect(legendBg).toBeNull();
+		});
+
 		it('applies dark background', () => {
 			const options: ExportOptions = { ...defaultOptions, background: 'dark' };
 			const svg = generateExportSVG(mockRacks, mockDeviceLibrary, options);

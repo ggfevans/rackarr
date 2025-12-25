@@ -331,7 +331,7 @@ describe('Types', () => {
 			const deviceType: DeviceType = {
 				slug: '1u-server',
 				u_height: 1,
-				model: '1U Server',
+				model: 'Server',
 				colour: '#4A90D9',
 				category: 'server'
 			};

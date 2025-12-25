@@ -717,7 +717,7 @@ describe('KeyboardHandler Component', () => {
 
 			layoutStore.addRack('Test Rack', 42);
 			const deviceType = layoutStore.addDeviceType({
-				name: '2U Server',
+				name: 'Server',
 				u_height: 2,
 				category: 'server',
 				colour: CATEGORY_COLOURS.server
@@ -743,7 +743,7 @@ describe('KeyboardHandler Component', () => {
 
 			layoutStore.addRack('Test Rack', 42);
 			const deviceType = layoutStore.addDeviceType({
-				name: '2U Server',
+				name: 'Server',
 				u_height: 2,
 				category: 'server',
 				colour: CATEGORY_COLOURS.server

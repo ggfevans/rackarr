@@ -394,11 +394,7 @@ export function generateExportSVG(
 			: 0;
 	// Rack internal height: top padding + top rail + U slots + bottom rail + bottom padding
 	const rackAreaHeight =
-		maxRackHeight * U_HEIGHT +
-		RACK_PADDING +
-		RAIL_WIDTH * 2 +
-		RACK_BOTTOM_PADDING +
-		headerSpace;
+		maxRackHeight * U_HEIGHT + RACK_PADDING + RAIL_WIDTH * 2 + RACK_BOTTOM_PADDING + headerSpace;
 	const legendWidth = includeLegend ? 180 : 0;
 	const legendHeight = includeLegend
 		? usedDevices.length * LEGEND_ITEM_HEIGHT + LEGEND_PADDING * 2
@@ -605,8 +601,7 @@ export function generateExportSVG(
 
 				// Render blocked slot rectangles
 				for (const slot of blockedSlots) {
-					const slotY =
-						(rack.height - slot.top) * U_HEIGHT + RACK_PADDING + RAIL_WIDTH;
+					const slotY = (rack.height - slot.top) * U_HEIGHT + RACK_PADDING + RAIL_WIDTH;
 					const slotHeight = (slot.top - slot.bottom + 1) * U_HEIGHT;
 					const slotWidth = RACK_WIDTH - 2 * RAIL_WIDTH;
 
@@ -827,6 +822,24 @@ export function generateExportSVG(
 		const legendGroup = document.createElementNS('http://www.w3.org/2000/svg', 'g');
 		legendGroup.setAttribute('class', 'export-legend');
 		legendGroup.setAttribute('transform', `translate(${legendX}, ${legendY})`);
+
+		// Add background box when using transparent background (so legend text is legible)
+		if (background === 'transparent') {
+			const legendBgPadding = 8;
+			const legendBgWidth = legendWidth + legendBgPadding * 2;
+			const legendBgHeight = legendHeight + legendBgPadding;
+
+			const legendBg = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+			legendBg.setAttribute('class', 'legend-background');
+			legendBg.setAttribute('x', String(-legendBgPadding));
+			legendBg.setAttribute('y', '0');
+			legendBg.setAttribute('width', String(legendBgWidth));
+			legendBg.setAttribute('height', String(legendBgHeight));
+			legendBg.setAttribute('fill', 'rgba(255, 255, 255, 0.95)');
+			legendBg.setAttribute('rx', '4');
+			legendBg.setAttribute('ry', '4');
+			legendGroup.appendChild(legendBg);
+		}
 
 		// Legend title
 		const legendTitle = document.createElementNS('http://www.w3.org/2000/svg', 'text');

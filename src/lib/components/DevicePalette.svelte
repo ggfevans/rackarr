@@ -320,25 +320,23 @@
 </script>
 
 <div class="device-palette">
-	<!-- Search and Grouping Mode -->
+	<!-- Grouping Mode and Search -->
 	<div class="search-container">
-		<div class="search-row">
-			<input
-				type="search"
-				class="search-input"
-				placeholder="Search devices..."
-				bind:value={searchQueryRaw}
-				oninput={() => updateSearchQuery(searchQueryRaw)}
-				aria-label="Search devices"
-				data-testid="search-devices"
-			/>
-			<SegmentedControl
-				options={groupingModeOptions}
-				value={groupingMode}
-				onchange={handleGroupingModeChange}
-				ariaLabel="Grouping mode"
-			/>
-		</div>
+		<SegmentedControl
+			options={groupingModeOptions}
+			value={groupingMode}
+			onchange={handleGroupingModeChange}
+			ariaLabel="Grouping mode"
+		/>
+		<input
+			type="search"
+			class="search-input"
+			placeholder="Search devices..."
+			bind:value={searchQueryRaw}
+			oninput={() => updateSearchQuery(searchQueryRaw)}
+			aria-label="Search devices"
+			data-testid="search-devices"
+		/>
 	</div>
 
 	<!-- Device List -->
@@ -460,18 +458,13 @@
 	}
 
 	.search-container {
+		display: flex;
+		flex-direction: column;
+		gap: var(--space-2);
 		padding: var(--space-4) var(--space-2) var(--space-3);
 	}
 
-	.search-row {
-		display: flex;
-		gap: var(--space-2);
-		align-items: center;
-	}
-
 	.search-input {
-		flex: 1;
-		min-width: 0;
 		padding: var(--space-2) var(--space-3);
 		font-size: var(--font-size-sm);
 		color: var(--colour-text);

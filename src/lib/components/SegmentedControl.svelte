@@ -46,9 +46,11 @@
 	.segmented-control {
 		display: flex;
 		gap: 0;
+		width: 100%;
 	}
 
 	.segment {
+		flex: 1;
 		padding: var(--space-1) var(--space-2);
 		font-size: var(--font-size-xs);
 		font-family: inherit;
@@ -61,10 +63,8 @@
 			color var(--duration-fast);
 		/* Remove gap between buttons by collapsing borders */
 		margin-left: -1px;
-	}
-
-	.segment:first-child {
-		margin-left: 0;
+		/* Ensure clickable in all browsers */
+		position: relative;
 	}
 
 	.segment.first {

@@ -115,3 +115,38 @@ export function sortDevicesAlphabetically(devices: DeviceType[]): DeviceType[] {
 		return aName.localeCompare(bName);
 	});
 }
+
+/**
+ * Represents a device grouped with its size variants
+ */
+export interface DeviceModelGroup {
+	/** Display name for the group (shared model name) */
+	name: string;
+	/** Array of device variants with different u_heights, sorted ascending */
+	variants: DeviceType[];
+}
+
+/**
+ * Group devices by model name, collapsing variants with different u_heights
+ * @param devices - Array of device types to group
+ * @returns Array of device groups, each containing variants of the same model
+ */
+export function groupDevicesByModel(devices: DeviceType[]): DeviceModelGroup[] {
+	const groups = new Map<string, DeviceType[]>();
+
+	for (const device of devices) {
+		const name = device.model ?? device.slug;
+		const existing = groups.get(name) ?? [];
+		existing.push(device);
+		groups.set(name, existing);
+	}
+
+	// Convert to array and sort variants by u_height ascending
+	const result: DeviceModelGroup[] = [];
+	for (const [name, variants] of groups) {
+		variants.sort((a, b) => a.u_height - b.u_height);
+		result.push({ name, variants });
+	}
+
+	return result;
+}

@@ -10,6 +10,7 @@
 	import {
 		searchDevices,
 		groupDevicesByCategory,
+		groupDevicesByModel,
 		getCategoryDisplayName,
 		sortDevicesByBrandThenModel,
 		sortDevicesAlphabetically
@@ -25,6 +26,7 @@
 	import { getBrandPacks, getBrandSlugs } from '$lib/data/brandPacks';
 	import { getStarterLibrary, getStarterSlugs } from '$lib/data/starterLibrary';
 	import DevicePaletteItem from './DevicePaletteItem.svelte';
+	import DevicePaletteItemGroup from './DevicePaletteItemGroup.svelte';
 	import BrandIcon from './BrandIcon.svelte';
 	import SegmentedControl from './SegmentedControl.svelte';
 	import type { DeviceType } from '$lib/types';
@@ -355,53 +357,73 @@
 				{#each sections as section (section.id)}
 					<Accordion.Item value={section.id} class="accordion-item">
 						<Accordion.Header>
-						<Accordion.Trigger
-							class="accordion-trigger{section.isEmpty ? ' has-no-matches' : ''}"
-							onclick={handleAccordionTriggerClick}
-						>
-							<span class="section-header">
-								{#if section.icon || section.id === 'apc'}
-									<BrandIcon slug={section.icon} size={16} />
-								{/if}
-								<span class="section-title">{section.title}</span>
-							</span>
-
-							{#if isSearchActive && section.matchCount !== undefined}
-								<span class="match-info">
-									<span class="match-count">({section.matchCount})</span>
-									{#if section.firstMatch && Array.isArray(accordionValue) && !accordionValue.includes(section.id)}
-										<span class="match-preview">
-											-
-											{truncateWithEllipsis(section.firstMatch.model ?? section.firstMatch.slug, 30)}
-										</span>
+							<Accordion.Trigger
+								class="accordion-trigger{section.isEmpty ? ' has-no-matches' : ''}"
+								onclick={handleAccordionTriggerClick}
+							>
+								<span class="section-header">
+									{#if section.icon || section.id === 'apc'}
+										<BrandIcon slug={section.icon} size={16} />
 									{/if}
+									<span class="section-title">{section.title}</span>
 								</span>
-							{:else}
-								<span class="section-count">({section.devices.length})</span>
-							{/if}
-						</Accordion.Trigger>
+
+								{#if isSearchActive && section.matchCount !== undefined}
+									<span class="match-info">
+										<span class="match-count">({section.matchCount})</span>
+										{#if section.firstMatch && Array.isArray(accordionValue) && !accordionValue.includes(section.id)}
+											<span class="match-preview">
+												-
+												{truncateWithEllipsis(
+													section.firstMatch.model ?? section.firstMatch.slug,
+													30
+												)}
+											</span>
+										{/if}
+									</span>
+								{:else}
+									<span class="section-count">({section.devices.length})</span>
+								{/if}
+							</Accordion.Trigger>
 						</Accordion.Header>
 						<Accordion.Content class="accordion-content">
 							<div class="accordion-content-inner">
 								{#if section.id === 'generic' && groupingMode === 'brand'}
 									<!-- Generic section uses category grouping (brand mode only) -->
 									{#each [...groupedGenericDevices.entries()] as [category, devices] (category)}
+										{@const modelGroups = groupDevicesByModel(devices)}
 										{#if !isSearchActive || devices.length > 0}
 											<div class="category-group">
-											<h3 class="category-header">{getCategoryDisplayName(category)}</h3>
-											<div class="category-devices">
-												{#each devices as device (device.slug)}
-													<DevicePaletteItem {device} searchQuery={isSearchActive ? searchQuery : ''} onselect={handleDeviceSelect} />
-												{/each}
+												<h3 class="category-header">{getCategoryDisplayName(category)}</h3>
+												<div class="category-devices">
+													{#each modelGroups as group (group.name)}
+														{#if group.variants.length === 1}
+															<DevicePaletteItem
+																device={group.variants[0]}
+																searchQuery={isSearchActive ? searchQuery : ''}
+																onselect={handleDeviceSelect}
+															/>
+														{:else}
+															<DevicePaletteItemGroup
+																variants={group.variants}
+																searchQuery={isSearchActive ? searchQuery : ''}
+																onselect={handleDeviceSelect}
+															/>
+														{/if}
+													{/each}
+												</div>
 											</div>
-										</div>
 										{/if}
 									{/each}
 								{:else}
 									<!-- All other sections show devices in a flat list -->
 									<div class="section-devices">
 										{#each section.devices as device (device.slug)}
-											<DevicePaletteItem {device} searchQuery={isSearchActive ? searchQuery : ''} onselect={handleDeviceSelect} />
+											<DevicePaletteItem
+												{device}
+												searchQuery={isSearchActive ? searchQuery : ''}
+												onselect={handleDeviceSelect}
+											/>
 										{/each}
 									</div>
 								{/if}

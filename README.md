@@ -61,7 +61,7 @@ Serve the `dist/` folder however you like. It's just files.
 ## Documentation
 
 - [Architecture Overview](docs/ARCHITECTURE.md)
-- [Technical Specification](docs/SPEC.md)
+- [Technical Specification](docs/planning/SPEC.md)
 - [Contributing Guide](CONTRIBUTING.md)
 
 ## Built With Claude

@@ -212,7 +212,7 @@
 
 	const deviceListDescription = $derived.by(() => {
 		if (!rack || rack.devices.length === 0) return '';
-		const deviceNames = rack.devices
+		const deviceNames = [...rack.devices]
 			.sort((a, b) => b.position - a.position) // Top to bottom
 			.map((d) => {
 				const deviceType = layoutStore.device_types.find((dt) => dt.slug === d.device_type);

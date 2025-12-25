@@ -12,6 +12,7 @@
 	import { getCanvasStore } from '$lib/stores/canvas.svelte';
 	import { getImageStore } from '$lib/stores/images.svelte';
 	import { getCategoryDisplayName } from '$lib/utils/deviceFilters';
+	import { findDeviceType } from '$lib/utils/device-lookup';
 	import {
 		canResizeRackTo,
 		getConflictDetails,
@@ -228,6 +229,18 @@
 			);
 		}
 	}
+
+	// Check if selected device is full-depth (determines if face can be changed)
+	// Uses authoritative source (starter/brand library) to get current is_full_depth value
+	const isFullDepthDevice = $derived.by(() => {
+		if (!selectedDeviceInfo) return false;
+		// Look up the authoritative device type definition (checks starter/brand packs)
+		// This ensures we use the current library value, not a stale layout copy
+		const authoritativeDevice = findDeviceType(selectedDeviceInfo.device.slug);
+		const device = authoritativeDevice ?? selectedDeviceInfo.device;
+		// is_full_depth undefined or true means full-depth
+		return device.is_full_depth !== false;
+	});
 
 	// Sync device notes with selection
 	$effect(() => {
@@ -453,11 +466,16 @@
 					class="input-field"
 					value={selectedDeviceInfo.placedDevice.face}
 					onchange={(e) => handleFaceChange((e.target as HTMLSelectElement).value as DeviceFace)}
+					disabled={isFullDepthDevice}
+					title={isFullDepthDevice ? 'Full-depth devices occupy both front and rear of the rack' : undefined}
 				>
 					<option value="front">Front</option>
 					<option value="rear">Rear</option>
 					<option value="both">Both (full-depth)</option>
 				</select>
+				{#if isFullDepthDevice}
+					<p class="helper-text">Full-depth devices occupy both front and rear of the rack</p>
+				{/if}
 			</div>
 
 			<!-- Placement Image Overrides -->
@@ -586,6 +604,12 @@
 	.form-group select:focus {
 		outline: none;
 		border-color: var(--colour-selection);
+	}
+
+	.form-group select:disabled {
+		opacity: 0.6;
+		cursor: not-allowed;
+		background: var(--colour-surface);
 	}
 
 	.form-group textarea {

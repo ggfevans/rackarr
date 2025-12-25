@@ -37,7 +37,7 @@ const STARTER_DEVICES: StarterDeviceSpec[] = [
 	{ name: '4U Storage', u_height: 4, category: 'storage' },
 
 	// Power devices (3)
-	{ name: '1U PDU', u_height: 1, category: 'power' },
+	{ name: '1U PDU', u_height: 1, category: 'power', is_full_depth: false },
 	{ name: '2U UPS', u_height: 2, category: 'power', va_rating: 1500 },
 	{ name: '4U UPS', u_height: 4, category: 'power', va_rating: 3000 },
 

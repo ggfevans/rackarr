@@ -21,13 +21,13 @@
 	);
 </script>
 
-<Dialog {open} title="Replace Current Rack?" width="420px" onclose={onCancel}>
+<Dialog {open} title="Replace Current Rack?" width="420px" showClose={false} onclose={onCancel}>
 	<p class="message">{message}</p>
 
 	<div class="actions">
+		<button type="button" class="btn btn-secondary" onclick={onCancel}> Cancel </button>
 		<button type="button" class="btn btn-primary" onclick={onSaveFirst}> Save First </button>
 		<button type="button" class="btn btn-destructive" onclick={onReplace}> Replace </button>
-		<button type="button" class="btn btn-secondary" onclick={onCancel}> Cancel </button>
 	</div>
 </Dialog>
 
@@ -59,13 +59,21 @@
 	}
 
 	.btn-primary {
-		background: var(--colour-primary);
-		color: white;
+		background: var(--colour-button-primary);
+		color: var(--colour-text-on-primary);
+	}
+
+	.btn-primary:hover {
+		background: var(--colour-button-primary-hover);
 	}
 
 	.btn-destructive {
-		background: var(--colour-error);
-		color: white;
+		background: var(--colour-button-destructive);
+		color: var(--colour-text-on-primary);
+	}
+
+	.btn-destructive:hover {
+		background: var(--colour-button-destructive-hover);
 	}
 
 	.btn-secondary {

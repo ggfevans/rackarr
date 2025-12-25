@@ -182,6 +182,8 @@
 	--colour-button-hover: var(--dracula-bg-lighter);
 	--colour-button-primary: var(--dracula-pink-muted); /* Softer pink for CTA background */
 	--colour-button-primary-hover: var(--dracula-pink); /* Bright pink on hover */
+	--colour-button-destructive: #a84a4a; /* Muted red for destructive actions (BRAND.md power color) */
+	--colour-button-destructive-hover: var(--dracula-red); /* Bright red on hover */
 	--colour-text-on-primary: #ffffff;
 
 	/* Feedback States */
@@ -378,6 +380,8 @@
 	--colour-button-hover: var(--alucard-bg-light);
 	--colour-button-primary: var(--alucard-pink-muted); /* Softer pink for CTA background */
 	--colour-button-primary-hover: var(--alucard-pink); /* Darker pink on hover */
+	--colour-button-destructive: #b85a5a; /* Muted red for destructive actions (BRAND.md power color light) */
+	--colour-button-destructive-hover: var(--alucard-red); /* Bright red on hover */
 	--colour-text-on-primary: #ffffff;
 
 	/* Feedback States */

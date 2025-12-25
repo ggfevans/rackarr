@@ -11,11 +11,12 @@
 		open: boolean;
 		title: string;
 		width?: string;
+		showClose?: boolean;
 		onclose?: () => void;
 		children?: Snippet;
 	}
 
-	let { open, title, width = '400px', onclose, children }: Props = $props();
+	let { open, title, width = '400px', showClose = true, onclose, children }: Props = $props();
 
 	let dialogElement: HTMLDivElement | null = $state(null);
 	const focusManager = createFocusManager();
@@ -78,21 +79,23 @@
 		>
 			<div class="dialog-header">
 				<h2 id={titleId} class="dialog-title">{title}</h2>
-				<button
-					type="button"
-					class="dialog-close"
-					onclick={() => onclose?.()}
-					aria-label="Close dialog"
-				>
-					<svg width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden="true">
-						<path
-							d="M15 5L5 15M5 5L15 15"
-							stroke="currentColor"
-							stroke-width="2"
-							stroke-linecap="round"
-						/>
-					</svg>
-				</button>
+				{#if showClose}
+					<button
+						type="button"
+						class="dialog-close"
+						onclick={() => onclose?.()}
+						aria-label="Close dialog"
+					>
+						<svg width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden="true">
+							<path
+								d="M15 5L5 15M5 5L15 15"
+								stroke="currentColor"
+								stroke-width="2"
+								stroke-linecap="round"
+							/>
+						</svg>
+					</button>
+				{/if}
 			</div>
 			<div class="dialog-content">
 				{#if children}

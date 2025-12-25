@@ -78,7 +78,7 @@
 	}
 </script>
 
-<Dialog {open} title="Share Layout" width="420px" {onclose}>
+<Dialog {open} title="Share Layout" width="420px" showClose={false} {onclose}>
 	<div class="share-dialog">
 		<!-- URL Section -->
 		<div class="share-section">
@@ -126,19 +126,8 @@
 				<div class="qr-message qr-error" data-testid="qr-error">{qrError}</div>
 			{:else if qrDataUrl}
 				<div class="qr-container" data-testid="qr-container">
+					<p class="qr-scan-label">Scan to open in <span class="brand">Rackarr</span></p>
 					<img src={qrDataUrl} alt="QR code for layout" class="qr-image" />
-					<div class="qr-actions">
-						<button
-							type="button"
-							class="download-btn"
-							onclick={downloadQR}
-							data-testid="qr-download-btn"
-						>
-							<IconDownload size={16} />
-							Download QR
-						</button>
-					</div>
-					<p class="qr-hint">Recommended print size: {QR_MIN_PRINT_CM}cm minimum</p>
 				</div>
 			{/if}
 		</div>
@@ -149,6 +138,23 @@
 				<strong>Note:</strong> Shared layouts include rack configuration and device placements. Device
 				images are not included.
 			</p>
+		</div>
+
+		<!-- Action Buttons -->
+		<div class="actions">
+			<button type="button" class="btn btn-secondary" onclick={onclose}> Cancel </button>
+			{#if qrDataUrl}
+				<button
+					type="button"
+					class="btn btn-primary"
+					onclick={downloadQR}
+					title="Recommended print size: {QR_MIN_PRINT_CM}cm minimum"
+					data-testid="qr-download-btn"
+				>
+					<IconDownload size={16} />
+					Download QR
+				</button>
+			{/if}
 		</div>
 	</div>
 </Dialog>
@@ -229,7 +235,7 @@
 		display: flex;
 		flex-direction: column;
 		align-items: center;
-		gap: var(--space-3);
+		gap: var(--space-2);
 		padding: var(--space-4);
 		background: white;
 		border-radius: var(--radius-md);
@@ -241,38 +247,15 @@
 		image-rendering: pixelated;
 	}
 
-	.qr-actions {
-		display: flex;
-		gap: var(--space-2);
-	}
-
-	.download-btn {
-		display: flex;
-		align-items: center;
-		gap: var(--space-1);
-		padding: var(--space-2) var(--space-3);
-		border: 1px solid var(--colour-border);
-		border-radius: var(--radius-sm);
-		background: var(--colour-surface);
-		color: var(--colour-text);
-		font-size: var(--font-size-sm);
-		cursor: pointer;
-		transition: background-color var(--duration-fast) ease;
-	}
-
-	.download-btn:hover {
-		background: var(--colour-surface-hover);
-	}
-
-	.download-btn:focus-visible {
-		outline: 2px solid var(--colour-selection);
-		outline-offset: 1px;
-	}
-
-	.qr-hint {
-		font-size: var(--font-size-xs);
-		color: var(--colour-text-muted);
+	.qr-scan-label {
 		margin: 0;
+		font-size: var(--font-size-sm);
+		color: #333;
+	}
+
+	.qr-scan-label .brand {
+		color: var(--dracula-purple);
+		font-weight: var(--font-weight-semibold);
 	}
 
 	.qr-message {
@@ -301,5 +284,45 @@
 
 	.share-info p {
 		margin: 0;
+	}
+
+	/* Action Buttons */
+	.actions {
+		display: flex;
+		gap: var(--space-3);
+		justify-content: flex-end;
+		margin-top: var(--space-2);
+	}
+
+	.btn {
+		display: flex;
+		align-items: center;
+		gap: var(--space-1-5);
+		padding: var(--space-2) var(--space-4);
+		border-radius: var(--radius-md);
+		font-size: var(--font-size-sm);
+		font-weight: 500;
+		cursor: pointer;
+		border: none;
+		transition: background-color var(--duration-fast);
+	}
+
+	.btn-primary {
+		background: var(--colour-button-primary);
+		color: var(--colour-text-on-primary);
+	}
+
+	.btn-primary:hover {
+		background: var(--colour-button-primary-hover);
+	}
+
+	.btn-secondary {
+		background: transparent;
+		border: 1px solid var(--colour-border);
+		color: var(--colour-text);
+	}
+
+	.btn-secondary:hover {
+		background: var(--colour-surface-hover);
 	}
 </style>

@@ -2,16 +2,24 @@ import { describe, it, expect } from 'vitest';
 import {
 	searchDevices,
 	groupDevicesByCategory,
-	getCategoryDisplayName
+	getCategoryDisplayName,
+	sortDevicesByBrandThenModel,
+	sortDevicesAlphabetically
 } from '$lib/utils/deviceFilters';
 import type { DeviceType, DeviceCategory } from '$lib/types';
 
-const createDevice = (slug: string, model: string, category: DeviceCategory): DeviceType => ({
+const createDevice = (
+	slug: string,
+	model: string,
+	category: DeviceCategory,
+	manufacturer?: string
+): DeviceType => ({
 	slug,
 	model,
 	u_height: 1,
 	colour: '#000000',
-	category
+	category,
+	manufacturer
 });
 
 describe('deviceFilters', () => {
@@ -74,6 +82,128 @@ describe('deviceFilters', () => {
 			expect(getCategoryDisplayName('cooling')).toBe('Cooling');
 			expect(getCategoryDisplayName('blank')).toBe('Blanks');
 			expect(getCategoryDisplayName('other')).toBe('Other');
+		});
+	});
+
+	describe('sortDevicesByBrandThenModel', () => {
+		it('sorts devices by manufacturer first, then by model', () => {
+			const devices: DeviceType[] = [
+				createDevice('dell-r740', 'PowerEdge R740', 'server', 'Dell'),
+				createDevice('hp-dl380', 'ProLiant DL380', 'server', 'HPE'),
+				createDevice('dell-r640', 'PowerEdge R640', 'server', 'Dell'),
+				createDevice('hp-dl360', 'ProLiant DL360', 'server', 'HPE')
+			];
+
+			const sorted = sortDevicesByBrandThenModel(devices);
+
+			// Dell devices first (alphabetically before HPE), sorted by model
+			expect(sorted[0].slug).toBe('dell-r640');
+			expect(sorted[1].slug).toBe('dell-r740');
+			// Then HPE devices, sorted by model
+			expect(sorted[2].slug).toBe('hp-dl360');
+			expect(sorted[3].slug).toBe('hp-dl380');
+		});
+
+		it('handles devices without manufacturer (sorted last)', () => {
+			const devices: DeviceType[] = [
+				createDevice('generic-server', 'Generic Server', 'server'),
+				createDevice('dell-r740', 'PowerEdge R740', 'server', 'Dell'),
+				createDevice('unknown-switch', 'Switch 24', 'network')
+			];
+
+			const sorted = sortDevicesByBrandThenModel(devices);
+
+			// Dell first (has manufacturer)
+			expect(sorted[0].slug).toBe('dell-r740');
+			// Then devices without manufacturer, sorted by model
+			expect(sorted[1].slug).toBe('generic-server');
+			expect(sorted[2].slug).toBe('unknown-switch');
+		});
+
+		it('sorts case-insensitively', () => {
+			const devices: DeviceType[] = [
+				createDevice('ubiquiti-usg', 'USG Pro', 'network', 'Ubiquiti'),
+				createDevice('apc-ups', 'Smart-UPS', 'power', 'APC')
+			];
+
+			const sorted = sortDevicesByBrandThenModel(devices);
+
+			expect(sorted[0].slug).toBe('apc-ups');
+			expect(sorted[1].slug).toBe('ubiquiti-usg');
+		});
+
+		it('returns empty array for empty input', () => {
+			expect(sortDevicesByBrandThenModel([])).toEqual([]);
+		});
+
+		it('does not mutate original array', () => {
+			const devices: DeviceType[] = [
+				createDevice('b-device', 'Bravo', 'server', 'Zebra'),
+				createDevice('a-device', 'Alpha', 'server', 'Alpha')
+			];
+			const original = [...devices];
+
+			sortDevicesByBrandThenModel(devices);
+
+			expect(devices).toEqual(original);
+		});
+	});
+
+	describe('sortDevicesAlphabetically', () => {
+		it('sorts devices alphabetically by model name', () => {
+			const devices: DeviceType[] = [
+				createDevice('server-c', 'Zebra Server', 'server'),
+				createDevice('server-a', 'Alpha Server', 'server'),
+				createDevice('server-b', 'Bravo Switch', 'network')
+			];
+
+			const sorted = sortDevicesAlphabetically(devices);
+
+			expect(sorted[0].model).toBe('Alpha Server');
+			expect(sorted[1].model).toBe('Bravo Switch');
+			expect(sorted[2].model).toBe('Zebra Server');
+		});
+
+		it('sorts case-insensitively', () => {
+			const devices: DeviceType[] = [
+				createDevice('upper', 'UPPER CASE', 'server'),
+				createDevice('lower', 'lower case', 'server'),
+				createDevice('mixed', 'Mixed Case', 'server')
+			];
+
+			const sorted = sortDevicesAlphabetically(devices);
+
+			expect(sorted[0].model).toBe('lower case');
+			expect(sorted[1].model).toBe('Mixed Case');
+			expect(sorted[2].model).toBe('UPPER CASE');
+		});
+
+		it('falls back to slug when model is undefined', () => {
+			const devices: DeviceType[] = [
+				createDevice('zebra-device', undefined as unknown as string, 'server'),
+				createDevice('alpha-device', undefined as unknown as string, 'server')
+			];
+
+			const sorted = sortDevicesAlphabetically(devices);
+
+			expect(sorted[0].slug).toBe('alpha-device');
+			expect(sorted[1].slug).toBe('zebra-device');
+		});
+
+		it('returns empty array for empty input', () => {
+			expect(sortDevicesAlphabetically([])).toEqual([]);
+		});
+
+		it('does not mutate original array', () => {
+			const devices: DeviceType[] = [
+				createDevice('b-device', 'Bravo', 'server'),
+				createDevice('a-device', 'Alpha', 'server')
+			];
+			const original = [...devices];
+
+			sortDevicesAlphabetically(devices);
+
+			expect(devices).toEqual(original);
 		});
 	});
 });

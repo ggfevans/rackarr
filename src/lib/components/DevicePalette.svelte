@@ -10,8 +10,15 @@
 	import {
 		searchDevices,
 		groupDevicesByCategory,
-		getCategoryDisplayName
+		getCategoryDisplayName,
+		sortDevicesByBrandThenModel,
+		sortDevicesAlphabetically
 	} from '$lib/utils/deviceFilters';
+	import {
+		loadGroupingModeFromStorage,
+		saveGroupingModeToStorage,
+		type DeviceGroupingMode
+	} from '$lib/utils/deviceGrouping';
 	import { debounce } from '$lib/utils/debounce';
 	import { truncateWithEllipsis } from '$lib/utils/searchHighlight';
 	import { parseDeviceLibraryImport } from '$lib/utils/import';
@@ -19,6 +26,7 @@
 	import { getStarterLibrary, getStarterSlugs } from '$lib/data/starterLibrary';
 	import DevicePaletteItem from './DevicePaletteItem.svelte';
 	import BrandIcon from './BrandIcon.svelte';
+	import SegmentedControl from './SegmentedControl.svelte';
 	import type { DeviceType } from '$lib/types';
 
 	interface Props {
@@ -35,6 +43,21 @@
 	let searchQueryRaw = $state('');
 	let searchQuery = $state('');
 	const isSearchActive = $derived(searchQuery.trim().length > 0);
+
+	// Grouping mode state with localStorage persistence
+	let groupingMode = $state<DeviceGroupingMode>(loadGroupingModeFromStorage());
+
+	// Grouping mode options for SegmentedControl
+	const groupingModeOptions: { value: DeviceGroupingMode; label: string }[] = [
+		{ value: 'brand', label: 'Brand' },
+		{ value: 'category', label: 'Category' },
+		{ value: 'flat', label: 'A-Z' }
+	];
+
+	function handleGroupingModeChange(newMode: DeviceGroupingMode) {
+		groupingMode = newMode;
+		saveGroupingModeToStorage(newMode);
+	}
 
 	// Accordion mode and state tracking
 	let accordionMode = $state<'single' | 'multiple'>('single');
@@ -112,9 +135,28 @@
 		)
 	);
 
-	// Define all sections: Generic first, then brand packs (sorted alphabetically)
-	// Enhanced with match tracking during search
-	const sections = $derived<DeviceSection[]>(
+	// All devices combined (for category and flat modes)
+	const allDevices = $derived([...allGenericDevices, ...brandPacks.flatMap((p) => p.devices)]);
+	const filteredAllDevices = $derived(searchDevices(allDevices, searchQuery));
+
+	// Category order for consistent display
+	const categoryOrder: import('$lib/types').DeviceCategory[] = [
+		'server',
+		'network',
+		'patch-panel',
+		'power',
+		'storage',
+		'kvm',
+		'av-media',
+		'cooling',
+		'shelf',
+		'blank',
+		'cable-management',
+		'other'
+	];
+
+	// Sections for brand mode (current behavior)
+	const brandModeSections = $derived<DeviceSection[]>(
 		[
 			{
 				id: 'generic',
@@ -141,6 +183,56 @@
 			};
 		})
 	);
+
+	// Sections for category mode
+	const categoryModeSections = $derived.by<DeviceSection[]>(() => {
+		const grouped = groupDevicesByCategory(filteredAllDevices);
+
+		return categoryOrder
+			.filter((cat) => grouped.has(cat))
+			.map((cat) => {
+				const devices = sortDevicesByBrandThenModel(grouped.get(cat) ?? []);
+				const matchCount = devices.length;
+				const firstMatch = devices[0] ?? null;
+				const isEmpty = matchCount === 0;
+
+				return {
+					id: cat,
+					title: getCategoryDisplayName(cat),
+					devices,
+					defaultExpanded: cat === 'server',
+					matchCount: isSearchActive ? matchCount : undefined,
+					firstMatch: isSearchActive ? firstMatch : undefined,
+					isEmpty: isSearchActive ? isEmpty : undefined
+				};
+			});
+	});
+
+	// Sections for flat mode (single "All Devices" section)
+	const flatModeSections = $derived.by<DeviceSection[]>(() => [
+		{
+			id: 'all',
+			title: 'All Devices',
+			devices: sortDevicesAlphabetically(filteredAllDevices),
+			defaultExpanded: true,
+			matchCount: isSearchActive ? filteredAllDevices.length : undefined,
+			firstMatch: isSearchActive ? filteredAllDevices[0] : undefined,
+			isEmpty: isSearchActive ? filteredAllDevices.length === 0 : undefined
+		}
+	]);
+
+	// Select sections based on grouping mode
+	const sections = $derived.by<DeviceSection[]>(() => {
+		switch (groupingMode) {
+			case 'category':
+				return categoryModeSections;
+			case 'flat':
+				return flatModeSections;
+			case 'brand':
+			default:
+				return brandModeSections;
+		}
+	});
 
 	// Check if any section has devices (filtered by search)
 	const totalDevicesCount = $derived(sections.reduce((acc, s) => acc + s.devices.length, 0));
@@ -228,17 +320,25 @@
 </script>
 
 <div class="device-palette">
-	<!-- Search -->
+	<!-- Search and Grouping Mode -->
 	<div class="search-container">
-		<input
-			type="search"
-			class="search-input"
-			placeholder="Search devices..."
-			bind:value={searchQueryRaw}
-			oninput={() => updateSearchQuery(searchQueryRaw)}
-			aria-label="Search devices"
-			data-testid="search-devices"
-		/>
+		<div class="search-row">
+			<input
+				type="search"
+				class="search-input"
+				placeholder="Search devices..."
+				bind:value={searchQueryRaw}
+				oninput={() => updateSearchQuery(searchQueryRaw)}
+				aria-label="Search devices"
+				data-testid="search-devices"
+			/>
+			<SegmentedControl
+				options={groupingModeOptions}
+				value={groupingMode}
+				onchange={handleGroupingModeChange}
+				ariaLabel="Grouping mode"
+			/>
+		</div>
 	</div>
 
 	<!-- Device List -->
@@ -285,8 +385,8 @@
 						</Accordion.Header>
 						<Accordion.Content class="accordion-content">
 							<div class="accordion-content-inner">
-								{#if section.id === 'generic'}
-									<!-- Generic section uses category grouping -->
+								{#if section.id === 'generic' && groupingMode === 'brand'}
+									<!-- Generic section uses category grouping (brand mode only) -->
 									{#each [...groupedGenericDevices.entries()] as [category, devices] (category)}
 										{#if !isSearchActive || devices.length > 0}
 											<div class="category-group">
@@ -300,8 +400,8 @@
 										{/if}
 									{/each}
 								{:else}
-									<!-- Brand sections show devices in a flat list -->
-									<div class="brand-devices">
+									<!-- All other sections show devices in a flat list -->
+									<div class="section-devices">
 										{#each section.devices as device (device.slug)}
 											<DevicePaletteItem {device} searchQuery={isSearchActive ? searchQuery : ''} onselect={handleDeviceSelect} />
 										{/each}
@@ -363,8 +463,15 @@
 		padding: var(--space-4) var(--space-2) var(--space-3);
 	}
 
+	.search-row {
+		display: flex;
+		gap: var(--space-2);
+		align-items: center;
+	}
+
 	.search-input {
-		width: 100%;
+		flex: 1;
+		min-width: 0;
 		padding: var(--space-2) var(--space-3);
 		font-size: var(--font-size-sm);
 		color: var(--colour-text);
@@ -514,7 +621,7 @@
 		flex-direction: column;
 	}
 
-	.brand-devices {
+	.section-devices {
 		display: flex;
 		flex-direction: column;
 	}

@@ -64,6 +64,7 @@
 	role="listitem"
 	tabindex="0"
 	draggable="true"
+	data-testid="device-palette-item"
 	onclick={handleClick}
 	onkeydown={handleKeyDown}
 	ondragstart={handleDragStart}

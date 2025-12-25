@@ -74,3 +74,44 @@ export function getCategoryDisplayName(category: DeviceCategory): string {
 
 	return names[category] ?? category;
 }
+
+/**
+ * Sort devices by manufacturer (brand) first, then by model within each brand
+ * Devices without a manufacturer are sorted last, then by model
+ * @param devices - Array of device types to sort
+ * @returns New sorted array (does not mutate original)
+ */
+export function sortDevicesByBrandThenModel(devices: DeviceType[]): DeviceType[] {
+	return [...devices].sort((a, b) => {
+		const aManufacturer = a.manufacturer?.toLowerCase() ?? '';
+		const bManufacturer = b.manufacturer?.toLowerCase() ?? '';
+
+		// Devices with manufacturer come before those without
+		if (aManufacturer && !bManufacturer) return -1;
+		if (!aManufacturer && bManufacturer) return 1;
+
+		// Sort by manufacturer first
+		if (aManufacturer !== bManufacturer) {
+			return aManufacturer.localeCompare(bManufacturer);
+		}
+
+		// Then sort by model
+		const aModel = (a.model ?? a.slug).toLowerCase();
+		const bModel = (b.model ?? b.slug).toLowerCase();
+		return aModel.localeCompare(bModel);
+	});
+}
+
+/**
+ * Sort devices alphabetically by model name (A-Z)
+ * Falls back to slug if model is not defined
+ * @param devices - Array of device types to sort
+ * @returns New sorted array (does not mutate original)
+ */
+export function sortDevicesAlphabetically(devices: DeviceType[]): DeviceType[] {
+	return [...devices].sort((a, b) => {
+		const aName = (a.model ?? a.slug).toLowerCase();
+		const bName = (b.model ?? b.slug).toLowerCase();
+		return aName.localeCompare(bName);
+	});
+}

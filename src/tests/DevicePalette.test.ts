@@ -5,9 +5,31 @@ import DevicePaletteItem from '$lib/components/DevicePaletteItem.svelte';
 import { getLayoutStore, resetLayoutStore } from '$lib/stores/layout.svelte';
 import { CATEGORY_COLOURS } from '$lib/types/constants';
 
+// Mock localStorage for grouping mode tests
+const localStorageMock = {
+	store: {} as Record<string, string>,
+	getItem: vi.fn((key: string) => localStorageMock.store[key] ?? null),
+	setItem: vi.fn((key: string, value: string) => {
+		localStorageMock.store[key] = value;
+	}),
+	removeItem: vi.fn((key: string) => {
+		delete localStorageMock.store[key];
+	}),
+	clear: vi.fn(() => {
+		localStorageMock.store = {};
+	})
+};
+
+Object.defineProperty(globalThis, 'localStorage', {
+	value: localStorageMock,
+	writable: true
+});
+
 describe('DevicePalette Component', () => {
 	beforeEach(() => {
 		resetLayoutStore();
+		localStorageMock.clear();
+		vi.clearAllMocks();
 	});
 
 	describe('Device Rendering', () => {
@@ -624,6 +646,180 @@ describe('DevicePaletteItem Component', () => {
 			await fireEvent.click(item!);
 
 			expect(handleSelect).toHaveBeenCalledTimes(1);
+		});
+	});
+});
+
+describe('DevicePalette Grouping Mode Toggle', () => {
+	beforeEach(() => {
+		resetLayoutStore();
+		localStorageMock.clear();
+		vi.clearAllMocks();
+	});
+
+	describe('Toggle Rendering', () => {
+		it('renders grouping mode toggle with three options', () => {
+			render(DevicePalette);
+
+			expect(screen.getByRole('button', { name: 'Brand' })).toBeInTheDocument();
+			expect(screen.getByRole('button', { name: 'Category' })).toBeInTheDocument();
+			expect(screen.getByRole('button', { name: 'A-Z' })).toBeInTheDocument();
+		});
+
+		it('toggle has accessible group role', () => {
+			render(DevicePalette);
+
+			const group = screen.getByRole('group', { name: /grouping mode/i });
+			expect(group).toBeInTheDocument();
+		});
+	});
+
+	describe('Default State', () => {
+		it('defaults to brand mode when no localStorage value', () => {
+			render(DevicePalette);
+
+			const brandButton = screen.getByRole('button', { name: 'Brand' });
+			expect(brandButton).toHaveAttribute('aria-pressed', 'true');
+		});
+
+		it('shows brand mode sections by default', () => {
+			render(DevicePalette);
+
+			// Brand mode shows Generic + brand pack sections
+			expect(screen.getByText('Generic')).toBeInTheDocument();
+			expect(screen.getByText('Ubiquiti')).toBeInTheDocument();
+		});
+	});
+
+	describe('Persistence', () => {
+		it('saves mode to localStorage when changed', async () => {
+			render(DevicePalette);
+
+			const categoryButton = screen.getByRole('button', { name: 'Category' });
+			await fireEvent.click(categoryButton);
+
+			expect(localStorageMock.setItem).toHaveBeenCalledWith('rackarr-device-grouping', 'category');
+		});
+
+		it('restores mode from localStorage on load', () => {
+			localStorageMock.store['rackarr-device-grouping'] = 'flat';
+
+			render(DevicePalette);
+
+			const flatButton = screen.getByRole('button', { name: 'A-Z' });
+			expect(flatButton).toHaveAttribute('aria-pressed', 'true');
+		});
+	});
+
+	describe('Mode Switching', () => {
+		it('switches to category mode when Category clicked', async () => {
+			render(DevicePalette);
+
+			const categoryButton = screen.getByRole('button', { name: 'Category' });
+			await fireEvent.click(categoryButton);
+
+			expect(categoryButton).toHaveAttribute('aria-pressed', 'true');
+			expect(screen.getByRole('button', { name: 'Brand' })).toHaveAttribute('aria-pressed', 'false');
+		});
+
+		it('switches to flat mode when A-Z clicked', async () => {
+			render(DevicePalette);
+
+			const flatButton = screen.getByRole('button', { name: 'A-Z' });
+			await fireEvent.click(flatButton);
+
+			expect(flatButton).toHaveAttribute('aria-pressed', 'true');
+			expect(screen.getByRole('button', { name: 'Brand' })).toHaveAttribute('aria-pressed', 'false');
+		});
+	});
+
+	describe('Search Preservation', () => {
+		it('preserves search query when switching modes', async () => {
+			render(DevicePalette);
+
+			const searchInput = screen.getByRole('searchbox');
+			await fireEvent.input(searchInput, { target: { value: 'Server' } });
+
+			// Wait for debounce
+			await waitFor(() => {
+				expect(searchInput).toHaveValue('Server');
+			}, { timeout: 300 });
+
+			// Switch mode
+			const categoryButton = screen.getByRole('button', { name: 'Category' });
+			await fireEvent.click(categoryButton);
+
+			// Search query should be preserved
+			expect(searchInput).toHaveValue('Server');
+		});
+	});
+
+	describe('Category Mode', () => {
+		it('shows category headers instead of brand sections in category mode', async () => {
+			render(DevicePalette);
+
+			// Switch to category mode
+			const categoryButton = screen.getByRole('button', { name: 'Category' });
+			await fireEvent.click(categoryButton);
+
+			// Should show category sections, not brand sections
+			expect(screen.getByText('Servers')).toBeInTheDocument();
+			expect(screen.getByText('Network')).toBeInTheDocument();
+			// Brand sections should NOT appear as top-level sections
+			expect(screen.queryByRole('button', { name: /ubiquiti/i })).not.toBeInTheDocument();
+		});
+
+		it('includes brand devices in category groups', async () => {
+			render(DevicePalette);
+
+			// Switch to category mode
+			const categoryButton = screen.getByRole('button', { name: 'Category' });
+			await fireEvent.click(categoryButton);
+
+			// Open Network category and check for Ubiquiti devices
+			const networkTrigger = screen.getByRole('button', { name: /network/i });
+			await fireEvent.click(networkTrigger);
+
+			// USW-24 is a Ubiquiti network device
+			expect(screen.getByText('USW-24')).toBeInTheDocument();
+		});
+	});
+
+	describe('Flat Mode', () => {
+		it('shows all devices in a single section', async () => {
+			render(DevicePalette);
+
+			// Switch to flat mode
+			const flatButton = screen.getByRole('button', { name: 'A-Z' });
+			await fireEvent.click(flatButton);
+
+			// Should show "All Devices" section
+			expect(screen.getByText('All Devices')).toBeInTheDocument();
+
+			// Should not show brand or category sections as separate accordions
+			expect(screen.queryByRole('button', { name: /generic/i })).not.toBeInTheDocument();
+			expect(screen.queryByRole('button', { name: /ubiquiti/i })).not.toBeInTheDocument();
+		});
+
+		it('displays devices sorted alphabetically by model', async () => {
+			render(DevicePalette);
+
+			// Switch to flat mode
+			const flatButton = screen.getByRole('button', { name: 'A-Z' });
+			await fireEvent.click(flatButton);
+
+			// Get all device items in order
+			const deviceItems = screen.getAllByTestId('device-palette-item');
+
+			// First few devices should be in alphabetical order
+			const deviceNames = deviceItems.slice(0, 5).map((item) => item.textContent);
+
+			// Verify they are sorted (each name should come before or equal to next)
+			for (let i = 0; i < deviceNames.length - 1; i++) {
+				const current = deviceNames[i]?.toLowerCase() ?? '';
+				const next = deviceNames[i + 1]?.toLowerCase() ?? '';
+				expect(current.localeCompare(next)).toBeLessThanOrEqual(0);
+			}
 		});
 	});
 });

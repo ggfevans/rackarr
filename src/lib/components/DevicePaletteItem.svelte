@@ -8,7 +8,11 @@
 	import IconGrip from './icons/IconGrip.svelte';
 	import CategoryIcon from './CategoryIcon.svelte';
 	import ImageIndicator from './ImageIndicator.svelte';
-	import { createPaletteDragData, serializeDragData } from '$lib/utils/dragdrop';
+	import {
+		createPaletteDragData,
+		serializeDragData,
+		setCurrentDragData
+	} from '$lib/utils/dragdrop';
 	import { highlightMatch } from '$lib/utils/searchHighlight';
 
 	interface Props {
@@ -47,10 +51,13 @@
 		event.dataTransfer.setData('application/json', serializeDragData(dragData));
 		event.dataTransfer.effectAllowed = 'copy';
 
+		// Set shared drag state for dragover (browsers block getData during dragover)
+		setCurrentDragData(dragData);
 		isDragging = true;
 	}
 
 	function handleDragEnd() {
+		setCurrentDragData(null);
 		isDragging = false;
 	}
 </script>

@@ -4,7 +4,11 @@
 -->
 <script lang="ts">
 	import type { DeviceType, DisplayMode, RackView } from '$lib/types';
-	import { createRackDeviceDragData, serializeDragData } from '$lib/utils/dragdrop';
+	import {
+		createRackDeviceDragData,
+		serializeDragData,
+		setCurrentDragData
+	} from '$lib/utils/dragdrop';
 	import CategoryIcon from './CategoryIcon.svelte';
 	import { IconGrip } from './icons';
 	import { getImageStore } from '$lib/stores/images.svelte';
@@ -137,11 +141,14 @@
 		event.dataTransfer.setData('application/json', serializeDragData(dragData));
 		event.dataTransfer.effectAllowed = 'move';
 
+		// Set shared drag state for dragover (browsers block getData during dragover)
+		setCurrentDragData(dragData);
 		isDragging = true;
 		ondragstartProp?.(new CustomEvent('dragstart', { detail: { rackId, deviceIndex } }));
 	}
 
 	function handleDragEnd() {
+		setCurrentDragData(null);
 		isDragging = false;
 		ondragendProp?.();
 	}

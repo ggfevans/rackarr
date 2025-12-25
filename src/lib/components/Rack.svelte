@@ -10,6 +10,7 @@
 		parseDragData,
 		calculateDropPosition,
 		getDropFeedback,
+		getCurrentDragData,
 		type DropFeedback
 	} from '$lib/utils/dragdrop';
 	import { screenToSVG } from '$lib/utils/coordinates';
@@ -76,7 +77,7 @@
 	}: Props = $props();
 
 	// Track which device is being dragged (for internal moves)
-	let draggingDeviceIndex = $state<number | null>(null);
+	let _draggingDeviceIndex = $state<number | null>(null);
 	// Track if we just finished dragging a device (to prevent rack selection on release)
 	let justFinishedDrag = $state(false);
 
@@ -188,14 +189,12 @@
 		event.preventDefault();
 		if (!event.dataTransfer) return;
 
-		const data = event.dataTransfer.getData('application/json');
-		if (!data) {
-			// Data not available during dragover in some browsers, allow drop anyway
-			event.dataTransfer.dropEffect = draggingDeviceIndex !== null ? 'move' : 'copy';
-			return;
+		// Try dataTransfer first (works in drop), fall back to shared state (needed for dragover)
+		let dragData = parseDragData(event.dataTransfer.getData('application/json'));
+		if (!dragData) {
+			// getData() blocked during dragover in most browsers - use shared state
+			dragData = getCurrentDragData();
 		}
-
-		const dragData = parseDragData(data);
 		if (!dragData) return;
 
 		// Determine if this is an internal move (same rack)
@@ -246,11 +245,11 @@
 	}
 
 	function handleDeviceDragStart(deviceIndex: number) {
-		draggingDeviceIndex = deviceIndex;
+		_draggingDeviceIndex = deviceIndex;
 	}
 
 	function handleDeviceDragEnd() {
-		draggingDeviceIndex = null;
+		_draggingDeviceIndex = null;
 		// Set flag to prevent rack selection on the click that follows drag end
 		justFinishedDrag = true;
 		// Reset the flag after a short delay (in case no click event follows)
@@ -262,7 +261,7 @@
 	function handleDrop(event: DragEvent) {
 		event.preventDefault();
 		dropPreview = null;
-		draggingDeviceIndex = null;
+		_draggingDeviceIndex = null;
 
 		if (!event.dataTransfer) return;
 

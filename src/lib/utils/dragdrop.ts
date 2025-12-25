@@ -7,6 +7,21 @@ import type { DeviceType, DeviceFace, Rack } from '$lib/types';
 import { canPlaceDevice } from './collision';
 
 /**
+ * Shared drag state - workaround for browser security restriction
+ * that prevents reading dataTransfer.getData() during dragover.
+ * Set on dragstart, read during dragover, cleared on dragend.
+ */
+let currentDragData: DragData | null = null;
+
+export function setCurrentDragData(data: DragData | null): void {
+	currentDragData = data;
+}
+
+export function getCurrentDragData(): DragData | null {
+	return currentDragData;
+}
+
+/**
  * Drag data structure for drag-and-drop operations
  */
 export interface DragData {

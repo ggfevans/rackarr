@@ -391,7 +391,8 @@ describe('Starter Device Type Library', () => {
 		it('starter library is available as a constant', () => {
 			const starterLibrary = getStarterLibrary();
 
-			expect(starterLibrary.length).toBe(26);
+			// Library should have a substantial number of devices (generic + branded)
+			expect(starterLibrary.length).toBeGreaterThanOrEqual(400);
 			expect(starterLibrary[0]?.slug).toBeTruthy();
 		});
 

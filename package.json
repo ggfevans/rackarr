@@ -1,7 +1,7 @@
 {
 	"name": "rackarr",
-	"version": "0.6.0",
-	"description": "Rack Layout Designer for Homelabbers - A browser-based visual tool for planning server rack layouts",
+	"version": "0.6.1",
+	"description": "Drag and drop rack visualizer",
 	"author": "ggfevans",
 	"license": "MIT",
 	"repository": {
